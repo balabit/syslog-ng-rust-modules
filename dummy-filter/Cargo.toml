@@ -1,14 +1,10 @@
 [package]
-
 name = "dummy-filter"
 version = "0.0.1"
 authors = ["tibi"]
 
 [lib]
-
 name = "dummy_filter"
-crate-type = ["dylib"]
-
 
 [dependencies.syslog-ng-sys]
 path = "../syslog-ng-sys/"

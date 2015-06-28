@@ -1,7 +1,6 @@
 prefix=/home/tibi/workspace/syslog-ng-rust-modules
 includedir=${prefix}/include
 libdir=${prefix}/target/debug
-depslibdir=${prefix}/target/debug/deps
 
 Name: libsyslog_ng_rust_modules
 Description: Rust modules for syslog-ng

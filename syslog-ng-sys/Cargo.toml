@@ -7,7 +7,6 @@ links = "syslog-ng"
 
 [lib]
 name = "syslog_ng_sys"
-crate-type = ["dylib"]
 
 [dependencies]
 libc = "*"
