@@ -1,10 +1,10 @@
 #[macro_use]
-extern crate syslog_ng_rust;
+extern crate syslog_ng_sys;
 
 use std::collections::BTreeSet;
 use std::borrow::Borrow;
 use std::iter::FromIterator;
-use syslog_ng_rust::{RustFilter, LogMessage, GlobalConfig, NVHandle};
+use syslog_ng_sys::{RustFilter, LogMessage, GlobalConfig, NVHandle};
 
 #[repr(C)]
 pub struct InListFilter {
@@ -21,7 +21,7 @@ impl InListFilter {
     }
 }
 
-impl syslog_ng_rust::RustFilter for InListFilter {
+impl syslog_ng_sys::RustFilter for InListFilter {
 
     fn init(&mut self, _: &GlobalConfig) {
         self.list = BTreeSet::from_iter(self.orig_list.split(',').map(|x: &str| x.to_string()));

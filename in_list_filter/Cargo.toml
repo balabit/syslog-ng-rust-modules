@@ -9,5 +9,5 @@ authors = ["Tibor Benke <ihrwein@gmail.com>"]
 name = "in_list_filter"
 crate-type = ["dylib"]
 
-[dependencies.syslog_ng_rust]
-path = "../syslog_ng_rust/"
+[dependencies.syslog-ng-sys]
+path = "../syslog-ng-sys/"

@@ -1,7 +1,7 @@
 #[macro_use]
-extern crate syslog_ng_rust;
+extern crate syslog_ng_sys;
 
-use syslog_ng_rust::{RustFilter, LogMessage, GlobalConfig};
+use syslog_ng_sys::{RustFilter, LogMessage, GlobalConfig};
 
 #[repr(C)]
 pub struct DummyFilter {
@@ -14,7 +14,7 @@ impl DummyFilter {
     }
 }
 
-impl syslog_ng_rust::RustFilter for DummyFilter {
+impl syslog_ng_sys::RustFilter for DummyFilter {
 
     fn init(&mut self, cfg: &GlobalConfig) {
         let user_version = cfg.get_user_version();

@@ -5,7 +5,6 @@ version = "0.1.0"
 authors = ["Tibor Benke <ihrwein@gmail.com>"]
 
 [lib]
-
 name = "syslog_ng_rust_modules"
 crate-type = ["dylib"]
 
@@ -15,5 +14,5 @@ path = "dummy_filter"
 [dependencies.in_list_filter]
 path = "in_list_filter"
 
-[dependencies.syslog_ng_rust]
-path = "syslog_ng_rust"
+[dependencies.syslog-ng-sys]
+path = "syslog-ng-sys"

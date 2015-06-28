@@ -1,4 +1,4 @@
-use syslog_ng_rust::*;
+use syslog_ng_sys::*;
 use dummy_filter::DummyFilter;
 use in_list_filter::InListFilter;
 

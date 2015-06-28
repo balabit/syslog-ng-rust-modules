@@ -111,7 +111,7 @@ log {
 
 ## References
 
-All bindings are defined in the `syslog_ng_rust` crate.
+All bindings are defined in the `syslog-ng-sys` crate.
 
 ### `RustFilter` trait
 
@@ -168,24 +168,24 @@ path = "hello_filter"
 name = "hello_filter"
 crate-type = ["dylib"]
 
-[dependencies.syslog_ng_rust]
-path = "../syslog_ng_rust/"
+[dependencies.syslog-ng-sys]
+path = "../syslog-ng-sys/"
 ```
 
-This change ensures that Cargo creates an `.so` library from your module and sets a local path to the  `syslog_ng_rust` crate.
+This change ensures that Cargo creates an `.so` library from your module and sets a local path to the  `syslog-ng-sys` crate.
 
 * fill in your `lib.rs`:
 
- * add the `syslog_ng_rust` crate as an external crate and also use the macros from it 
+ * add the `syslog_ng_sys` crate as an external crate and also use the macros from it 
  * import the required structs, traits, etc.
  * write your own logic :)
  The most simplest filter is this (it's the `DummyFilter` module renamed from the source tree, check it!):
 
  ```rust
  #[macro_use]
- extern crate syslog_ng_rust;
+ extern crate syslog_ng_sys;
  
- use syslog_ng_rust::{RustFilter, LogMessage, GlobalConfig};
+ use syslog_ng_sys::{RustFilter, LogMessage, GlobalConfig};
  
  pub struct HelloFilter;
  
@@ -195,7 +195,7 @@ This change ensures that Cargo creates an `.so` library from your module and set
      }
  }
  
- impl syslog_ng_rust::RustFilter for HelloFilter {
+ impl syslog_ng_sys::RustFilter for HelloFilter {
  
      fn init(&mut self, cfg: &GlobalConfig) {
          let user_version = cfg.get_user_version();
