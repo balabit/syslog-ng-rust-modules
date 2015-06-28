@@ -32,9 +32,3 @@ impl syslog_ng_sys::RustFilter for DummyFilter {
         msg_debug!("DummyFilter.set_option({:?}, {:?})", key, value);
     }
 }
-
-impl Drop for DummyFilter {
-    fn drop(&mut self) {
-        msg_debug!("Dropping DummyFilter");    
-    }
-}
