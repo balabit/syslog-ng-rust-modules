@@ -1,5 +1,4 @@
 [package]
-
 name = "syslog-ng-rust-modules"
 version = "0.1.0"
 authors = ["Tibor Benke <ihrwein@gmail.com>"]

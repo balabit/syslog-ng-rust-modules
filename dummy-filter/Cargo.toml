@@ -1,7 +1,7 @@
 [package]
 name = "dummy-filter"
-version = "0.0.1"
-authors = ["tibi"]
+version = "0.1.0"
+authors = ["Tibor Benke <ihrwein@gmail.com>"]
 
 [lib]
 name = "dummy_filter"
