@@ -8,8 +8,8 @@ authors = ["Tibor Benke <ihrwein@gmail.com>"]
 name = "syslog_ng_rust_modules"
 crate-type = ["dylib"]
 
-[dependencies.dummy_filter]
-path = "dummy_filter"
+[dependencies.dummy-filter]
+path = "dummy-filter"
 
 [dependencies.in-list-filter]
 path = "in-list-filter"

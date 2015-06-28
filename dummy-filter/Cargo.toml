@@ -1,6 +1,6 @@
 [package]
 
-name = "dummy_filter"
+name = "dummy-filter"
 version = "0.0.1"
 authors = ["tibi"]
 
