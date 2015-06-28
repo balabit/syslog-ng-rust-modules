@@ -1,8 +1,6 @@
 use ::types::*;
 
-#[repr(C)]
-pub struct LogMessage;
-
+pub enum LogMessage{}
 pub type NVHandle = u32;
 
 #[link(name = "syslog-ng")]
