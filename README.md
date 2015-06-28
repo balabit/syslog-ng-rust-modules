@@ -2,66 +2,27 @@
 
 ## Requirements
 
-* `rustc` and `cargo` installed
+* `rustc`, `cargo` installed
+* `syslog-ng` installed and `pkg-config` is able to find `libsyslog-ng.so`
 
 ## Building
 
 1. I suppose you've just cloned my repository.
 
 ```
-$ git clone https://github.com/ihrwein/syslog-ng.git
+$ git clone https://github.com/ihrwein/syslog-ng-rust-modules.git
 ```
 
 1. Cd into the repo:
 
 ```
-$ cd syslog-ng
+$ cd syslog-ng-rust-modules
 ```
-
-1. Check out the `f/rust` brach.
-
-```
-$ git checkout f/rust
-```
-
-1. Run `autogen.sh`:
+1. Build with Cargo
 
 ```
-$ ./autogen.sh
+$ cargo build
 ```
-
-1. Create a build directory:
-
-```
-$ mkdir build
-```
-
-1. Step into your build dir and run `configure`:
-
-```
-$ cd build
-$ ../configure --enable-debug --enable-rust --disable-mongodb --prefix=$HOME/install/syslog-ng --disable-amqp --disable-java
-```
-
-1. Now run `make`:
-
-```
-$ make
-```
-
-1. And install your built syslog-ng into the specified `prefix`:
-
-```
-$ make install
-```
-
-### Configure flags
-
-* `--enable-rust`: build Rust bindinds and modules
-
-If you use `--enable-debug` the Rust bindings will be built in
-debug mode. If that's not specified, the Rust code is compiled in
-release mode (`-O3`).
 
 ### Sample config
 
@@ -92,7 +53,7 @@ destination d_log_server {
 
 filter f_rust {
     rust(
-        type("in_list"),
+        type("in-list"),
         option("field", "HOST"),
         option("list", "localhost,hostA,hostB"),
     );
@@ -146,33 +107,30 @@ It represents the parsed `syslog-ng.conf` file.
 Follow the steps below:
 
 * cd into the root folder of the repo
-* cd into `modules/rust-modules`
 * create your own module:
 
 ```bash
-$ cargo new hello_filter --vcs none
+$ cargo new hello-filter --vcs none
 ```
 
-* add your module as a dependency to `rust-modules`. Edit `Cargo.toml` and add the following lines to the end of the file:
+* add your module as a dependency. Edit `Cargo.toml` and add the following lines to the end of the file:
 
 ```toml
-[dependencies.hello_filter]
-path = "hello_filter"
+[dependencies.hello-filter]
+path = "hello-filter"
 ```
 
 * append the following lines to the `Cargo.toml` of your module:
 
 ```toml
 [lib]
-
 name = "hello_filter"
-crate-type = ["dylib"]
 
 [dependencies.syslog-ng-sys]
 path = "../syslog-ng-sys/"
 ```
 
-This change ensures that Cargo creates an `.so` library from your module and sets a local path to the  `syslog-ng-sys` crate.
+This change ensures that Cargo sees a local path to the  `syslog-ng-sys` crate.
 
 * fill in your `lib.rs`:
 
@@ -213,22 +171,16 @@ This change ensures that Cargo creates an `.so` library from your module and set
          msg_debug!("HelloFilter.set_option({:?}, {:?})", key, value);
      }
  }
- 
- impl Drop for HelloFilter {
-     fn drop(&mut self) {
-         msg_debug!("Dropping HelloFilter");    
-     }
- }
  ```
 
 * tell the module system about the existence of your module.
- * Register your module as an extern crate in `modules/rust-modules/src/lib.rs`:
+ * Register your module as an extern crate in `src/lib.rs`:
 
  ```rust
  extern crate hello_filter;
  ```
 
- * Open `modules/rust-modules/src/filter.rs` and an appropriate match branch to the `create_new_impl()` function:
+ * Open `src/filter.rs` and an appropriate match branch to the `create_new_impl()` function:
 
  ```rust
 "hello" => {
