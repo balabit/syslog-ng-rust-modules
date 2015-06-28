@@ -54,7 +54,7 @@ fn create_new_impl(filter_name: *const c_char) -> Option<Box<RustFilterWrapper>>
         "dummy" => {
             Some(Box::new(DummyFilter::new()) as Box<RustFilter>)
         },
-        "in_list" => {
+        "in-list" => {
             Some(Box::new(InListFilter::new()) as Box<RustFilter>)
         },
         _ => {
