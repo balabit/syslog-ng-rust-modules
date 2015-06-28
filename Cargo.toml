@@ -11,8 +11,8 @@ crate-type = ["dylib"]
 [dependencies.dummy_filter]
 path = "dummy_filter"
 
-[dependencies.in_list_filter]
-path = "in_list_filter"
+[dependencies.in-list-filter]
+path = "in-list-filter"
 
 [dependencies.syslog-ng-sys]
 path = "syslog-ng-sys"

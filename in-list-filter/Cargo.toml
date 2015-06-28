@@ -1,6 +1,6 @@
 [package]
 
-name = "in_list_filter"
+name = "in-list-filter"
 version = "0.0.1"
 authors = ["Tibor Benke <ihrwein@gmail.com>"]
 
