@@ -1,7 +1,8 @@
 use logmsg::*;
 use cfg::*;
 
-pub struct RustFilterWrapper {
+#[repr(C)]
+pub struct RustFilterProxy {
     pub filter: Box<RustFilter>
 }
 
