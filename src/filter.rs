@@ -14,7 +14,7 @@ pub extern fn rust_filter_proxy_init(this: &mut RustFilterWrapper, cfg: &GlobalC
 pub extern fn rust_filter_proxy_eval(this: &mut RustFilterWrapper, msg: &mut LogMessage) -> c_int {
     match this.filter.eval(msg) {
         true => 1,
-             false => 0
+        false => 0
     }
 }
 

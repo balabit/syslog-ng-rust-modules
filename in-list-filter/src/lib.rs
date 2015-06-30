@@ -6,7 +6,6 @@ use std::borrow::Borrow;
 use std::iter::FromIterator;
 use syslog_ng_sys::{RustFilter, LogMessage, GlobalConfig, NVHandle};
 
-#[repr(C)]
 pub struct InListFilter {
     orig_list: String,
     list: BTreeSet<String>,
@@ -21,7 +20,7 @@ impl InListFilter {
     }
 }
 
-impl syslog_ng_sys::RustFilter for InListFilter {
+impl RustFilter for InListFilter {
 
     fn init(&mut self, _: &GlobalConfig) {
         self.list = BTreeSet::from_iter(self.orig_list.split(',').map(|x: &str| x.to_string()));

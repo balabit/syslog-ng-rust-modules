@@ -7,8 +7,8 @@ use std::ffi::{CString};
 
 mod ffi;
 
-pub use self::ffi::LogMessage as LogMessage;
-pub use self::ffi::NVHandle as NVHandle;
+pub use self::ffi::LogMessage;
+pub use self::ffi::NVHandle;
 
 impl Drop for LogMessage {
 

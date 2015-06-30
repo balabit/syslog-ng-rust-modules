@@ -3,7 +3,6 @@ extern crate syslog_ng_sys;
 
 use syslog_ng_sys::{RustFilter, LogMessage, GlobalConfig};
 
-#[repr(C)]
 pub struct DummyFilter {
     pub value: i32    
 }
@@ -14,7 +13,7 @@ impl DummyFilter {
     }
 }
 
-impl syslog_ng_sys::RustFilter for DummyFilter {
+impl RustFilter for DummyFilter {
 
     fn init(&mut self, cfg: &GlobalConfig) {
         let user_version = cfg.get_user_version();
