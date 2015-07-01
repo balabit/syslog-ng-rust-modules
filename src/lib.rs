@@ -3,5 +3,5 @@ extern crate in_list_filter;
 #[macro_use]
 extern crate syslog_ng_sys;
 
-pub mod filter;
+pub mod proxies;
 
