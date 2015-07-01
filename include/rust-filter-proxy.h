@@ -3,21 +3,21 @@
 
 #include "syslog-ng.h"
 
-struct RustFilter;
+struct RustFilterProxy;
 
 void
-rust_filter_proxy_free(struct RustFilter* this);
+rust_filter_proxy_free(struct RustFilterProxy* this);
 
 void
-rust_filter_proxy_set_option(struct RustFilter* this, const gchar* key, const gchar* value);
+rust_filter_proxy_set_option(struct RustFilterProxy* this, const gchar* key, const gchar* value);
 
 gboolean
-rust_filter_proxy_eval(struct RustFilter* this, LogMessage* msg);
+rust_filter_proxy_eval(struct RustFilterProxy* this, LogMessage* msg);
 
 void
-rust_filter_proxy_init(struct RustFilter* s, const GlobalConfig *cfg);
+rust_filter_proxy_init(struct RustFilterProxy* s, const GlobalConfig *cfg);
 
-struct RustFilter*
+struct RustFilterProxy*
 rust_filter_proxy_new(const gchar* filter_name);
 
 
