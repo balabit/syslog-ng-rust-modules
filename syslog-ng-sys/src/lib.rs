@@ -2,6 +2,7 @@ extern crate libc;
 
 pub mod types;
 pub mod filter;
+pub mod parser;
 pub mod logmsg;
 pub mod ffi;
 mod cfg;
