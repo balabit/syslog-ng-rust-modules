@@ -14,7 +14,7 @@ impl Drop for LogMessage {
 
     fn drop(&mut self) {
         unsafe {
-            ffi::log_msg_unref(self)    
+            ffi::log_msg_unref(self)
         }
     }
 }
@@ -25,7 +25,7 @@ impl LogMessage {
         let slce = from_raw_parts(value, len as usize);
         str::from_utf8(mem::transmute(slce)).unwrap()
     }
-    
+
     pub fn get_value_handle(value_name: &str) -> NVHandle {
         unsafe {
             let name = CString::new(value_name).unwrap();
@@ -47,7 +47,14 @@ impl LogMessage {
             let mut size: ssize_t = 0;
             let value = ffi::__log_msg_get_value(&*self, handle, &mut size);
             LogMessage::c_char_to_str(value, size)
-        }    
+        }
+    }
+
+    pub fn set_value(&mut self, key: &str, value: &str) {
+        let handle = LogMessage::get_value_handle(key);
+        unsafe {
+            let c_value = CString::new(value).unwrap();
+            ffi::log_msg_set_value(&mut *self, handle, c_value.as_ptr(), value.len() as i64);
+        }
     }
 }
-
