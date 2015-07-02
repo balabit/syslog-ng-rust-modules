@@ -9,12 +9,12 @@ void
 rust_parser_proxy_free(struct RustParserProxy* this);
 
 void
-rust_parser_proxy_set_option(struct RustParserProxy* this, const gchar* key, const gchar* value);
+rust_parser_proxy_set_option(struct RustParserProxy* self, const gchar* key, const gchar* value);
 
 gboolean
-rust_parser_proxy_process(struct RustParserProxy* this, LogMessage **pmsg, const gchar *input, gsize input_len);
+rust_parser_proxy_process(struct RustParserProxy* this, LogMessage *pmsg, const gchar *input, gsize input_len);
 
-void
+int
 rust_parser_proxy_init(struct RustParserProxy* s);
 
 struct RustParserProxy*

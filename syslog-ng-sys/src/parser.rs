@@ -2,11 +2,17 @@ use logmsg::*;
 
 #[repr(C)]
 pub struct RustParserProxy {
-    pub filter: Box<RustFilter>
+    pub parser: Box<RustParser>
 }
 
-pub trait RustFilter {
-    fn init(&mut self) {}
+impl RustParserProxy {
+    pub fn new(parser: Box<RustParser>) -> RustParserProxy {
+        RustParserProxy{ parser: parser }
+    }
+}
+
+pub trait RustParser {
+    fn init(&mut self) -> bool { true }
+    fn set_option(&mut self, _: String, _: String) {}
     fn process(&self, msg: &mut LogMessage, input: &str) -> bool;
-    fn set_option(&mut self, key: String, value: String);
 }

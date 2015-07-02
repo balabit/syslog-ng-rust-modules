@@ -10,6 +10,7 @@ mod messages;
 
 pub use types::*;
 pub use filter::*;
+pub use parser::*;
 pub use logmsg::*;
 pub use ffi::*;
 pub use cfg::*;
