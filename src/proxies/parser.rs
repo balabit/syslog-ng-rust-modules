@@ -33,8 +33,8 @@ pub extern fn rust_parser_proxy_process(this: &mut RustParserProxy, msg: &mut Lo
     let input = from_c_str_to_borrowed_str(input);
 
     match this.parser.process(msg, input) {
-        true => 0,
-        false => 1
+        true => 1,
+        false => 0
     }
 }
 
