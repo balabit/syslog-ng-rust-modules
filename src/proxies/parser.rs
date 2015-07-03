@@ -7,6 +7,8 @@ use syslog_ng_sys::RustParser;
 use dummy_parser::DummyParser;
 use actiondb_parser::ActiondbParser;
 
+use proxies;
+
 use std::ptr;
 use std::mem;
 
@@ -44,6 +46,7 @@ pub extern fn rust_parser_proxy_process(this: &mut RustParserProxy, msg: &mut Lo
 
 #[no_mangle]
 pub extern fn rust_parser_proxy_new(parser_name: *const c_char) -> Box<RustParserProxy> {
+    proxies::init_logger();
     let name = from_c_str_to_borrowed_str(parser_name);
     let parser = create_parser_impl(name);
 
@@ -67,7 +70,7 @@ fn create_parser_impl(name: &str) -> Option<Box<RustParserProxy>> {
             Some(Box::new(ActiondbParser::new()) as Box<RustParser>)
         },
         _ => {
-            msg_debug!("rust_parser_proxy_new(): {:?} not found, returning None", name);
+            debug!("rust_parser_proxy_new(): {:?} not found, returning None", name);
             None
         },
     };

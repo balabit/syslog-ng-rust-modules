@@ -1,3 +1,6 @@
+#[macro_use]
+extern crate log;
+
 extern crate dummy_filter;
 extern crate in_list_filter;
 extern crate dummy_parser;

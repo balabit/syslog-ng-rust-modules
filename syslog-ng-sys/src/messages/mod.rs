@@ -1,4 +1,5 @@
 use std::ffi::CString;
+use log::{LogLevel, LogLevelFilter};
 
 mod ffi;
 
@@ -9,6 +10,18 @@ pub enum Msg {
     Notice = 5,
     Info = 6,
     Debug = 7
+}
+
+impl From<LogLevel> for Msg {
+    fn from(level: LogLevel) -> Msg {
+        match level {
+            LogLevel::Error => Msg::Error,
+            LogLevel::Warn => Msg::Warning,
+            LogLevel::Info => Msg::Info,
+            LogLevel::Debug => Msg::Debug,
+            LogLevel::Trace => Msg::Debug
+        }
+    }
 }
 
 pub struct InternalMessageSender;
@@ -25,53 +38,14 @@ impl InternalMessageSender {
             }
         };
     }
-}
 
-#[macro_export]
-macro_rules! msg_create {
-    ($lvl:expr, $($arg:tt)*) => {{    
-        $crate::InternalMessageSender::create_and_send($lvl, format!($($arg)*));
-    }};
-}
-
-#[macro_export]
-macro_rules! msg_fatal {
-    ($($arg:tt)*) => (
-        msg_create!($crate::Msg::Fatal, $($arg)*);
-    )
-}
-
-#[macro_export]
-macro_rules! msg_error {
-    ($($arg:tt)*) => (
-        msg_create!($crate::Msg::Error, $($arg)*);
-    )
-}
-
-#[macro_export]
-macro_rules! msg_warning {
-    ($($arg:tt)*) => (
-        msg_create!($crate::Msg::Warning, $($arg)*);
-    )
-}
-
-#[macro_export]
-macro_rules! msg_notice {
-    ($($arg:tt)*) => (
-        msg_create!($crate::Msg::Notice, $($arg)*);
-    )
-}
-
-#[macro_export]
-macro_rules! msg_info {
-    ($($arg:tt)*) => (
-        msg_create!($crate::Msg::Info, $($arg)*);
-    )
-}
-
-#[macro_export]
-macro_rules! msg_debug {
-    ($($arg:tt)*) => (
-        msg_create!($crate::Msg::Debug, $($arg)*);
-    )
+    pub fn level() -> LogLevelFilter {
+        if ffi::trace_flag != 0 {
+            LogLevelFilter::Trace
+        } else if ffi::debug_flag != 0 {
+            LogLevelFilter::Debug
+        } else {
+            LogLevelFilter::Info
+        }
+    }
 }

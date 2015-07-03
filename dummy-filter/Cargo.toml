@@ -6,5 +6,8 @@ authors = ["Tibor Benke <ihrwein@gmail.com>"]
 [lib]
 name = "dummy_filter"
 
+[dependencies]
+log = "*"
+
 [dependencies.syslog-ng-sys]
 path = "../syslog-ng-sys/"
