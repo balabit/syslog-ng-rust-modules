@@ -5,6 +5,8 @@ use syslog_ng_sys::LogMessage;
 use syslog_ng_sys::RustParser;
 
 use dummy_parser::DummyParser;
+use std::ptr;
+use std::mem;
 
 #[no_mangle]
 pub extern fn rust_parser_proxy_init(this: &mut RustParserProxy) -> c_int {
@@ -39,8 +41,36 @@ pub extern fn rust_parser_proxy_process(this: &mut RustParserProxy, msg: &mut Lo
 }
 
 #[no_mangle]
-pub extern fn rust_parser_proxy_new(_: *const c_char) -> Box<RustParserProxy> {
-    let parser = Box::new(DummyParser::new()) as Box<RustParser>;
+pub extern fn rust_parser_proxy_new(parser_name: *const c_char) -> Box<RustParserProxy> {
+    let name = from_c_str_to_borrowed_str(parser_name);
+    let parser = create_parser_impl(name);
 
-    Box::new(RustParserProxy::new(parser))
+    unsafe {
+        let result = match parser {
+            Some(a) => a,
+            None => {
+                mem::transmute::<*mut RustParserProxy, Box<RustParserProxy>>(ptr::null_mut())
+            }
+        };
+        return result
+    }
+}
+
+fn create_parser_impl(name: &str) -> Option<Box<RustParserProxy>> {
+    let parser: Option<Box<RustParser>> = match name {
+        "dummy" => {
+            Some(Box::new(DummyParser::new()) as Box<RustParser>)
+        },
+        _ => {
+            msg_debug!("rust_parser_proxy_new(): {:?} not found, returning None", name);
+            None
+        },
+    };
+
+    match parser {
+        Some(parser) => {
+            Some(Box::new(RustParserProxy{parser: parser}))
+        },
+        None => None
+    }
 }
