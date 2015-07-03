@@ -5,6 +5,8 @@ use syslog_ng_sys::LogMessage;
 use syslog_ng_sys::RustParser;
 
 use dummy_parser::DummyParser;
+use actiondb_parser::ActiondbParser;
+
 use std::ptr;
 use std::mem;
 
@@ -60,6 +62,9 @@ fn create_parser_impl(name: &str) -> Option<Box<RustParserProxy>> {
     let parser: Option<Box<RustParser>> = match name {
         "dummy" => {
             Some(Box::new(DummyParser::new()) as Box<RustParser>)
+        },
+        "actiondb" => {
+            Some(Box::new(ActiondbParser::new()) as Box<RustParser>)
         },
         _ => {
             msg_debug!("rust_parser_proxy_new(): {:?} not found, returning None", name);

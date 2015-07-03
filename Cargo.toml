@@ -10,6 +10,9 @@ crate-type = ["dylib"]
 [dependencies.dummy-parser]
 path = "dummy-parser"
 
+[dependencies.actiondb-parser]
+path = "actiondb-parser"
+
 [dependencies.dummy-filter]
 path = "dummy-filter"
 
