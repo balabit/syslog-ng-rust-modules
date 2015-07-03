@@ -1,0 +1,10 @@
+[package]
+name = "dummy-parser"
+version = "0.1.0"
+authors = ["Tibor Benke <tibor.benke@balabit.com>"]
+
+[lib]
+name = "dummy_parser"
+
+[dependencies.syslog-ng-sys]
+path = "../syslog-ng-sys/"

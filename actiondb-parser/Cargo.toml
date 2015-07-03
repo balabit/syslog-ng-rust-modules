@@ -1,0 +1,13 @@
+[package]
+name = "actiondb-parser"
+version = "0.1.0"
+authors = ["Tibor Benke <tibor.benke@balabit.com>"]
+
+[lib]
+name = "actiondb_parser"
+
+[dependencies.syslog-ng-sys]
+path = "../syslog-ng-sys/"
+
+[dependencies.actiondb]
+path = "../../actiondb/"
