@@ -1,4 +1,4 @@
-prefix=/home/tibi/workspace/syslog-ng-rust-modules
+prefix=/home/btibi/workspace/syslog-ng-rust-modules
 includedir=${prefix}/include
 libdir=${prefix}/target/debug
 

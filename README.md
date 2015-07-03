@@ -158,17 +158,17 @@ This change ensures that Cargo sees a local path to the  `syslog-ng-sys` crate.
      fn init(&mut self, cfg: &GlobalConfig) {
          let user_version = cfg.get_user_version();
          let parsed_version = cfg.get_parsed_version();
-         msg_debug!("HelloFilter.init: cfg user version {:?}", user_version);
-         msg_debug!("HelloFilter.init: cfg parsed version {:?}", parsed_version);
+         debug!("HelloFilter.init: cfg user version {:?}", user_version);
+         debug!("HelloFilter.init: cfg parsed version {:?}", parsed_version);
      }
  
      fn eval(&self, _: &mut LogMessage) -> bool {
-         msg_debug!("HelloFilter.eval()");
+         debug!("HelloFilter.eval()");
          true    
      }
  
      fn set_option(&mut self, key: String, value: String) {
-         msg_debug!("HelloFilter.set_option({:?}, {:?})", key, value);
+         debug!("HelloFilter.set_option({:?}, {:?})", key, value);
      }
  }
  ```

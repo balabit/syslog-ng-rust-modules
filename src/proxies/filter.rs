@@ -2,6 +2,8 @@ use syslog_ng_sys::*;
 use dummy_filter::DummyFilter;
 use in_list_filter::InListFilter;
 
+use proxies;
+
 use std::ptr;
 use std::mem;
 
@@ -32,9 +34,9 @@ pub extern fn rust_filter_proxy_set_option(this: &mut RustFilterProxy, key: *con
 
 #[no_mangle]
 pub extern fn rust_filter_proxy_new(filter_name: *const c_char) -> Box<RustFilterProxy> {
+    proxies::init_logger();
     let filter = create_new_impl(filter_name);
-
-    unsafe { 
+    unsafe {
         let result = match filter {
             Some(a) => a,
                 // converts *mut to a Box
@@ -58,7 +60,7 @@ fn create_new_impl(filter_name: *const c_char) -> Option<Box<RustFilterProxy>> {
             Some(Box::new(InListFilter::new()) as Box<RustFilter>)
         },
         _ => {
-            msg_debug!("rust_filter_new(): {:?} not found, returning None", name);
+            debug!("rust_filter_new(): {:?} not found, returning None", name);
             None
         },
     };

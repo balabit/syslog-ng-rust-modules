@@ -1,10 +1,13 @@
 #[macro_use]
+extern crate log;
+
+#[macro_use]
 extern crate syslog_ng_sys;
 
 use syslog_ng_sys::{RustFilter, LogMessage, GlobalConfig};
 
 pub struct DummyFilter {
-    pub value: i32    
+    pub value: i32
 }
 
 impl DummyFilter {
@@ -18,16 +21,16 @@ impl RustFilter for DummyFilter {
     fn init(&mut self, cfg: &GlobalConfig) {
         let user_version = cfg.get_user_version();
         let parsed_version = cfg.get_parsed_version();
-        msg_debug!("DummyFilter.init: cfg user version {:?}", user_version);
-        msg_debug!("DummyFilter.init: cfg parsed version {:?}", parsed_version);
+        debug!("DummyFilter.init: cfg user version {:?}", user_version);
+        debug!("DummyFilter.init: cfg parsed version {:?}", parsed_version);
     }
 
     fn eval(&self, _: &mut LogMessage) -> bool {
-        msg_debug!("DummyFilter.eval()");
-        true    
+        debug!("DummyFilter.eval()");
+        true
     }
 
     fn set_option(&mut self, key: String, value: String) {
-        msg_debug!("DummyFilter.set_option({:?}, {:?})", key, value);
+        debug!("DummyFilter.set_option({:?}, {:?})", key, value);
     }
 }

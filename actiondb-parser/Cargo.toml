@@ -6,6 +6,9 @@ authors = ["Tibor Benke <tibor.benke@balabit.com>"]
 [lib]
 name = "actiondb_parser"
 
+[dependencies]
+log = "*"
+
 [dependencies.syslog-ng-sys]
 path = "../syslog-ng-sys/"
 

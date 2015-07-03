@@ -7,6 +7,9 @@ authors = ["Tibor Benke <ihrwein@gmail.com>"]
 name = "syslog_ng_rust_modules"
 crate-type = ["dylib"]
 
+[dependencies]
+log = "*"
+
 [dependencies.dummy-parser]
 path = "dummy-parser"
 

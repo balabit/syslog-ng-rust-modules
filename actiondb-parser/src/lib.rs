@@ -1,4 +1,7 @@
 #[macro_use]
+extern crate log;
+
+#[macro_use]
 extern crate syslog_ng_sys;
 extern crate actiondb;
 
@@ -15,18 +18,18 @@ pub struct ActiondbParser {
 
 impl ActiondbParser {
     pub fn new() -> ActiondbParser {
-        msg_debug!("ActiondbParser: new()");
+        debug!("ActiondbParser: new()");
         ActiondbParser{ matcher: None }
     }
 }
 
 impl RustParser for ActiondbParser {
     fn process(&self, msg: &mut LogMessage, input: &str) -> bool {
-        msg_debug!("ActiondbParser: process(input='{}')", input);
+        debug!("ActiondbParser: process(input='{}')", input);
         let parse_result = self.matcher.as_ref().unwrap().parse(input);
 
         if let Some(kv_pairs) = parse_result {
-            msg_debug!("parser matched");
+            debug!("parser matched");
             for (key, value) in kv_pairs {
                 msg.set_value(key, value);
             }
@@ -37,9 +40,9 @@ impl RustParser for ActiondbParser {
     }
 
     fn init(&mut self) -> bool {
-        msg_debug!("ActiondbParser: init()");
+        debug!("ActiondbParser: init()");
         if self.matcher.is_none() {
-            msg_error!("ActiondbParser: not all required parameters are set");
+            error!("ActiondbParser: not all required parameters are set");
             false
         } else {
             true
@@ -47,7 +50,7 @@ impl RustParser for ActiondbParser {
     }
 
     fn set_option(&mut self, key: String, value: String) {
-        msg_debug!("ActiondbParser: set_option(key={}, value={})", &key, &value);
+        debug!("ActiondbParser: set_option(key={}, value={})", &key, &value);
 
         match key.borrow() {
             "pattern_file" => {
@@ -56,11 +59,11 @@ impl RustParser for ActiondbParser {
                 if matcher.is_ok() {
                     self.matcher = matcher.ok();
                 } else {
-                    msg_error!("ActiondbParser: failed to set 'pattern_file'");
+                    error!("ActiondbParser: failed to set 'pattern_file'");
                 }
             },
             _ => {
-                msg_debug!("ActiondbParser not supported key: {:?}", key) ;
+                debug!("ActiondbParser not supported key: {:?}", key) ;
             }
         };
 

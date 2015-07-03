@@ -1,4 +1,7 @@
 #[macro_use]
+extern crate log;
+
+#[macro_use]
 extern crate syslog_ng_sys;
 
 use std::collections::BTreeSet;
@@ -27,7 +30,7 @@ impl RustFilter for InListFilter {
     }
 
     fn eval(&self, msg: &mut LogMessage) -> bool {
-        msg_debug!("InListFilter.eval()");
+        debug!("InListFilter.eval()");
 
         let value = msg.get_value(self.field);
 
@@ -35,7 +38,7 @@ impl RustFilter for InListFilter {
     }
 
     fn set_option(&mut self, key: String, value: String) {
-        msg_debug!("InListFilter.set_option({:?}, {:?})", &key, &value);
+        debug!("InListFilter.set_option({:?}, {:?})", &key, &value);
 
         match key.borrow() {
             "field" => {
@@ -45,7 +48,7 @@ impl RustFilter for InListFilter {
                 self.orig_list = value;
             },
             _ => {
-                msg_debug!("InListFilter.set_option(): not supported key: {:?}", key) ;
+                debug!("InListFilter.set_option(): not supported key: {:?}", key) ;
             }
         };
     }
