@@ -7,6 +7,7 @@ extern crate syslog_ng_sys;
 use syslog_ng_sys::{RustParser,
                     LogMessage};
 
+#[derive(Clone)]
 pub struct DummyParser;
 
 impl DummyParser {
@@ -30,6 +31,10 @@ impl RustParser for DummyParser {
 
     fn set_option(&mut self, key: String, value: String) {
         debug!("DummyParser: set_option(key={}, value={})", &key, &value);
+    }
+    
+    fn boxed_clone(&self) -> Box<RustParser> {
+        Box::new(self.clone())
     }
 }
 

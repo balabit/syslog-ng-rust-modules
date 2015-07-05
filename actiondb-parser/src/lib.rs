@@ -12,6 +12,7 @@ use actiondb::matcher::Matcher;
 use syslog_ng_sys::{RustParser,
                     LogMessage};
 
+#[derive(Clone)]
 pub struct ActiondbParser {
     matcher: Option<Matcher>
 }
@@ -66,6 +67,9 @@ impl RustParser for ActiondbParser {
                 debug!("ActiondbParser not supported key: {:?}", key) ;
             }
         };
+    }
 
+    fn boxed_clone(&self) -> Box<RustParser> {
+        Box::new(self.clone())
     }
 }
