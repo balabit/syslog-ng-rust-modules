@@ -61,6 +61,12 @@ pub extern fn rust_parser_proxy_new(parser_name: *const c_char) -> Box<RustParse
     }
 }
 
+#[no_mangle]
+pub extern fn rust_parser_proxy_clone(slf: &RustParserProxy) -> Box<RustParserProxy> {
+    let cloned = (*slf).clone();
+    Box::new(cloned)
+}
+
 fn create_parser_impl(name: &str) -> Option<Box<RustParserProxy>> {
     let parser: Option<Box<RustParser>> = match name {
         "dummy" => {

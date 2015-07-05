@@ -20,4 +20,7 @@ rust_parser_proxy_init(struct RustParserProxy* s);
 struct RustParserProxy*
 rust_parser_proxy_new(const gchar* parser_name);
 
+struct RustParserProxy*
+rust_parser_proxy_clone(struct RustParserProxy *self);
+
 #endif
