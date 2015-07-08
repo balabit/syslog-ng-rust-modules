@@ -51,10 +51,10 @@ impl LogMessage {
     }
 
     pub fn set_value(&mut self, key: &str, value: &str) {
-        let handle = LogMessage::get_value_handle(key);
         unsafe {
+            let c_key = CString::new(key).unwrap();
             let c_value = CString::new(value).unwrap();
-            ffi::log_msg_set_value(&mut *self, handle, c_value.as_ptr(), value.len() as i64);
+            ffi::__log_msg_set_value_by_name(&mut *self, c_key.as_ptr(), c_value.as_ptr(), value.len() as i64);
         }
     }
 }
