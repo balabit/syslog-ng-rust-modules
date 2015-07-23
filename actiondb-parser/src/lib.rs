@@ -6,15 +6,16 @@ extern crate syslog_ng_sys;
 extern crate actiondb;
 
 use std::borrow::Borrow;
+use std::clone;
 
 use actiondb::matcher::Matcher;
+use actiondb::matcher::Factory;
 
 use syslog_ng_sys::{RustParser,
                     LogMessage};
 
-#[derive(Clone)]
 pub struct ActiondbParser {
-    matcher: Option<Matcher>
+    matcher: Option<Box<Matcher>>
 }
 
 impl ActiondbParser {
@@ -31,7 +32,7 @@ impl RustParser for ActiondbParser {
 
         if let Some(kv_pairs) = parse_result {
             debug!("parser matched");
-            for (key, value) in kv_pairs {
+            for &(key, value) in kv_pairs.pairs() {
                 msg.set_value(key, value);
             }
             true
@@ -55,7 +56,7 @@ impl RustParser for ActiondbParser {
 
         match key.borrow() {
             "pattern_file" => {
-                let matcher = Matcher::from_file(&value);
+                let matcher = Factory::from_file(&value);
 
                 if matcher.is_ok() {
                     self.matcher = matcher.ok();
@@ -71,5 +72,22 @@ impl RustParser for ActiondbParser {
 
     fn boxed_clone(&self) -> Box<RustParser> {
         Box::new(self.clone())
+    }
+}
+
+impl clone::Clone for ActiondbParser {
+    fn clone(&self) -> ActiondbParser {
+        match self.matcher.as_ref() {
+            Option::Some(matcher) => {
+                ActiondbParser{
+                    matcher: Some(matcher.boxed_clone())
+                }
+            },
+            Option::None => {
+                ActiondbParser{
+                    matcher: None
+                }
+            }
+        }
     }
 }
