@@ -14,6 +14,11 @@ use actiondb::matcher::Factory;
 use syslog_ng_sys::{RustParser,
                     LogMessage};
 
+mod keys {
+    pub const PATTERN_NAME: &'static str = ".classifier.class";
+    pub const PATTERN_UUID: &'static str = ".classifier.uuid";
+}
+
 pub struct ActiondbParser {
     matcher: Option<Box<Matcher>>
 }
@@ -28,13 +33,18 @@ impl ActiondbParser {
 impl RustParser for ActiondbParser {
     fn process(&self, msg: &mut LogMessage, input: &str) -> bool {
         debug!("ActiondbParser: process(input='{}')", input);
-        let parse_result = self.matcher.as_ref().unwrap().parse(input);
 
-        if let Some(kv_pairs) = parse_result {
-            debug!("parser matched");
-            for &(key, value) in kv_pairs.pairs() {
+        if let Some(result) = self.matcher.as_ref().unwrap().parse(input) {
+            for &(key, value) in result.pairs() {
                 msg.set_value(key, value);
             }
+
+            if let Some(name) = result.pattern().name() {
+                msg.set_value(keys::PATTERN_NAME, name);
+            }
+
+            msg.set_value(keys::PATTERN_UUID, &result.pattern().uuid().to_hyphenated_string());
+
             true
         } else {
             false
