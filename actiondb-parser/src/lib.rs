@@ -7,6 +7,7 @@ extern crate actiondb;
 
 use std::borrow::Borrow;
 use std::clone;
+use std::fmt::Write;
 
 use actiondb::matcher::Matcher;
 use actiondb::matcher::Factory;
@@ -47,8 +48,11 @@ impl ActiondbParser {
     }
 
     pub fn populate_logmsg(&self, msg: &mut LogMessage, result: &MatchResult) {
+        let mut prefixed_key = String::new();
         for &(key, value) in result.pairs() {
-            msg.set_value(key, value);
+            self.prepend_prefix(key, &mut prefixed_key);
+            msg.set_value(&prefixed_key, value);
+            prefixed_key.clear();
         }
 
         if let Some(name) = result.pattern().name() {
@@ -60,6 +64,18 @@ impl ActiondbParser {
 
     pub fn set_prefix(&mut self, prefix: String) {
         self.prefix = Some(prefix);
+    }
+
+    fn prepend_prefix(&self, key: &str, buffer: &mut String) {
+        match self.prefix.as_ref() {
+            Some(prefix) => {
+                let _ = buffer.write_str(prefix);
+                let _ = buffer.write_str(key);
+            },
+            None => {
+                let _ = buffer.write_str(key);
+            }
+        };
     }
 }
 
