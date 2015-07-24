@@ -7,6 +7,7 @@ extern crate actiondb;
 
 use std::borrow::Borrow;
 use std::clone;
+use std::fmt::Write;
 
 use actiondb::matcher::Matcher;
 use actiondb::matcher::Factory;
@@ -21,13 +22,17 @@ mod keys {
 }
 
 pub struct ActiondbParser {
-    matcher: Option<Box<Matcher>>
+    matcher: Option<Box<Matcher>>,
+    prefix: Option<String>,
 }
 
 impl ActiondbParser {
     pub fn new() -> ActiondbParser {
         debug!("ActiondbParser: new()");
-        ActiondbParser{ matcher: None }
+        ActiondbParser{
+            matcher: None,
+            prefix: None
+        }
     }
 
     pub fn set_pattern_file(&mut self, path: &str) {
@@ -43,15 +48,39 @@ impl ActiondbParser {
     }
 
     pub fn populate_logmsg(&self, msg: &mut LogMessage, result: &MatchResult) {
+        let mut prefixed_key = String::new();
         for &(key, value) in result.pairs() {
-            msg.set_value(key, value);
+            self.set_value_in_logmsg(msg, &mut prefixed_key, key, value);
         }
 
         if let Some(name) = result.pattern().name() {
-            msg.set_value(keys::PATTERN_NAME, name);
+            self.set_value_in_logmsg(msg, &mut prefixed_key, keys::PATTERN_NAME, name);
         }
 
-        msg.set_value(keys::PATTERN_UUID, &result.pattern().uuid().to_hyphenated_string());
+        let uuid = result.pattern().uuid().to_hyphenated_string();
+        self.set_value_in_logmsg(msg, &mut prefixed_key, keys::PATTERN_UUID, &uuid);
+    }
+
+    pub fn set_prefix(&mut self, prefix: String) {
+        self.prefix = Some(prefix);
+    }
+
+    fn prepend_prefix(&self, key: &str, buffer: &mut String) {
+        match self.prefix.as_ref() {
+            Some(prefix) => {
+                let _ = buffer.write_str(prefix);
+                let _ = buffer.write_str(key);
+            },
+            None => {
+                let _ = buffer.write_str(key);
+            }
+        };
+    }
+
+    fn set_value_in_logmsg(&self, msg: &mut LogMessage, buffer: &mut String, key: &str, value: &str) {
+        self.prepend_prefix(key, buffer);
+        msg.set_value(&buffer, value);
+        buffer.clear();
     }
 }
 
@@ -82,6 +111,9 @@ impl RustParser for ActiondbParser {
             "pattern_file" => {
                 self.set_pattern_file(&value);
             },
+            "prefix" => {
+                self.set_prefix(value);
+            },
             _ => {
                 debug!("ActiondbParser: not supported key: {:?}", key) ;
             }
@@ -98,12 +130,14 @@ impl clone::Clone for ActiondbParser {
         match self.matcher.as_ref() {
             Option::Some(matcher) => {
                 ActiondbParser{
-                    matcher: Some(matcher.boxed_clone())
+                    matcher: Some(matcher.boxed_clone()),
+                    prefix: self.prefix.clone(),
                 }
             },
             Option::None => {
                 ActiondbParser{
-                    matcher: None
+                    matcher: None,
+                    prefix: self.prefix.clone(),
                 }
             }
         }
