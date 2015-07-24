@@ -10,9 +10,15 @@ use std::clone;
 
 use actiondb::matcher::Matcher;
 use actiondb::matcher::Factory;
+use actiondb::matcher::result::MatchResult;
 
 use syslog_ng_sys::{RustParser,
                     LogMessage};
+
+mod keys {
+    pub const PATTERN_NAME: &'static str = ".classifier.class";
+    pub const PATTERN_UUID: &'static str = ".classifier.uuid";
+}
 
 pub struct ActiondbParser {
     matcher: Option<Box<Matcher>>
@@ -23,18 +29,36 @@ impl ActiondbParser {
         debug!("ActiondbParser: new()");
         ActiondbParser{ matcher: None }
     }
+
+    pub fn set_pattern_file(&mut self, path: &str) {
+        match Factory::from_file(path) {
+            Ok(matcher) => {
+                self.matcher = Some(matcher)
+            },
+            Err(err) => {
+                error!("ActiondbParser: failed to set 'pattern_file'");
+                error!("{}", err);
+            }
+        }
+    }
+
+    pub fn populate_logmsg(&self, msg: &mut LogMessage, result: &MatchResult) {
+        for &(key, value) in result.pairs() {
+            msg.set_value(key, value);
+        }
+
+        if let Some(name) = result.pattern().name() {
+            msg.set_value(keys::PATTERN_NAME, name);
+        }
+
+        msg.set_value(keys::PATTERN_UUID, &result.pattern().uuid().to_hyphenated_string());
+    }
 }
 
 impl RustParser for ActiondbParser {
     fn process(&self, msg: &mut LogMessage, input: &str) -> bool {
-        debug!("ActiondbParser: process(input='{}')", input);
-        let parse_result = self.matcher.as_ref().unwrap().parse(input);
-
-        if let Some(kv_pairs) = parse_result {
-            debug!("parser matched");
-            for &(key, value) in kv_pairs.pairs() {
-                msg.set_value(key, value);
-            }
+        if let Some(result) = self.matcher.as_ref().unwrap().parse(input) {
+            self.populate_logmsg(msg, &result);
             true
         } else {
             false
@@ -56,16 +80,10 @@ impl RustParser for ActiondbParser {
 
         match key.borrow() {
             "pattern_file" => {
-                let matcher = Factory::from_file(&value);
-
-                if matcher.is_ok() {
-                    self.matcher = matcher.ok();
-                } else {
-                    error!("ActiondbParser: failed to set 'pattern_file'");
-                }
+                self.set_pattern_file(&value);
             },
             _ => {
-                debug!("ActiondbParser not supported key: {:?}", key) ;
+                debug!("ActiondbParser: not supported key: {:?}", key) ;
             }
         };
     }
