@@ -32,8 +32,6 @@ impl ActiondbParser {
 
 impl RustParser for ActiondbParser {
     fn process(&self, msg: &mut LogMessage, input: &str) -> bool {
-        debug!("ActiondbParser: process(input='{}')", input);
-
         if let Some(result) = self.matcher.as_ref().unwrap().parse(input) {
             for &(key, value) in result.pairs() {
                 msg.set_value(key, value);
@@ -75,7 +73,7 @@ impl RustParser for ActiondbParser {
                 }
             },
             _ => {
-                debug!("ActiondbParser not supported key: {:?}", key) ;
+                debug!("ActiondbParser: not supported key: {:?}", key) ;
             }
         };
     }
