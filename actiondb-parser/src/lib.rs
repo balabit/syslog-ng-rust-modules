@@ -64,12 +64,14 @@ impl RustParser for ActiondbParser {
 
         match key.borrow() {
             "pattern_file" => {
-                let matcher = Factory::from_file(&value);
-
-                if matcher.is_ok() {
-                    self.matcher = matcher.ok();
-                } else {
-                    error!("ActiondbParser: failed to set 'pattern_file'");
+                match Factory::from_file(&value) {
+                    Ok(matcher) => {
+                        self.matcher = Some(matcher)
+                    },
+                    Err(err) => {
+                        error!("ActiondbParser: failed to set 'pattern_file'");
+                        error!("{}", err);
+                    }
                 }
             },
             _ => {
