@@ -50,16 +50,15 @@ impl ActiondbParser {
     pub fn populate_logmsg(&self, msg: &mut LogMessage, result: &MatchResult) {
         let mut prefixed_key = String::new();
         for &(key, value) in result.pairs() {
-            self.prepend_prefix(key, &mut prefixed_key);
-            msg.set_value(&prefixed_key, value);
-            prefixed_key.clear();
+            self.set_value_in_logmsg(msg, &mut prefixed_key, key, value);
         }
 
         if let Some(name) = result.pattern().name() {
-            msg.set_value(keys::PATTERN_NAME, name);
+            self.set_value_in_logmsg(msg, &mut prefixed_key, keys::PATTERN_NAME, name);
         }
 
-        msg.set_value(keys::PATTERN_UUID, &result.pattern().uuid().to_hyphenated_string());
+        let uuid = result.pattern().uuid().to_hyphenated_string();
+        self.set_value_in_logmsg(msg, &mut prefixed_key, keys::PATTERN_UUID, &uuid);
     }
 
     pub fn set_prefix(&mut self, prefix: String) {
@@ -76,6 +75,12 @@ impl ActiondbParser {
                 let _ = buffer.write_str(key);
             }
         };
+    }
+
+    fn set_value_in_logmsg(&self, msg: &mut LogMessage, buffer: &mut String, key: &str, value: &str) {
+        self.prepend_prefix(key, buffer);
+        msg.set_value(&buffer, value);
+        buffer.clear();
     }
 }
 
