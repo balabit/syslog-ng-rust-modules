@@ -8,9 +8,7 @@ name = "actiondb_parser"
 
 [dependencies]
 log = "*"
+actiondb = "0.2.1"
 
 [dependencies.syslog-ng-sys]
 path = "../syslog-ng-sys/"
-
-[dependencies.actiondb]
-path = "../../actiondb/"
