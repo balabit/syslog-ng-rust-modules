@@ -28,6 +28,18 @@ impl ActiondbParser {
         debug!("ActiondbParser: new()");
         ActiondbParser{ matcher: None }
     }
+
+    pub fn set_pattern_file(&mut self, path: &str) {
+        match Factory::from_file(path) {
+            Ok(matcher) => {
+                self.matcher = Some(matcher)
+            },
+            Err(err) => {
+                error!("ActiondbParser: failed to set 'pattern_file'");
+                error!("{}", err);
+            }
+        }
+    }
 }
 
 impl RustParser for ActiondbParser {
@@ -64,15 +76,7 @@ impl RustParser for ActiondbParser {
 
         match key.borrow() {
             "pattern_file" => {
-                match Factory::from_file(&value) {
-                    Ok(matcher) => {
-                        self.matcher = Some(matcher)
-                    },
-                    Err(err) => {
-                        error!("ActiondbParser: failed to set 'pattern_file'");
-                        error!("{}", err);
-                    }
-                }
+                self.set_pattern_file(&value);
             },
             _ => {
                 debug!("ActiondbParser: not supported key: {:?}", key) ;
