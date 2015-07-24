@@ -21,13 +21,17 @@ mod keys {
 }
 
 pub struct ActiondbParser {
-    matcher: Option<Box<Matcher>>
+    matcher: Option<Box<Matcher>>,
+    prefix: Option<String>,
 }
 
 impl ActiondbParser {
     pub fn new() -> ActiondbParser {
         debug!("ActiondbParser: new()");
-        ActiondbParser{ matcher: None }
+        ActiondbParser{
+            matcher: None,
+            prefix: None
+        }
     }
 
     pub fn set_pattern_file(&mut self, path: &str) {
@@ -52,6 +56,10 @@ impl ActiondbParser {
         }
 
         msg.set_value(keys::PATTERN_UUID, &result.pattern().uuid().to_hyphenated_string());
+    }
+
+    pub fn set_prefix(&mut self, prefix: String) {
+        self.prefix = Some(prefix);
     }
 }
 
@@ -82,6 +90,9 @@ impl RustParser for ActiondbParser {
             "pattern_file" => {
                 self.set_pattern_file(&value);
             },
+            "prefix" => {
+                self.set_prefix(value);
+            },
             _ => {
                 debug!("ActiondbParser: not supported key: {:?}", key) ;
             }
@@ -98,12 +109,14 @@ impl clone::Clone for ActiondbParser {
         match self.matcher.as_ref() {
             Option::Some(matcher) => {
                 ActiondbParser{
-                    matcher: Some(matcher.boxed_clone())
+                    matcher: Some(matcher.boxed_clone()),
+                    prefix: self.prefix.clone(),
                 }
             },
             Option::None => {
                 ActiondbParser{
-                    matcher: None
+                    matcher: None,
+                    prefix: self.prefix.clone(),
                 }
             }
         }
