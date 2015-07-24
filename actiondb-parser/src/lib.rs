@@ -10,6 +10,7 @@ use std::clone;
 
 use actiondb::matcher::Matcher;
 use actiondb::matcher::Factory;
+use actiondb::matcher::result::MatchResult;
 
 use syslog_ng_sys::{RustParser,
                     LogMessage};
@@ -40,21 +41,24 @@ impl ActiondbParser {
             }
         }
     }
+
+    pub fn populate_logmsg(&self, msg: &mut LogMessage, result: &MatchResult) {
+        for &(key, value) in result.pairs() {
+            msg.set_value(key, value);
+        }
+
+        if let Some(name) = result.pattern().name() {
+            msg.set_value(keys::PATTERN_NAME, name);
+        }
+
+        msg.set_value(keys::PATTERN_UUID, &result.pattern().uuid().to_hyphenated_string());
+    }
 }
 
 impl RustParser for ActiondbParser {
     fn process(&self, msg: &mut LogMessage, input: &str) -> bool {
         if let Some(result) = self.matcher.as_ref().unwrap().parse(input) {
-            for &(key, value) in result.pairs() {
-                msg.set_value(key, value);
-            }
-
-            if let Some(name) = result.pattern().name() {
-                msg.set_value(keys::PATTERN_NAME, name);
-            }
-
-            msg.set_value(keys::PATTERN_UUID, &result.pattern().uuid().to_hyphenated_string());
-
+            self.populate_logmsg(msg, &result);
             true
         } else {
             false
