@@ -2,3 +2,7 @@
 name = "correlation"
 version = "0.1.0"
 authors = ["Tibor Benke <ihrwein@gmail.com>"]
+
+[dependencies.wheel_timer]
+path = "/home/tibi/workspace/wheel-timer-rs"
+version = "*"
