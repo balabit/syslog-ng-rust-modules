@@ -1,7 +1,6 @@
 #[macro_use]
 extern crate maplit;
 use std::collections::BTreeMap;
-mod timer;
 
 pub type Message = BTreeMap<String, String>;
 
