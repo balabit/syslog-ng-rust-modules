@@ -2,3 +2,6 @@
 name = "correlation"
 version = "0.1.0"
 authors = ["Tibor Benke <ihrwein@gmail.com>"]
+
+[dependencies]
+maplit = "0.1"
