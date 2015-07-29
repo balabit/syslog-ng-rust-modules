@@ -1,7 +1,3 @@
-extern crate wheel_timer;
-
-use wheel_timer::WheelTimer;
-
 use std::collections::BTreeMap;
 mod timer;
 
@@ -31,14 +27,12 @@ pub trait Context {
 
 pub struct Correlator {
     contexts: BTreeMap<String, Box<Context>>,
-    wheel_of_times: WheelTimer<Box<Context>>
 }
 
 impl Correlator {
     pub fn new() -> Correlator {
         Correlator {
             contexts: BTreeMap::new(),
-            wheel_of_times: WheelTimer::new(20)
         }
     }
 
@@ -57,7 +51,6 @@ impl Correlator {
                 let contexts = self.contexts.get(uuid);
             },
             EventType::Timer(ref event) => {
-                let expired_timers = self.wheel_of_times.tick();
             }
         }
     }
@@ -83,15 +76,4 @@ struct C<'a>(
 );
 
 fn main() {
-    let mut timer = WheelTimer::new(10);
-    timer.schedule(2, C(2, "2"));
-    timer.schedule(4, C(4, "4"));
-    timer.schedule(5, C(5,"5"));
-
-    for i in 0..10 {
-        for c in timer.tick() {
-            timer.schedule(i + c.0, c);
-            println!("{:?}", c);
-        }
-    }
 }
