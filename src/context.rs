@@ -4,6 +4,7 @@ use super::{config, Conditions, Message, TimerEvent};
 
 pub struct Context {
     conditions: Conditions,
+    patterns: Vec<String>,
     elapsed_time: u32,
     elapsed_time_since_last_message: u32,
     messages: Vec<Rc<Message>>
@@ -15,7 +16,8 @@ impl Context {
             conditions: conditions,
             elapsed_time: 0,
             elapsed_time_since_last_message: 0,
-            messages: Vec::new()
+            messages: Vec::new(),
+            patterns: Vec::new()
         }
     }
 
@@ -38,8 +40,8 @@ impl Context {
 
     fn is_closing_message(&self) -> bool {
         self.messages.last().map_or(false, |event| {
-            self.conditions.uuid.as_ref().map_or(false, |uuid| {
-                uuid == event.get("uuid").unwrap()
+            self.patterns.last().map_or(false, |pattern| {
+                pattern == event.get("uuid").unwrap()
             })
         })
     }
@@ -70,7 +72,9 @@ impl Context {
 
 impl From<config::Context> for Context {
     fn from(context: config::Context) -> Context {
-        Context::new(context.conditions)
+        let mut ctx = Context::new(context.conditions);
+        ctx.patterns = context.patterns;
+        ctx
     }
 }
 
