@@ -1,5 +1,6 @@
 use std::sync::mpsc;
 use std::thread;
+use std::result::Result;
 
 use super::{Command, Dispatcher, Event, Message, Timer};
 
@@ -14,7 +15,7 @@ impl Correlator {
     pub fn new() -> Correlator {
         let (tx, rx) = mpsc::channel();
 
-        let timer = Timer::from_chan(TIMER_STEP, tx.clone());
+        let _ = Timer::from_chan(TIMER_STEP, tx.clone());
 
         let handle = thread::spawn(move || {
             let mut dispatcher = Dispatcher::new();
@@ -33,12 +34,12 @@ impl Correlator {
         }
     }
 
-    pub fn push_message(&mut self, message: Message) {
-        self.tx.send(Command::Dispatch(Event::Message(message)));
+    pub fn push_message(&mut self, message: Message) -> Result<(), mpsc::SendError<Command>> {
+        self.tx.send(Command::Dispatch(Event::Message(message)))
     }
 
-    pub fn stop(self) {
-        self.tx.send(Command::Exit);
-        self.dispatcher_thread_handle.join();
+    pub fn stop(self) -> thread::Result<()> {
+        let _ = self.tx.send(Command::Exit);
+        self.dispatcher_thread_handle.join()
     }
 }

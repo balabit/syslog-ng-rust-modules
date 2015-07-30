@@ -5,8 +5,6 @@ extern crate maplit;
 mod macros;
 
 use std::collections::BTreeMap;
-use std::sync::mpsc;
-use std::thread;
 
 pub use context::Context;
 pub use dispatcher::Dispatcher;

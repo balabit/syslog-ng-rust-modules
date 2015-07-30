@@ -10,7 +10,7 @@ fn main() {
     let msg1 = btreemap!{
         "uuid".to_string() => "1".to_string(),
     };
-    correlator.push_message(msg1);
+    let _ = correlator.push_message(msg1);
     thread::sleep_ms(2000);
-    correlator.stop();
+    let _ = correlator.stop();
 }
