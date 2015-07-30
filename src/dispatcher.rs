@@ -1,13 +1,15 @@
 use std::rc::Rc;
 
-use super::{context, Context, Event};
+use super::{config, context, Context, Event};
 
 pub struct Dispatcher {
     contexts: Vec<Context>,
 }
 
 impl Dispatcher {
-    pub fn new(contexts: Vec<Context>) -> Dispatcher {
+    pub fn new(contexts: Vec<config::Context>) -> Dispatcher {
+        let contexts = contexts.into_iter().map(|ctx| Context::from(ctx)).collect::<Vec<Context>>();
+        println!("{}", contexts.len());
         Dispatcher {
             contexts: contexts,
         }
@@ -18,7 +20,7 @@ impl Dispatcher {
             Event::Message(event) => {
                 let event = Rc::new(event);
                 for context in self.contexts.iter_mut() {
-                    context.on_message(event);
+                    context.on_message(event.clone());
                 }
             },
             Event::Timer(ref event) => {

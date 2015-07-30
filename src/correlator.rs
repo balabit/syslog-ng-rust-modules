@@ -2,7 +2,7 @@ use std::sync::mpsc;
 use std::thread;
 use std::result::Result;
 
-use super::{Command, Context, Dispatcher, Event, Message, Timer};
+use super::{config, Command, Context, Dispatcher, Event, Message, Timer};
 
 const TIMER_STEP: u32 = 100;
 
@@ -12,7 +12,7 @@ pub struct Correlator {
 }
 
 impl Correlator {
-    pub fn new(contexts: Vec<Context>) -> Correlator {
+    pub fn new(contexts: Vec<config::Context>) -> Correlator {
         let (tx, rx) = mpsc::channel();
         let _ = Timer::from_chan(TIMER_STEP, tx.clone());
 

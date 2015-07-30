@@ -6,7 +6,7 @@ use correlation::Correlator;
 use std::thread;
 
 fn main() {
-    let mut correlator = Correlator::new();
+    let mut correlator = Correlator::new(vec!());
     let msg1 = btreemap!{
         "uuid".to_string() => "1".to_string(),
     };

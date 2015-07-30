@@ -6,12 +6,15 @@ mod macros;
 
 use std::collections::BTreeMap;
 
+pub use conditions::Conditions;
 pub use context::Context;
-pub use dispatcher::Dispatcher;
 pub use correlator::Correlator;
+pub use dispatcher::Dispatcher;
 pub use timer::{Timer,
                 TimerEvent};
 
+mod conditions;
+mod config;
 mod context;
 mod dispatcher;
 mod correlator;
