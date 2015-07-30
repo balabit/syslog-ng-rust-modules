@@ -1,7 +1,7 @@
 use std::collections::BTreeMap;
 use std::rc::Rc;
 
-use super::{context, Context, Event, Observer};
+use super::{context, Context, Event};
 
 pub struct Dispatcher {
     contexts: BTreeMap<String, Vec<Context>>,

@@ -1,6 +1,6 @@
 use std::rc::Rc;
 
-use super::{Message, Observer, TimerEvent};
+use super::{Message, TimerEvent};
 
 #[derive(Clone)]
 struct ConditionFields {

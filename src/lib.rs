@@ -33,15 +33,3 @@ pub enum Command {
     Dispatch(Event),
     Exit
 }
-
-
-pub trait Observer {
-    fn on_event(&mut self, event: &Event) -> bool {
-        match *event {
-            Event::Timer(ref event) => self.on_timer(event),
-            Event::Message(ref event) => self.on_message(event),
-        }
-    }
-    fn on_timer(&mut self, event: &TimerEvent) -> bool;
-    fn on_message(&mut self, event: &Message) -> bool;
-}
