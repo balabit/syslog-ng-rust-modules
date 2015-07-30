@@ -1,6 +1,7 @@
 use std::collections::BTreeMap;
+use std::rc::Rc;
 
-use super::{Context, Event, Observer};
+use super::{context, Context, Event, Observer};
 
 pub struct Dispatcher {
     contexts: BTreeMap<String, Vec<Context>>,
@@ -9,9 +10,9 @@ pub struct Dispatcher {
 impl Dispatcher {
     pub fn new() -> Dispatcher {
         let contexts = btreemap!{
-            "1".to_string() => vec!(Context::new()),
-            "2".to_string() => vec!(Context::new()),
-            "3".to_string() => vec!(Context::new()),
+            "1".to_string() => vec!(context::Builder::new(100).build()),
+            "2".to_string() => vec!(context::Builder::new(100).build()),
+            "3".to_string() => vec!(context::Builder::new(100).build()),
         };
         Dispatcher{
             contexts: contexts,
@@ -21,10 +22,11 @@ impl Dispatcher {
     pub fn dispatch(&mut self, event: Event) {
         match event {
             Event::Message(event) => {
+                let event = Rc::new(event);
                 if let Some(uuid) = event.get("uuid") {
                     if let Some(mut contexts) = self.contexts.get_mut(uuid) {
                         for i in contexts.iter_mut() {
-                            i.on_message(&event);
+                            i.on_message(event.clone());
                         }
                     }
                 }

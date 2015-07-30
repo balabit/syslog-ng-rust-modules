@@ -27,7 +27,7 @@ impl Correlator {
             }
         });
 
-        Correlator{
+        Correlator {
             tx: tx,
             dispatcher_thread_handle: handle
         }
