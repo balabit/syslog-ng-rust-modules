@@ -31,7 +31,7 @@ impl Context {
         println!("message event");
         self.elapsed_time_since_last_message = 0;
         self.messages.push(event);
-        self.is_last_message()
+        self.is_closing()
     }
 
     fn is_max_size_reached(&self) -> bool {
@@ -46,7 +46,20 @@ impl Context {
         })
     }
 
-    fn is_last_message(&self) -> bool {
+    fn is_opening(&self, message: &Message) -> bool {
+        let found = self.patterns.contains(message.get("uuid").unwrap());
+        self.conditions.first_opens.map_or(found, |first| {
+            if first {
+                self.patterns.first().map_or(false, |pattern| {
+                    pattern == message.get("uuid").unwrap()
+                })
+            } else {
+                found
+            }
+        })
+    }
+
+    fn is_closing(&self) -> bool {
        self.is_max_size_reached() || self.is_closing_message()
     }
 

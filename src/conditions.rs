@@ -2,6 +2,7 @@
 pub struct Conditions {
     pub timeout: u32,
     pub renew_timeout: Option<u32>,
+    pub first_opens: Option<bool>,
     pub last_closes: Option<bool>,
     pub max_size: Option<usize>
 }
@@ -11,6 +12,7 @@ impl Conditions {
         Conditions {
             timeout: timeout,
             renew_timeout: None,
+            first_opens: None,
             last_closes: None,
             max_size: None
         }
@@ -33,6 +35,8 @@ impl Builder {
         self
     }
 
+    pub fn first_opens(&mut self, first_opens: bool) -> &mut Builder {
+        self.conditions.first_opens = Some(first_opens);
         self
     }
 
