@@ -14,7 +14,7 @@ impl Dispatcher {
             "2".to_string() => vec!(context::Builder::new(100).build()),
             "3".to_string() => vec!(context::Builder::new(100).build()),
         };
-        Dispatcher{
+        Dispatcher {
             contexts: contexts,
         }
     }
