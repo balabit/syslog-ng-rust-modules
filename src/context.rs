@@ -4,6 +4,7 @@ use super::{config, Conditions, Message, TimerEvent};
 
 pub struct Context {
     conditions: Conditions,
+    opened: bool,
     patterns: Vec<String>,
     elapsed_time: u32,
     elapsed_time_since_last_message: u32,
@@ -14,6 +15,7 @@ impl Context {
     pub fn new(conditions: Conditions) -> Context {
         Context {
             conditions: conditions,
+            opened: false,
             elapsed_time: 0,
             elapsed_time_since_last_message: 0,
             messages: Vec::new(),
@@ -22,16 +24,37 @@ impl Context {
     }
 
     pub fn on_timer(&mut self, event: &TimerEvent) -> bool {
-        println!("timer event: {}", event.0);
-        self.update_timers(event.0);
-        self.is_any_timer_expired()
+        if self.opened {
+            println!("timer event: {}", event.0);
+            self.update_timers(event.0);
+            self.is_any_timer_expired()
+        } else {
+            false
+        }
     }
 
-    pub fn on_message(&mut self, event: Rc<Message>) -> bool {
+    fn process_message(&mut self, event: Rc<Message>) -> bool {
         println!("message event");
         self.elapsed_time_since_last_message = 0;
         self.messages.push(event);
         self.is_closing()
+    }
+
+    pub fn on_message(&mut self, event: Rc<Message>) -> bool {
+        if self.opened {
+            self.process_message(event)
+        } else {
+            self.open_context_or_ignore_message(event)
+        }
+    }
+
+    fn open_context_or_ignore_message(&mut self, event: Rc<Message>) -> bool {
+        if self.is_opening(&event) {
+            self.opened = true;
+            self.process_message(event)
+        } else {
+            false
+        }
     }
 
     fn is_max_size_reached(&self) -> bool {
