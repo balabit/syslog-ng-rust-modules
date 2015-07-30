@@ -3,5 +3,9 @@ name = "correlation"
 version = "0.1.0"
 authors = ["Tibor Benke <ihrwein@gmail.com>"]
 
+[[bin]]
+name = "test"
+path = "src/bin/test.rs"
+
 [dependencies]
 maplit = "0.1"
