@@ -47,13 +47,11 @@ impl Context {
     }
 
     fn is_closing_message(&self) -> bool {
-        if let Some(event) = self.messages.last() {
+        self.messages.last().map_or(false, |event| {
             self.conditions.uuid.as_ref().map_or(false, |uuid| {
                 uuid == event.get("uuid").unwrap()
             })
-        } else {
-            false
-        }
+        })
     }
 
     fn is_last_message(&self) -> bool {
