@@ -2,11 +2,16 @@
 extern crate maplit;
 extern crate correlation;
 
-use correlation::Correlator;
+use correlation::{config, conditions, Conditions, Correlator};
 use std::thread;
 
 fn main() {
-    let mut correlator = Correlator::new(vec!());
+    let contexts = vec!{
+        config::Context::new(conditions::Builder::new(100).build()),
+        config::Context::new(conditions::Builder::new(100).build()),
+        config::Context::new(conditions::Builder::new(100).build()),
+    };
+    let mut correlator = Correlator::new(contexts);
     let msg1 = btreemap!{
         "uuid".to_string() => "1".to_string(),
     };

@@ -13,8 +13,8 @@ pub use dispatcher::Dispatcher;
 pub use timer::{Timer,
                 TimerEvent};
 
-mod conditions;
-mod config;
+pub mod conditions;
+pub mod config;
 mod context;
 mod dispatcher;
 mod correlator;
@@ -27,7 +27,6 @@ pub enum Event {
     Timer(TimerEvent),
     Message(Message)
 }
-
 
 #[derive(Debug)]
 pub enum Command {

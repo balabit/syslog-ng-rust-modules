@@ -9,7 +9,6 @@ pub struct Dispatcher {
 impl Dispatcher {
     pub fn new(contexts: Vec<config::Context>) -> Dispatcher {
         let contexts = contexts.into_iter().map(|ctx| Context::from(ctx)).collect::<Vec<Context>>();
-        println!("{}", contexts.len());
         Dispatcher {
             contexts: contexts,
         }
