@@ -6,7 +6,6 @@ use super::{config, Conditions, Message, TimerEvent};
 pub struct Context {
     conditions: Conditions,
     opened: bool,
-    patterns: Vec<String>,
     elapsed_time: u32,
     elapsed_time_since_last_message: u32,
     messages: Vec<Rc<Message>>
@@ -20,7 +19,6 @@ impl Context {
             elapsed_time: 0,
             elapsed_time_since_last_message: 0,
             messages: Vec::new(),
-            patterns: Vec::new()
         }
     }
 
@@ -43,7 +41,7 @@ impl Context {
     }
 
     pub fn on_message(&mut self, event: Rc<Message>) {
-        if self.opened && self.patterns.contains(event.get("uuid").unwrap()) {
+        if self.opened && self.conditions.patterns.contains(event.get("uuid").unwrap()) {
             self.process_message(event);
         } else {
             self.open_context_or_ignore_message(event);
@@ -72,7 +70,7 @@ impl Context {
     fn is_closing_message(&self) -> bool {
         self.conditions.last_closes.map_or(false, |closes| {
             if closes {
-                self.patterns.last().map_or(false, |pattern| {
+                self.conditions.patterns.last().map_or(false, |pattern| {
                     pattern == self.messages.last().unwrap().get("uuid").unwrap()
                 })
             } else {
@@ -82,11 +80,11 @@ impl Context {
     }
 
     fn is_opening(&self, message: &Message) -> bool {
-        let found = self.patterns.contains(message.get("uuid").unwrap());
+        let found = self.conditions.patterns.contains(message.get("uuid").unwrap());
         println!("found: {}", found);
         self.conditions.first_opens.map_or(found, |first| {
             if first {
-                self.patterns.first().map_or(false, |pattern| {
+                self.conditions.patterns.first().map_or(false, |pattern| {
                     pattern == message.get("uuid").unwrap()
                 })
             } else {
@@ -122,9 +120,7 @@ impl Context {
 
 impl From<config::Context> for Context {
     fn from(context: config::Context) -> Context {
-        let mut ctx = Context::new(context.conditions);
-        ctx.patterns = context.patterns;
-        ctx
+        Context::new(context.conditions)
     }
 }
 
@@ -134,8 +130,7 @@ use conditions::Builder;
 fn test_given_close_condition_with_timeout_when_the_timeout_expires_then_the_condition_is_met() {
     let timeout = 100;
     let msg_id = "1".to_string();
-    let mut context = Context::new(Builder::new(timeout).build());
-    context.patterns.push(msg_id.clone());
+    let mut context = Context::new(Builder::new(timeout).patterns(vec![msg_id.clone()]).build());
     let msg1 = btreemap!{
         "uuid".to_string() => msg_id.clone(),
     };
@@ -156,8 +151,7 @@ fn test_given_close_condition_with_max_size_when_the_max_size_reached_then_the_c
     let timeout = 100;
     let max_size = 3;
     let msg_id = "1".to_string();
-    let mut context = Context::new(Builder::new(timeout).max_size(max_size).build());
-    context.patterns.push(msg_id.clone());
+    let mut context = Context::new(Builder::new(timeout).max_size(max_size).patterns(vec![msg_id.clone()]).build());
     let msg1 = btreemap!{
         "uuid".to_string() => msg_id.clone(),
     };
@@ -177,8 +171,7 @@ fn test_given_close_condition_with_renew_timeout_when_the_timeout_expires_withou
     let timeout = 100;
     let renew_timeout = 10;
     let msg_id = "1".to_string();
-    let mut context = Context::new(Builder::new(timeout).renew_timeout(renew_timeout).build());
-    context.patterns.push(msg_id.clone());
+    let mut context = Context::new(Builder::new(timeout).renew_timeout(renew_timeout).patterns(vec![msg_id.clone()]).build());
     let msg1 = btreemap!{
         "uuid".to_string() => msg_id.clone(),
     };
@@ -198,8 +191,7 @@ fn test_given_close_condition_with_renew_timeout_when_the_timeout_expires_with_r
     let timeout = 100;
     let renew_timeout = 10;
     let msg_id = "1".to_string();
-    let mut context = Context::new(Builder::new(timeout).renew_timeout(renew_timeout).build());
-    context.patterns.push(msg_id.clone());
+    let mut context = Context::new(Builder::new(timeout).renew_timeout(renew_timeout).patterns(vec![msg_id.clone()]).build());
     let msg1 = btreemap!{
         "uuid".to_string() => msg_id.clone(),
     };

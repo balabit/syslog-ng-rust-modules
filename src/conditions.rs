@@ -4,7 +4,8 @@ pub struct Conditions {
     pub renew_timeout: Option<u32>,
     pub first_opens: Option<bool>,
     pub last_closes: Option<bool>,
-    pub max_size: Option<usize>
+    pub max_size: Option<usize>,
+    pub patterns: Vec<String>
 }
 
 impl Conditions {
@@ -14,7 +15,8 @@ impl Conditions {
             renew_timeout: None,
             first_opens: None,
             last_closes: None,
-            max_size: None
+            max_size: None,
+            patterns: Vec::new()
         }
     }
 }
@@ -46,6 +48,11 @@ impl Builder {
     }
     pub fn max_size(&mut self, max_size: usize) -> &mut Builder {
         self.conditions.max_size = Some(max_size);
+        self
+    }
+
+    pub fn patterns(&mut self, patterns: Vec<String>) -> &mut Builder {
+        self.conditions.patterns = patterns;
         self
     }
 
