@@ -43,7 +43,7 @@ impl Context {
     }
 
     pub fn on_message(&mut self, event: Rc<Message>) {
-        if self.opened {
+        if self.opened && self.patterns.contains(event.get("uuid").unwrap()) {
             self.process_message(event);
         } else {
             self.open_context_or_ignore_message(event);
