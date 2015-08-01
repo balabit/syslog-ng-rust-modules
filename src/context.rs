@@ -35,11 +35,11 @@ impl Context {
     fn process_message(&mut self, event: Rc<Message>) {
         println!("message event");
         self.elapsed_time_since_last_message = 0;
-        if self.is_closing(&event) {
+        self.messages.push(event);
+        if self.is_closing() {
             println!("context closed");
             self.opened = false;
         }
-        self.messages.push(event);
     }
 
     pub fn on_message(&mut self, event: Rc<Message>) {
@@ -66,14 +66,14 @@ impl Context {
 
     fn is_max_size_reached(&self) -> bool {
         println!("self.messages: {:?}", &self.messages);
-        self.conditions.max_size.map_or(false, |max_size| self.messages.len() == max_size -1)
+        self.conditions.max_size.map_or(false, |max_size| self.messages.len() >= max_size)
     }
 
-    fn is_closing_message(&self, message: &Message) -> bool {
+    fn is_closing_message(&self) -> bool {
         self.conditions.last_closes.map_or(false, |closes| {
             if closes {
                 self.patterns.last().map_or(false, |pattern| {
-                    pattern == message.get("uuid").unwrap()
+                    pattern == self.messages.last().unwrap().get("uuid").unwrap()
                 })
             } else {
                 false
@@ -95,9 +95,9 @@ impl Context {
         })
     }
 
-    fn is_closing(&self, message: &Message) -> bool {
+    fn is_closing(&self) -> bool {
         println!("checking close");
-        self.is_max_size_reached() || self.is_closing_message(message)
+        self.is_max_size_reached() || self.is_closing_message()
     }
 
     fn is_timeout_expired(&self) -> bool {
