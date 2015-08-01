@@ -26,7 +26,7 @@ impl Conditions {
         }
     }
 
-    pub fn on_message(&mut self, state: &mut State, message: Rc<Message>) {
+    pub fn on_message(&mut self, message: Rc<Message>, state: &mut State) {
         if !self.patterns.contains(message.get("uuid").unwrap()) && self.patterns.len() > 0 {
             return;
         }

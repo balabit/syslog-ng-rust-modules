@@ -1,120 +1,32 @@
 use std::rc::Rc;
 
 use super::{config, Conditions, Message, TimerEvent};
+use state::State;
 
 #[derive(Debug)]
 pub struct Context {
     conditions: Conditions,
-    opened: bool,
-    elapsed_time: u32,
-    elapsed_time_since_last_message: u32,
-    messages: Vec<Rc<Message>>
+    state: State
 }
 
 impl Context {
     pub fn new(conditions: Conditions) -> Context {
         Context {
             conditions: conditions,
-            opened: false,
-            elapsed_time: 0,
-            elapsed_time_since_last_message: 0,
-            messages: Vec::new(),
+            state: State::new()
         }
     }
 
     pub fn on_timer(&mut self, event: &TimerEvent) {
-        if self.opened {
-            println!("timer event: {}", event.0);
-            self.update_timers(event.0);
-            self.opened = !self.is_any_timer_expired();
-        }
+        self.conditions.on_timer(event, &mut self.state);
     }
 
     pub fn on_message(&mut self, event: Rc<Message>) {
-        if self.opened && self.conditions.patterns.contains(event.get("uuid").unwrap()) {
-            self.process_message(event);
-        } else {
-            self.open_context_or_ignore_message(event);
-        }
-    }
-
-    fn process_message(&mut self, event: Rc<Message>) {
-        println!("message event");
-        self.elapsed_time_since_last_message = 0;
-        self.messages.push(event);
-        if self.is_closing() {
-            println!("context closed");
-            self.opened = false;
-        }
+        self.conditions.on_message(event, &mut self.state);
     }
 
     pub fn is_open(&self) -> bool {
-        self.opened
-    }
-
-    fn open_context_or_ignore_message(&mut self, event: Rc<Message>) {
-        if self.is_opening(&event) {
-            println!("context opened");
-            self.opened = true;
-            self.process_message(event);
-        } else {
-            println!("not opening");
-        }
-    }
-
-    fn is_max_size_reached(&self) -> bool {
-        println!("self.messages: {:?}", &self.messages);
-        self.conditions.max_size.map_or(false, |max_size| self.messages.len() >= max_size)
-    }
-
-    fn is_closing_message(&self) -> bool {
-        self.conditions.last_closes.map_or(false, |closes| {
-            if closes {
-                self.conditions.patterns.last().map_or(false, |pattern| {
-                    pattern == self.messages.last().unwrap().get("uuid").unwrap()
-                })
-            } else {
-                false
-            }
-        })
-    }
-
-    fn is_opening(&self, message: &Message) -> bool {
-        let found = self.conditions.patterns.contains(message.get("uuid").unwrap());
-        println!("found: {}", found);
-        self.conditions.first_opens.map_or(found, |first| {
-            if first {
-                self.conditions.patterns.first().map_or(false, |pattern| {
-                    pattern == message.get("uuid").unwrap()
-                })
-            } else {
-                found
-            }
-        })
-    }
-
-    fn is_closing(&self) -> bool {
-        println!("checking close");
-        self.is_max_size_reached() || self.is_closing_message()
-    }
-
-    fn is_timeout_expired(&self) -> bool {
-        self.elapsed_time >= self.conditions.timeout
-    }
-
-    fn is_renew_timeout_expired(&self) -> bool {
-        self.conditions.renew_timeout.map_or(false, |renew_timeout| {
-            self.elapsed_time_since_last_message >= renew_timeout
-        })
-    }
-
-    fn is_any_timer_expired(&self) -> bool {
-        self.is_timeout_expired() || self.is_renew_timeout_expired()
-    }
-
-    fn update_timers(&mut self, elapsed_time: u32) {
-        self.elapsed_time += elapsed_time;
-        self.elapsed_time_since_last_message += elapsed_time;
+        self.state.is_open()
     }
 }
 

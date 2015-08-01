@@ -4,6 +4,7 @@ use Message;
 use MiliSec;
 use TimerEvent;
 
+#[derive(Debug)]
 pub struct State {
     elapsed_time: MiliSec,
     elapsed_time_since_last_message: MiliSec,
