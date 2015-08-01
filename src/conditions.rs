@@ -1,4 +1,4 @@
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct Conditions {
     pub timeout: u32,
     pub renew_timeout: Option<u32>,
