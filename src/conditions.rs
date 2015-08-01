@@ -1,3 +1,9 @@
+use std::rc::Rc;
+
+use Message;
+use state::State;
+use TimerEvent;
+
 #[derive(Clone, Debug)]
 pub struct Conditions {
     pub timeout: u32,
@@ -18,6 +24,78 @@ impl Conditions {
             max_size: None,
             patterns: Vec::new()
         }
+    }
+
+    pub fn on_message(&mut self, state: &mut State, message: Rc<Message>) {
+        if !self.patterns.contains(message.get("uuid").unwrap()) && self.patterns.len() > 0 {
+            return;
+        }
+
+        if state.is_open() {
+            state.add_message(message);
+            if self.is_closing(state) {
+                state.close()
+            }
+        } else if self.is_opening(&message) {
+            state.add_message(message);
+            state.open();
+        }
+    }
+
+    fn is_max_size_reached(&self, state: &State) -> bool {
+        self.max_size.map_or(false, |max_size| state.messages().len() >= max_size)
+    }
+
+    fn is_closing_message(&self, state: &State) -> bool {
+        self.last_closes.map_or(false, |closes| {
+            if closes {
+                self.patterns.last().map_or(false, |pattern| {
+                    pattern == state.messages().last().unwrap().get("uuid").unwrap()
+                })
+            } else {
+                false
+            }
+        })
+    }
+
+    fn is_opening(&self, message: &Message) -> bool {
+        let found = self.patterns.contains(message.get("uuid").unwrap());
+        println!("found: {}", found);
+        self.first_opens.map_or(found, |first| {
+            if first {
+                self.patterns.first().map_or(false, |pattern| {
+                    pattern == message.get("uuid").unwrap()
+                })
+            } else {
+                found
+            }
+        })
+    }
+
+    fn is_closing(&self, state: &State) -> bool {
+        println!("checking close");
+        self.is_max_size_reached(state) || self.is_closing_message(state)
+    }
+
+    pub fn on_timer(&mut self, event: &TimerEvent, state: &mut State) {
+        state.on_timer(event);
+        if self.is_any_timer_expired(state) {
+            state.close()
+        }
+    }
+
+    fn is_timeout_expired(&self, state: &State) -> bool {
+        state.elapsed_time() >= self.timeout
+    }
+
+    fn is_renew_timeout_expired(&self, state: &State) -> bool {
+        self.renew_timeout.map_or(false, |renew_timeout| {
+            state.elapsed_time_since_last_message() >= renew_timeout
+        })
+    }
+
+    fn is_any_timer_expired(&self, state: &State) -> bool {
+        self.is_timeout_expired(state) || self.is_renew_timeout_expired(state)
     }
 }
 

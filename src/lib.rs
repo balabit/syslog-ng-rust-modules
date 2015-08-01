@@ -18,9 +18,11 @@ pub mod config;
 mod context;
 mod dispatcher;
 mod correlator;
+mod state;
 mod timer;
 
 pub type Message = BTreeMap<String, String>;
+pub type MiliSec = u32;
 
 #[derive(Debug)]
 pub enum Event {

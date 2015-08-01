@@ -30,6 +30,14 @@ impl Context {
         }
     }
 
+    pub fn on_message(&mut self, event: Rc<Message>) {
+        if self.opened && self.conditions.patterns.contains(event.get("uuid").unwrap()) {
+            self.process_message(event);
+        } else {
+            self.open_context_or_ignore_message(event);
+        }
+    }
+
     fn process_message(&mut self, event: Rc<Message>) {
         println!("message event");
         self.elapsed_time_since_last_message = 0;
@@ -37,14 +45,6 @@ impl Context {
         if self.is_closing() {
             println!("context closed");
             self.opened = false;
-        }
-    }
-
-    pub fn on_message(&mut self, event: Rc<Message>) {
-        if self.opened && self.conditions.patterns.contains(event.get("uuid").unwrap()) {
-            self.process_message(event);
-        } else {
-            self.open_context_or_ignore_message(event);
         }
     }
 
