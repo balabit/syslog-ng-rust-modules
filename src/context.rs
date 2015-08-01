@@ -172,34 +172,47 @@ fn test_given_close_condition_with_max_size_when_the_max_size_reached_then_the_c
     assert_false!(context.is_open());
 }
 
-/*
 #[test]
 fn test_given_close_condition_with_renew_timeout_when_the_timeout_expires_without_renewing_messages_then_the_condition_is_met() {
     let timeout = 100;
     let renew_timeout = 10;
+    let msg_id = "1".to_string();
     let mut context = Context::new(Builder::new(timeout).renew_timeout(renew_timeout).build());
+    context.patterns.push(msg_id.clone());
     let msg1 = btreemap!{
-        "uuid".to_string() => "1".to_string(),
+        "uuid".to_string() => msg_id.clone(),
     };
     let event = Rc::new(msg1);
-    assert_false!(context.on_message(event.clone()));
-    assert_false!(context.on_timer(&mut TimerEvent(8)));
-    assert_false!(context.on_timer(&mut TimerEvent(1)));
-    assert_true!(context.on_timer(&mut TimerEvent(1)));
+    context.on_message(event.clone());
+    assert_true!(context.is_open());
+    context.on_timer(&mut TimerEvent(8));
+    assert_true!(context.is_open());
+    context.on_timer(&mut TimerEvent(1));
+    assert_true!(context.is_open());
+    context.on_timer(&mut TimerEvent(1));
+    assert_false!(context.is_open());
 }
 
 #[test]
 fn test_given_close_condition_with_renew_timeout_when_the_timeout_expires_with_renewing_messages_then_the_context_is_not_closed() {
     let timeout = 100;
     let renew_timeout = 10;
+    let msg_id = "1".to_string();
     let mut context = Context::new(Builder::new(timeout).renew_timeout(renew_timeout).build());
+    context.patterns.push(msg_id.clone());
     let msg1 = btreemap!{
-        "uuid".to_string() => "1".to_string(),
+        "uuid".to_string() => msg_id.clone(),
     };
     let event = Rc::new(msg1);
-    assert_false!(context.on_message(event.clone()));
-    assert_false!(context.on_timer(&mut TimerEvent(8)));
-    assert_false!(context.on_timer(&mut TimerEvent(1)));
-    assert_false!(context.on_message(event.clone()));
-    assert_false!(context.on_timer(&mut TimerEvent(1)));
-}*/
+    assert_false!(context.is_open());
+    context.on_message(event.clone());
+    assert_true!(context.is_open());
+    context.on_timer(&mut TimerEvent(8));
+    assert_true!(context.is_open());
+    context.on_timer(&mut TimerEvent(1));
+    assert_true!(context.is_open());
+    context.on_message(event.clone());
+    assert_true!(context.is_open());
+    context.on_timer(&mut TimerEvent(1));
+    assert_true!(context.is_open());
+}
