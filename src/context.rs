@@ -29,7 +29,7 @@ impl Context {
         }
     }
 
-    pub fn new(conditions: Conditions) -> Context {
+    pub fn new_linear(conditions: Conditions) -> Context {
         Context::Linear(
             LinearContext::new(conditions)
         )
@@ -38,7 +38,7 @@ impl Context {
 
 impl From<config::Context> for Context {
     fn from(context: config::Context) -> Context {
-        Context::new(context.conditions)
+        Context::new_linear(context.conditions)
     }
 }
 
