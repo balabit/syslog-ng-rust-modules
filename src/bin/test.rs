@@ -2,7 +2,7 @@
 extern crate maplit;
 extern crate correlation;
 
-use correlation::{config, conditions, Conditions, Correlator};
+use correlation::{config, conditions, Correlator};
 use std::thread;
 
 fn main() {

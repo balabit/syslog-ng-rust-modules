@@ -1,6 +1,6 @@
 use std::rc::Rc;
 
-use super::{config, context, Context, Event};
+use super::{config, Context, Event};
 
 pub struct Dispatcher {
     contexts: Vec<Context>,

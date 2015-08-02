@@ -46,10 +46,6 @@ impl State {
         &self.messages
     }
 
-    pub fn messages_mut(&mut self) -> &mut Vec<Rc<Message>> {
-        &mut self.messages
-    }
-
     pub fn add_message(&mut self, message: Rc<Message>) {
         self.messages.push(message);
         self.elapsed_time_since_last_message = 0;

@@ -1,7 +1,6 @@
 use std::rc::Rc;
 
 use Message;
-use MiliSec;
 use state::State;
 use TimerEvent;
 
