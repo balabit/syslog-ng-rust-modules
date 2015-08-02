@@ -3,6 +3,8 @@ use std::rc::Rc;
 use super::{config, Conditions, Message, TimerEvent};
 use state::State;
 
+use self::linear::LinearContext;
+
 #[derive(Debug)]
 pub enum Context {
     Linear(LinearContext),
@@ -29,37 +31,100 @@ impl Context {
 
     pub fn new(conditions: Conditions) -> Context {
         Context::Linear(
-            LinearContext {
-                conditions: conditions,
-                state: State::new()
-            }
+            LinearContext::new(conditions)
         )
-    }
-}
-
-#[derive(Debug)]
-pub struct LinearContext {
-    conditions: Conditions,
-    state: State
-}
-
-impl LinearContext {
-    pub fn on_timer(&mut self, event: &TimerEvent) {
-        self.conditions.on_timer(event, &mut self.state);
-    }
-
-    pub fn on_message(&mut self, event: Rc<Message>) {
-        self.conditions.on_message(event, &mut self.state);
-    }
-
-    pub fn is_open(&self) -> bool {
-        self.state.is_open()
     }
 }
 
 impl From<config::Context> for Context {
     fn from(context: config::Context) -> Context {
         Context::new(context.conditions)
+    }
+}
+
+mod linear {
+    use std::rc::Rc;
+
+    use Conditions;
+    use config;
+    use Message;
+    use state::State;
+    use TimerEvent;
+
+    #[derive(Debug)]
+    pub struct LinearContext {
+        conditions: Conditions,
+        state: State
+    }
+
+    impl LinearContext {
+        pub fn new(conditions: Conditions) -> LinearContext {
+            LinearContext {
+                conditions: conditions,
+                state: State::new()
+            }
+        }
+
+        pub fn on_timer(&mut self, event: &TimerEvent) {
+            self.conditions.on_timer(event, &mut self.state);
+        }
+
+        pub fn on_message(&mut self, event: Rc<Message>) {
+            self.conditions.on_message(event, &mut self.state);
+        }
+
+        pub fn is_open(&self) -> bool {
+            self.state.is_open()
+        }
+    }
+}
+
+mod map {
+    use std::collections::BTreeMap;
+    use std::fmt::Write;
+    use std::rc::Rc;
+
+    use Conditions;
+    use config;
+    use Message;
+    use state::State;
+    use TimerEvent;
+
+    pub struct MapContext {
+        map: BTreeMap<String, State>,
+        conditions: Conditions,
+        format_buffer: String
+    }
+
+    impl MapContext {
+        pub fn new(conditions: Conditions) -> MapContext {
+            MapContext {
+                map: BTreeMap::new(),
+                conditions: conditions,
+                format_buffer: String::new()
+            }
+        }
+
+        pub fn on_timer(&mut self, event: &TimerEvent) {
+            for (id, mut state) in self.map.iter_mut() {
+                self.conditions.on_timer(event, &mut state);
+            }
+        }
+
+        pub fn on_message(&mut self, event: Rc<Message>) {
+            self.format_context_id(&event);
+            let state = self.map.entry(self.format_buffer.clone()).or_insert(State::new());
+            self.conditions.on_message(event, state);
+            self.format_buffer.clear();
+        }
+
+        pub fn is_open(&mut self) -> bool {
+            !self.map.is_empty()
+        }
+
+        fn format_context_id(&mut self, message: &Message) {
+            let _ = self.format_buffer.write_str("foo bar baz");
+        }
     }
 }
 
