@@ -4,34 +4,45 @@ use super::{config, Conditions, Message, TimerEvent};
 use state::State;
 
 use self::linear::LinearContext;
+use self::map::MapContext;
 
 #[derive(Debug)]
 pub enum Context {
     Linear(LinearContext),
+    Map(MapContext)
 }
 
 impl Context {
     pub fn on_timer(&mut self, event: &TimerEvent) {
         match *self {
-            Context::Linear(ref mut context) => context.on_timer(event)
+            Context::Linear(ref mut context) => context.on_timer(event),
+            Context::Map(ref mut context) => context.on_timer(event),
         }
     }
 
     pub fn on_message(&mut self, event: Rc<Message>) {
         match *self {
-            Context::Linear(ref mut context) => context.on_message(event)
+            Context::Linear(ref mut context) => context.on_message(event),
+            Context::Map(ref mut context) => context.on_message(event),
         }
     }
 
-    pub fn is_open(&self) -> bool {
+    pub fn is_open(&mut self) -> bool {
         match *self {
-            Context::Linear(ref context) => context.is_open()
+            Context::Linear(ref context) => context.is_open(),
+            Context::Map(ref mut context) => context.is_open(),
         }
     }
 
     pub fn new_linear(conditions: Conditions) -> Context {
         Context::Linear(
             LinearContext::new(conditions)
+        )
+    }
+
+    pub fn new_map(conditions: Conditions) -> Context {
+        Context::Map(
+            MapContext::new(conditions)
         )
     }
 }
@@ -90,6 +101,7 @@ mod map {
     use state::State;
     use TimerEvent;
 
+    #[derive(Debug)]
     pub struct MapContext {
         map: BTreeMap<String, State>,
         conditions: Conditions,
@@ -123,7 +135,12 @@ mod map {
         }
 
         fn format_context_id(&mut self, message: &Message) {
-            let _ = self.format_buffer.write_str("foo bar baz");
+            let empty = String::new();
+            let _ = self.format_buffer.write_str(message.get("HOST").unwrap_or(&empty));
+            let _ = self.format_buffer.write_str(":");
+            let _ = self.format_buffer.write_str(message.get("PROGRAM").unwrap_or(&empty));
+            let _ = self.format_buffer.write_str(":");
+            let _ = self.format_buffer.write_str(message.get("PID").unwrap_or(&empty));
         }
     }
 }
@@ -134,7 +151,7 @@ use conditions::Builder;
 fn test_given_close_condition_with_timeout_when_the_timeout_expires_then_the_condition_is_met() {
     let timeout = 100;
     let msg_id = "1".to_string();
-    let mut context = Context::new(Builder::new(timeout).patterns(vec![msg_id.clone()]).build());
+    let mut context = Context::new_linear(Builder::new(timeout).patterns(vec![msg_id.clone()]).build());
     let msg1 = btreemap!{
         "uuid".to_string() => msg_id.clone(),
     };
@@ -155,7 +172,7 @@ fn test_given_close_condition_with_max_size_when_the_max_size_reached_then_the_c
     let timeout = 100;
     let max_size = 3;
     let msg_id = "1".to_string();
-    let mut context = Context::new(Builder::new(timeout).max_size(max_size).patterns(vec![msg_id.clone()]).build());
+    let mut context = Context::new_linear(Builder::new(timeout).max_size(max_size).patterns(vec![msg_id.clone()]).build());
     let msg1 = btreemap!{
         "uuid".to_string() => msg_id.clone(),
     };
@@ -175,7 +192,7 @@ fn test_given_close_condition_with_renew_timeout_when_the_timeout_expires_withou
     let timeout = 100;
     let renew_timeout = 10;
     let msg_id = "1".to_string();
-    let mut context = Context::new(Builder::new(timeout).renew_timeout(renew_timeout).patterns(vec![msg_id.clone()]).build());
+    let mut context = Context::new_linear(Builder::new(timeout).renew_timeout(renew_timeout).patterns(vec![msg_id.clone()]).build());
     let msg1 = btreemap!{
         "uuid".to_string() => msg_id.clone(),
     };
@@ -195,7 +212,7 @@ fn test_given_close_condition_with_renew_timeout_when_the_timeout_expires_with_r
     let timeout = 100;
     let renew_timeout = 10;
     let msg_id = "1".to_string();
-    let mut context = Context::new(Builder::new(timeout).renew_timeout(renew_timeout).patterns(vec![msg_id.clone()]).build());
+    let mut context = Context::new_linear(Builder::new(timeout).renew_timeout(renew_timeout).patterns(vec![msg_id.clone()]).build());
     let msg1 = btreemap!{
         "uuid".to_string() => msg_id.clone(),
     };
