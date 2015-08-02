@@ -6,6 +6,19 @@ use self::linear::LinearContext;
 use self::map::MapContext;
 
 #[derive(Debug)]
+struct BaseContext {
+    conditions: Conditions
+}
+
+impl BaseContext {
+    pub fn new(conditions: Conditions) -> BaseContext {
+        BaseContext {
+            conditions: conditions
+        }
+    }
+}
+
+#[derive(Debug)]
 pub enum Context {
     Linear(LinearContext),
     Map(MapContext)
@@ -59,27 +72,28 @@ mod linear {
     use Message;
     use state::State;
     use TimerEvent;
+    use super::BaseContext;
 
     #[derive(Debug)]
     pub struct LinearContext {
-        conditions: Conditions,
+        base: BaseContext,
         state: State
     }
 
     impl LinearContext {
         pub fn new(conditions: Conditions) -> LinearContext {
             LinearContext {
-                conditions: conditions,
+                base: BaseContext::new(conditions),
                 state: State::new()
             }
         }
 
         pub fn on_timer(&mut self, event: &TimerEvent) {
-            self.conditions.on_timer(event, &mut self.state);
+            self.base.conditions.on_timer(event, &mut self.state);
         }
 
         pub fn on_message(&mut self, event: Rc<Message>) {
-            self.conditions.on_message(event, &mut self.state);
+            self.base.conditions.on_message(event, &mut self.state);
         }
 
         pub fn is_open(&self) -> bool {
@@ -97,26 +111,27 @@ mod map {
     use Message;
     use state::State;
     use TimerEvent;
+    use super::BaseContext;
 
     #[derive(Debug)]
     pub struct MapContext {
+        base: BaseContext,
         map: BTreeMap<String, State>,
-        conditions: Conditions,
         format_buffer: String
     }
 
     impl MapContext {
         pub fn new(conditions: Conditions) -> MapContext {
             MapContext {
+                base: BaseContext::new(conditions),
                 map: BTreeMap::new(),
-                conditions: conditions,
                 format_buffer: String::new()
             }
         }
 
         pub fn on_timer(&mut self, event: &TimerEvent) {
             for (_, mut state) in self.map.iter_mut() {
-                self.conditions.on_timer(event, &mut state);
+                self.base.conditions.on_timer(event, &mut state);
             }
             self.remove_closed_states();
         }
@@ -146,14 +161,14 @@ mod map {
 
             match self.map.remove(&id) {
                 Some(mut state) => {
-                    self.conditions.on_message(event, &mut state);
+                    self.base.conditions.on_message(event, &mut state);
                     if state.is_open() {
                         self.map.insert(id, state);
                     }
                 },
                 None => {
                     let mut state = State::new();
-                    self.conditions.on_message(event, &mut state);
+                    self.base.conditions.on_message(event, &mut state);
                     self.map.insert(id, state);
                 }
             }
