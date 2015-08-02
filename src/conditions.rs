@@ -1,6 +1,7 @@
 use std::rc::Rc;
 
 use Message;
+use MiliSec;
 use state::State;
 use TimerEvent;
 
@@ -27,7 +28,7 @@ impl Conditions {
     }
 
     pub fn on_message(&mut self, message: Rc<Message>, state: &mut State) {
-        if !self.patterns.contains(message.get("uuid").unwrap()) && self.patterns.len() > 0 {
+        if self.ignore_message(&message) {
             println!("ignoring");
             return;
         }
@@ -43,6 +44,20 @@ impl Conditions {
         }
     }
 
+    fn ignore_message(&self, message: &Message) -> bool {
+        !self.patterns.contains(message.get("uuid").unwrap()) && self.patterns.len() > 0
+    }
+
+    fn is_opening(&self, message: &Message) -> bool {
+        self.first_opens.map_or(true, |first| {
+            if first {
+                self.patterns.first().unwrap() == message.get("uuid").unwrap()
+            } else {
+                true
+            }
+        })
+    }
+
     fn is_max_size_reached(&self, state: &State) -> bool {
         self.max_size.map_or(false, |max_size| state.messages().len() >= max_size)
     }
@@ -55,20 +70,6 @@ impl Conditions {
                 })
             } else {
                 false
-            }
-        })
-    }
-
-    fn is_opening(&self, message: &Message) -> bool {
-        let found = self.patterns.contains(message.get("uuid").unwrap());
-        println!("found: {}", found);
-        self.first_opens.map_or(found, |first| {
-            if first {
-                self.patterns.first().map_or(false, |pattern| {
-                    pattern == message.get("uuid").unwrap()
-                })
-            } else {
-                found
             }
         })
     }
