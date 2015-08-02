@@ -49,8 +49,8 @@ impl Conditions {
     }
 
     fn is_opening(&self, message: &Message) -> bool {
-        self.first_opens.map_or(true, |first| {
-            if first {
+        self.first_opens.map_or(true, |first_message_opens_the_context| {
+            if first_message_opens_the_context {
                 self.patterns.first().unwrap() == message.get("uuid").unwrap()
             } else {
                 true
@@ -58,25 +58,23 @@ impl Conditions {
         })
     }
 
+    fn is_closing(&self, state: &State) -> bool {
+        println!("checking close");
+        self.is_max_size_reached(state) || self.is_closing_message(state)
+    }
+
     fn is_max_size_reached(&self, state: &State) -> bool {
         self.max_size.map_or(false, |max_size| state.messages().len() >= max_size)
     }
 
     fn is_closing_message(&self, state: &State) -> bool {
-        self.last_closes.map_or(false, |closes| {
-            if closes {
-                self.patterns.last().map_or(false, |pattern| {
-                    pattern == state.messages().last().unwrap().get("uuid").unwrap()
-                })
+        self.last_closes.map_or(false, |last_message_closes_the_context| {
+            if last_message_closes_the_context {
+                self.patterns.last().unwrap() == state.messages().last().unwrap().get("uuid").unwrap()
             } else {
                 false
             }
         })
-    }
-
-    fn is_closing(&self, state: &State) -> bool {
-        println!("checking close");
-        self.is_max_size_reached(state) || self.is_closing_message(state)
     }
 
     pub fn on_timer(&mut self, event: &TimerEvent, state: &mut State) {
@@ -87,6 +85,10 @@ impl Conditions {
         }
     }
 
+    fn is_any_timer_expired(&self, state: &State) -> bool {
+        self.is_timeout_expired(state) || self.is_renew_timeout_expired(state)
+    }
+
     fn is_timeout_expired(&self, state: &State) -> bool {
         state.elapsed_time() >= self.timeout
     }
@@ -95,10 +97,6 @@ impl Conditions {
         self.renew_timeout.map_or(false, |renew_timeout| {
             state.elapsed_time_since_last_message() >= renew_timeout
         })
-    }
-
-    fn is_any_timer_expired(&self, state: &State) -> bool {
-        self.is_timeout_expired(state) || self.is_renew_timeout_expired(state)
     }
 }
 
