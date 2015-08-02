@@ -4,19 +4,46 @@ use super::{config, Conditions, Message, TimerEvent};
 use state::State;
 
 #[derive(Debug)]
-pub struct Context {
+pub enum Context {
+    Linear(LinearContext),
+}
+
+impl Context {
+    pub fn on_timer(&mut self, event: &TimerEvent) {
+        match *self {
+            Context::Linear(ref mut context) => context.on_timer(event)
+        }
+    }
+
+    pub fn on_message(&mut self, event: Rc<Message>) {
+        match *self {
+            Context::Linear(ref mut context) => context.on_message(event)
+        }
+    }
+
+    pub fn is_open(&self) -> bool {
+        match *self {
+            Context::Linear(ref context) => context.is_open()
+        }
+    }
+
+    pub fn new(conditions: Conditions) -> Context {
+        Context::Linear(
+            LinearContext {
+                conditions: conditions,
+                state: State::new()
+            }
+        )
+    }
+}
+
+#[derive(Debug)]
+pub struct LinearContext {
     conditions: Conditions,
     state: State
 }
 
-impl Context {
-    pub fn new(conditions: Conditions) -> Context {
-        Context {
-            conditions: conditions,
-            state: State::new()
-        }
-    }
-
+impl LinearContext {
     pub fn on_timer(&mut self, event: &TimerEvent) {
         self.conditions.on_timer(event, &mut self.state);
     }
