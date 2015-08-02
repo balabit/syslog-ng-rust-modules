@@ -52,6 +52,7 @@ impl State {
 
     pub fn add_message(&mut self, message: Rc<Message>) {
         self.messages.push(message);
+        self.elapsed_time_since_last_message = 0;
     }
 
     pub fn on_timer(&mut self, event: &TimerEvent) {

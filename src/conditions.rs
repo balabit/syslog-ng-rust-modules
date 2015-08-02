@@ -28,6 +28,7 @@ impl Conditions {
 
     pub fn on_message(&mut self, message: Rc<Message>, state: &mut State) {
         if !self.patterns.contains(message.get("uuid").unwrap()) && self.patterns.len() > 0 {
+            println!("ignoring");
             return;
         }
 
@@ -80,6 +81,7 @@ impl Conditions {
     pub fn on_timer(&mut self, event: &TimerEvent, state: &mut State) {
         state.on_timer(event);
         if self.is_any_timer_expired(state) {
+            println!("closing state");
             state.close()
         }
     }
