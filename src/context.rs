@@ -137,9 +137,26 @@ mod map {
 
         pub fn on_message(&mut self, event: Rc<Message>) {
             self.format_context_id(&event);
-            let state = self.map.entry(self.format_buffer.clone()).or_insert(State::new());
-            self.conditions.on_message(event, state);
+            self.update_state(event);
             self.format_buffer.clear();
+        }
+
+        fn update_state(&mut self, event: Rc<Message>) {
+            let id = self.format_buffer.clone();
+
+            match self.map.remove(&id) {
+                Some(mut state) => {
+                    self.conditions.on_message(event, &mut state);
+                    if state.is_open() {
+                        self.map.insert(id, state);
+                    }
+                },
+                None => {
+                    let mut state = State::new();
+                    self.conditions.on_message(event, &mut state);
+                    self.map.insert(id, state);
+                }
+            }
         }
 
         pub fn is_open(&mut self) -> bool {
