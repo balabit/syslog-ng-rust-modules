@@ -44,13 +44,13 @@ impl Conditions {
     }
 
     fn ignore_message(&self, message: &Message) -> bool {
-        !self.patterns.contains(message.get("uuid").unwrap()) && self.patterns.len() > 0
+        !self.patterns.contains(message.uuid()) && self.patterns.len() > 0
     }
 
     fn is_opening(&self, message: &Message) -> bool {
         self.first_opens.map_or(true, |first_message_opens_the_context| {
             if first_message_opens_the_context {
-                self.patterns.first().unwrap() == message.get("uuid").unwrap()
+                self.patterns.first().unwrap() == message.uuid()
             } else {
                 true
             }
@@ -69,7 +69,7 @@ impl Conditions {
     fn is_closing_message(&self, state: &State) -> bool {
         self.last_closes.map_or(false, |last_message_closes_the_context| {
             if last_message_closes_the_context {
-                self.patterns.last().unwrap() == state.messages().last().unwrap().get("uuid").unwrap()
+                self.patterns.last().unwrap() == state.messages().last().unwrap().uuid()
             } else {
                 false
             }

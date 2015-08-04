@@ -193,6 +193,7 @@ mod map {
         use conditions::Builder;
         use Context;
         use TimerEvent;
+        use message;
 
         use std::rc::Rc;
 
@@ -203,31 +204,28 @@ mod map {
             let event = TimerEvent(delta);
             let patterns: Vec<String> = vec!["1".to_string(), "2".to_string(), "3".to_string()];
             let mut context = Context::new_map(Builder::new(timeout).patterns(patterns).build());
-            let msg1 = Rc::new(btreemap! {
-                "uuid".to_string() => "1".to_string(),
-                "HOST".to_string() => "host".to_string(),
-                "PROGRAM".to_string() => "program".to_string(),
-                "PID".to_string() => "pid".to_string(),
-            });
-            let msg2 = Rc::new(btreemap! {
-                "uuid".to_string() => "2".to_string(),
-                "HOST".to_string() => "host2".to_string(),
-                "PROGRAM".to_string() => "program2".to_string(),
-                "PID".to_string() => "pid2".to_string(),
-            });
-            let msg3 = Rc::new(btreemap! {
-                "uuid".to_string() => "3".to_string(),
-                "HOST".to_string() => "host".to_string(),
-                "PROGRAM".to_string() => "program".to_string(),
-                "PID".to_string() => "pid".to_string(),
-            });
+            let msg1 = message::Builder::new("1".to_string())
+                                        .pair("HOST".to_string(), "host".to_string())
+                                        .pair("PROGRAM".to_string(), "program".to_string())
+                                        .pair("PID".to_string(), "pid".to_string())
+                                        .build();
+            let msg2 = message::Builder::new("2".to_string())
+                                        .pair("HOST".to_string(), "host2".to_string())
+                                        .pair("PROGRAM".to_string(), "program2".to_string())
+                                        .pair("PID".to_string(), "pid2".to_string())
+                                        .build();
+            let msg3 = message::Builder::new("3".to_string())
+                                        .pair("HOST".to_string(), "host".to_string())
+                                        .pair("PROGRAM".to_string(), "program".to_string())
+                                        .pair("PID".to_string(), "pid".to_string())
+                                        .build();
 
             assert_false!(context.is_open());
-            context.on_message(msg1.clone());
+            context.on_message(Rc::new(msg1));
             assert_true!(context.is_open());
             context.on_timer(&event);
-            context.on_message(msg2.clone());
-            context.on_message(msg3.clone());
+            context.on_message(Rc::new(msg2));
+            context.on_message(Rc::new(msg3));
             context.on_timer(&event);
             context.on_timer(&event);
             assert_true!(context.is_open());
@@ -241,6 +239,7 @@ mod map {
 mod test {
     use std::rc::Rc;
 
+    use message;
     use TimerEvent;
     use super::Context;
     use conditions::Builder;
@@ -250,9 +249,7 @@ mod test {
         let timeout = 100;
         let msg_id = "1".to_string();
         let mut context = Context::new_linear(Builder::new(timeout).patterns(vec![msg_id.clone()]).build());
-        let msg1 = btreemap!{
-            "uuid".to_string() => msg_id.clone(),
-        };
+        let msg1 = message::Builder::new(msg_id.clone()).build();
         let event = Rc::new(msg1);
         println!("{:?}", &context);
         assert_false!(context.is_open());
@@ -272,9 +269,7 @@ mod test {
         let max_size = 3;
         let msg_id = "1".to_string();
         let mut context = Context::new_linear(Builder::new(timeout).max_size(max_size).patterns(vec![msg_id.clone()]).build());
-        let msg1 = btreemap!{
-            "uuid".to_string() => msg_id.clone(),
-        };
+        let msg1 = message::Builder::new(msg_id.clone()).build();
         let event = Rc::new(msg1);
         println!("{:?}", &context);
         context.on_message(event.clone());
@@ -292,9 +287,7 @@ mod test {
         let renew_timeout = 10;
         let msg_id = "1".to_string();
         let mut context = Context::new_linear(Builder::new(timeout).renew_timeout(renew_timeout).patterns(vec![msg_id.clone()]).build());
-        let msg1 = btreemap!{
-            "uuid".to_string() => msg_id.clone(),
-        };
+        let msg1 = message::Builder::new(msg_id.clone()).build();
         let event = Rc::new(msg1);
         context.on_message(event.clone());
         assert_true!(context.is_open());
@@ -312,9 +305,7 @@ mod test {
         let renew_timeout = 10;
         let msg_id = "1".to_string();
         let mut context = Context::new_linear(Builder::new(timeout).renew_timeout(renew_timeout).patterns(vec![msg_id.clone()]).build());
-        let msg1 = btreemap!{
-            "uuid".to_string() => msg_id.clone(),
-        };
+        let msg1 = message::Builder::new(msg_id.clone()).build();
         let event = Rc::new(msg1);
         assert_false!(context.is_open());
         context.on_message(event.clone());
