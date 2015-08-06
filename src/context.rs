@@ -1,19 +1,31 @@
 use std::rc::Rc;
 
-use super::{config, Conditions, Message, TimerEvent};
+use super::{Action, config, Conditions, Message, TimerEvent};
 
 use self::linear::LinearContext;
 use self::map::MapContext;
 
 #[derive(Debug)]
 struct BaseContext {
-    conditions: Conditions
+    conditions: Conditions,
+    actions: Vec<Action>
 }
 
 impl BaseContext {
     pub fn new(conditions: Conditions) -> BaseContext {
         BaseContext {
-            conditions: conditions
+            conditions: conditions,
+            actions: Vec::new()
+        }
+    }
+}
+
+impl From<config::Context> for BaseContext {
+    fn from(config: config::Context) -> BaseContext {
+        let config::Context{conditions, actions} = config;
+        BaseContext {
+            conditions: conditions,
+            actions: actions
         }
     }
 }
@@ -60,14 +72,15 @@ impl Context {
 }
 
 impl From<config::Context> for Context {
-    fn from(context: config::Context) -> Context {
-        Context::new_linear(context.conditions)
+    fn from(config: config::Context) -> Context {
+        Context::Linear(LinearContext::from(config))
     }
 }
 
 mod linear {
     use std::rc::Rc;
 
+    use config;
     use Conditions;
     use Message;
     use state::State;
@@ -98,6 +111,15 @@ mod linear {
 
         pub fn is_open(&self) -> bool {
             self.state.is_open()
+        }
+    }
+
+    impl From<config::Context> for LinearContext {
+        fn from(config: config::Context) -> LinearContext {
+            LinearContext {
+                base: BaseContext::from(config),
+                state: State::new()
+            }
         }
     }
 }

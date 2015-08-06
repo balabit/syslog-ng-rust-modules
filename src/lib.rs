@@ -3,10 +3,10 @@
 extern crate maplit;
 #[macro_use]
 mod macros;
-mod message;
 
 use std::fmt::Debug;
 
+pub use action::Action;
 pub use conditions::Conditions;
 pub use context::Context;
 pub use correlator::Correlator;
@@ -17,9 +17,11 @@ pub use timer::{Timer,
 
 pub mod conditions;
 pub mod config;
+mod action;
 mod context;
-mod dispatcher;
 mod correlator;
+mod dispatcher;
+mod message;
 mod state;
 mod timer;
 
@@ -35,8 +37,4 @@ pub enum Event {
 pub enum Command {
     Dispatch(Event),
     Exit
-}
-
-pub trait Action: Debug {
-    fn execute(&mut self, state: &state::State);
 }
