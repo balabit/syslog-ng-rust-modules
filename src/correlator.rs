@@ -14,10 +14,11 @@ pub struct Correlator {
 impl Correlator {
     pub fn new(contexts: Vec<config::Context>) -> Correlator {
         let (dispatcher_input_channel, rx) = mpsc::channel();
+        let (dispatcher_output_channel_tx, dispatcher_output_channel_rx) = mpsc::channel();
         let _ = Timer::from_chan(TIMER_STEP, dispatcher_input_channel.clone());
 
         let handle = thread::spawn(move || {
-            let mut dispatcher = Dispatcher::new(contexts);
+            let mut dispatcher = Dispatcher::new(contexts, dispatcher_output_channel_tx);
 
             for i in rx.iter() {
                 match i {
