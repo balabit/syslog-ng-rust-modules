@@ -1,7 +1,9 @@
 use std::rc::Rc;
 
+use state::State;
 use super::{Action, config, Conditions, Message, TimerEvent};
 
+use action::ActionCommand;
 use self::linear::LinearContext;
 use self::map::MapContext;
 
@@ -17,6 +19,18 @@ impl BaseContext {
             conditions: conditions,
             actions: Vec::new()
         }
+    }
+
+    pub fn actions(&self) -> &[Action] {
+        &self.actions
+    }
+
+    pub fn on_timer(&self, event: &TimerEvent, state: &mut State) -> Option<Vec<ActionCommand>> {
+        self.conditions.on_timer(event, state, self)
+    }
+
+    pub fn on_message(&self, event: Rc<Message>, state: &mut State) -> Option<Vec<ActionCommand>> {
+        self.conditions.on_message(event, state, self)
     }
 }
 
