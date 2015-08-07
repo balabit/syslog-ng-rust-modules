@@ -4,8 +4,6 @@ extern crate maplit;
 #[macro_use]
 mod macros;
 
-use std::fmt::Debug;
-
 pub use action::Action;
 pub use conditions::Conditions;
 pub use context::Context;
