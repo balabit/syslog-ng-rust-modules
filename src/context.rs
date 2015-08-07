@@ -6,7 +6,7 @@ use self::linear::LinearContext;
 use self::map::MapContext;
 
 #[derive(Debug)]
-struct BaseContext {
+pub struct BaseContext {
     conditions: Conditions,
     actions: Vec<Action>
 }

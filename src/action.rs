@@ -1,5 +1,5 @@
 use state::State;
-use context::Context;
+use context::BaseContext;
 
 use self::message::Action as MessageAction;
 use self::message::Command as MessageCommand;
@@ -10,7 +10,7 @@ pub enum Action {
 }
 
 impl Action {
-    pub fn execute(&self, state: &State, context: &Context) -> ActionCommand {
+    pub fn execute(&self, state: &State, context: &BaseContext) -> ActionCommand {
         match *self {
             Action::Message(ref action) => action.execute(state, context)
         }
@@ -22,7 +22,7 @@ pub enum ActionCommand {
 }
 
 mod message {
-    use context::Context;
+    use context::BaseContext;
     use state::State;
     use Message;
     use super::ActionCommand;
@@ -31,7 +31,7 @@ mod message {
     pub struct Action;
 
     impl Action {
-        pub fn execute(&self, state: &State, context: &Context) -> ActionCommand {
+        pub fn execute(&self, state: &State, context: &BaseContext) -> ActionCommand {
             ActionCommand::Message(Command(Message::new("".to_string())))
         }
     }
