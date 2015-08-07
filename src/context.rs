@@ -51,14 +51,14 @@ pub enum Context {
 }
 
 impl Context {
-    pub fn on_timer(&mut self, event: &TimerEvent) {
+    pub fn on_timer(&mut self, event: &TimerEvent) -> Option<Vec<ActionCommand>> {
         match *self {
             Context::Linear(ref mut context) => context.on_timer(event),
             Context::Map(ref mut context) => context.on_timer(event),
         }
     }
 
-    pub fn on_message(&mut self, event: Rc<Message>) {
+    pub fn on_message(&mut self, event: Rc<Message>) -> Option<Vec<ActionCommand>> {
         match *self {
             Context::Linear(ref mut context) => context.on_message(event),
             Context::Map(ref mut context) => context.on_message(event),
@@ -94,6 +94,7 @@ impl From<config::Context> for Context {
 mod linear {
     use std::rc::Rc;
 
+    use action::ActionCommand;
     use config;
     use Conditions;
     use Message;
@@ -115,12 +116,12 @@ mod linear {
             }
         }
 
-        pub fn on_timer(&mut self, event: &TimerEvent) {
-            self.base.conditions.on_timer(event, &mut self.state);
+        pub fn on_timer(&mut self, event: &TimerEvent) -> Option<Vec<ActionCommand>> {
+            self.base.on_timer(event, &mut self.state)
         }
 
-        pub fn on_message(&mut self, event: Rc<Message>) {
-            self.base.conditions.on_message(event, &mut self.state);
+        pub fn on_message(&mut self, event: Rc<Message>) -> Option<Vec<ActionCommand>> {
+            self.base.on_message(event, &mut self.state)
         }
 
         pub fn is_open(&self) -> bool {
@@ -143,6 +144,7 @@ mod map {
     use std::fmt::Write;
     use std::rc::Rc;
 
+    use action::ActionCommand;
     use Conditions;
     use Message;
     use state::State;
@@ -165,49 +167,53 @@ mod map {
             }
         }
 
-        pub fn on_timer(&mut self, event: &TimerEvent) {
+        pub fn on_timer(&mut self, event: &TimerEvent) -> Option<Vec<ActionCommand>> {
+            let mut result: Vec<ActionCommand> = Vec::new();
+
             for (_, mut state) in self.map.iter_mut() {
-                self.base.conditions.on_timer(event, &mut state);
+                if let Some(commands) = self.base.on_timer(event, &mut state) {
+                    for i in commands.into_iter() {
+                        result.push(i);
+                    }
+                }
             }
-            self.remove_closed_states();
+
+            if result.is_empty() {
+                None
+            } else {
+                self.remove_closed_states();
+                Some(result)
+            }
         }
 
-        fn remove_closed_states(&mut self) {
-            let ids_to_remove = self.map.iter().filter_map(|(id, state)| {
+        fn get_closed_state_ids(&self) -> Vec<String> {
+            self.map.iter().filter_map(|(id, state)| {
                 if !state.is_open() {
                     Some(id.clone())
                 } else {
                     None
                 }
-            }).collect::<Vec<String>>();
+            }).collect::<Vec<String>>()
+        }
 
-            for id in ids_to_remove {
-                self.map.remove(&id);
+        fn remove_closed_states(&mut self) {
+            for id in self.get_closed_state_ids() {
+                let state = self.map.remove(&id);
             }
         }
 
-        pub fn on_message(&mut self, event: Rc<Message>) {
+        pub fn on_message(&mut self, event: Rc<Message>) -> Option<Vec<ActionCommand>> {
             self.format_context_id(&event);
-            self.update_state(event);
+            let result = self.update_state(event);
             self.format_buffer.clear();
+            self.remove_closed_states();
+            result
         }
 
-        fn update_state(&mut self, event: Rc<Message>) {
+        fn update_state(&mut self, event: Rc<Message>) -> Option<Vec<ActionCommand>> {
             let id = self.format_buffer.clone();
-
-            match self.map.remove(&id) {
-                Some(mut state) => {
-                    self.base.conditions.on_message(event, &mut state);
-                    if state.is_open() {
-                        self.map.insert(id, state);
-                    }
-                },
-                None => {
-                    let mut state = State::new();
-                    self.base.conditions.on_message(event, &mut state);
-                    self.map.insert(id, state);
-                }
-            }
+            let state = self.map.entry(self.format_buffer.clone()).or_insert(State::new());
+            self.base.on_message(event, state)
         }
 
         pub fn is_open(&mut self) -> bool {

@@ -1,5 +1,7 @@
 use std::rc::Rc;
 
+use action::ActionCommand;
+use context::BaseContext;
 use Message;
 use MiliSec;
 use TimerEvent;
@@ -30,8 +32,14 @@ impl State {
         self.opened = true;
     }
 
-    pub fn close(&mut self) {
+    pub fn close(&mut self, context: &BaseContext) -> Option<Vec<ActionCommand>> {
         self.opened = false;
+        if context.actions().is_empty() {
+            None
+        } else {
+            let commands = context.actions().iter().map(|action| action.execute(self, context)).collect();
+            Some(commands)
+        }
     }
 
     pub fn elapsed_time(&self) -> MiliSec {

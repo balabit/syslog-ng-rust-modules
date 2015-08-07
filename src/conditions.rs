@@ -1,5 +1,7 @@
 use std::rc::Rc;
 
+use action::ActionCommand;
+use context::BaseContext;
 use Message;
 use state::State;
 use TimerEvent;
@@ -26,21 +28,25 @@ impl Conditions {
         }
     }
 
-    pub fn on_message(&mut self, message: Rc<Message>, state: &mut State) {
+    pub fn on_message(&self, message: Rc<Message>, state: &mut State, context: &BaseContext) -> Option<Vec<ActionCommand>> {
         if self.ignore_message(&message) {
             println!("ignoring");
-            return;
+            return None;
         }
 
         if state.is_open() {
             state.add_message(message);
             if self.is_closing(state) {
-                state.close()
+                return state.close(context);
+            } else {
+                return None;
             }
         } else if self.is_opening(&message) {
             state.add_message(message);
-            state.open();
+            state.open()
         }
+
+        None
     }
 
     fn ignore_message(&self, message: &Message) -> bool {
@@ -76,11 +82,13 @@ impl Conditions {
         })
     }
 
-    pub fn on_timer(&mut self, event: &TimerEvent, state: &mut State) {
+    pub fn on_timer(&self, event: &TimerEvent, state: &mut State, context: &BaseContext) -> Option<Vec<ActionCommand>> {
         state.on_timer(event);
         if self.is_any_timer_expired(state) {
             println!("closing state");
-            state.close()
+            state.close(context)
+        } else {
+            None
         }
     }
 

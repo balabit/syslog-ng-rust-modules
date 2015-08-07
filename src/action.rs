@@ -31,7 +31,7 @@ mod message {
     pub struct Action;
 
     impl Action {
-        pub fn execute(&self, state: &State, context: &BaseContext) -> ActionCommand {
+        pub fn execute(&self, _: &State, _: &BaseContext) -> ActionCommand {
             ActionCommand::Message(Command(Message::new("".to_string())))
         }
     }
