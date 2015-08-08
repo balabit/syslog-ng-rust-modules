@@ -3,14 +3,14 @@ extern crate maplit;
 extern crate correlation;
 
 use correlation::{config, conditions, Correlator, Message};
-use correlation::action::message::{MessageActionHandler, Command};
+use correlation::action::message::{MessageActionHandler, MessageCommand};
 use correlation::action::ActionHandlers;
 use std::thread;
 
 struct Printer;
 
 impl MessageActionHandler for Printer {
-    fn handle(&mut self, command: Command) {
+    fn handle(&mut self, command: MessageCommand) {
         println!("{:?}", &command);
     }
 }

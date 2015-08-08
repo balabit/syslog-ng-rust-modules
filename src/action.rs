@@ -1,9 +1,8 @@
 use state::State;
 use context::BaseContext;
 
-use self::message::Action as MessageAction;
-use self::message::Command as MessageCommand;
-pub use self::message::MessageActionHandler;
+pub use self::handlers::ActionHandlers;
+pub use self::message::{MessageAction, MessageActionHandler, MessageCommand};
 
 #[derive(Debug)]
 pub enum Action {
@@ -23,20 +22,24 @@ pub enum ActionCommand {
     Message(MessageCommand)
 }
 
-pub struct ActionHandlers {
-    message_handler: Box<MessageActionHandler>
-}
+pub mod handlers {
+    use super::{ActionCommand, MessageActionHandler};
 
-impl ActionHandlers {
-    pub fn new(message: Box<MessageActionHandler>) -> ActionHandlers {
-        ActionHandlers {
-            message_handler: message
-        }
+    pub struct ActionHandlers {
+        message_handler: Box<MessageActionHandler>
     }
 
-    pub fn handle(&mut self, command: ActionCommand) {
-        match command {
-            ActionCommand::Message(message) => self.message_handler.handle(message)
+    impl ActionHandlers {
+        pub fn new(message: Box<MessageActionHandler>) -> ActionHandlers {
+            ActionHandlers {
+                message_handler: message
+            }
+        }
+
+        pub fn handle(&mut self, command: ActionCommand) {
+            match command {
+                ActionCommand::Message(message) => self.message_handler.handle(message)
+            }
         }
     }
 }
@@ -48,18 +51,18 @@ pub mod message {
     use super::ActionCommand;
 
     #[derive(Debug)]
-    pub struct Action;
+    pub struct MessageAction;
 
-    impl Action {
+    impl MessageAction {
         pub fn execute(&self, _: &State, _: &BaseContext) -> ActionCommand {
-            ActionCommand::Message(Command(Message::new("".to_string())))
+            ActionCommand::Message(MessageCommand(Message::new("".to_string())))
         }
     }
 
     #[derive(Debug)]
-    pub struct Command(Message);
+    pub struct MessageCommand(Message);
 
     pub trait MessageActionHandler {
-        fn handle(&mut self, command: Command);
+        fn handle(&mut self, command: MessageCommand);
     }
 }
