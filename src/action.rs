@@ -64,6 +64,10 @@ pub mod message {
     pub struct Action;
 
     impl Action {
+        pub fn new() -> Action {
+            Action
+        }
+
         pub fn execute(&self, _: &State, _: &BaseContext) -> ExecResult {
             ExecResult(Message::new("".to_string()))
         }
