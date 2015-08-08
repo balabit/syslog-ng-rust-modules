@@ -2,11 +2,11 @@ use state::State;
 use context::BaseContext;
 
 pub use self::handlers::ActionHandlers;
-pub use self::message::{MessageAction, MessageActionHandler};
+pub use self::message::{MessageActionHandler};
 
 #[derive(Debug)]
 pub enum Action {
-    Message(MessageAction)
+    Message(self::message::Action)
 }
 
 impl Action {
@@ -61,9 +61,9 @@ pub mod message {
     }
 
     #[derive(Debug)]
-    pub struct MessageAction;
+    pub struct Action;
 
-    impl MessageAction {
+    impl Action {
         pub fn execute(&self, _: &State, _: &BaseContext) -> ExecResult {
             ExecResult(Message::new("".to_string()))
         }
