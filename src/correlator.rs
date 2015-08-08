@@ -4,14 +4,15 @@ use std::result::Result;
 
 use action::ExecResult;
 use action::ActionHandlers;
-use super::{config, Command, Context, Dispatcher, Event, Message, Timer};
+use super::{config, Command, CommandResult, Context, Dispatcher, Event, Message, Timer};
 
 const TIMER_STEP: u32 = 100;
+
 
 pub struct Correlator {
     action_handlers: ActionHandlers,
     dispatcher_input_channel: mpsc::Sender<Command>,
-    dispatcher_output_channel: mpsc::Receiver<ExecResult>,
+    dispatcher_output_channel: mpsc::Receiver<CommandResult>,
     dispatcher_thread_handle: thread::JoinHandle<()>
 }
 
@@ -45,15 +46,19 @@ impl Correlator {
         self.dispatcher_input_channel.send(Command::Dispatch(Event::Message(message)))
     }
 
-    fn consume_results(channel: &mut mpsc::Receiver<ExecResult>, handlers: &mut ActionHandlers) {
+    fn consume_results(channel: &mut mpsc::Receiver<CommandResult>, handlers: &mut ActionHandlers) {
         for i in channel.try_recv() {
-            handlers.handle(i);
+            if let CommandResult::Dispatch(result) = i {
+                handlers.handle(result);
+            }
         }
     }
 
-    fn consume_all_remaining_results(channel: &mut mpsc::Receiver<ExecResult>, handlers: &mut ActionHandlers) {
+    fn consume_all_remaining_results(channel: &mut mpsc::Receiver<CommandResult>, handlers: &mut ActionHandlers) {
         for i in channel.recv() {
-            handlers.handle(i);
+            if let CommandResult::Dispatch(result) = i {
+                handlers.handle(result);
+            }
         }
     }
 

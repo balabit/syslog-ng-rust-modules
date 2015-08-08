@@ -1,16 +1,16 @@
-use std::sync::mpsc::Sender;
+use std::sync::mpsc::{Receiver, Sender};
 use std::rc::Rc;
 
 use action::ExecResult;
-use super::{config, Context, Event, Message, TimerEvent};
+use super::{config, Command, CommandResult, Context, Event, Message, TimerEvent};
 
 pub struct Dispatcher {
     contexts: Vec<Context>,
-    output_channel: Sender<ExecResult>
+    output_channel: Sender<CommandResult>
 }
 
 impl Dispatcher {
-    pub fn new(contexts: Vec<config::Context>, action_output_channel: Sender<ExecResult>) -> Dispatcher {
+    pub fn new(contexts: Vec<config::Context>, action_output_channel: Sender<CommandResult>) -> Dispatcher {
         let contexts = contexts.into_iter().map(|ctx| Context::from(ctx)).collect::<Vec<Context>>();
         Dispatcher {
             contexts: contexts,
@@ -34,7 +34,7 @@ impl Dispatcher {
         for context in self.contexts.iter_mut() {
             if let Some(result) = context.on_message(event.clone()) {
                 for i in result.into_iter() {
-                    let r = self.output_channel.send(i);
+                    let r = self.output_channel.send(i.into());
                     println!("{:?}", r);
                 }
             }
@@ -45,7 +45,7 @@ impl Dispatcher {
         for context in self.contexts.iter_mut() {
             if let Some(result) = context.on_timer(event) {
                 for i in result.into_iter() {
-                    let r = self.output_channel.send(i);
+                    let r = self.output_channel.send(i.into());
                     println!("{:?}", r);
                 }
             }
