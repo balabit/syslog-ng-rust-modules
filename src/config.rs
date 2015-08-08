@@ -14,3 +14,29 @@ impl Context {
         }
     }
 }
+
+pub struct ContextBuilder {
+    conditions: Conditions,
+    actions: Vec<Action>
+}
+
+impl ContextBuilder {
+    pub fn new(conditions: Conditions) -> ContextBuilder {
+        ContextBuilder {
+            conditions: conditions,
+            actions: Vec::new()
+        }
+    }
+
+    pub fn actions(&mut self, actions: Vec<Action>) -> &mut ContextBuilder {
+        self.actions = actions;
+        self
+    }
+
+    pub fn build(&self) -> Context {
+        Context {
+            conditions: self.conditions.clone(),
+            actions: self.actions.clone()
+        }
+    }
+}
