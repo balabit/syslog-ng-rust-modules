@@ -15,7 +15,7 @@ pub use timer::{Timer,
 
 pub mod conditions;
 pub mod config;
-mod action;
+pub mod action;
 mod context;
 mod correlator;
 mod dispatcher;
