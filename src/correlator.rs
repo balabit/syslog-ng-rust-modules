@@ -41,12 +41,18 @@ impl Correlator {
     }
 
     pub fn push_message(&mut self, message: Message) -> Result<(), mpsc::SendError<Command>> {
-        Correlator::consume_all_remaining_results(&mut self.dispatcher_output_channel, &mut self.action_handlers);
+        Correlator::consume_results(&mut self.dispatcher_output_channel, &mut self.action_handlers);
         self.dispatcher_input_channel.send(Command::Dispatch(Event::Message(message)))
     }
 
-    fn consume_all_remaining_results(channel: &mut mpsc::Receiver<ExecResult>, handlers: &mut ActionHandlers) {
+    fn consume_results(channel: &mut mpsc::Receiver<ExecResult>, handlers: &mut ActionHandlers) {
         for i in channel.try_recv() {
+            handlers.handle(i);
+        }
+    }
+
+    fn consume_all_remaining_results(channel: &mut mpsc::Receiver<ExecResult>, handlers: &mut ActionHandlers) {
+        for i in channel.recv() {
             handlers.handle(i);
         }
     }
@@ -58,8 +64,9 @@ impl Correlator {
             dispatcher_output_channel: mut output,
             dispatcher_thread_handle: thread_handle } = self;
 
-        Correlator::consume_all_remaining_results(&mut output, &mut handlers);
+        Correlator::consume_results(&mut output, &mut handlers);
         let _ = input.send(Command::Exit);
+        Correlator::consume_results(&mut output, &mut handlers);
         let join_result = thread_handle.join();
         Correlator::consume_all_remaining_results(&mut output, &mut handlers);
         join_result
