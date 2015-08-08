@@ -35,6 +35,6 @@ fn main() {
     let _ = correlator.push_message(Message::new("2".to_string()));
     thread::sleep_ms(80);
     let _ = correlator.push_message(Message::new("3".to_string()));
-    thread::sleep_ms(50);
-    let _ = correlator.stop();
+    let r = correlator.stop();
+    println!("{:?}", r);
 }
