@@ -178,10 +178,10 @@ mod map {
                 }
             }
 
+            self.remove_closed_states();
             if result.is_empty() {
                 None
             } else {
-                self.remove_closed_states();
                 Some(result)
             }
         }
