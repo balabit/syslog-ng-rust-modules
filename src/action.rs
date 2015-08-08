@@ -73,6 +73,12 @@ pub mod message {
         }
     }
 
+    impl From<Action> for super::Action {
+        fn from(action: Action) -> super::Action {
+            super::Action::Message(action)
+        }
+    }
+
     pub trait ActionHandler {
         fn handle(&mut self, command: ExecResult);
     }
