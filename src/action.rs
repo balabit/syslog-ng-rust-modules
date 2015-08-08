@@ -3,7 +3,7 @@ use context::BaseContext;
 
 use self::message::Action as MessageAction;
 use self::message::Command as MessageCommand;
-use self::message::MessageActionHandler;
+pub use self::message::MessageActionHandler;
 
 #[derive(Debug)]
 pub enum Action {
@@ -34,7 +34,7 @@ impl ActionHandlers {
     }
 }
 
-mod message {
+pub mod message {
     use context::BaseContext;
     use state::State;
     use Message;
