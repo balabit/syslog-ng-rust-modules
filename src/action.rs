@@ -3,7 +3,7 @@ use context::BaseContext;
 
 pub use self::handlers::ActionHandlers;
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub enum Action {
     Message(self::message::Action)
 }
@@ -60,7 +60,7 @@ pub mod message {
         }
     }
 
-    #[derive(Debug)]
+    #[derive(Clone, Debug)]
     pub struct Action;
 
     impl Action {
