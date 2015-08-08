@@ -2,7 +2,6 @@ use state::State;
 use context::BaseContext;
 
 pub use self::handlers::ActionHandlers;
-pub use self::message::{MessageActionHandler};
 
 #[derive(Debug)]
 pub enum Action {
@@ -25,14 +24,15 @@ pub enum ExecResult {
 }
 
 pub mod handlers {
-    use super::{ExecResult, MessageActionHandler};
+    use super::ExecResult;
+    use super::message;
 
     pub struct ActionHandlers {
-        message_handler: Box<MessageActionHandler>
+        message_handler: Box<message::ActionHandler>
     }
 
     impl ActionHandlers {
-        pub fn new(message: Box<MessageActionHandler>) -> ActionHandlers {
+        pub fn new(message: Box<message::ActionHandler>) -> ActionHandlers {
             ActionHandlers {
                 message_handler: message
             }
@@ -69,7 +69,7 @@ pub mod message {
         }
     }
 
-    pub trait MessageActionHandler {
+    pub trait ActionHandler {
         fn handle(&mut self, command: ExecResult);
     }
 }
