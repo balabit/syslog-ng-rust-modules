@@ -2,7 +2,7 @@ use std::sync::mpsc;
 use std::thread;
 use std::result::Result;
 
-use action::ActionCommand;
+use action::ExecResult;
 use action::ActionHandlers;
 use super::{config, Command, Context, Dispatcher, Event, Message, Timer};
 
@@ -11,7 +11,7 @@ const TIMER_STEP: u32 = 100;
 pub struct Correlator {
     action_handlers: ActionHandlers,
     dispatcher_input_channel: mpsc::Sender<Command>,
-    dispatcher_output_channel: mpsc::Receiver<ActionCommand>,
+    dispatcher_output_channel: mpsc::Receiver<ExecResult>,
     dispatcher_thread_handle: thread::JoinHandle<()>
 }
 

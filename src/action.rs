@@ -10,7 +10,7 @@ pub enum Action {
 }
 
 impl Action {
-    pub fn execute(&self, state: &State, context: &BaseContext) -> ActionCommand {
+    pub fn execute(&self, state: &State, context: &BaseContext) -> ExecResult {
         match *self {
             Action::Message(ref action) => action.execute(state, context)
         }
@@ -18,12 +18,12 @@ impl Action {
 }
 
 #[derive(Debug)]
-pub enum ActionCommand {
+pub enum ExecResult {
     Message(MessageCommand)
 }
 
 pub mod handlers {
-    use super::{ActionCommand, MessageActionHandler};
+    use super::{ExecResult, MessageActionHandler};
 
     pub struct ActionHandlers {
         message_handler: Box<MessageActionHandler>
@@ -36,9 +36,9 @@ pub mod handlers {
             }
         }
 
-        pub fn handle(&mut self, command: ActionCommand) {
+        pub fn handle(&mut self, command: ExecResult) {
             match command {
-                ActionCommand::Message(message) => self.message_handler.handle(message)
+                ExecResult::Message(message) => self.message_handler.handle(message)
             }
         }
     }
@@ -48,14 +48,14 @@ pub mod message {
     use context::BaseContext;
     use state::State;
     use Message;
-    use super::ActionCommand;
+    use super::ExecResult;
 
     #[derive(Debug)]
     pub struct MessageAction;
 
     impl MessageAction {
-        pub fn execute(&self, _: &State, _: &BaseContext) -> ActionCommand {
-            ActionCommand::Message(MessageCommand(Message::new("".to_string())))
+        pub fn execute(&self, _: &State, _: &BaseContext) -> ExecResult {
+            ExecResult::Message(MessageCommand(Message::new("".to_string())))
         }
     }
 

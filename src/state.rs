@@ -1,6 +1,6 @@
 use std::rc::Rc;
 
-use action::ActionCommand;
+use action::ExecResult;
 use context::BaseContext;
 use Message;
 use MiliSec;
@@ -32,7 +32,7 @@ impl State {
         self.opened = true;
     }
 
-    pub fn close(&mut self, context: &BaseContext) -> Option<Vec<ActionCommand>> {
+    pub fn close(&mut self, context: &BaseContext) -> Option<Vec<ExecResult>> {
         self.opened = false;
         if context.actions().is_empty() {
             None

@@ -1,6 +1,6 @@
 use std::rc::Rc;
 
-use action::ActionCommand;
+use action::ExecResult;
 use context::BaseContext;
 use Message;
 use state::State;
@@ -28,7 +28,7 @@ impl Conditions {
         }
     }
 
-    pub fn on_message(&self, message: Rc<Message>, state: &mut State, context: &BaseContext) -> Option<Vec<ActionCommand>> {
+    pub fn on_message(&self, message: Rc<Message>, state: &mut State, context: &BaseContext) -> Option<Vec<ExecResult>> {
         if self.ignore_message(&message) {
             println!("ignoring");
             return None;
@@ -82,7 +82,7 @@ impl Conditions {
         })
     }
 
-    pub fn on_timer(&self, event: &TimerEvent, state: &mut State, context: &BaseContext) -> Option<Vec<ActionCommand>> {
+    pub fn on_timer(&self, event: &TimerEvent, state: &mut State, context: &BaseContext) -> Option<Vec<ExecResult>> {
         state.on_timer(event);
         if self.is_any_timer_expired(state) {
             println!("closing state");

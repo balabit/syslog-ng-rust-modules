@@ -3,7 +3,7 @@ use std::rc::Rc;
 use state::State;
 use super::{Action, config, Conditions, Message, TimerEvent};
 
-use action::ActionCommand;
+use action::ExecResult;
 use self::linear::LinearContext;
 use self::map::MapContext;
 
@@ -25,11 +25,11 @@ impl BaseContext {
         &self.actions
     }
 
-    pub fn on_timer(&self, event: &TimerEvent, state: &mut State) -> Option<Vec<ActionCommand>> {
+    pub fn on_timer(&self, event: &TimerEvent, state: &mut State) -> Option<Vec<ExecResult>> {
         self.conditions.on_timer(event, state, self)
     }
 
-    pub fn on_message(&self, event: Rc<Message>, state: &mut State) -> Option<Vec<ActionCommand>> {
+    pub fn on_message(&self, event: Rc<Message>, state: &mut State) -> Option<Vec<ExecResult>> {
         self.conditions.on_message(event, state, self)
     }
 }
@@ -51,14 +51,14 @@ pub enum Context {
 }
 
 impl Context {
-    pub fn on_timer(&mut self, event: &TimerEvent) -> Option<Vec<ActionCommand>> {
+    pub fn on_timer(&mut self, event: &TimerEvent) -> Option<Vec<ExecResult>> {
         match *self {
             Context::Linear(ref mut context) => context.on_timer(event),
             Context::Map(ref mut context) => context.on_timer(event),
         }
     }
 
-    pub fn on_message(&mut self, event: Rc<Message>) -> Option<Vec<ActionCommand>> {
+    pub fn on_message(&mut self, event: Rc<Message>) -> Option<Vec<ExecResult>> {
         match *self {
             Context::Linear(ref mut context) => context.on_message(event),
             Context::Map(ref mut context) => context.on_message(event),
@@ -94,7 +94,7 @@ impl From<config::Context> for Context {
 mod linear {
     use std::rc::Rc;
 
-    use action::ActionCommand;
+    use action::ExecResult;
     use config;
     use Conditions;
     use Message;
@@ -116,11 +116,11 @@ mod linear {
             }
         }
 
-        pub fn on_timer(&mut self, event: &TimerEvent) -> Option<Vec<ActionCommand>> {
+        pub fn on_timer(&mut self, event: &TimerEvent) -> Option<Vec<ExecResult>> {
             self.base.on_timer(event, &mut self.state)
         }
 
-        pub fn on_message(&mut self, event: Rc<Message>) -> Option<Vec<ActionCommand>> {
+        pub fn on_message(&mut self, event: Rc<Message>) -> Option<Vec<ExecResult>> {
             self.base.on_message(event, &mut self.state)
         }
 
@@ -144,7 +144,7 @@ mod map {
     use std::fmt::Write;
     use std::rc::Rc;
 
-    use action::ActionCommand;
+    use action::ExecResult;
     use Conditions;
     use Message;
     use state::State;
@@ -167,8 +167,8 @@ mod map {
             }
         }
 
-        pub fn on_timer(&mut self, event: &TimerEvent) -> Option<Vec<ActionCommand>> {
-            let mut result: Vec<ActionCommand> = Vec::new();
+        pub fn on_timer(&mut self, event: &TimerEvent) -> Option<Vec<ExecResult>> {
+            let mut result: Vec<ExecResult> = Vec::new();
 
             for (_, mut state) in self.map.iter_mut() {
                 if let Some(commands) = self.base.on_timer(event, &mut state) {
@@ -202,7 +202,7 @@ mod map {
             }
         }
 
-        pub fn on_message(&mut self, event: Rc<Message>) -> Option<Vec<ActionCommand>> {
+        pub fn on_message(&mut self, event: Rc<Message>) -> Option<Vec<ExecResult>> {
             self.format_context_id(&event);
             let result = self.update_state(event);
             self.format_buffer.clear();
@@ -210,7 +210,7 @@ mod map {
             result
         }
 
-        fn update_state(&mut self, event: Rc<Message>) -> Option<Vec<ActionCommand>> {
+        fn update_state(&mut self, event: Rc<Message>) -> Option<Vec<ExecResult>> {
             let id = self.format_buffer.clone();
             let state = self.map.entry(id).or_insert(State::new());
             self.base.on_message(event, state)

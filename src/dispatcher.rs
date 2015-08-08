@@ -1,16 +1,16 @@
 use std::sync::mpsc::Sender;
 use std::rc::Rc;
 
-use action::ActionCommand;
+use action::ExecResult;
 use super::{config, Context, Event, Message, TimerEvent};
 
 pub struct Dispatcher {
     contexts: Vec<Context>,
-    output_channel: Sender<ActionCommand>
+    output_channel: Sender<ExecResult>
 }
 
 impl Dispatcher {
-    pub fn new(contexts: Vec<config::Context>, action_output_channel: Sender<ActionCommand>) -> Dispatcher {
+    pub fn new(contexts: Vec<config::Context>, action_output_channel: Sender<ExecResult>) -> Dispatcher {
         let contexts = contexts.into_iter().map(|ctx| Context::from(ctx)).collect::<Vec<Context>>();
         Dispatcher {
             contexts: contexts,
