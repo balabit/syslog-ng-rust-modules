@@ -212,11 +212,7 @@ mod map {
             }
 
             self.remove_closed_states();
-            if result.is_empty() {
-                None
-            } else {
-                Some(result)
-            }
+            Some(result)
         }
 
         fn get_closed_state_ids(&self) -> Vec<String> {
