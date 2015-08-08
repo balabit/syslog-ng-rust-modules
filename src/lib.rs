@@ -19,7 +19,7 @@ pub mod action;
 mod context;
 mod correlator;
 mod dispatcher;
-mod message;
+pub mod message;
 mod state;
 mod timer;
 
