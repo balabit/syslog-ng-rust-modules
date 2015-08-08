@@ -61,17 +61,7 @@ impl Conditions {
         })
     }
 
-    pub fn on_timer(&self, event: &TimerEvent, state: &mut State, context: &BaseContext) -> Option<Vec<ExecResult>> {
-        state.on_timer(event);
-        if self.is_any_timer_expired(state) {
-            println!("closing state");
-            state.close(context)
-        } else {
-            None
-        }
-    }
-
-    fn is_any_timer_expired(&self, state: &State) -> bool {
+    pub fn is_any_timer_expired(&self, state: &State) -> bool {
         self.is_timeout_expired(state) || self.is_renew_timeout_expired(state)
     }
 
