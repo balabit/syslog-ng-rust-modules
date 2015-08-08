@@ -31,7 +31,7 @@ impl State {
     }
 
     pub fn close(&mut self) {
-        self.opened = false;
+        self.reset();
     }
 
     pub fn elapsed_time(&self) -> MiliSec {
@@ -55,5 +55,12 @@ impl State {
         let delta = event.0;
         self.elapsed_time += delta;
         self.elapsed_time_since_last_message += delta;
+    }
+
+    fn reset(&mut self) {
+        self.elapsed_time = 0;
+        self.elapsed_time_since_last_message = 0;
+        self.messages.clear();
+        self.opened = false;
     }
 }
