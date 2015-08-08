@@ -54,8 +54,7 @@ impl Dispatcher {
         for context in self.contexts.iter_mut() {
             if let Some(result) = context.on_message(event.clone()) {
                 for i in result.into_iter() {
-                    let r = self.output_channel.send(i.into());
-                    println!("{:?}", r);
+                    let _ = self.output_channel.send(i.into());
                 }
             }
         }
@@ -65,8 +64,7 @@ impl Dispatcher {
         for context in self.contexts.iter_mut() {
             if let Some(result) = context.on_timer(event) {
                 for i in result.into_iter() {
-                    let r = self.output_channel.send(i.into());
-                    println!("{:?}", r);
+                    let _ = self.output_channel.send(i.into());
                 }
             }
         }
