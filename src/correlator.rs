@@ -12,7 +12,8 @@ pub struct Correlator {
     action_handlers: ActionHandlers,
     dispatcher_input_channel: mpsc::Sender<Command>,
     dispatcher_output_channel: mpsc::Receiver<CommandResult>,
-    dispatcher_thread_handle: thread::JoinHandle<()>
+    dispatcher_thread_handle: thread::JoinHandle<()>,
+    exits_received: u32
 }
 
 impl Correlator {
@@ -30,7 +31,8 @@ impl Correlator {
             action_handlers: action_handlers,
             dispatcher_input_channel: dispatcher_input_channel,
             dispatcher_output_channel: dispatcher_output_channel_rx,
-            dispatcher_thread_handle: handle
+            dispatcher_thread_handle: handle,
+            exits_received: 0
         }
     }
 
@@ -47,32 +49,44 @@ impl Correlator {
         }
     }
 
-    fn stop_dispatcher(&mut self) {
-        let _ = self.dispatcher_input_channel.send(Command::Exit);
-        let mut exit_num = 0;
-        loop {
-            let value = self.dispatcher_output_channel.recv();
-            match value {
-                Ok(value) => {
-                    match value {
-                        CommandResult::Dispatch(result) => self.action_handlers.handle(result),
-                        CommandResult::Exit => {
-                            let _ = self.dispatcher_input_channel.send(Command::Exit);
-                            exit_num += 1;
-                            if exit_num >= 1 {
-                                break;
-                            }
-                        }
-                    }
-                },
-                Err(_) => {}
-            }
-        }
-    }
-
     pub fn stop(mut self) -> thread::Result<()> {
         self.consume_results();
         self.stop_dispatcher();
         self.dispatcher_thread_handle.join()
+    }
+
+    fn stop_dispatcher(&mut self) {
+        let _ = self.dispatcher_input_channel.send(Command::Exit);
+        let _ = self.wait_for_dispatcher_to_exit();
+    }
+
+    fn wait_for_dispatcher_to_exit(&mut self) -> Result<(), ()> {
+        loop {
+            let value = self.dispatcher_output_channel.recv();
+            match value {
+                Ok(value) => {
+                    try!(self.handle_command(value))
+                },
+                _ => {}
+            }
+        }
+    }
+
+    fn handle_command(&mut self, command: CommandResult) -> Result<(), ()> {
+        match command {
+            CommandResult::Dispatch(result) => self.action_handlers.handle(result),
+            CommandResult::Exit => {
+                if self.handle_exit_command() {
+                    return Err(());
+                }
+            }
+        }
+        Ok(())
+    }
+
+    fn handle_exit_command(&mut self) -> bool {
+        let _ = self.dispatcher_input_channel.send(Command::Exit);
+        self.exits_received += 1;
+        self.exits_received >= 1
     }
 }
