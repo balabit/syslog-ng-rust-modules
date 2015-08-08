@@ -198,7 +198,7 @@ mod map {
 
         fn remove_closed_states(&mut self) {
             for id in self.get_closed_state_ids() {
-                let state = self.map.remove(&id);
+                let _ = self.map.remove(&id);
             }
         }
 
@@ -212,7 +212,7 @@ mod map {
 
         fn update_state(&mut self, event: Rc<Message>) -> Option<Vec<ActionCommand>> {
             let id = self.format_buffer.clone();
-            let state = self.map.entry(self.format_buffer.clone()).or_insert(State::new());
+            let state = self.map.entry(id).or_insert(State::new());
             self.base.on_message(event, state)
         }
 

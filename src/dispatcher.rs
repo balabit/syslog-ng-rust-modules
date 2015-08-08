@@ -44,7 +44,7 @@ impl Dispatcher {
         for context in self.contexts.iter_mut() {
             if let Some(result) = context.on_timer(event) {
                 for i in result.into_iter() {
-                    self.output_channel.send(i);
+                    let _ = self.output_channel.send(i);
                 }
             }
         }
