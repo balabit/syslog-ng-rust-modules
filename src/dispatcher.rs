@@ -1,7 +1,6 @@
 use std::sync::mpsc::{Receiver, Sender};
 use std::rc::Rc;
 
-use action::ExecResult;
 use super::{config, Command, CommandResult, Context, Event, Message, TimerEvent};
 
 pub struct Dispatcher {
@@ -19,10 +18,17 @@ impl Dispatcher {
     }
 
     pub fn start_loop(&mut self, channel: Receiver<Command>) {
+        let mut exits_received = 0;
         for i in channel.iter() {
             match i {
                 Command::Dispatch(event) => self.dispatch(event),
-                Command::Exit => break
+                Command::Exit => {
+                    exits_received += 1;
+                    let _ = self.output_channel.send(CommandResult::Exit);
+                    if exits_received >= 2 {
+                        break;
+                    }
+                }
             }
         }
     }
