@@ -1,3 +1,4 @@
+use CommandResult;
 use state::State;
 use context::BaseContext;
 
@@ -21,6 +22,12 @@ impl Action {
 #[derive(Debug)]
 pub enum ExecResult {
     Message(self::message::ExecResult)
+}
+
+impl From<ExecResult> for CommandResult {
+    fn from(result: ExecResult) -> CommandResult {
+        CommandResult::Dispatch(result)
+    }
 }
 
 pub mod handlers {

@@ -25,6 +25,8 @@ mod timer;
 
 pub type MiliSec = u32;
 
+use action::ExecResult;
+
 #[derive(Debug)]
 pub enum Event {
     Timer(TimerEvent),
@@ -34,5 +36,11 @@ pub enum Event {
 #[derive(Debug)]
 pub enum Command {
     Dispatch(Event),
+    Exit
+}
+
+#[derive(Debug)]
+pub enum CommandResult {
+    Dispatch(ExecResult),
     Exit
 }
