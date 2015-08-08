@@ -19,37 +19,32 @@ impl Dispatcher {
     }
 
     pub fn dispatch(&mut self, event: Event) {
-        let mut commands = Vec::new();
         match event {
             Event::Message(event) => {
                 let event = Rc::new(event);
-                self.on_message(&mut commands, event);
+                self.on_message(event);
             },
             Event::Timer(ref event) => {
-                self.on_timer(&mut commands, event);
+                self.on_timer(event);
             }
         };
-
-        for i in commands.into_iter() {
-            self.output_channel.send(i);
-        }
     }
 
-    fn on_message(&mut self, commands: &mut Vec<ActionCommand>, event: Rc<Message>) {
+    fn on_message(&mut self, event: Rc<Message>) {
         for context in self.contexts.iter_mut() {
             if let Some(result) = context.on_message(event.clone()) {
                 for i in result.into_iter() {
-                    commands.push(i);
+                    let _ = self.output_channel.send(i);
                 }
             }
         }
     }
 
-    fn on_timer(&mut self, commands: &mut Vec<ActionCommand>, event: &TimerEvent) {
+    fn on_timer(&mut self, event: &TimerEvent) {
         for context in self.contexts.iter_mut() {
             if let Some(result) = context.on_timer(event) {
                 for i in result.into_iter() {
-                    commands.push(i);
+                    self.output_channel.send(i);
                 }
             }
         }
