@@ -30,7 +30,23 @@ impl BaseContext {
     }
 
     pub fn on_message(&self, event: Rc<Message>, state: &mut State) -> Option<Vec<ExecResult>> {
-        self.conditions.on_message(event, state, self)
+        if self.conditions.ignore_message(&event) {
+            return None;
+        }
+
+        if state.is_open() {
+            state.add_message(event);
+            if self.conditions.is_closing(state) {
+                return state.close(self);
+            } else {
+                return None;
+            }
+        } else if self.conditions.is_opening(&event) {
+            state.add_message(event);
+            state.open();
+        }
+
+        None
     }
 }
 

@@ -28,32 +28,11 @@ impl Conditions {
         }
     }
 
-    pub fn on_message(&self, message: Rc<Message>, state: &mut State, context: &BaseContext) -> Option<Vec<ExecResult>> {
-        if self.ignore_message(&message) {
-            println!("ignoring");
-            return None;
-        }
-
-        if state.is_open() {
-            state.add_message(message);
-            if self.is_closing(state) {
-                return state.close(context);
-            } else {
-                return None;
-            }
-        } else if self.is_opening(&message) {
-            state.add_message(message);
-            state.open()
-        }
-
-        None
-    }
-
-    fn ignore_message(&self, message: &Message) -> bool {
+    pub fn ignore_message(&self, message: &Message) -> bool {
         !self.patterns.contains(message.uuid()) && self.patterns.len() > 0
     }
 
-    fn is_opening(&self, message: &Message) -> bool {
+    pub fn is_opening(&self, message: &Message) -> bool {
         self.first_opens.map_or(true, |first_message_opens_the_context| {
             if first_message_opens_the_context {
                 self.patterns.first().unwrap() == message.uuid()
@@ -63,7 +42,7 @@ impl Conditions {
         })
     }
 
-    fn is_closing(&self, state: &State) -> bool {
+    pub fn is_closing(&self, state: &State) -> bool {
         println!("checking close");
         self.is_max_size_reached(state) || self.is_closing_message(state)
     }
