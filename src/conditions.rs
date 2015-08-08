@@ -44,7 +44,7 @@ impl Conditions {
 
     pub fn is_closing(&self, state: &State) -> bool {
         println!("checking close");
-        self.is_max_size_reached(state) || self.is_closing_message(state)
+        self.is_max_size_reached(state) || self.is_closing_message(state) || self.is_any_timer_expired(state)
     }
 
     fn is_max_size_reached(&self, state: &State) -> bool {
@@ -61,7 +61,7 @@ impl Conditions {
         })
     }
 
-    pub fn is_any_timer_expired(&self, state: &State) -> bool {
+    fn is_any_timer_expired(&self, state: &State) -> bool {
         self.is_timeout_expired(state) || self.is_renew_timeout_expired(state)
     }
 

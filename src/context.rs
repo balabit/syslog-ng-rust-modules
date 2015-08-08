@@ -27,7 +27,7 @@ impl BaseContext {
 
     pub fn on_timer(&self, event: &TimerEvent, state: &mut State) -> Option<Vec<ExecResult>> {
         state.on_timer(event);
-        if self.conditions.is_any_timer_expired(state) {
+        if self.conditions.is_closing(state) {
             println!("closing state");
             state.close(self)
         } else {
