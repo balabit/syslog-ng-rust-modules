@@ -110,3 +110,48 @@ impl Builder {
         self.conditions.clone()
     }
 }
+
+#[cfg(test)]
+mod test {
+    use std::rc::Rc;
+
+    use message;
+    use state::State;
+    use super::Builder;
+
+    #[test]
+    fn test_given_close_condition_when_an_unknown_message_received_then_it_is_ignored() {
+        let timeout = 100;
+        let msg_id = "1".to_string();
+        let condition = Builder::new(timeout).patterns(vec![msg_id.clone()]).build();
+        let msg_which_should_not_be_ignored = message::Builder::new(msg_id.clone()).build();
+        let msg_which_should_be_ignored = message::Builder::new("2".to_string()).build();
+        assert_true!(condition.ignore_message(&msg_which_should_be_ignored));
+        assert_false!(condition.ignore_message(&msg_which_should_not_be_ignored));
+    }
+
+    #[test]
+    fn test_given_condition_when_an_opening_message_is_received_then_the_state_becomes_opened() {
+        let timeout = 100;
+        let msg_id = "1".to_string();
+        let condition = Builder::new(timeout).patterns(vec![msg_id.clone()]).first_opens(true).build();
+        let msg_which_should_not_be_ignored = message::Builder::new(msg_id.clone()).build();
+        let msg_which_should_be_ignored = message::Builder::new("2".to_string()).build();
+        assert_false!(condition.is_opening(&msg_which_should_be_ignored));
+        assert_true!(condition.is_opening(&msg_which_should_not_be_ignored));
+    }
+
+    #[test]
+    fn test_given_condition_when_a_closing_message_is_received_then_the_state_becomes_closed() {
+        let timeout = 100;
+        let msg_id = "1".to_string();
+        let mut state = State::new();
+        let condition = Builder::new(timeout).patterns(vec!["1".to_string(), "2".to_string()]).last_closes(true).build();
+        let msg_1 = message::Builder::new(msg_id.clone()).build();
+        let msg_closing = Rc::new(message::Builder::new("2".to_string()).build());
+        assert_true!(condition.is_opening(&msg_1));
+        state.open();
+        state.add_message(msg_closing);
+        assert_true!(condition.is_closing(&mut state));
+    }
+}
