@@ -28,6 +28,12 @@ pub struct ActionHandlers {
 }
 
 impl ActionHandlers {
+    pub fn new(message: Box<MessageActionHandler>) -> ActionHandlers {
+        ActionHandlers {
+            message_handler: message
+        }
+    }
+
     pub fn handle(&mut self, command: ActionCommand) {
         match command {
             ActionCommand::Message(message) => self.message_handler.handle(message)
