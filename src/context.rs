@@ -26,13 +26,13 @@ impl BaseContext {
     }
 
     pub fn on_timer(&self, event: &TimerEvent, state: &mut State) -> Option<Vec<ExecResult>> {
-        state.on_timer(event);
-        if self.conditions.is_closing(state) {
-            println!("closing state");
-            state.close(self)
-        } else {
-            None
+        if state.is_open() {
+            state.on_timer(event);
+            if self.conditions.is_closing(state) {
+                return self.on_state_close(state);
+            }
         }
+        None
     }
 
     pub fn on_message(&self, event: Rc<Message>, state: &mut State) -> Option<Vec<ExecResult>> {
@@ -43,7 +43,7 @@ impl BaseContext {
         if state.is_open() {
             state.add_message(event);
             if self.conditions.is_closing(state) {
-                return state.close(self);
+                return self.on_state_close(state);
             } else {
                 return None;
             }
@@ -53,6 +53,16 @@ impl BaseContext {
         }
 
         None
+    }
+
+    fn on_state_close(&self, state: &mut State) -> Option<Vec<ExecResult>> {
+        state.close();
+        if self.actions.is_empty() {
+            None
+        } else {
+            let commands = self.actions().iter().map(|action| action.execute(state, self)).collect();
+            Some(commands)
+        }
     }
 }
 
