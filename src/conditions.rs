@@ -1,10 +1,11 @@
 use Message;
+use MiliSec;
 use state::State;
 
 #[derive(Clone, Debug)]
 pub struct Conditions {
-    pub timeout: u32,
-    pub renew_timeout: Option<u32>,
+    pub timeout: MiliSec,
+    pub renew_timeout: Option<MiliSec>,
     pub first_opens: Option<bool>,
     pub last_closes: Option<bool>,
     pub max_size: Option<usize>,
@@ -12,7 +13,7 @@ pub struct Conditions {
 }
 
 impl Conditions {
-    fn new(timeout: u32) -> Conditions {
+    fn new(timeout: MiliSec) -> Conditions {
         Conditions {
             timeout: timeout,
             renew_timeout: None,
@@ -75,13 +76,13 @@ pub struct Builder {
 }
 
 impl Builder {
-    pub fn new(timeout: u32) -> Builder {
+    pub fn new(timeout: MiliSec) -> Builder {
         Builder{
             conditions: Conditions::new(timeout)
         }
     }
 
-    pub fn renew_timeout(&mut self, timeout: u32) -> &mut Builder {
+    pub fn renew_timeout(&mut self, timeout: MiliSec) -> &mut Builder {
         self.conditions.renew_timeout = Some(timeout);
         self
     }

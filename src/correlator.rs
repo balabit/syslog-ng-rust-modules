@@ -3,10 +3,9 @@ use std::thread;
 use std::result::Result;
 
 use action::ActionHandlers;
-use super::{config, Command, CommandResult, Context, Dispatcher, Event, Message, Timer};
+use super::{config, Command, CommandResult, Context, Dispatcher, Event, Message, MiliSec, Timer};
 
-const TIMER_STEP: u32 = 100;
-
+const TIMER_STEP: MiliSec = 100;
 
 pub struct Correlator {
     action_handlers: ActionHandlers,
