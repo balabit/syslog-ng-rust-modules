@@ -18,6 +18,15 @@ impl Dispatcher {
         }
     }
 
+    pub fn start_loop(&mut self, channel: Receiver<Command>) {
+        for i in channel.iter() {
+            match i {
+                Command::Dispatch(event) => self.dispatch(event),
+                Command::Exit => break
+            }
+        }
+    }
+
     pub fn dispatch(&mut self, event: Event) {
         match event {
             Event::Message(event) => {

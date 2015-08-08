@@ -24,13 +24,7 @@ impl Correlator {
 
         let handle = thread::spawn(move || {
             let mut dispatcher = Dispatcher::new(contexts, dispatcher_output_channel_tx);
-
-            for i in rx.iter() {
-                match i {
-                    Command::Dispatch(event) => dispatcher.dispatch(event),
-                    Command::Exit => break
-                }
-            }
+            dispatcher.start_loop(rx);
         });
 
         Correlator {
