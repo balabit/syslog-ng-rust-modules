@@ -29,7 +29,7 @@ impl BaseContext {
         if state.is_open() {
             state.on_timer(event);
             if self.conditions.is_closing(state) {
-                return self.on_state_close(state);
+                return self.close_state(state);
             }
         }
         None
@@ -37,25 +37,26 @@ impl BaseContext {
 
     pub fn on_message(&self, event: Rc<Message>, state: &mut State) -> Option<Vec<ExecResult>> {
         if self.conditions.ignore_message(&event) {
-            return None;
+            None
+        } else {
+            self.on_relevant_message(event, state)
         }
+    }
 
+    pub fn on_relevant_message(&self, event: Rc<Message>, state: &mut State) -> Option<Vec<ExecResult>> {
         if state.is_open() {
             state.add_message(event);
             if self.conditions.is_closing(state) {
-                return self.on_state_close(state);
-            } else {
-                return None;
+                return self.close_state(state);
             }
         } else if self.conditions.is_opening(&event) {
             state.add_message(event);
             state.open();
         }
-
         None
     }
 
-    fn on_state_close(&self, state: &mut State) -> Option<Vec<ExecResult>> {
+    fn close_state(&self, state: &mut State) -> Option<Vec<ExecResult>> {
         state.close();
         if self.actions.is_empty() {
             None

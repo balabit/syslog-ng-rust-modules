@@ -1,10 +1,5 @@
-use std::rc::Rc;
-
-use action::ExecResult;
-use context::BaseContext;
 use Message;
 use state::State;
-use TimerEvent;
 
 #[derive(Clone, Debug)]
 pub struct Conditions {
