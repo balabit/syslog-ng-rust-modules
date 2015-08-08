@@ -57,11 +57,12 @@ impl BaseContext {
     }
 
     fn close_state(&self, state: &mut State) -> Option<Vec<ExecResult>> {
-        state.close();
         if self.actions.is_empty() {
+            state.close();
             None
         } else {
             let commands = self.actions().iter().map(|action| action.execute(state, self)).collect();
+            state.close();
             Some(commands)
         }
     }
