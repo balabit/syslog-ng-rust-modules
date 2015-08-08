@@ -5,7 +5,8 @@ use super::{config, Command, CommandResult, Context, Event, Message, TimerEvent}
 
 pub struct Dispatcher {
     contexts: Vec<Context>,
-    output_channel: Sender<CommandResult>
+    output_channel: Sender<CommandResult>,
+    exits_received: u32
 }
 
 impl Dispatcher {
@@ -13,24 +14,28 @@ impl Dispatcher {
         let contexts = contexts.into_iter().map(|ctx| Context::from(ctx)).collect::<Vec<Context>>();
         Dispatcher {
             contexts: contexts,
-            output_channel: action_output_channel
+            output_channel: action_output_channel,
+            exits_received: 0
         }
     }
 
     pub fn start_loop(&mut self, channel: Receiver<Command>) {
-        let mut exits_received = 0;
         for i in channel.iter() {
             match i {
                 Command::Dispatch(event) => self.dispatch(event),
                 Command::Exit => {
-                    exits_received += 1;
-                    let _ = self.output_channel.send(CommandResult::Exit);
-                    if exits_received >= 2 {
+                    if self.on_exit() {
                         break;
                     }
                 }
             }
         }
+    }
+
+    fn on_exit(&mut self) -> bool {
+        self.exits_received += 1;
+        let _ = self.output_channel.send(CommandResult::Exit);
+        self.exits_received >= 2
     }
 
     pub fn dispatch(&mut self, event: Event) {
