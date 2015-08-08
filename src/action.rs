@@ -18,6 +18,7 @@ impl Action {
     }
 }
 
+#[derive(Debug)]
 pub enum ActionCommand {
     Message(MessageCommand)
 }
@@ -49,6 +50,7 @@ pub mod message {
         }
     }
 
+    #[derive(Debug)]
     pub struct Command(Message);
 
     pub trait MessageActionHandler {
