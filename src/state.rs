@@ -42,7 +42,7 @@ impl State {
         self.elapsed_time_since_last_message
     }
 
-    pub fn messages(&self) -> &Vec<Rc<Message>> {
+    pub fn messages(&self) -> &[Rc<Message>] {
         &self.messages
     }
 
@@ -51,7 +51,7 @@ impl State {
         self.elapsed_time_since_last_message = 0;
     }
 
-    pub fn on_timer(&mut self, event: &TimerEvent) {
+    pub fn update_timers(&mut self, event: &TimerEvent) {
         let delta = event.0;
         self.elapsed_time += delta;
         self.elapsed_time_since_last_message += delta;

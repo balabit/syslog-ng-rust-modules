@@ -21,13 +21,9 @@ impl BaseContext {
         }
     }
 
-    pub fn actions(&self) -> &[Action] {
-        &self.actions
-    }
-
     pub fn on_timer(&self, event: &TimerEvent, state: &mut State) -> Option<Vec<ExecResult>> {
         if state.is_open() {
-            state.on_timer(event);
+            state.update_timers(event);
             if self.conditions.is_closing(state) {
                 return self.close_state(state);
             }
@@ -43,7 +39,7 @@ impl BaseContext {
         }
     }
 
-    pub fn on_relevant_message(&self, event: Rc<Message>, state: &mut State) -> Option<Vec<ExecResult>> {
+    fn on_relevant_message(&self, event: Rc<Message>, state: &mut State) -> Option<Vec<ExecResult>> {
         if state.is_open() {
             state.add_message(event);
             if self.conditions.is_closing(state) {
@@ -61,7 +57,7 @@ impl BaseContext {
             state.close();
             None
         } else {
-            let commands = self.actions().iter().map(|action| action.execute(state, self)).collect();
+            let commands = self.actions.iter().map(|action| action.execute(state, self)).collect();
             state.close();
             Some(commands)
         }
