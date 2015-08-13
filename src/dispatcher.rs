@@ -277,14 +277,20 @@ mod handlers {
     }
 
     mod timer {
+        use std::cell::RefCell;
+        use std::rc::Rc;
+
         use context::Context;
         use dispatcher::{Request, RequestHandler};
-        use EventHandler;
+        use context::EventHandler;
+        use context;
         use Event;
         use reactor;
+        use TimerEvent;
+        use action::ExecResult;
 
         pub struct TimerEventHandler {
-            contexts: Vec<Context>
+            contexts: Vec<Rc<RefCell<Box<EventHandler<TimerEvent, Result=Option<Vec<ExecResult>>>>>>>
         }
 
         impl TimerEventHandler {
@@ -296,12 +302,15 @@ mod handlers {
         }
 
         impl reactor::EventHandler<Event> for TimerEventHandler {
-            type Handler = EventHandler;
+            type Handler = ::EventHandler;
             fn handle_event(&mut self, event: Event) {
                 println!("timer event");
+                for i in self.contexts.iter_mut() {
+                    i.borrow_mut().handle_event(event);
+                }
             }
             fn handler(&self) -> Self::Handler {
-                EventHandler::Timer
+                ::EventHandler::Timer
             }
         }
     }
