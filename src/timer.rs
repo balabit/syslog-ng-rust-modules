@@ -1,7 +1,7 @@
 use std::sync::mpsc;
 use std::thread;
 
-use super::{Command, Event, MiliSec};
+use super::{Event, MiliSec, Request};
 
 #[derive(Debug)]
 pub struct TimerEvent(pub MiliSec);
@@ -9,11 +9,11 @@ pub struct TimerEvent(pub MiliSec);
 pub struct Timer;
 
 impl Timer {
-    pub fn from_chan(ms: MiliSec, tx: mpsc::Sender<Command>) {
+    pub fn from_chan(ms: MiliSec, tx: mpsc::Sender<Request>) {
         thread::spawn(move || {
             loop {
                 thread::sleep_ms(ms);
-                if tx.send(Command::Dispatch(Event::Timer(TimerEvent(ms)))).is_err() {
+                if tx.send(Request::Dispatch(Event::Timer(TimerEvent(ms)))).is_err() {
                     break;
                 }
             }

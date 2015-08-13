@@ -8,7 +8,7 @@ pub use action::Action;
 pub use conditions::Conditions;
 pub use context::Context;
 pub use correlator::Correlator;
-pub use dispatcher::{Command, Dispatcher};
+pub use dispatcher::{Dispatcher, Request};
 pub use message::Message;
 pub use timer::{Timer,
                 TimerEvent};

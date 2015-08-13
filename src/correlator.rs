@@ -3,13 +3,13 @@ use std::thread;
 use std::result::Result;
 
 use action::ActionHandlers;
-use super::{config, Command, CommandResult, Context, Dispatcher, Event, Message, MiliSec, Timer};
+use super::{config, CommandResult, Context, Dispatcher, Event, Message, MiliSec, Request, Timer};
 
 const TIMER_STEP: MiliSec = 100;
 
 pub struct Correlator {
     action_handlers: ActionHandlers,
-    dispatcher_input_channel: mpsc::Sender<Command>,
+    dispatcher_input_channel: mpsc::Sender<Request>,
     dispatcher_output_channel: mpsc::Receiver<CommandResult>,
     dispatcher_thread_handle: thread::JoinHandle<()>,
     exits_received: u32
@@ -35,9 +35,9 @@ impl Correlator {
         }
     }
 
-    pub fn push_message(&mut self, message: Message) -> Result<(), mpsc::SendError<Command>> {
+    pub fn push_message(&mut self, message: Message) -> Result<(), mpsc::SendError<Request>> {
         self.consume_results();
-        self.dispatcher_input_channel.send(Command::Dispatch(Event::Message(message)))
+        self.dispatcher_input_channel.send(Request::Dispatch(Event::Message(message)))
     }
 
     fn consume_results(&mut self) {
@@ -55,7 +55,7 @@ impl Correlator {
     }
 
     fn stop_dispatcher(&mut self) {
-        let _ = self.dispatcher_input_channel.send(Command::Exit);
+        let _ = self.dispatcher_input_channel.send(Request::Exit);
         let _ = self.wait_for_dispatcher_to_exit();
     }
 
@@ -84,7 +84,7 @@ impl Correlator {
     }
 
     fn handle_exit_command(&mut self) -> bool {
-        let _ = self.dispatcher_input_channel.send(Command::Exit);
+        let _ = self.dispatcher_input_channel.send(Request::Exit);
         self.exits_received += 1;
         self.exits_received >= 1
     }

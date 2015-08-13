@@ -4,7 +4,7 @@ use std::rc::Rc;
 use super::{config, CommandResult, Context, Event, Message, TimerEvent};
 
 #[derive(Debug)]
-pub enum Command {
+pub enum Request {
     Dispatch(Event),
     Exit
 }
@@ -25,11 +25,11 @@ impl Dispatcher {
         }
     }
 
-    pub fn start_loop(&mut self, channel: Receiver<Command>) {
+    pub fn start_loop(&mut self, channel: Receiver<Request>) {
         for i in channel.iter() {
             match i {
-                Command::Dispatch(event) => self.dispatch(event),
-                Command::Exit => {
+                Request::Dispatch(event) => self.dispatch(event),
+                Request::Exit => {
                     if self.on_exit() {
                         break;
                     }
