@@ -86,18 +86,18 @@ impl Dispatcher {
 }
 
 mod handlers {
-    mod exit {
+    pub mod exit {
         use dispatcher::Request;
         use condition::Condition;
         use reactor::EventHandler;
 
-        struct ExitHandler{
+        pub struct ExitHandler{
             condition: Condition,
             stops: u32
         }
 
         impl ExitHandler {
-            fn new(condition: Condition) -> ExitHandler {
+            pub fn new(condition: Condition) -> ExitHandler {
                 ExitHandler {
                     condition: condition,
                     stops: 0
