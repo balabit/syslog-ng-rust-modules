@@ -1,7 +1,13 @@
 use std::sync::mpsc::{Receiver, Sender};
 use std::rc::Rc;
 
-use super::{config, Command, CommandResult, Context, Event, Message, TimerEvent};
+use super::{config, CommandResult, Context, Event, Message, TimerEvent};
+
+#[derive(Debug)]
+pub enum Command {
+    Dispatch(Event),
+    Exit
+}
 
 pub struct Dispatcher {
     contexts: Vec<Context>,
