@@ -7,6 +7,25 @@ use action::ExecResult;
 use self::linear::LinearContext;
 use self::map::MapContext;
 
+pub trait EventHandler<T> {
+    type Result;
+    fn handle_event(&mut self, T) -> Self::Result;
+}
+
+impl EventHandler<Rc<Message>> for LinearContext {
+    type Result = Option<Vec<ExecResult>>;
+    fn handle_event(&mut self, message: Rc<Message>) -> Self::Result {
+        self.on_message(message)
+    }
+}
+
+impl EventHandler<TimerEvent> for LinearContext {
+    type Result = Option<Vec<ExecResult>>;
+    fn handle_event(&mut self, event: TimerEvent) -> Self::Result {
+        self.on_timer(&event)
+    }
+}
+
 #[derive(Debug)]
 pub struct BaseContext {
     conditions: Conditions,
