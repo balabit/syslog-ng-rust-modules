@@ -2,7 +2,8 @@ use std::sync::mpsc::{Receiver, Sender};
 use std::rc::Rc;
 
 use action::ExecResult;
-use super::{config, Context, Event, Message, TimerEvent};
+use super::{config, Condition, Context, Event, Message, TimerEvent};
+use reactor;
 
 #[derive(Debug)]
 pub enum Request {
@@ -84,25 +85,38 @@ impl Dispatcher {
     }
 }
 
-mod condition {
-    use std::cell::RefCell;
-    use std::rc::Rc;
-    use std::clone::Clone;
+mod handlers {
+    mod exit {
+        use dispatcher::Request;
+        use condition::Condition;
+        use reactor::EventHandler;
 
-    #[derive(Clone, Debug)]
-    pub struct Condition(Rc<RefCell<bool>>);
+        struct ExitHandler{
+            condition: Condition,
+            stops: u32
+        }
 
-    impl Condition {
-      pub fn is_active(&self) -> bool {
-        *self.0.borrow()
-      }
+        impl ExitHandler {
+            fn new(condition: Condition) -> ExitHandler {
+                ExitHandler {
+                    condition: condition,
+                    stops: 0
+                }
+            }
+        }
 
-      pub fn activate(&mut self) {
-        *self.0.borrow_mut() = true;
-      }
+        impl EventHandler<Request> for ExitHandler {
+            fn handle_event(&mut self, event: Request) {
+                if let Request::Exit = event {
+                    self.stops += 1;
 
-      pub fn deactivate(&mut self) {
-        *self.0.borrow_mut() = false;
-      }
+                    if self.stops >= 2 {
+                        self.condition.activate();
+                    }
+                } else {
+                    unreachable!("An ExitHandler should only receive Exit events");
+                }
+            }
+        }
     }
 }
