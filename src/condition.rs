@@ -5,6 +5,10 @@ use std::rc::Rc;
 pub struct Condition(Rc<RefCell<bool>>);
 
 impl Condition {
+    pub fn new(state: bool) -> Condition {
+        Condition(Rc::new(RefCell::new(state)))
+    }
+
     pub fn is_active(&self) -> bool {
         *self.0.borrow()
     }
