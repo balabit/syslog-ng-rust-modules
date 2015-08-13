@@ -83,3 +83,26 @@ impl Dispatcher {
         }
     }
 }
+
+mod condition {
+    use std::cell::RefCell;
+    use std::rc::Rc;
+    use std::clone::Clone;
+
+    #[derive(Clone, Debug)]
+    struct Condition(Rc<RefCell<bool>>);
+
+    impl Condition {
+      fn is_active(&self) -> bool {
+        *self.0.borrow()
+      }
+
+      fn activate(&mut self) {
+        *self.0.borrow_mut() = true;
+      }
+
+      fn deactivate(&mut self) {
+        *self.0.borrow_mut() = false;
+      }
+    }
+}
