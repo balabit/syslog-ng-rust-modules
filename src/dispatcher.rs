@@ -3,7 +3,7 @@ use std::rc::Rc;
 
 use action::ExecResult;
 use super::{config, Condition, Context, Event, Message, TimerEvent};
-use reactor;
+use reactor::{self, EventDemultiplexer, EventHandler};
 
 #[derive(Debug)]
 pub enum Request {
@@ -82,6 +82,15 @@ impl Dispatcher {
                 }
             }
         }
+    }
+}
+
+struct Demultiplexer<T>(Receiver<T>);
+
+impl reactor::EventDemultiplexer for Demultiplexer<Request> {
+    type Event = Request;
+    fn select(&mut self) -> Option<Self::Event> {
+        self.0.recv().ok()
     }
 }
 
