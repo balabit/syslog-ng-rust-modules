@@ -85,6 +85,31 @@ impl Dispatcher {
     }
 }
 
+pub struct Reactor {
+    exit_handler: Box<self::handlers::exit::ExitHandler>,
+    event_handler: Box<self::handlers::event::EventHandler>,
+    demultiplexer: Demultiplexer<Request>,
+    exit_condition: Condition
+}
+
+impl reactor::Reactor for Reactor {
+    type Event = Request;
+    fn handle_events(&mut self) {
+        while !self.exit_condition.is_active() {
+            if let Some(request) = self.demultiplexer.select() {
+                match request {
+                    event @ Request::Event(_) => self.event_handler.handle_event(event),
+                    event @ Request::Exit => self.exit_handler.handle_event(event)
+                }
+            } else {
+                break;
+            }
+        }
+    }
+    fn register_handler(&mut self, handler: Box<reactor::EventHandler<Self::Event>>) {}
+    fn remove_handler(&mut self, handler: &reactor::EventHandler<Self::Event>){}
+}
+
 struct Demultiplexer<T>(Receiver<T>);
 
 impl reactor::EventDemultiplexer for Demultiplexer<Request> {
