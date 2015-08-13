@@ -3,14 +3,14 @@ use std::thread;
 use std::result::Result;
 
 use action::ActionHandlers;
-use super::{config, CommandResult, Context, Dispatcher, Event, Message, MiliSec, Request, Timer};
+use super::{config, Context, Dispatcher, Event, Message, MiliSec, Response, Request, Timer};
 
 const TIMER_STEP: MiliSec = 100;
 
 pub struct Correlator {
     action_handlers: ActionHandlers,
     dispatcher_input_channel: mpsc::Sender<Request>,
-    dispatcher_output_channel: mpsc::Receiver<CommandResult>,
+    dispatcher_output_channel: mpsc::Receiver<Response>,
     dispatcher_thread_handle: thread::JoinHandle<()>,
     exits_received: u32
 }
@@ -42,7 +42,7 @@ impl Correlator {
 
     fn consume_results(&mut self) {
         for i in self.dispatcher_output_channel.try_recv() {
-            if let CommandResult::Dispatch(result) = i {
+            if let Response::Dispatch(result) = i {
                 self.action_handlers.handle(result);
             }
         }
@@ -71,10 +71,10 @@ impl Correlator {
         }
     }
 
-    fn handle_command(&mut self, command: CommandResult) -> Result<(), ()> {
+    fn handle_command(&mut self, command: Response) -> Result<(), ()> {
         match command {
-            CommandResult::Dispatch(result) => self.action_handlers.handle(result),
-            CommandResult::Exit => {
+            Response::Dispatch(result) => self.action_handlers.handle(result),
+            Response::Exit => {
                 if self.handle_exit_command() {
                     return Err(());
                 }

@@ -11,19 +11,19 @@ pub enum Request {
 }
 
 #[derive(Debug)]
-pub enum CommandResult {
+pub enum Response {
     Dispatch(ExecResult),
     Exit
 }
 
 pub struct Dispatcher {
     contexts: Vec<Context>,
-    output_channel: Sender<CommandResult>,
+    output_channel: Sender<Response>,
     exits_received: u32
 }
 
 impl Dispatcher {
-    pub fn new(contexts: Vec<config::Context>, action_output_channel: Sender<CommandResult>) -> Dispatcher {
+    pub fn new(contexts: Vec<config::Context>, action_output_channel: Sender<Response>) -> Dispatcher {
         let contexts = contexts.into_iter().map(|ctx| Context::from(ctx)).collect::<Vec<Context>>();
         Dispatcher {
             contexts: contexts,
@@ -47,7 +47,7 @@ impl Dispatcher {
 
     fn on_exit(&mut self) -> bool {
         self.exits_received += 1;
-        let _ = self.output_channel.send(CommandResult::Exit);
+        let _ = self.output_channel.send(Response::Exit);
         self.exits_received >= 2
     }
 

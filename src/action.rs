@@ -1,4 +1,4 @@
-use CommandResult;
+use Response;
 use state::State;
 use context::BaseContext;
 
@@ -24,9 +24,9 @@ pub enum ExecResult {
     Message(self::message::ExecResult)
 }
 
-impl From<ExecResult> for CommandResult {
-    fn from(result: ExecResult) -> CommandResult {
-        CommandResult::Dispatch(result)
+impl From<ExecResult> for Response {
+    fn from(result: ExecResult) -> Response {
+        Response::Dispatch(result)
     }
 }
 
