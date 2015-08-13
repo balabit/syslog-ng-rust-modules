@@ -119,4 +119,21 @@ mod handlers {
             }
         }
     }
+
+    pub mod event {
+        use dispatcher::Request;
+        use reactor;
+
+        pub struct EventHandler;
+
+        impl reactor::EventHandler<Request> for EventHandler {
+            fn handle_event(&mut self, event: Request) {
+                if let Request::Event(_) = event {
+                    println!("Event recvd");
+                } else {
+                    unreachable!("An EventHandler should only receive Event events");
+                }
+            }
+        }
+    }
 }
