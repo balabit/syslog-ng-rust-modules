@@ -200,7 +200,7 @@ mod handlers {
         use dispatcher::{Request, RequestHandler};
         use reactor::{self, EventHandler, Event};
 
-        use super::linear::LinearHandler;
+        use super::timer::TimerEventHandler;
         use self::message::MessageHandler;
 
         pub struct Handler{
@@ -209,7 +209,7 @@ mod handlers {
 
         impl Handler {
             pub fn new() -> Handler {
-                let timer_handler = Box::new(LinearHandler::new());
+                let timer_handler = Box::new(TimerEventHandler::new());
                 let message_handler = Box::new(MessageHandler::new());
                 let mut handler = Handler{
                     handlers: BTreeMap::new()
@@ -276,26 +276,26 @@ mod handlers {
         }
     }
 
-    mod linear {
+    mod timer {
         use context::Context;
         use dispatcher::{Request, RequestHandler};
         use EventHandler;
         use Event;
         use reactor;
 
-        pub struct LinearHandler {
+        pub struct TimerEventHandler {
             contexts: Vec<Context>
         }
 
-        impl LinearHandler {
-            pub fn new() -> LinearHandler {
-                LinearHandler {
+        impl TimerEventHandler {
+            pub fn new() -> TimerEventHandler {
+                TimerEventHandler {
                     contexts: Vec::new()
                 }
             }
         }
 
-        impl reactor::EventHandler<Event> for LinearHandler {
+        impl reactor::EventHandler<Event> for TimerEventHandler {
             type Handler = EventHandler;
             fn handle_event(&mut self, event: Event) {
                 println!("timer event");
