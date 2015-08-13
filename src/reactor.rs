@@ -1,15 +1,15 @@
-trait EventHandler<T> {
+pub trait EventHandler<T> {
     type Handler;
     fn handle_event(&mut self, event: T);
     fn handler(&self) -> Self::Handler;
 }
 
-trait EventDemultiplexer {
+pub trait EventDemultiplexer {
     type Event;
     fn select(&mut self) -> Option<Self::Event>;
 }
 
-trait Reactor {
+pub trait Reactor {
     type Event: Event;
     type Handler;
     fn handle_events(&mut self);
@@ -17,7 +17,7 @@ trait Reactor {
     fn remove_handler(&mut self, handler: &EventHandler<Self::Event, Handler=Self::Handler>);
 }
 
-trait Event {
+pub trait Event {
     type Handler;
     fn handler(&self) -> Self::Handler;
 }
