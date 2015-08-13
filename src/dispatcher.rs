@@ -2,13 +2,29 @@ use std::sync::mpsc::{Receiver, Sender};
 use std::rc::Rc;
 
 use action::ExecResult;
-use super::{config, Condition, Context, Event, Message, TimerEvent};
-use reactor::{self, EventDemultiplexer, EventHandler};
+use super::{config, Condition, Context, Message, TimerEvent};
+use reactor::{self, Event, EventDemultiplexer, EventHandler, Reactor};
 
 #[derive(Debug)]
 pub enum Request {
-    Event(Event),
+    Event(super::Event),
     Exit
+}
+
+#[derive(Debug, Eq, PartialEq, PartialOrd, Ord)]
+pub enum RequestHandler {
+    Event,
+    Exit
+}
+
+impl reactor::Event for Request {
+    type Handler = RequestHandler;
+    fn handler(&self) -> Self::Handler {
+        match *self {
+            Request::Event(_) => RequestHandler::Event,
+            Request::Exit => RequestHandler::Exit,
+        }
+    }
 }
 
 #[derive(Debug)]
@@ -52,13 +68,13 @@ impl Dispatcher {
         self.exits_received >= 2
     }
 
-    pub fn dispatch(&mut self, event: Event) {
+    pub fn dispatch(&mut self, event: super::Event) {
         match event {
-            Event::Message(event) => {
+            super::Event::Message(event) => {
                 let event = Rc::new(event);
                 self.on_message(event);
             },
-            Event::Timer(ref event) => {
+            super::Event::Timer(ref event) => {
                 self.on_timer(event);
             }
         };
@@ -85,29 +101,49 @@ impl Dispatcher {
     }
 }
 
-pub struct Reactor {
-    exit_handler: Box<self::handlers::exit::ExitHandler>,
-    event_handler: Box<self::handlers::event::EventHandler>,
+use std::collections::BTreeMap;
+
+pub struct RequestReactor {
+    handlers: BTreeMap<RequestHandler, Box<reactor::EventHandler<Request, Handler=RequestHandler>>>,
     demultiplexer: Demultiplexer<Request>,
     exit_condition: Condition
 }
 
-impl reactor::Reactor for Reactor {
+impl RequestReactor {
+    fn new(demultiplexer: Demultiplexer<Request>) -> RequestReactor {
+        let exit_condition = Condition::new(false);
+        let exit_handler = Box::new(handlers::exit::ExitHandler::new(exit_condition.clone()));
+        let event_handler = Box::new(handlers::event::EventHandler::new());
+
+        let mut reactor = RequestReactor {
+            demultiplexer: demultiplexer,
+            exit_condition: exit_condition,
+            handlers: BTreeMap::new()
+        };
+
+        reactor.register_handler(exit_handler);
+        reactor.register_handler(event_handler);
+        reactor
+    }
+}
+
+impl Reactor for RequestReactor {
     type Event = Request;
+    type Handler = RequestHandler;
     fn handle_events(&mut self) {
         while !self.exit_condition.is_active() {
             if let Some(request) = self.demultiplexer.select() {
-                match request {
-                    event @ Request::Event(_) => self.event_handler.handle_event(event),
-                    event @ Request::Exit => self.exit_handler.handle_event(event)
-                }
+                let mut handler = self.handlers.get_mut(&request.handler()).unwrap();
+                handler.handle_event(request);
             } else {
                 break;
             }
         }
     }
-    fn register_handler(&mut self, handler: Box<reactor::EventHandler<Self::Event>>) {}
-    fn remove_handler(&mut self, handler: &reactor::EventHandler<Self::Event>){}
+    fn register_handler(&mut self, handler: Box<reactor::EventHandler<Self::Event, Handler=RequestHandler>>) {
+        self.handlers.insert(handler.handler(), handler);
+    }
+    fn remove_handler(&mut self, handler: &reactor::EventHandler<Self::Event, Handler=RequestHandler>){}
 }
 
 struct Demultiplexer<T>(Receiver<T>);
@@ -121,7 +157,7 @@ impl reactor::EventDemultiplexer for Demultiplexer<Request> {
 
 mod handlers {
     pub mod exit {
-        use dispatcher::Request;
+        use dispatcher::{Request, RequestHandler};
         use condition::Condition;
         use reactor::EventHandler;
 
@@ -140,6 +176,7 @@ mod handlers {
         }
 
         impl EventHandler<Request> for ExitHandler {
+            type Handler = RequestHandler;
             fn handle_event(&mut self, event: Request) {
                 if let Request::Exit = event {
                     self.stops += 1;
@@ -151,22 +188,35 @@ mod handlers {
                     unreachable!("An ExitHandler should only receive Exit events");
                 }
             }
+            fn handler(&self) -> Self::Handler {
+                RequestHandler::Exit
+            }
         }
     }
 
     pub mod event {
-        use dispatcher::Request;
+        use dispatcher::{Request, RequestHandler};
         use reactor;
 
         pub struct EventHandler;
 
+        impl EventHandler {
+            pub fn new() -> EventHandler {
+                EventHandler
+            }
+        }
+
         impl reactor::EventHandler<Request> for EventHandler {
+            type Handler = RequestHandler;
             fn handle_event(&mut self, event: Request) {
                 if let Request::Event(_) = event {
                     println!("Event recvd");
                 } else {
                     unreachable!("An EventHandler should only receive Event events");
                 }
+            }
+            fn handler(&self) -> Self::Handler {
+                RequestHandler::Event
             }
         }
     }
