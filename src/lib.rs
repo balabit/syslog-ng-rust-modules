@@ -25,8 +25,6 @@ mod timer;
 
 pub type MiliSec = u32;
 
-use action::ExecResult;
-
 #[derive(Debug)]
 pub enum Event {
     Timer(TimerEvent),
