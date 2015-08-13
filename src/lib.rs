@@ -21,6 +21,7 @@ mod correlator;
 mod dispatcher;
 pub mod message;
 mod state;
+mod reactor;
 mod timer;
 
 pub type MiliSec = u32;
