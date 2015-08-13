@@ -12,7 +12,7 @@ pub enum Request {
 
 #[derive(Debug)]
 pub enum Response {
-    Dispatch(ExecResult),
+    Event(ExecResult),
     Exit
 }
 

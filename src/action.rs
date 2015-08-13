@@ -26,7 +26,7 @@ pub enum ExecResult {
 
 impl From<ExecResult> for Response {
     fn from(result: ExecResult) -> Response {
-        Response::Dispatch(result)
+        Response::Event(result)
     }
 }
 

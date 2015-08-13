@@ -42,7 +42,7 @@ impl Correlator {
 
     fn consume_results(&mut self) {
         for i in self.dispatcher_output_channel.try_recv() {
-            if let Response::Dispatch(result) = i {
+            if let Response::Event(result) = i {
                 self.action_handlers.handle(result);
             }
         }
@@ -73,7 +73,7 @@ impl Correlator {
 
     fn handle_command(&mut self, command: Response) -> Result<(), ()> {
         match command {
-            Response::Dispatch(result) => self.action_handlers.handle(result),
+            Response::Event(result) => self.action_handlers.handle(result),
             Response::Exit => {
                 if self.handle_exit_command() {
                     return Err(());
