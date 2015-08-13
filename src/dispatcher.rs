@@ -219,6 +219,40 @@ mod handlers {
                 RequestHandler::Event
             }
         }
+
+        pub mod message {
+            use std::collections::BTreeMap;
+
+            use dispatcher::{Request, RequestHandler};
+            use reactor::{self, EventHandler, Event};
+
+            pub struct MessageHandler {
+                handlers: BTreeMap<::EventHandler, Box<reactor::EventHandler<::Event, Handler=::EventHandler>>>,
+            }
+
+            impl MessageHandler {
+                pub fn new() -> MessageHandler {
+                    let mut handler = MessageHandler{
+                        handlers: BTreeMap::new()
+                    };
+                    handler
+                }
+
+                fn register_handler(&mut self, handler: Box<reactor::EventHandler<::Event, Handler=::EventHandler>>) {
+                    self.handlers.insert(handler.handler(), handler);
+                }
+            }
+
+            impl reactor::EventHandler<::Event> for MessageHandler {
+                type Handler = ::EventHandler;
+                fn handle_event(&mut self, event: ::Event) {
+                    println!("message event");
+                }
+                fn handler(&self) -> Self::Handler {
+                    ::EventHandler::Message
+                }
+            }
+        }
     }
 
     mod linear {
