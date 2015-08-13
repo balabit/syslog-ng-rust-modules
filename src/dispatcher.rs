@@ -6,7 +6,7 @@ use super::{config, Context, Event, Message, TimerEvent};
 
 #[derive(Debug)]
 pub enum Request {
-    Dispatch(Event),
+    Event(Event),
     Exit
 }
 
@@ -35,7 +35,7 @@ impl Dispatcher {
     pub fn start_loop(&mut self, channel: Receiver<Request>) {
         for i in channel.iter() {
             match i {
-                Request::Dispatch(event) => self.dispatch(event),
+                Request::Event(event) => self.dispatch(event),
                 Request::Exit => {
                     if self.on_exit() {
                         break;

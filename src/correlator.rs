@@ -37,7 +37,7 @@ impl Correlator {
 
     pub fn push_message(&mut self, message: Message) -> Result<(), mpsc::SendError<Request>> {
         self.consume_results();
-        self.dispatcher_input_channel.send(Request::Dispatch(Event::Message(message)))
+        self.dispatcher_input_channel.send(Request::Event(Event::Message(message)))
     }
 
     fn consume_results(&mut self) {

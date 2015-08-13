@@ -13,7 +13,7 @@ impl Timer {
         thread::spawn(move || {
             loop {
                 thread::sleep_ms(ms);
-                if tx.send(Request::Dispatch(Event::Timer(TimerEvent(ms)))).is_err() {
+                if tx.send(Request::Event(Event::Timer(TimerEvent(ms)))).is_err() {
                     break;
                 }
             }
