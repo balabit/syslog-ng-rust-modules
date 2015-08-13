@@ -222,33 +222,32 @@ mod handlers {
     }
 
     mod linear {
+        use context::Context;
         use dispatcher::{Request, RequestHandler};
         use EventHandler;
         use Event;
         use reactor;
 
-        pub struct LinearHandler<C, H> {
-            contexts: Vec<C>,
-            handler: H
+        pub struct LinearHandler {
+            contexts: Vec<Context>
         }
 
-        impl<C, H> LinearHandler<C, H> {
-            pub fn new(handler: H) -> LinearHandler<C, H> {
+        impl LinearHandler {
+            pub fn new() -> LinearHandler {
                 LinearHandler {
-                    contexts: Vec::new(),
-                    handler: handler
+                    contexts: Vec::new()
                 }
             }
         }
 
-        /*impl<C, H, E> reactor::EventHandler<E> for LinearHandler<C, H> {
-            type Handler = H;
-            fn handle_event(&mut self, event: E) {
-
+        impl reactor::EventHandler<Event> for LinearHandler {
+            type Handler = EventHandler;
+            fn handle_event(&mut self, event: Event) {
+                println!("timer event");
             }
             fn handler(&self) -> Self::Handler {
-                self.handler
+                EventHandler::Timer
             }
-        }*/
+        }
     }
 }
