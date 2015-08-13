@@ -11,7 +11,7 @@ pub enum Request {
     Exit
 }
 
-#[derive(Debug, Eq, PartialEq, PartialOrd, Ord)]
+#[derive(Clone, Debug, Eq, PartialEq, PartialOrd, Ord)]
 pub enum RequestHandler {
     Event,
     Exit
@@ -219,5 +219,36 @@ mod handlers {
                 RequestHandler::Event
             }
         }
+    }
+
+    mod linear {
+        use dispatcher::{Request, RequestHandler};
+        use EventHandler;
+        use Event;
+        use reactor;
+
+        pub struct LinearHandler<C, H> {
+            contexts: Vec<C>,
+            handler: H
+        }
+
+        impl<C, H> LinearHandler<C, H> {
+            pub fn new(handler: H) -> LinearHandler<C, H> {
+                LinearHandler {
+                    contexts: Vec::new(),
+                    handler: handler
+                }
+            }
+        }
+
+        /*impl<C, H, E> reactor::EventHandler<E> for LinearHandler<C, H> {
+            type Handler = H;
+            fn handle_event(&mut self, event: E) {
+
+            }
+            fn handler(&self) -> Self::Handler {
+                self.handler
+            }
+        }*/
     }
 }
