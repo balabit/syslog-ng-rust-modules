@@ -1,11 +1,18 @@
 use std::sync::mpsc::{Receiver, Sender};
 use std::rc::Rc;
 
-use super::{config, CommandResult, Context, Event, Message, TimerEvent};
+use action::ExecResult;
+use super::{config, Context, Event, Message, TimerEvent};
 
 #[derive(Debug)]
 pub enum Request {
     Dispatch(Event),
+    Exit
+}
+
+#[derive(Debug)]
+pub enum CommandResult {
+    Dispatch(ExecResult),
     Exit
 }
 

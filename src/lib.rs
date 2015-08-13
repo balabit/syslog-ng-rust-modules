@@ -8,7 +8,7 @@ pub use action::Action;
 pub use conditions::Conditions;
 pub use context::Context;
 pub use correlator::Correlator;
-pub use dispatcher::{Dispatcher, Request};
+pub use dispatcher::{CommandResult, Dispatcher, Request};
 pub use message::Message;
 pub use timer::{Timer,
                 TimerEvent};
@@ -31,10 +31,4 @@ use action::ExecResult;
 pub enum Event {
     Timer(TimerEvent),
     Message(Message)
-}
-
-#[derive(Debug)]
-pub enum CommandResult {
-    Dispatch(ExecResult),
-    Exit
 }
