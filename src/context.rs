@@ -9,11 +9,17 @@ use self::map::MapContext;
 
 pub trait EventHandler<T> {
     type Result;
+    type Handler;
     fn handle_event(&mut self, T) -> Self::Result;
+    fn handlers(&self) -> &[Self::Handler];
 }
 
 impl EventHandler<Rc<Message>> for LinearContext {
     type Result = Option<Vec<ExecResult>>;
+    type Handler = String;
+    fn handlers(&self) -> &[Self::Handler] {
+        self.patterns()
+    }
     fn handle_event(&mut self, message: Rc<Message>) -> Self::Result {
         self.on_message(message)
     }
@@ -21,6 +27,10 @@ impl EventHandler<Rc<Message>> for LinearContext {
 
 impl EventHandler<TimerEvent> for LinearContext {
     type Result = Option<Vec<ExecResult>>;
+    type Handler = String;
+    fn handlers(&self) -> &[Self::Handler] {
+        self.patterns()
+    }
     fn handle_event(&mut self, event: TimerEvent) -> Self::Result {
         self.on_timer(&event)
     }
@@ -175,6 +185,10 @@ mod linear {
 
         pub fn is_open(&self) -> bool {
             self.state.is_open()
+        }
+
+        pub fn patterns(&self) -> &[String] {
+            &self.base.conditions.patterns
         }
     }
 
