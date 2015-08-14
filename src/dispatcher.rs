@@ -243,31 +243,65 @@ mod handlers {
 
         pub mod message {
             use std::collections::BTreeMap;
+            use std::rc::Rc;
+            use std::cell::RefCell;
 
+            use action;
+            use context;
+            use Message;
             use dispatcher::{Request, RequestHandler};
-            use reactor::{self, EventHandler, Event};
+            use context::EventHandler;
+            use reactor::{self, Event};
 
             pub struct MessageHandler {
-                handlers: BTreeMap<::EventHandler, Box<reactor::EventHandler<::Event, Handler=::EventHandler>>>,
+                handlers: BTreeMap<String, Vec<Rc<RefCell<Box<context::EventHandler<Rc<Message>, Result=Option<Vec<action::ExecResult>>, Handler=String>>>>>>,
+                keyless_handlers: Vec<Rc<RefCell<Box<context::EventHandler<Rc<Message>, Result=Option<Vec<action::ExecResult>>, Handler=String>>>>>,
             }
 
             impl MessageHandler {
                 pub fn new() -> MessageHandler {
-                    let mut handler = MessageHandler{
-                        handlers: BTreeMap::new()
-                    };
-                    handler
+                    MessageHandler{
+                        handlers: BTreeMap::new(),
+                        keyless_handlers: Vec::new()
+                    }
                 }
 
-                fn register_handler(&mut self, handler: Box<reactor::EventHandler<::Event, Handler=::EventHandler>>) {
-                    self.handlers.insert(handler.handler(), handler);
+                fn register_handler(&mut self, handler: Box<context::EventHandler<Rc<Message>, Result=Option<Vec<action::ExecResult>>, Handler=String>>) {
+                    if handler.handlers().is_empty() {
+                        let handler = Rc::new(RefCell::new(handler));
+                        self.keyless_handlers.push(handler);
+                    } else {
+                        let refcounted_handler = Rc::new(RefCell::new(handler));
+                        let cloned_handler = refcounted_handler.clone();
+                        for key in cloned_handler.borrow().handlers() {
+                            let handlers = self.handlers.entry(key.clone()).or_insert(Vec::new());
+                            handlers.push(cloned_handler.clone());
+                        }
+                    }
                 }
             }
 
             impl reactor::EventHandler<::Event> for MessageHandler {
                 type Handler = ::EventHandler;
                 fn handle_event(&mut self, event: ::Event) {
-                    println!("message event");
+                    if let ::Event::Message(event) = event {
+                        let event = Rc::new(event);
+
+                        println!("message event");
+                        if let Some(handlers) = self.handlers.get_mut(event.uuid()) {
+                            for i in handlers.iter_mut() {
+                                i.borrow_mut().handle_event(event.clone());
+                            }
+                        } else {
+                            println!("no handler found for this message");
+                        }
+
+                        for i in self.keyless_handlers.iter_mut() {
+                            i.borrow_mut().handle_event(event.clone());
+                        }
+                    } else {
+                        unreachable!("MessageEventHandler should only handle Message events");
+                    }
                 }
                 fn handler(&self) -> Self::Handler {
                     ::EventHandler::Message
@@ -290,7 +324,7 @@ mod handlers {
         use action::ExecResult;
 
         pub struct TimerEventHandler {
-            contexts: Vec<Rc<RefCell<Box<EventHandler<TimerEvent, Result=Option<Vec<ExecResult>>>>>>>
+            contexts: Vec<Rc<RefCell<Box<EventHandler<TimerEvent, Result=Option<Vec<ExecResult>>, Handler=String>>>>>
         }
 
         impl TimerEventHandler {
@@ -304,9 +338,13 @@ mod handlers {
         impl reactor::EventHandler<Event> for TimerEventHandler {
             type Handler = ::EventHandler;
             fn handle_event(&mut self, event: Event) {
-                println!("timer event");
-                for i in self.contexts.iter_mut() {
-                    i.borrow_mut().handle_event(event);
+                if let ::Event::Timer(event) = event {
+                    println!("timer event");
+                    for i in self.contexts.iter_mut() {
+                        i.borrow_mut().handle_event(event);
+                    }
+                } else {
+                    unreachable!("TimerEventHandler should only handle Timer events");
                 }
             }
             fn handler(&self) -> Self::Handler {
