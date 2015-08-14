@@ -7,27 +7,14 @@ use action::ExecResult;
 use self::linear::LinearContext;
 use self::map::MapContext;
 
+pub enum Event {
+    Timer(TimerEvent),
+    Message(Rc<Message>)
+}
+
 pub trait EventHandler<T> {
     fn handle_event(&mut self, T) -> Option<Vec<ExecResult>>;
     fn handlers(&self) -> &[String];
-}
-
-impl EventHandler<Rc<Message>> for LinearContext {
-    fn handlers(&self) -> &[String] {
-        self.patterns()
-    }
-    fn handle_event(&mut self, message: Rc<Message>) -> Option<Vec<ExecResult>> {
-        self.on_message(message)
-    }
-}
-
-impl EventHandler<TimerEvent> for LinearContext {
-    fn handlers(&self) -> &[String] {
-        self.patterns()
-    }
-    fn handle_event(&mut self, event: TimerEvent) -> Option<Vec<ExecResult>> {
-        self.on_timer(&event)
-    }
 }
 
 #[derive(Debug)]
@@ -144,6 +131,15 @@ impl From<config::Context> for Context {
     }
 }
 
+impl From<Context> for Box<EventHandler<Event>> {
+    fn from(context: Context) -> Box<EventHandler<Event>> {
+        match context {
+            Context::Linear(context) => Box::new(context),
+            Context::Map(context) => Box::new(context),
+        }
+    }
+}
+
 mod linear {
     use std::rc::Rc;
 
@@ -153,7 +149,7 @@ mod linear {
     use Message;
     use state::State;
     use TimerEvent;
-    use super::BaseContext;
+    use super::{BaseContext, EventHandler};
 
     #[derive(Debug)]
     pub struct LinearContext {
@@ -195,6 +191,15 @@ mod linear {
         }
     }
 
+    impl EventHandler<super::Event> for LinearContext {
+        fn handlers(&self) -> &[String] {
+            self.patterns()
+        }
+        fn handle_event(&mut self, event: super::Event) -> Option<Vec<ExecResult>> {
+            self.on_event(event)
+        }
+    }
+
     impl From<LinearContext> for Box<super::EventHandler<TimerEvent>> {
         fn from(context: LinearContext) -> Box<super::EventHandler<TimerEvent>> {
             Box::new(context)
@@ -218,7 +223,7 @@ mod map {
     use Message;
     use state::State;
     use TimerEvent;
-    use super::BaseContext;
+    use super::{BaseContext, EventHandler};
 
     #[derive(Debug)]
     pub struct MapContext {
@@ -292,6 +297,40 @@ mod map {
             let _ = self.format_buffer.write_str(message.get("PROGRAM").unwrap_or(&empty));
             let _ = self.format_buffer.write_str(":");
             let _ = self.format_buffer.write_str(message.get("PID").unwrap_or(&empty));
+        }
+
+        pub fn patterns(&self) -> &[String] {
+            &self.base.conditions.patterns
+        }
+    }
+
+    impl EventHandler<Rc<Message>> for MapContext {
+        fn handlers(&self) -> &[String] {
+            self.patterns()
+        }
+        fn handle_event(&mut self, message: Rc<Message>) -> Option<Vec<ExecResult>> {
+            self.on_message(message)
+        }
+    }
+
+    impl EventHandler<TimerEvent> for MapContext {
+        fn handlers(&self) -> &[String] {
+            self.patterns()
+        }
+        fn handle_event(&mut self, event: TimerEvent) -> Option<Vec<ExecResult>> {
+            self.on_timer(&event)
+        }
+    }
+
+    impl From<MapContext> for Box<super::EventHandler<TimerEvent>> {
+        fn from(context: MapContext) -> Box<super::EventHandler<TimerEvent>> {
+            Box::new(context)
+        }
+    }
+
+    impl From<MapContext> for Box<super::EventHandler<Rc<Message>>> {
+        fn from(context: MapContext) -> Box<super::EventHandler<Rc<Message>>> {
+            Box::new(context)
         }
     }
 

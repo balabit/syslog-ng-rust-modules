@@ -22,6 +22,10 @@ impl Correlator {
         let _ = Timer::from_chan(TIMER_STEP, dispatcher_input_channel.clone());
 
         let handle = thread::spawn(move || {
+            for i in contexts.into_iter() {
+                let handler: Box<> = i.into();
+            }
+
             let mut dispatcher = Dispatcher::new(contexts, dispatcher_output_channel_tx);
             dispatcher.start_loop(rx);
         });
