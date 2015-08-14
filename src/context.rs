@@ -8,30 +8,24 @@ use self::linear::LinearContext;
 use self::map::MapContext;
 
 pub trait EventHandler<T> {
-    type Result;
-    type Handler;
-    fn handle_event(&mut self, T) -> Self::Result;
-    fn handlers(&self) -> &[Self::Handler];
+    fn handle_event(&mut self, T) -> Option<Vec<ExecResult>>;
+    fn handlers(&self) -> &[String];
 }
 
 impl EventHandler<Rc<Message>> for LinearContext {
-    type Result = Option<Vec<ExecResult>>;
-    type Handler = String;
-    fn handlers(&self) -> &[Self::Handler] {
+    fn handlers(&self) -> &[String] {
         self.patterns()
     }
-    fn handle_event(&mut self, message: Rc<Message>) -> Self::Result {
+    fn handle_event(&mut self, message: Rc<Message>) -> Option<Vec<ExecResult>> {
         self.on_message(message)
     }
 }
 
 impl EventHandler<TimerEvent> for LinearContext {
-    type Result = Option<Vec<ExecResult>>;
-    type Handler = String;
-    fn handlers(&self) -> &[Self::Handler] {
+    fn handlers(&self) -> &[String] {
         self.patterns()
     }
-    fn handle_event(&mut self, event: TimerEvent) -> Self::Result {
+    fn handle_event(&mut self, event: TimerEvent) -> Option<Vec<ExecResult>> {
         self.on_timer(&event)
     }
 }
@@ -198,6 +192,18 @@ mod linear {
                 base: BaseContext::from(config),
                 state: State::new()
             }
+        }
+    }
+
+    impl From<LinearContext> for Box<super::EventHandler<TimerEvent>> {
+        fn from(context: LinearContext) -> Box<super::EventHandler<TimerEvent>> {
+            Box::new(context)
+        }
+    }
+
+    impl From<LinearContext> for Box<super::EventHandler<Rc<Message>>> {
+        fn from(context: LinearContext) -> Box<super::EventHandler<Rc<Message>>> {
+            Box::new(context)
         }
     }
 }

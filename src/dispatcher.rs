@@ -254,8 +254,8 @@ mod handlers {
             use reactor::{self, Event};
 
             pub struct MessageHandler {
-                handlers: BTreeMap<String, Vec<Rc<RefCell<Box<context::EventHandler<Rc<Message>, Result=Option<Vec<action::ExecResult>>, Handler=String>>>>>>,
-                keyless_handlers: Vec<Rc<RefCell<Box<context::EventHandler<Rc<Message>, Result=Option<Vec<action::ExecResult>>, Handler=String>>>>>,
+                handlers: BTreeMap<String, Vec<Rc<RefCell<Box<context::EventHandler<Rc<Message> >>>>>>,
+                keyless_handlers: Vec<Rc<RefCell<Box<context::EventHandler<Rc<Message> >>>>>,
             }
 
             impl MessageHandler {
@@ -266,7 +266,7 @@ mod handlers {
                     }
                 }
 
-                fn register_handler(&mut self, handler: Box<context::EventHandler<Rc<Message>, Result=Option<Vec<action::ExecResult>>, Handler=String>>) {
+                fn register_handler(&mut self, handler: Box<context::EventHandler<Rc<Message>>>) {
                     if handler.handlers().is_empty() {
                         let handler = Rc::new(RefCell::new(handler));
                         self.keyless_handlers.push(handler);
@@ -324,7 +324,7 @@ mod handlers {
         use action::ExecResult;
 
         pub struct TimerEventHandler {
-            contexts: Vec<Rc<RefCell<Box<EventHandler<TimerEvent, Result=Option<Vec<ExecResult>>, Handler=String>>>>>
+            contexts: Vec<Rc<RefCell<Box<EventHandler<TimerEvent>>>>>
         }
 
         impl TimerEventHandler {
