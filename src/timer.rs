@@ -3,7 +3,7 @@ use std::thread;
 
 use super::{Event, MiliSec, Request};
 
-#[derive(Debug)]
+#[derive(Clone, Copy, Debug)]
 pub struct TimerEvent(pub MiliSec);
 
 pub struct Timer;
