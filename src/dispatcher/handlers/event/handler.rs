@@ -1,20 +1,20 @@
 use std::collections::BTreeMap;
 
 use dispatcher::request::{Request, RequestHandler};
-use reactor::{self, EventHandler, Event};
+use reactor::{self, Event};
 
 use dispatcher::handlers::event::timer::TimerEventHandler;
 use dispatcher::handlers::event::message::MessageHandler;
 
-pub struct Handler{
+pub struct EventHandler{
     handlers: BTreeMap<::EventHandler, Box<reactor::EventHandler<::Event, Handler=::EventHandler>>>,
 }
 
-impl Handler {
-    pub fn new() -> Handler {
+impl EventHandler {
+    pub fn new() -> EventHandler {
         let timer_handler = Box::new(TimerEventHandler::new());
         let message_handler = Box::new(MessageHandler::new());
-        let mut handler = Handler{
+        let mut handler = EventHandler{
             handlers: BTreeMap::new()
         };
         handler.register_handler(timer_handler);
@@ -27,7 +27,7 @@ impl Handler {
     }
 }
 
-impl reactor::EventHandler<Request> for Handler {
+impl reactor::EventHandler<Request> for EventHandler {
     type Handler = RequestHandler;
     fn handle_event(&mut self, event: Request) {
         if let Request::Event(event) = event {
@@ -36,7 +36,7 @@ impl reactor::EventHandler<Request> for Handler {
                 handler.handle_event(event);
             }
         } else {
-            unreachable!("An Handler should only receive Event events");
+            unreachable!("An EventHandler should only receive Event events");
         }
     }
     fn handler(&self) -> Self::Handler {

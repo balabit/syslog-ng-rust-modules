@@ -16,7 +16,7 @@ impl RequestReactor {
     fn new(demultiplexer: Demultiplexer<Request>) -> RequestReactor {
         let exit_condition = Condition::new(false);
         let exit_handler = Box::new(handlers::exit::ExitHandler::new(exit_condition.clone()));
-        let event_handler = Box::new(handlers::event::Handler::new());
+        let event_handler = Box::new(handlers::event::EventHandler::new());
 
         let mut reactor = RequestReactor {
             demultiplexer: demultiplexer,

@@ -1,4 +1,4 @@
-pub use self::handler::Handler;
+pub use self::handler::EventHandler;
 
 pub mod handler;
 pub mod message;
