@@ -1,5 +1,6 @@
 use std::collections::BTreeMap;
 
+use event;
 use dispatcher::request::{Request, RequestHandler};
 use reactor::{self, Event};
 
@@ -7,7 +8,7 @@ use dispatcher::handlers::event::timer::TimerEventHandler;
 use dispatcher::handlers::event::message::MessageHandler;
 
 pub struct EventHandler{
-    handlers: BTreeMap<::EventHandler, Box<reactor::EventHandler<::Event, Handler=::EventHandler>>>,
+    handlers: BTreeMap<event::EventHandler, Box<reactor::EventHandler<event::Event, Handler=event::EventHandler>>>,
 }
 
 impl EventHandler {
@@ -22,7 +23,7 @@ impl EventHandler {
         handler
     }
 
-    fn register_handler(&mut self, handler: Box<reactor::EventHandler<::Event, Handler=::EventHandler>>) {
+    fn register_handler(&mut self, handler: Box<reactor::EventHandler<event::Event, Handler=event::EventHandler>>) {
         self.handlers.insert(handler.handler(), handler);
     }
 }

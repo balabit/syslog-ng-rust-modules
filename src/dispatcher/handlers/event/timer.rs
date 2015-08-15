@@ -5,7 +5,8 @@ use context::Context;
 use dispatcher::request::{Request, RequestHandler};
 use context::EventHandler;
 use context;
-use Event;
+use event;
+use event::Event;
 use reactor;
 use TimerEvent;
 use action::ExecResult;
@@ -23,9 +24,9 @@ impl TimerEventHandler {
 }
 
 impl reactor::EventHandler<Event> for TimerEventHandler {
-    type Handler = ::EventHandler;
+    type Handler = event::EventHandler;
     fn handle_event(&mut self, event: Event) {
-        if let ::Event::Timer(event) = event {
+        if let event::Event::Timer(event) = event {
             println!("timer event");
             for i in self.contexts.iter_mut() {
                 i.borrow_mut().handle_event(event);
@@ -35,6 +36,6 @@ impl reactor::EventHandler<Event> for TimerEventHandler {
         }
     }
     fn handler(&self) -> Self::Handler {
-        ::EventHandler::Timer
+        event::EventHandler::Timer
     }
 }

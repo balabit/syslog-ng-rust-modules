@@ -3,7 +3,7 @@ use std::thread;
 use std::result::Result;
 
 use action::ActionHandlers;
-use super::{config, Context, Event, Message, MiliSec, Response, Timer};
+use {config, context, event , Message, MiliSec, Response, Timer};
 use dispatcher::request::{Request, RequestHandler};
 
 const TIMER_STEP: MiliSec = 100;
@@ -43,7 +43,7 @@ impl Correlator {
 
     pub fn push_message(&mut self, message: Message) -> Result<(), mpsc::SendError<Request>> {
         self.consume_results();
-        self.dispatcher_input_channel.send(Request::Event(Event::Message(message)))
+        self.dispatcher_input_channel.send(Request::Event(event::Event::Message(message)))
     }
 
     fn consume_results(&mut self) {

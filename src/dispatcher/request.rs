@@ -1,4 +1,4 @@
-use ::Event;
+use event::Event;
 use reactor;
 
 #[derive(Debug)]

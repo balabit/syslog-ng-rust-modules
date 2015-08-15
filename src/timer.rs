@@ -1,7 +1,8 @@
 use std::sync::mpsc;
 use std::thread;
 
-use super::{Event, MiliSec};
+use MiliSec;
+use event::Event;
 use dispatcher::request::Request;
 
 #[derive(Clone, Copy, Debug)]
