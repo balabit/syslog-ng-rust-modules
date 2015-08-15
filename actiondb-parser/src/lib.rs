@@ -50,10 +50,7 @@ impl ActiondbParser {
     fn populate_logmsg(formatter: &mut MessageFormatter, msg: &mut LogMessage, result: &MatchResult) {
         ActiondbParser::populate_values(formatter, msg, result);
         ActiondbParser::populate_name(formatter, msg, result);
-
-        let uuid = result.pattern().uuid().to_hyphenated_string();
-        let (key, value) = formatter.format(keys::PATTERN_UUID, &uuid);
-        msg.set_value(key, value);
+        ActiondbParser::populate_uuid(formatter, msg, result);
     }
 
     fn populate_values(formatter: &mut MessageFormatter, msg: &mut LogMessage, result: &MatchResult) {
@@ -68,6 +65,12 @@ impl ActiondbParser {
             let (key, value) = formatter.format(keys::PATTERN_NAME, name);
             msg.set_value(key, value);
         }
+    }
+
+    fn populate_uuid(formatter: &mut MessageFormatter, msg: &mut LogMessage, result: &MatchResult) {
+        let uuid = result.pattern().uuid().to_hyphenated_string();
+        let (key, value) = formatter.format(keys::PATTERN_UUID, &uuid);
+        msg.set_value(key, value);
     }
 
     pub fn set_prefix(&mut self, prefix: String) {
