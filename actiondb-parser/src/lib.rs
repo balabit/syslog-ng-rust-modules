@@ -49,11 +49,7 @@ impl ActiondbParser {
 
     fn populate_logmsg(formatter: &mut MessageFormatter, msg: &mut LogMessage, result: &MatchResult) {
         ActiondbParser::populate_values(formatter, msg, result);
-
-        if let Some(name) = result.pattern().name() {
-            let (key, value) = formatter.format(keys::PATTERN_NAME, name);
-            msg.set_value(key, value);
-        }
+        ActiondbParser::populate_name(formatter, msg, result);
 
         let uuid = result.pattern().uuid().to_hyphenated_string();
         let (key, value) = formatter.format(keys::PATTERN_UUID, &uuid);
@@ -63,6 +59,13 @@ impl ActiondbParser {
     fn populate_values(formatter: &mut MessageFormatter, msg: &mut LogMessage, result: &MatchResult) {
         for &(key, value) in result.pairs() {
             let (key, value) = formatter.format(key, value);
+            msg.set_value(key, value);
+        }
+    }
+
+    fn populate_name(formatter: &mut MessageFormatter, msg: &mut LogMessage, result: &MatchResult) {
+        if let Some(name) = result.pattern().name() {
+            let (key, value) = formatter.format(keys::PATTERN_NAME, name);
             msg.set_value(key, value);
         }
     }
