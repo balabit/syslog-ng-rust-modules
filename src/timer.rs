@@ -1,7 +1,8 @@
 use std::sync::mpsc;
 use std::thread;
 
-use super::{Event, MiliSec, Request};
+use super::{Event, MiliSec};
+use dispatcher::request::Request;
 
 #[derive(Clone, Copy, Debug)]
 pub struct TimerEvent(pub MiliSec);

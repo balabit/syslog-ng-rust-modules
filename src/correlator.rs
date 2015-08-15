@@ -3,7 +3,8 @@ use std::thread;
 use std::result::Result;
 
 use action::ActionHandlers;
-use super::{config, Context, Event, Message, MiliSec, Response, Request, Timer};
+use super::{config, Context, Event, Message, MiliSec, Response, Timer};
+use dispatcher::request::{Request, RequestHandler};
 
 const TIMER_STEP: MiliSec = 100;
 

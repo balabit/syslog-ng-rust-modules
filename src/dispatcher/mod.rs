@@ -5,27 +5,9 @@ use action::ExecResult;
 use super::{config, Condition, Context, Message, TimerEvent};
 use reactor::{self, Event, EventDemultiplexer, EventHandler, Reactor};
 
-#[derive(Debug)]
-pub enum Request {
-    Event(super::Event),
-    Exit
-}
+use self::request::{Request, RequestHandler};
 
-#[derive(Clone, Debug, Eq, PartialEq, PartialOrd, Ord)]
-pub enum RequestHandler {
-    Event,
-    Exit
-}
-
-impl reactor::Event for Request {
-    type Handler = RequestHandler;
-    fn handler(&self) -> Self::Handler {
-        match *self {
-            Request::Event(_) => RequestHandler::Event,
-            Request::Exit => RequestHandler::Exit,
-        }
-    }
-}
+pub mod request;
 
 #[derive(Debug)]
 pub enum Response {
@@ -89,7 +71,7 @@ impl reactor::EventDemultiplexer for Demultiplexer<Request> {
 
 mod handlers {
     pub mod exit {
-        use dispatcher::{Request, RequestHandler};
+        use dispatcher::request::{Request, RequestHandler};
         use condition::Condition;
         use reactor::EventHandler;
 
@@ -129,7 +111,7 @@ mod handlers {
     pub mod event {
         use std::collections::BTreeMap;
 
-        use dispatcher::{Request, RequestHandler};
+        use dispatcher::request::{Request, RequestHandler};
         use reactor::{self, EventHandler, Event};
 
         use super::timer::TimerEventHandler;
@@ -181,7 +163,7 @@ mod handlers {
             use action;
             use context;
             use Message;
-            use dispatcher::{Request, RequestHandler};
+            use dispatcher::request::{Request, RequestHandler};
             use context::EventHandler;
             use reactor::{self, Event};
 
@@ -247,7 +229,7 @@ mod handlers {
         use std::rc::Rc;
 
         use context::Context;
-        use dispatcher::{Request, RequestHandler};
+        use dispatcher::request::{Request, RequestHandler};
         use context::EventHandler;
         use context;
         use Event;
