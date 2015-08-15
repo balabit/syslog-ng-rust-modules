@@ -13,20 +13,12 @@ pub struct RequestReactor {
 }
 
 impl RequestReactor {
-    pub fn new(demultiplexer: Demultiplexer<Request>) -> RequestReactor {
-        let exit_condition = Condition::new(false);
-        let exit_handler = Box::new(handlers::exit::ExitHandler::new(exit_condition.clone()));
-        let event_handler = Box::new(handlers::event::EventHandler::new());
-
-        let mut reactor = RequestReactor {
+    pub fn new(demultiplexer: Demultiplexer<Request>, exit_condition: Condition) -> RequestReactor {
+        RequestReactor {
             demultiplexer: demultiplexer,
             exit_condition: exit_condition,
             handlers: BTreeMap::new()
-        };
-
-        reactor.register_handler(exit_handler);
-        reactor.register_handler(event_handler);
-        reactor
+        }
     }
 }
 
