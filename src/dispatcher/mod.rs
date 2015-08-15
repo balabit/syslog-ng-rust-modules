@@ -3,11 +3,13 @@ use std::rc::Rc;
 
 use action::ExecResult;
 use super::{config, Condition, Context, Message, TimerEvent};
-use reactor::{self, Event, EventDemultiplexer, EventHandler, Reactor};
+use reactor::{Event, EventDemultiplexer, EventHandler, Reactor};
 
 use self::request::{Request, RequestHandler};
 
+pub mod demux;
 pub mod request;
+pub mod reactor;
 
 #[derive(Debug)]
 pub enum Response {
@@ -15,61 +17,7 @@ pub enum Response {
     Exit
 }
 
-use std::collections::BTreeMap;
-
-pub struct RequestReactor {
-    handlers: BTreeMap<RequestHandler, Box<reactor::EventHandler<Request, Handler=RequestHandler>>>,
-    demultiplexer: Demultiplexer<Request>,
-    exit_condition: Condition
-}
-
-impl RequestReactor {
-    fn new(demultiplexer: Demultiplexer<Request>) -> RequestReactor {
-        let exit_condition = Condition::new(false);
-        let exit_handler = Box::new(handlers::exit::ExitHandler::new(exit_condition.clone()));
-        let event_handler = Box::new(handlers::event::Handler::new());
-
-        let mut reactor = RequestReactor {
-            demultiplexer: demultiplexer,
-            exit_condition: exit_condition,
-            handlers: BTreeMap::new()
-        };
-
-        reactor.register_handler(exit_handler);
-        reactor.register_handler(event_handler);
-        reactor
-    }
-}
-
-impl Reactor for RequestReactor {
-    type Event = Request;
-    type Handler = RequestHandler;
-    fn handle_events(&mut self) {
-        while !self.exit_condition.is_active() {
-            if let Some(request) = self.demultiplexer.select() {
-                let mut handler = self.handlers.get_mut(&request.handler()).unwrap();
-                handler.handle_event(request);
-            } else {
-                break;
-            }
-        }
-    }
-    fn register_handler(&mut self, handler: Box<reactor::EventHandler<Self::Event, Handler=RequestHandler>>) {
-        self.handlers.insert(handler.handler(), handler);
-    }
-    fn remove_handler(&mut self, handler: &reactor::EventHandler<Self::Event, Handler=RequestHandler>){}
-}
-
-struct Demultiplexer<T>(Receiver<T>);
-
-impl reactor::EventDemultiplexer for Demultiplexer<Request> {
-    type Event = Request;
-    fn select(&mut self) -> Option<Self::Event> {
-        self.0.recv().ok()
-    }
-}
-
-mod handlers {
+pub mod handlers {
     pub mod exit {
         use dispatcher::request::{Request, RequestHandler};
         use condition::Condition;
