@@ -47,55 +47,6 @@ impl ActiondbParser {
         }
     }
 
-    fn fill_logmsg(formatter: &mut MessageFormatter, msg: &mut LogMessage, result: &MatchResult) {
-        ActiondbParser::fill_values(formatter, msg, result);
-        ActiondbParser::fill_name(formatter, msg, result);
-        ActiondbParser::fill_uuid(formatter, msg, result);
-        ActiondbParser::fill_tags(msg, result);
-    }
-
-    fn fill_values(formatter: &mut MessageFormatter, msg: &mut LogMessage, result: &MatchResult) {
-        ActiondbParser::fill_parsed_values(formatter, msg, result);
-        ActiondbParser::fill_additional_values(formatter, msg, result);
-    }
-
-    fn fill_parsed_values(formatter: &mut MessageFormatter, msg: &mut LogMessage, result: &MatchResult) {
-        for &(key, value) in result.pairs() {
-            let (key, value) = formatter.format(key, value);
-            msg.set_value(key, value);
-        }
-    }
-
-    fn fill_additional_values(formatter: &mut MessageFormatter, msg: &mut LogMessage, result: &MatchResult) {
-        if let Some(values) = result.pattern().values() {
-            for (key, value) in values {
-                let (key, value) = formatter.format(key, value);
-                msg.set_value(key, value);
-            }
-        }
-    }
-
-    fn fill_name(formatter: &mut MessageFormatter, msg: &mut LogMessage, result: &MatchResult) {
-        if let Some(name) = result.pattern().name() {
-            let (key, value) = formatter.format(keys::PATTERN_NAME, name);
-            msg.set_value(key, value);
-        }
-    }
-
-    fn fill_uuid(formatter: &mut MessageFormatter, msg: &mut LogMessage, result: &MatchResult) {
-        let uuid = result.pattern().uuid().to_hyphenated_string();
-        let (key, value) = formatter.format(keys::PATTERN_UUID, &uuid);
-        msg.set_value(key, value);
-    }
-
-    fn fill_tags(msg: &mut LogMessage, result: &MatchResult) {
-        if let Some(tags) = result.pattern().tags() {
-            for i in tags {
-                msg.set_tag(i);
-            }
-        }
-    }
-
     pub fn set_prefix(&mut self, prefix: String) {
         self.formatter.set_prefix(prefix);
     }
@@ -104,7 +55,7 @@ impl ActiondbParser {
 impl RustParser for ActiondbParser {
     fn process(&mut self, msg: &mut LogMessage, input: &str) -> bool {
         if let Some(result) = self.matcher.as_ref().unwrap().parse(input) {
-            ActiondbParser::fill_logmsg(&mut self.formatter, msg, &result);
+            MessageFiller::fill_logmsg(&mut self.formatter, msg, &result);
             true
         } else {
             false
@@ -156,6 +107,59 @@ impl clone::Clone for ActiondbParser {
                     matcher: None,
                     formatter: self.formatter.clone(),
                 }
+            }
+        }
+    }
+}
+
+struct MessageFiller;
+
+impl MessageFiller {
+    fn fill_logmsg(formatter: &mut MessageFormatter, msg: &mut LogMessage, result: &MatchResult) {
+        MessageFiller::fill_values(formatter, msg, result);
+        MessageFiller::fill_name(formatter, msg, result);
+        MessageFiller::fill_uuid(formatter, msg, result);
+        MessageFiller::fill_tags(msg, result);
+    }
+
+    fn fill_values(formatter: &mut MessageFormatter, msg: &mut LogMessage, result: &MatchResult) {
+        MessageFiller::fill_parsed_values(formatter, msg, result);
+        MessageFiller::fill_additional_values(formatter, msg, result);
+    }
+
+    fn fill_parsed_values(formatter: &mut MessageFormatter, msg: &mut LogMessage, result: &MatchResult) {
+        for &(key, value) in result.pairs() {
+            let (key, value) = formatter.format(key, value);
+            msg.set_value(key, value);
+        }
+    }
+
+    fn fill_additional_values(formatter: &mut MessageFormatter, msg: &mut LogMessage, result: &MatchResult) {
+        if let Some(values) = result.pattern().values() {
+            for (key, value) in values {
+                let (key, value) = formatter.format(key, value);
+                msg.set_value(key, value);
+            }
+        }
+    }
+
+    fn fill_name(formatter: &mut MessageFormatter, msg: &mut LogMessage, result: &MatchResult) {
+        if let Some(name) = result.pattern().name() {
+            let (key, value) = formatter.format(keys::PATTERN_NAME, name);
+            msg.set_value(key, value);
+        }
+    }
+
+    fn fill_uuid(formatter: &mut MessageFormatter, msg: &mut LogMessage, result: &MatchResult) {
+        let uuid = result.pattern().uuid().to_hyphenated_string();
+        let (key, value) = formatter.format(keys::PATTERN_UUID, &uuid);
+        msg.set_value(key, value);
+    }
+
+    fn fill_tags(msg: &mut LogMessage, result: &MatchResult) {
+        if let Some(tags) = result.pattern().tags() {
+            for i in tags {
+                msg.set_tag(i);
             }
         }
     }
