@@ -85,7 +85,7 @@ impl ActiondbParser {
 }
 
 impl RustParser for ActiondbParser {
-    fn process(&self, msg: &mut LogMessage, input: &str) -> bool {
+    fn process(&mut self, msg: &mut LogMessage, input: &str) -> bool {
         if let Some(result) = self.matcher.as_ref().unwrap().parse(input) {
             self.populate_logmsg(msg, &result);
             true

@@ -18,7 +18,7 @@ impl DummyParser {
 }
 
 impl RustParser for DummyParser {
-    fn process(&self, msg: &mut LogMessage, input: &str) -> bool {
+    fn process(&mut self, msg: &mut LogMessage, input: &str) -> bool {
         debug!("DummyParser: process(input='{}')", input);
         msg.set_value("dummy_key", "value");
         false
@@ -32,7 +32,7 @@ impl RustParser for DummyParser {
     fn set_option(&mut self, key: String, value: String) {
         debug!("DummyParser: set_option(key={}, value={})", &key, &value);
     }
-    
+
     fn boxed_clone(&self) -> Box<RustParser> {
         Box::new(self.clone())
     }
