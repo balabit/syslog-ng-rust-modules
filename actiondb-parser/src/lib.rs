@@ -128,7 +128,7 @@ impl MessageFiller {
     }
 
     fn fill_parsed_values(formatter: &mut MessageFormatter, msg: &mut LogMessage, result: &MatchResult) {
-        for &(key, value) in result.pairs() {
+        for (key, value) in result.values() {
             let (key, value) = formatter.format(key, value);
             msg.set_value(key, value);
         }
