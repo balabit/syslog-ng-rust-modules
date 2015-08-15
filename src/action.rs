@@ -1,6 +1,6 @@
 use Response;
 use state::State;
-use context::BaseContext;
+use context::base::BaseContext;
 
 pub use self::handlers::ActionHandlers;
 
@@ -54,7 +54,7 @@ pub mod handlers {
 }
 
 pub mod message {
-    use context::BaseContext;
+    use context::base::BaseContext;
     use state::State;
     use Message;
 
