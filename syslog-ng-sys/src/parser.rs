@@ -23,6 +23,6 @@ impl Clone for RustParserProxy {
 pub trait RustParser {
     fn init(&mut self) -> bool { true }
     fn set_option(&mut self, _: String, _: String) {}
-    fn process(&self, msg: &mut LogMessage, input: &str) -> bool;
+    fn process(&mut self, msg: &mut LogMessage, input: &str) -> bool;
     fn boxed_clone(&self) -> Box<RustParser>;
 }
