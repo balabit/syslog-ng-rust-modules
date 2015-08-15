@@ -23,8 +23,8 @@ impl Correlator {
 
         let handle = thread::spawn(move || {
             for i in contexts.into_iter() {
-                let context: context::Context = i.into();
-                let event_handler: Box<context::EventHandler<Event>> = context.into();
+                //let context: context::Context = i.into();
+                //let event_handler: Box<context::EventHandler<Event>> = context.into();
             }
 
             //let mut dispatcher = Dispatcher::new(contexts, dispatcher_output_channel_tx);
