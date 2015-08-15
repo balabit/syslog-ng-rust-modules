@@ -7,12 +7,12 @@ use context;
 use event;
 use Message;
 use dispatcher::request::{Request, RequestHandler};
-use context::EventHandler;
+use context::event::EventHandler;
 use reactor::{self, Event};
 
 pub struct MessageHandler {
-    handlers: BTreeMap<String, Vec<Rc<RefCell<Box<context::EventHandler<Rc<Message> >>>>>>,
-    keyless_handlers: Vec<Rc<RefCell<Box<context::EventHandler<Rc<Message> >>>>>,
+    handlers: BTreeMap<String, Vec<Rc<RefCell<Box<context::event::EventHandler<Rc<Message> >>>>>>,
+    keyless_handlers: Vec<Rc<RefCell<Box<context::event::EventHandler<Rc<Message> >>>>>,
 }
 
 impl MessageHandler {
@@ -23,7 +23,7 @@ impl MessageHandler {
         }
     }
 
-    fn register_handler(&mut self, handler: Box<context::EventHandler<Rc<Message>>>) {
+    fn register_handler(&mut self, handler: Box<context::event::EventHandler<Rc<Message>>>) {
         if handler.handlers().is_empty() {
             let handler = Rc::new(RefCell::new(handler));
             self.keyless_handlers.push(handler);

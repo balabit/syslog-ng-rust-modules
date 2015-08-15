@@ -8,17 +8,8 @@ use self::linear::LinearContext;
 use self::map::MapContext;
 
 pub mod base;
+pub mod event;
 pub mod map;
-
-pub enum Event {
-    Timer(TimerEvent),
-    Message(Rc<Message>)
-}
-
-pub trait EventHandler<T> {
-    fn handle_event(&mut self, T) -> Option<Vec<ExecResult>>;
-    fn handlers(&self) -> &[String];
-}
 
 #[derive(Debug)]
 pub enum Context {
@@ -67,8 +58,8 @@ impl From<config::Context> for Context {
     }
 }
 
-impl From<Context> for Box<EventHandler<Event>> {
-    fn from(context: Context) -> Box<EventHandler<Event>> {
+impl From<Context> for Box<self::event::EventHandler<self::event::Event>> {
+    fn from(context: Context) -> Box<self::event::EventHandler<self::event::Event>> {
         match context {
             Context::Linear(context) => Box::new(context),
             Context::Map(context) => Box::new(context),
@@ -81,13 +72,13 @@ mod linear {
 
     use action::ExecResult;
     use config;
+    use context;
     use Conditions;
-    use super::Event;
+    use context::event::{Event, EventHandler};
     use Message;
     use state::State;
     use TimerEvent;
     use context::base::BaseContext;
-    use context::EventHandler;
 
     #[derive(Debug)]
     pub struct LinearContext {
@@ -136,17 +127,17 @@ mod linear {
         }
     }
 
-    impl EventHandler<super::Event> for LinearContext {
+    impl EventHandler<context::event::Event> for LinearContext {
         fn handlers(&self) -> &[String] {
             self.patterns()
         }
-        fn handle_event(&mut self, event: super::Event) -> Option<Vec<ExecResult>> {
+        fn handle_event(&mut self, event: context::event::Event) -> Option<Vec<ExecResult>> {
             self.on_event(event)
         }
     }
 
-    impl From<LinearContext> for Box<super::EventHandler<Event>> {
-        fn from(context: LinearContext) -> Box<super::EventHandler<Event>> {
+    impl From<LinearContext> for Box<context::event::EventHandler<Event>> {
+        fn from(context: LinearContext) -> Box<context::event::EventHandler<Event>> {
             Box::new(context)
         }
     }

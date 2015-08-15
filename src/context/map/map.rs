@@ -4,12 +4,12 @@ use std::rc::Rc;
 
 use action::ExecResult;
 use Conditions;
-use context::Event;
+use context::event::Event;
 use Message;
 use state::State;
 use TimerEvent;
 use context::base::BaseContext;
-use context::EventHandler;
+use context::event::EventHandler;
 
 #[derive(Debug)]
 pub struct MapContext {

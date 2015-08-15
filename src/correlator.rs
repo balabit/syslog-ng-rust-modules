@@ -4,7 +4,12 @@ use std::result::Result;
 
 use action::ActionHandlers;
 use {config, context, event , Message, MiliSec, Response, Timer};
+use condition::Condition;
 use dispatcher::request::{Request, RequestHandler};
+use dispatcher::reactor::RequestReactor;
+use dispatcher::demux::Demultiplexer;
+use dispatcher::handlers;
+use reactor::Reactor;
 
 const TIMER_STEP: MiliSec = 100;
 
@@ -23,9 +28,19 @@ impl Correlator {
         let _ = Timer::from_chan(TIMER_STEP, dispatcher_input_channel.clone());
 
         let handle = thread::spawn(move || {
+            let dmux = Demultiplexer::new(rx);
+            let exit_condition = Condition::new(false);
+            let mut reactor = RequestReactor::new(dmux, exit_condition.clone());
+            let exit_handler = Box::new(handlers::exit::ExitHandler::new(exit_condition));
+            reactor.register_handler(exit_handler);
+
+            let mut event_handler = Box::new(handlers::event::EventHandler::new());
+            let timer_event_handler = Box::new(handlers::event::timer::TimerEventHandler::new());
+            event_handler.register_handler(timer_event_handler);
+
             for i in contexts.into_iter() {
-                //let context: context::Context = i.into();
-                //let event_handler: Box<context::EventHandler<Event>> = context.into();
+                let context: context::Context = i.into();
+                let event_handler: Box<context::event::EventHandler<context::event::Event>> = context.into();
             }
 
             //let mut dispatcher = Dispatcher::new(contexts, dispatcher_output_channel_tx);

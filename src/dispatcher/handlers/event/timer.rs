@@ -3,7 +3,7 @@ use std::rc::Rc;
 
 use context::Context;
 use dispatcher::request::{Request, RequestHandler};
-use context::EventHandler;
+use context::event::EventHandler;
 use context;
 use event;
 use event::Event;
