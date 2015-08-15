@@ -9,7 +9,7 @@ pub use condition::Condition;
 pub use conditions::Conditions;
 pub use context::Context;
 pub use correlator::Correlator;
-pub use dispatcher::{Dispatcher, Response, Request};
+pub use dispatcher::{Response, Request};
 pub use message::Message;
 pub use timer::{Timer,
                 TimerEvent};
