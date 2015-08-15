@@ -23,6 +23,7 @@ mod keys {
 
 pub struct ActiondbParser {
     matcher: Option<Box<Matcher>>,
+    formatter: MessageFormatter
 }
 
 impl ActiondbParser {
@@ -30,6 +31,7 @@ impl ActiondbParser {
         debug!("ActiondbParser: new()");
         ActiondbParser{
             matcher: None,
+            formatter: MessageFormatter::new()
         }
     }
 
@@ -45,27 +47,31 @@ impl ActiondbParser {
         }
     }
 
-    pub fn populate_logmsg(&self, msg: &mut LogMessage, result: &MatchResult) {
+    fn populate_logmsg(formatter: &mut MessageFormatter, msg: &mut LogMessage, result: &MatchResult) {
         for &(key, value) in result.pairs() {
+            let (key, value) = formatter.format(key, value);
             msg.set_value(key, value);
         }
 
         if let Some(name) = result.pattern().name() {
-            msg.set_value(keys::PATTERN_NAME, name);
+            let (key, value) = formatter.format(keys::PATTERN_NAME, name);
+            msg.set_value(key, value);
         }
 
         let uuid = result.pattern().uuid().to_hyphenated_string();
-        msg.set_value(keys::PATTERN_UUID, &uuid);
+        let (key, value) = formatter.format(keys::PATTERN_UUID, &uuid);
+        msg.set_value(key, value);
     }
 
     pub fn set_prefix(&mut self, prefix: String) {
+        self.formatter.set_prefix(prefix);
     }
 }
 
 impl RustParser for ActiondbParser {
     fn process(&mut self, msg: &mut LogMessage, input: &str) -> bool {
         if let Some(result) = self.matcher.as_ref().unwrap().parse(input) {
-            self.populate_logmsg(msg, &result);
+            ActiondbParser::populate_logmsg(&mut self.formatter, msg, &result);
             true
         } else {
             false
@@ -109,11 +115,13 @@ impl clone::Clone for ActiondbParser {
             Option::Some(matcher) => {
                 ActiondbParser{
                     matcher: Some(matcher.boxed_clone()),
+                    formatter: self.formatter.clone(),
                 }
             },
             Option::None => {
                 ActiondbParser{
                     matcher: None,
+                    formatter: self.formatter.clone(),
                 }
             }
         }
