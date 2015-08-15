@@ -146,6 +146,7 @@ mod linear {
     use action::ExecResult;
     use config;
     use Conditions;
+    use super::Event;
     use Message;
     use state::State;
     use TimerEvent;
@@ -162,6 +163,13 @@ mod linear {
             LinearContext {
                 base: BaseContext::new(conditions),
                 state: State::new()
+            }
+        }
+
+        pub fn on_event(&mut self, event: Event) -> Option<Vec<ExecResult>> {
+            match event {
+                Event::Message(event) => self.on_message(event),
+                Event::Timer(event) => self.on_timer(&event),
             }
         }
 
@@ -200,14 +208,8 @@ mod linear {
         }
     }
 
-    impl From<LinearContext> for Box<super::EventHandler<TimerEvent>> {
-        fn from(context: LinearContext) -> Box<super::EventHandler<TimerEvent>> {
-            Box::new(context)
-        }
-    }
-
-    impl From<LinearContext> for Box<super::EventHandler<Rc<Message>>> {
-        fn from(context: LinearContext) -> Box<super::EventHandler<Rc<Message>>> {
+    impl From<LinearContext> for Box<super::EventHandler<Event>> {
+        fn from(context: LinearContext) -> Box<super::EventHandler<Event>> {
             Box::new(context)
         }
     }
@@ -220,6 +222,7 @@ mod map {
 
     use action::ExecResult;
     use Conditions;
+    use super::Event;
     use Message;
     use state::State;
     use TimerEvent;
@@ -238,6 +241,13 @@ mod map {
                 base: BaseContext::new(conditions),
                 map: BTreeMap::new(),
                 format_buffer: String::new()
+            }
+        }
+
+        pub fn on_event(&mut self, event: Event) -> Option<Vec<ExecResult>> {
+            match event {
+                Event::Message(event) => self.on_message(event),
+                Event::Timer(event) => self.on_timer(&event),
             }
         }
 
@@ -304,32 +314,17 @@ mod map {
         }
     }
 
-    impl EventHandler<Rc<Message>> for MapContext {
+    impl EventHandler<super::Event> for MapContext {
         fn handlers(&self) -> &[String] {
             self.patterns()
         }
-        fn handle_event(&mut self, message: Rc<Message>) -> Option<Vec<ExecResult>> {
-            self.on_message(message)
+        fn handle_event(&mut self, event: super::Event) -> Option<Vec<ExecResult>> {
+            self.on_event(event)
         }
     }
 
-    impl EventHandler<TimerEvent> for MapContext {
-        fn handlers(&self) -> &[String] {
-            self.patterns()
-        }
-        fn handle_event(&mut self, event: TimerEvent) -> Option<Vec<ExecResult>> {
-            self.on_timer(&event)
-        }
-    }
-
-    impl From<MapContext> for Box<super::EventHandler<TimerEvent>> {
-        fn from(context: MapContext) -> Box<super::EventHandler<TimerEvent>> {
-            Box::new(context)
-        }
-    }
-
-    impl From<MapContext> for Box<super::EventHandler<Rc<Message>>> {
-        fn from(context: MapContext) -> Box<super::EventHandler<Rc<Message>>> {
+    impl From<MapContext> for Box<super::EventHandler<Event>> {
+        fn from(context: MapContext) -> Box<super::EventHandler<Event>> {
             Box::new(context)
         }
     }
