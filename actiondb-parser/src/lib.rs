@@ -119,3 +119,40 @@ impl clone::Clone for ActiondbParser {
         }
     }
 }
+
+#[derive(Clone)]
+struct MessageFormatter {
+    buffer: String,
+    prefix: Option<String>
+}
+
+impl MessageFormatter {
+    fn new() -> MessageFormatter {
+        MessageFormatter {
+            buffer: String::new(),
+            prefix: None
+        }
+    }
+
+    fn set_prefix(&mut self, prefix: String) {
+        self.prefix = Some(prefix)
+    }
+
+    fn format<'a, 'b, 'c>(&'a mut self, key: &'b str, value: &'c str) -> (&'a str, &'c str) {
+        self.buffer.clear();
+        self.apply_prefix(key);
+        (&self.buffer, value)
+    }
+
+    fn apply_prefix(&mut self, key: &str) {
+        match self.prefix.as_ref() {
+            Some(prefix) => {
+                let _ = self.buffer.write_str(prefix);
+                let _ = self.buffer.write_str(key);
+            },
+            None => {
+                let _ = self.buffer.write_str(key);
+            }
+        };
+    }
+}
