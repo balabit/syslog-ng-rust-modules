@@ -23,7 +23,7 @@ impl EventHandler {
         handler
     }
 
-    fn register_handler(&mut self, handler: Box<reactor::EventHandler<event::Event, Handler=event::EventHandler>>) {
+    pub fn register_handler(&mut self, handler: Box<reactor::EventHandler<event::Event, Handler=event::EventHandler>>) {
         self.handlers.insert(handler.handler(), handler);
     }
 }
