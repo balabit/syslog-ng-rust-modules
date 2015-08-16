@@ -40,5 +40,7 @@ impl Reactor for RequestReactor {
     fn register_handler(&mut self, handler: Box<EventHandler<Self::Event, Handler=RequestHandler>>) {
         self.handlers.insert(handler.handler(), handler);
     }
-    fn remove_handler(&mut self, _: &EventHandler<Self::Event, Handler=RequestHandler>){}
+    fn remove_handler_by_handler(&mut self, handler: &RequestHandler) {
+        self.handlers.remove(handler);
+    }
 }
