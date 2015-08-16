@@ -2,7 +2,6 @@ use std::sync::mpsc;
 use std::thread;
 
 use MiliSec;
-use event::Event;
 use dispatcher::request::{ExternalRequest, Request};
 
 #[derive(Clone, Copy, Debug)]

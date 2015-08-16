@@ -21,7 +21,6 @@ mod condition;
 mod context;
 mod correlator;
 mod dispatcher;
-mod event;
 pub mod message;
 mod state;
 mod reactor;

@@ -2,6 +2,7 @@ use std::rc::Rc;
 
 use state::State;
 use super::{Action, config, Conditions, Message, TimerEvent};
+use dispatcher::request::{InternalRequest, Request};
 
 use action::ExecResult;
 use self::linear::LinearContext;
@@ -58,8 +59,8 @@ impl From<config::Context> for Context {
     }
 }
 
-impl From<Context> for Box<self::event::EventHandler<self::event::Event>> {
-    fn from(context: Context) -> Box<self::event::EventHandler<self::event::Event>> {
+impl From<Context> for Box<self::event::EventHandler<InternalRequest>> {
+    fn from(context: Context) -> Box<self::event::EventHandler<InternalRequest>> {
         match context {
             Context::Linear(context) => Box::new(context),
             Context::Map(context) => Box::new(context),
@@ -74,10 +75,11 @@ mod linear {
     use config;
     use context;
     use Conditions;
-    use context::event::{Event, EventHandler};
+    use context::event::{EventHandler};
     use Message;
     use state::State;
     use TimerEvent;
+    use dispatcher::request::{InternalRequest, Request};
     use context::base::BaseContext;
 
     #[derive(Debug)]
@@ -94,10 +96,10 @@ mod linear {
             }
         }
 
-        pub fn on_event(&mut self, event: Event) -> Option<Vec<ExecResult>> {
+        pub fn on_event(&mut self, event: InternalRequest) -> Option<Vec<ExecResult>> {
             match event {
-                Event::Message(event) => self.on_message(event),
-                Event::Timer(event) => self.on_timer(&event),
+                Request::Timer(event) => self.on_timer(&event),
+                _ => None,
             }
         }
 
@@ -127,17 +129,17 @@ mod linear {
         }
     }
 
-    impl EventHandler<context::event::Event> for LinearContext {
+    impl EventHandler<InternalRequest> for LinearContext {
         fn handlers(&self) -> &[String] {
             self.patterns()
         }
-        fn handle_event(&mut self, event: context::event::Event) -> Option<Vec<ExecResult>> {
+        fn handle_event(&mut self, event: InternalRequest) -> Option<Vec<ExecResult>> {
             self.on_event(event)
         }
     }
 
-    impl From<LinearContext> for Box<context::event::EventHandler<Event>> {
-        fn from(context: LinearContext) -> Box<context::event::EventHandler<Event>> {
+    impl From<LinearContext> for Box<context::event::EventHandler<InternalRequest>> {
+        fn from(context: LinearContext) -> Box<context::event::EventHandler<InternalRequest>> {
             Box::new(context)
         }
     }

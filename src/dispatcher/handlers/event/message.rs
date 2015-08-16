@@ -4,9 +4,8 @@ use std::cell::RefCell;
 
 use action;
 use context;
-use event;
 use Message;
-use dispatcher::request::{Request, RequestHandler};
+use dispatcher::request::{InternalRequest, Request, RequestHandler};
 use context::event::EventHandler;
 use reactor::{self, Event};
 
@@ -38,12 +37,10 @@ impl MessageHandler {
     }
 }
 
-impl reactor::EventHandler<event::Event> for MessageHandler {
-    type Handler = event::EventHandler;
-    fn handle_event(&mut self, event: event::Event) {
-        if let event::Event::Message(event) = event {
-            let event = Rc::new(event);
-
+impl reactor::EventHandler<InternalRequest> for MessageHandler {
+    type Handler = RequestHandler;
+    fn handle_event(&mut self, event: InternalRequest) {
+        if let Request::Message(event) = event {
             println!("message event");
             if let Some(handlers) = self.handlers.get_mut(event.uuid()) {
                 for i in handlers.iter_mut() {
@@ -61,6 +58,6 @@ impl reactor::EventHandler<event::Event> for MessageHandler {
         }
     }
     fn handler(&self) -> Self::Handler {
-        event::EventHandler::Message
+        RequestHandler::Message
     }
 }

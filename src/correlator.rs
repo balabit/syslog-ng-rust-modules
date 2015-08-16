@@ -3,9 +3,9 @@ use std::thread;
 use std::result::Result;
 
 use action::ActionHandlers;
-use {config, context, event , Message, MiliSec, Response, Timer};
+use {config, context, Message, MiliSec, Response, Timer};
 use condition::Condition;
-use dispatcher::request::{Request, RequestHandler};
+use dispatcher::request::{InternalRequest, Request, RequestHandler};
 use dispatcher::reactor::RequestReactor;
 use dispatcher::demux::Demultiplexer;
 use dispatcher::handlers;
@@ -39,7 +39,7 @@ impl Correlator {
 
             for i in contexts.into_iter() {
                 let context: context::Context = i.into();
-                let event_handler: Box<context::event::EventHandler<context::event::Event>> = context.into();
+                let event_handler: Box<context::event::EventHandler<InternalRequest>> = context.into();
             }
 
             //let mut dispatcher = Dispatcher::new(contexts, dispatcher_output_channel_tx);

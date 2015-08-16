@@ -4,12 +4,12 @@ use std::rc::Rc;
 
 use action::ExecResult;
 use Conditions;
-use context::event::Event;
 use Message;
 use state::State;
 use TimerEvent;
 use context::base::BaseContext;
 use context::event::EventHandler;
+use dispatcher::request::{Request, InternalRequest};
 
 #[derive(Debug)]
 pub struct MapContext {
@@ -27,10 +27,10 @@ impl MapContext {
         }
     }
 
-    pub fn on_event(&mut self, event: Event) -> Option<Vec<ExecResult>> {
+    pub fn on_event(&mut self, event: InternalRequest) -> Option<Vec<ExecResult>> {
         match event {
-            Event::Message(event) => self.on_message(event),
-            Event::Timer(event) => self.on_timer(&event),
+            Request::Message(event) => self.on_message(event),
+            _ => None
         }
     }
 
@@ -97,17 +97,17 @@ impl MapContext {
     }
 }
 
-impl EventHandler<Event> for MapContext {
+impl EventHandler<InternalRequest> for MapContext {
     fn handlers(&self) -> &[String] {
         self.patterns()
     }
-    fn handle_event(&mut self, event: Event) -> Option<Vec<ExecResult>> {
+    fn handle_event(&mut self, event: InternalRequest) -> Option<Vec<ExecResult>> {
         self.on_event(event)
     }
 }
 
-impl From<MapContext> for Box<EventHandler<Event>> {
-    fn from(context: MapContext) -> Box<EventHandler<Event>> {
+impl From<MapContext> for Box<EventHandler<InternalRequest>> {
+    fn from(context: MapContext) -> Box<EventHandler<InternalRequest>> {
         Box::new(context)
     }
 }
