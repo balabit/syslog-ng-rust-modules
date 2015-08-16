@@ -10,8 +10,8 @@ use context::event::EventHandler;
 use reactor::{self, Event};
 
 pub struct MessageEventHandler {
-    handlers: BTreeMap<String, Vec<Rc<RefCell<Box<context::event::EventHandler<Rc<Message> >>>>>>,
-    keyless_handlers: Vec<Rc<RefCell<Box<context::event::EventHandler<Rc<Message> >>>>>,
+    handlers: BTreeMap<String, Vec<Rc<RefCell<Box<context::event::EventHandler<InternalRequest>>>>>>,
+    keyless_handlers: Vec<Rc<RefCell<Box<context::event::EventHandler<InternalRequest>>>>>,
 }
 
 impl MessageEventHandler {
@@ -22,13 +22,11 @@ impl MessageEventHandler {
         }
     }
 
-    fn register_handler(&mut self, handler: Box<context::event::EventHandler<Rc<Message>>>) {
-        if handler.handlers().is_empty() {
-            let handler = Rc::new(RefCell::new(handler));
-            self.keyless_handlers.push(handler);
+    pub fn register_handler(&mut self, handler: Rc<RefCell<Box<context::event::EventHandler<InternalRequest>>>>) {
+        let cloned_handler = handler.clone();
+        if handler.borrow().handlers().is_empty() {
+            self.keyless_handlers.push(cloned_handler);
         } else {
-            let refcounted_handler = Rc::new(RefCell::new(handler));
-            let cloned_handler = refcounted_handler.clone();
             for key in cloned_handler.borrow().handlers() {
                 let handlers = self.handlers.entry(key.clone()).or_insert(Vec::new());
                 handlers.push(cloned_handler.clone());
@@ -44,14 +42,14 @@ impl reactor::EventHandler<InternalRequest> for MessageEventHandler {
             println!("message event");
             if let Some(handlers) = self.handlers.get_mut(event.uuid()) {
                 for i in handlers.iter_mut() {
-                    i.borrow_mut().handle_event(event.clone());
+                    i.borrow_mut().handle_event(Request::Message(event.clone()));
                 }
             } else {
                 println!("no handler found for this message");
             }
 
             for i in self.keyless_handlers.iter_mut() {
-                i.borrow_mut().handle_event(event.clone());
+                i.borrow_mut().handle_event(Request::Message(event.clone()));
             }
         } else {
             unreachable!("MessageEventHandler should only handle Message events");

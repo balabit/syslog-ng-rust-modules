@@ -38,6 +38,7 @@ impl Correlator {
             reactor.register_handler(exit_handler);
 
             let mut timer_event_handler = Box::new(handlers::timer::TimerEventHandler::new());
+            let mut message_event_handler = Box::new(handlers::message::MessageEventHandler::new());
 
             let mut event_handlers = Vec::new();
             for i in contexts.into_iter() {
@@ -48,14 +49,13 @@ impl Correlator {
             }
 
             for i in event_handlers {
-                let clone = i.clone();
-                timer_event_handler.register_handler(clone);
+                timer_event_handler.register_handler(i.clone());
+                message_event_handler.register_handler(i.clone())
             }
 
             reactor.register_handler(timer_event_handler);
+            reactor.register_handler(message_event_handler);
             reactor.handle_events();
-            //let mut dispatcher = Dispatcher::new(contexts, dispatcher_output_channel_tx);
-            //dispatcher.start_loop(rx);
         });
 
         Correlator {
