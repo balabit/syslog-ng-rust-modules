@@ -40,7 +40,7 @@ impl Correlator {
             let response_handler = Rc::new(RefCell::new(response_handler));
 
             let exit_handler = Box::new(handlers::exit::ExitEventHandler::new(exit_condition, response_handler.clone()));
-            let mut timer_event_handler = Box::new(handlers::timer::TimerEventHandler::new());
+            let mut timer_event_handler = Box::new(handlers::timer::TimerEventHandler::new(response_handler.clone()));
             let mut message_event_handler = Box::new(handlers::message::MessageEventHandler::new(response_handler.clone()));
 
             let mut event_handlers = Vec::new();
