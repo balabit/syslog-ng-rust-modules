@@ -19,7 +19,7 @@ impl ExitHandler {
     }
 }
 
-impl<'a> EventHandler<Request<Rc<Message>>> for ExitHandler {
+impl EventHandler<Request<Rc<Message>>> for ExitHandler {
     type Handler = RequestHandler;
     fn handle_event(&mut self, event: Request<Rc<Message>>) {
         if let Request::Exit = event {

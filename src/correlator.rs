@@ -34,7 +34,7 @@ impl Correlator {
             let exit_handler = Box::new(handlers::exit::ExitHandler::new(exit_condition));
             reactor.register_handler(exit_handler);
 
-            let timer_event_handler = Box::new(handlers::event::timer::TimerEventHandler::new());
+            let timer_event_handler = Box::new(handlers::timer::TimerEventHandler::new());
             //event_handler.register_handler(timer_event_handler);
 
             for i in contexts.into_iter() {
