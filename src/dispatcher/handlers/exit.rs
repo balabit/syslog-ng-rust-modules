@@ -5,21 +5,21 @@ use condition::Condition;
 use message::Message;
 use reactor::EventHandler;
 
-pub struct ExitHandler{
+pub struct ExitEventHandler {
     condition: Condition,
     stops: u32
 }
 
-impl ExitHandler {
-    pub fn new(condition: Condition) -> ExitHandler {
-        ExitHandler {
+impl ExitEventHandler {
+    pub fn new(condition: Condition) -> ExitEventHandler {
+        ExitEventHandler {
             condition: condition,
             stops: 0
         }
     }
 }
 
-impl EventHandler<Request<Rc<Message>>> for ExitHandler {
+impl EventHandler<Request<Rc<Message>>> for ExitEventHandler {
     type Handler = RequestHandler;
     fn handle_event(&mut self, event: Request<Rc<Message>>) {
         if let Request::Exit = event {
@@ -29,7 +29,7 @@ impl EventHandler<Request<Rc<Message>>> for ExitHandler {
                 self.condition.activate();
             }
         } else {
-            unreachable!("An ExitHandler should only receive Exit events");
+            unreachable!("An ExitEventHandler should only receive Exit events");
         }
     }
     fn handler(&self) -> Self::Handler {

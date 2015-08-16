@@ -31,7 +31,7 @@ impl Correlator {
             let dmux = Demultiplexer::new(rx);
             let exit_condition = Condition::new(false);
             let mut reactor = RequestReactor::new(dmux, exit_condition.clone());
-            let exit_handler = Box::new(handlers::exit::ExitHandler::new(exit_condition));
+            let exit_handler = Box::new(handlers::exit::ExitEventHandler::new(exit_condition));
             reactor.register_handler(exit_handler);
 
             let timer_event_handler = Box::new(handlers::timer::TimerEventHandler::new());
