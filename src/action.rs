@@ -24,12 +24,6 @@ pub enum ExecResult {
     Message(self::message::ExecResult)
 }
 
-impl From<ExecResult> for Response {
-    fn from(result: ExecResult) -> Response {
-        Response::Event(result)
-    }
-}
-
 pub mod handlers {
     use super::ExecResult;
     use super::message;

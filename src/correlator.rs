@@ -10,6 +10,8 @@ use condition::Condition;
 use context::event::EventHandler;
 use dispatcher::request::{InternalRequest, Request, RequestHandler};
 use dispatcher::reactor::RequestReactor;
+use dispatcher::ResponseHandler;
+use dispatcher::response;
 use dispatcher::demux::Demultiplexer;
 use dispatcher::handlers;
 use reactor::Reactor;
@@ -34,7 +36,10 @@ impl Correlator {
             let dmux = Demultiplexer::new(rx);
             let exit_condition = Condition::new(false);
             let mut reactor = RequestReactor::new(dmux, exit_condition.clone());
-            let exit_handler = Box::new(handlers::exit::ExitEventHandler::new(exit_condition));
+            let response_handler = Box::new(ResponseHandler::new(dispatcher_output_channel_tx)) as Box<response::ResponseHandler<Response>>;
+            let response_handler = Rc::new(RefCell::new(response_handler));
+
+            let exit_handler = Box::new(handlers::exit::ExitEventHandler::new(exit_condition, response_handler.clone()));
             let mut timer_event_handler = Box::new(handlers::timer::TimerEventHandler::new());
             let mut message_event_handler = Box::new(handlers::message::MessageEventHandler::new());
 
