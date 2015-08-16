@@ -4,7 +4,7 @@ use message::Message;
 use reactor;
 use timer::TimerEvent;
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub enum Request<M> {
     Message(M),
     Timer(TimerEvent),
