@@ -1,6 +1,8 @@
+use std::rc::Rc;
 use std::sync::mpsc::Receiver;
 
-use dispatcher::request::Request;
+use dispatcher::request::{InternalRequest, ExternalRequest};
+use message::Message;
 use reactor::EventDemultiplexer;
 
 pub struct Demultiplexer<T>(Receiver<T>);
@@ -11,9 +13,10 @@ impl<T> Demultiplexer<T> {
     }
 }
 
-impl EventDemultiplexer for Demultiplexer<Request> {
-    type Event = Request;
+impl EventDemultiplexer for Demultiplexer<ExternalRequest> {
+    type Event = InternalRequest;
     fn select(&mut self) -> Option<Self::Event> {
-        self.0.recv().ok()
+        let data = self.0.recv().ok();
+        data.map(|request| request.into())
     }
 }

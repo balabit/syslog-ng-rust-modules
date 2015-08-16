@@ -3,7 +3,7 @@ use std::thread;
 
 use MiliSec;
 use event::Event;
-use dispatcher::request::Request;
+use dispatcher::request::{ExternalRequest, Request};
 
 #[derive(Clone, Copy, Debug)]
 pub struct TimerEvent(pub MiliSec);
@@ -11,11 +11,11 @@ pub struct TimerEvent(pub MiliSec);
 pub struct Timer;
 
 impl Timer {
-    pub fn from_chan(ms: MiliSec, tx: mpsc::Sender<Request>) {
+    pub fn from_chan(ms: MiliSec, tx: mpsc::Sender<ExternalRequest>) {
         thread::spawn(move || {
             loop {
                 thread::sleep_ms(ms);
-                if tx.send(Request::Event(Event::Timer(TimerEvent(ms)))).is_err() {
+                if tx.send(Request::Timer(TimerEvent(ms))).is_err() {
                     break;
                 }
             }

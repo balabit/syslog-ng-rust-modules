@@ -15,7 +15,7 @@ const TIMER_STEP: MiliSec = 100;
 
 pub struct Correlator {
     action_handlers: ActionHandlers,
-    dispatcher_input_channel: mpsc::Sender<Request>,
+    dispatcher_input_channel: mpsc::Sender<Request<Message>>,
     dispatcher_output_channel: mpsc::Receiver<Response>,
     dispatcher_thread_handle: thread::JoinHandle<()>,
     exits_received: u32
@@ -34,9 +34,8 @@ impl Correlator {
             let exit_handler = Box::new(handlers::exit::ExitHandler::new(exit_condition));
             reactor.register_handler(exit_handler);
 
-            let mut event_handler = Box::new(handlers::event::EventHandler::new());
             let timer_event_handler = Box::new(handlers::event::timer::TimerEventHandler::new());
-            event_handler.register_handler(timer_event_handler);
+            //event_handler.register_handler(timer_event_handler);
 
             for i in contexts.into_iter() {
                 let context: context::Context = i.into();
@@ -56,9 +55,9 @@ impl Correlator {
         }
     }
 
-    pub fn push_message(&mut self, message: Message) -> Result<(), mpsc::SendError<Request>> {
+    pub fn push_message(&mut self, message: Message) -> Result<(), mpsc::SendError<Request<Message>>> {
         self.consume_results();
-        self.dispatcher_input_channel.send(Request::Event(event::Event::Message(message)))
+        self.dispatcher_input_channel.send(Request::Message(message))
     }
 
     fn consume_results(&mut self) {

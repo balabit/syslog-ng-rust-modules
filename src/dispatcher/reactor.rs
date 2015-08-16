@@ -3,17 +3,17 @@ use std::collections::BTreeMap;
 use condition::Condition;
 use dispatcher::demux::Demultiplexer;
 use dispatcher::handlers;
-use dispatcher::request::{Request, RequestHandler};
+use dispatcher::request::{RequestHandler, InternalRequest, ExternalRequest};
 use reactor::{Event, EventDemultiplexer, EventHandler, Reactor};
 
 pub struct RequestReactor {
-    handlers: BTreeMap<RequestHandler, Box<EventHandler<Request, Handler=RequestHandler>>>,
-    demultiplexer: Demultiplexer<Request>,
+    handlers: BTreeMap<RequestHandler, Box<EventHandler<InternalRequest, Handler=RequestHandler>>>,
+    demultiplexer: Demultiplexer<ExternalRequest>,
     exit_condition: Condition
 }
 
 impl RequestReactor {
-    pub fn new(demultiplexer: Demultiplexer<Request>, exit_condition: Condition) -> RequestReactor {
+    pub fn new(demultiplexer: Demultiplexer<ExternalRequest>, exit_condition: Condition) -> RequestReactor {
         RequestReactor {
             demultiplexer: demultiplexer,
             exit_condition: exit_condition,
@@ -23,7 +23,7 @@ impl RequestReactor {
 }
 
 impl Reactor for RequestReactor {
-    type Event = Request;
+    type Event = InternalRequest;
     type Handler = RequestHandler;
     fn handle_events(&mut self) {
         while !self.exit_condition.is_active() {

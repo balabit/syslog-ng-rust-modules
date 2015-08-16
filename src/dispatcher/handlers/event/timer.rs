@@ -6,13 +6,13 @@ use dispatcher::request::{Request, RequestHandler};
 use context::event::EventHandler;
 use context;
 use event;
-use event::Event;
+use context::event::Event;
 use reactor;
 use TimerEvent;
 use action::ExecResult;
 
 pub struct TimerEventHandler {
-    contexts: Vec<Rc<RefCell<Box<EventHandler<TimerEvent>>>>>
+    contexts: Vec<Rc<RefCell<Box<EventHandler<context::event::Event>>>>>
 }
 
 impl TimerEventHandler {
@@ -26,14 +26,11 @@ impl TimerEventHandler {
 impl reactor::EventHandler<Event> for TimerEventHandler {
     type Handler = event::EventHandler;
     fn handle_event(&mut self, event: Event) {
-        if let event::Event::Timer(event) = event {
             println!("timer event");
+            let event: Event = event.into();
             for i in self.contexts.iter_mut() {
-                i.borrow_mut().handle_event(event);
+                //i.borrow_mut().handle_event(event.clone());
             }
-        } else {
-            unreachable!("TimerEventHandler should only handle Timer events");
-        }
     }
     fn handler(&self) -> Self::Handler {
         event::EventHandler::Timer

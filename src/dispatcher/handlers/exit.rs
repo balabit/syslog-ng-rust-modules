@@ -1,5 +1,8 @@
+use std::rc::Rc;
+
 use dispatcher::request::{Request, RequestHandler};
 use condition::Condition;
+use message::Message;
 use reactor::EventHandler;
 
 pub struct ExitHandler{
@@ -16,9 +19,9 @@ impl ExitHandler {
     }
 }
 
-impl EventHandler<Request> for ExitHandler {
+impl<'a> EventHandler<Request<Rc<Message>>> for ExitHandler {
     type Handler = RequestHandler;
-    fn handle_event(&mut self, event: Request) {
+    fn handle_event(&mut self, event: Request<Rc<Message>>) {
         if let Request::Exit = event {
             self.stops += 1;
 
