@@ -1,11 +1,6 @@
-use std::sync::mpsc::{Receiver, Sender};
-use std::rc::Rc;
+use std::sync::mpsc::Sender;
 
 use action::ExecResult;
-use super::{config, Condition, Context, Message, TimerEvent};
-use reactor::{Event, EventDemultiplexer, EventHandler, Reactor};
-
-use self::request::{Request, RequestHandler};
 
 pub mod demux;
 pub mod handlers;

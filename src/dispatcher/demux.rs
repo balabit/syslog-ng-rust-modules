@@ -1,8 +1,6 @@
-use std::rc::Rc;
 use std::sync::mpsc::Receiver;
 
 use dispatcher::request::{InternalRequest, ExternalRequest};
-use message::Message;
 use reactor::EventDemultiplexer;
 
 pub struct Demultiplexer<T>(Receiver<T>);

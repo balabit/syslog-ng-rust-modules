@@ -2,14 +2,12 @@ use std::collections::BTreeMap;
 use std::rc::Rc;
 use std::cell::RefCell;
 
-use action;
 use context;
-use Message;
 use dispatcher::request::{InternalRequest, Request, RequestHandler};
 use dispatcher::response::ResponseHandler;
 use dispatcher::Response;
 use context::event::EventHandler;
-use reactor::{self, Event};
+use reactor;
 
 pub struct MessageEventHandler {
     handlers: BTreeMap<String, Vec<Rc<RefCell<Box<context::event::EventHandler<InternalRequest>>>>>>,

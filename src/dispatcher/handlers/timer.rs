@@ -1,15 +1,11 @@
 use std::cell::RefCell;
 use std::rc::Rc;
 
-use context::Context;
-use dispatcher::request::{InternalRequest, Request, RequestHandler};
+use dispatcher::request::{InternalRequest, RequestHandler};
 use dispatcher::response::ResponseHandler;
 use dispatcher::Response;
 use context::event::EventHandler;
-use context;
 use reactor;
-use TimerEvent;
-use action::ExecResult;
 
 pub struct TimerEventHandler {
     contexts: Vec<Rc<RefCell<Box<EventHandler<InternalRequest>>>>>,

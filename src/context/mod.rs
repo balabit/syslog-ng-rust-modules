@@ -1,8 +1,7 @@
 use std::rc::Rc;
 
-use state::State;
-use super::{Action, config, Conditions, Message, TimerEvent};
-use dispatcher::request::{InternalRequest, Request};
+use super::{config, Conditions, Message, TimerEvent};
+use dispatcher::request::InternalRequest;
 
 use action::ExecResult;
 use self::linear::LinearContext;

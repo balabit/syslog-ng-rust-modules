@@ -8,7 +8,7 @@ use action::ActionHandlers;
 use {config, context, Message, MiliSec, Response, Timer};
 use condition::Condition;
 use context::event::EventHandler;
-use dispatcher::request::{InternalRequest, Request, RequestHandler};
+use dispatcher::request::{InternalRequest, Request};
 use dispatcher::reactor::RequestReactor;
 use dispatcher::ResponseHandler;
 use dispatcher::response;

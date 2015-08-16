@@ -2,7 +2,6 @@ use std::collections::BTreeMap;
 
 use condition::Condition;
 use dispatcher::demux::Demultiplexer;
-use dispatcher::handlers;
 use dispatcher::request::{RequestHandler, InternalRequest, ExternalRequest};
 use reactor::{Event, EventDemultiplexer, EventHandler, Reactor};
 
@@ -41,5 +40,5 @@ impl Reactor for RequestReactor {
     fn register_handler(&mut self, handler: Box<EventHandler<Self::Event, Handler=RequestHandler>>) {
         self.handlers.insert(handler.handler(), handler);
     }
-    fn remove_handler(&mut self, handler: &EventHandler<Self::Event, Handler=RequestHandler>){}
+    fn remove_handler(&mut self, _: &EventHandler<Self::Event, Handler=RequestHandler>){}
 }

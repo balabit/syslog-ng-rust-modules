@@ -1,4 +1,3 @@
-use Response;
 use state::State;
 use context::base::BaseContext;
 

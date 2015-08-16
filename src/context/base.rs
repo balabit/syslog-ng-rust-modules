@@ -1,7 +1,6 @@
 use std::rc::Rc;
 
 use action::{Action, ExecResult};
-use condition::Condition;
 use conditions::Conditions;
 use config;
 use message::Message;
