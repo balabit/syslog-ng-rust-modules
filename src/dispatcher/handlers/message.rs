@@ -9,14 +9,14 @@ use dispatcher::request::{InternalRequest, Request, RequestHandler};
 use context::event::EventHandler;
 use reactor::{self, Event};
 
-pub struct MessageHandler {
+pub struct MessageEventHandler {
     handlers: BTreeMap<String, Vec<Rc<RefCell<Box<context::event::EventHandler<Rc<Message> >>>>>>,
     keyless_handlers: Vec<Rc<RefCell<Box<context::event::EventHandler<Rc<Message> >>>>>,
 }
 
-impl MessageHandler {
-    pub fn new() -> MessageHandler {
-        MessageHandler{
+impl MessageEventHandler {
+    pub fn new() -> MessageEventHandler {
+        MessageEventHandler{
             handlers: BTreeMap::new(),
             keyless_handlers: Vec::new()
         }
@@ -37,7 +37,7 @@ impl MessageHandler {
     }
 }
 
-impl reactor::EventHandler<InternalRequest> for MessageHandler {
+impl reactor::EventHandler<InternalRequest> for MessageEventHandler {
     type Handler = RequestHandler;
     fn handle_event(&mut self, event: InternalRequest) {
         if let Request::Message(event) = event {
