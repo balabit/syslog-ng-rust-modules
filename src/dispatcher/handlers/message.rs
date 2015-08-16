@@ -6,19 +6,23 @@ use action;
 use context;
 use Message;
 use dispatcher::request::{InternalRequest, Request, RequestHandler};
+use dispatcher::response::ResponseHandler;
+use dispatcher::Response;
 use context::event::EventHandler;
 use reactor::{self, Event};
 
 pub struct MessageEventHandler {
     handlers: BTreeMap<String, Vec<Rc<RefCell<Box<context::event::EventHandler<InternalRequest>>>>>>,
     keyless_handlers: Vec<Rc<RefCell<Box<context::event::EventHandler<InternalRequest>>>>>,
+    response_handler: Rc<RefCell<Box<ResponseHandler<Response>>>>,
 }
 
 impl MessageEventHandler {
-    pub fn new() -> MessageEventHandler {
+    pub fn new(response_handler: Rc<RefCell<Box<ResponseHandler<Response>>>>) -> MessageEventHandler {
         MessageEventHandler{
             handlers: BTreeMap::new(),
-            keyless_handlers: Vec::new()
+            keyless_handlers: Vec::new(),
+            response_handler: response_handler
         }
     }
 
@@ -42,7 +46,11 @@ impl reactor::EventHandler<InternalRequest> for MessageEventHandler {
             println!("message event");
             if let Some(handlers) = self.handlers.get_mut(event.uuid()) {
                 for i in handlers.iter_mut() {
-                    i.borrow_mut().handle_event(Request::Message(event.clone()));
+                    if let Some(result) = i.borrow_mut().handle_event(Request::Message(event.clone())) {
+                        for i in result.into_iter() {
+                            self.response_handler.borrow_mut().handle_response(i.into());
+                        }
+                    }
                 }
             } else {
                 println!("no handler found for this message");
