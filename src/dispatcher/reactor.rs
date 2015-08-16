@@ -28,8 +28,11 @@ impl Reactor for RequestReactor {
     fn handle_events(&mut self) {
         while !self.exit_condition.is_active() {
             if let Some(request) = self.demultiplexer.select() {
-                let mut handler = self.handlers.get_mut(&request.handler()).unwrap();
-                handler.handle_event(request);
+                if let Some(handler) = self.handlers.get_mut(&request.handler()) {
+                    handler.handle_event(request);
+                } else {
+                    println!("Handler not found for event");
+                }
             } else {
                 break;
             }

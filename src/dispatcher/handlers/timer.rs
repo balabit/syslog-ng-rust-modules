@@ -19,6 +19,10 @@ impl TimerEventHandler {
             contexts: Vec::new()
         }
     }
+
+    pub fn register_handler(&mut self, handler: Rc<RefCell<Box<EventHandler<InternalRequest>>>>) {
+        self.contexts.push(handler);
+    }
 }
 
 impl reactor::EventHandler<InternalRequest> for TimerEventHandler {

@@ -1,3 +1,5 @@
+use std::cell::RefCell;
+use std::rc::Rc;
 use std::sync::mpsc;
 use std::thread;
 use std::result::Result;
@@ -5,6 +7,7 @@ use std::result::Result;
 use action::ActionHandlers;
 use {config, context, Message, MiliSec, Response, Timer};
 use condition::Condition;
+use context::event::EventHandler;
 use dispatcher::request::{InternalRequest, Request, RequestHandler};
 use dispatcher::reactor::RequestReactor;
 use dispatcher::demux::Demultiplexer;
@@ -34,14 +37,23 @@ impl Correlator {
             let exit_handler = Box::new(handlers::exit::ExitEventHandler::new(exit_condition));
             reactor.register_handler(exit_handler);
 
-            let timer_event_handler = Box::new(handlers::timer::TimerEventHandler::new());
-            //event_handler.register_handler(timer_event_handler);
+            let mut timer_event_handler = Box::new(handlers::timer::TimerEventHandler::new());
 
+            let mut event_handlers = Vec::new();
             for i in contexts.into_iter() {
                 let context: context::Context = i.into();
-                let event_handler: Box<context::event::EventHandler<InternalRequest>> = context.into();
+                let event_handler: Box<EventHandler<InternalRequest>> = context.into();
+                let handler = Rc::new(RefCell::new(event_handler));
+                event_handlers.push(handler);
             }
 
+            for i in event_handlers {
+                let clone = i.clone();
+                timer_event_handler.register_handler(clone);
+            }
+
+            reactor.register_handler(timer_event_handler);
+            reactor.handle_events();
             //let mut dispatcher = Dispatcher::new(contexts, dispatcher_output_channel_tx);
             //dispatcher.start_loop(rx);
         });
