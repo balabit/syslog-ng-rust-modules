@@ -1,6 +1,6 @@
 prefix=/home/btibi/workspace/syslog-ng-rust-modules
 includedir=${prefix}/include
-libdir=${prefix}/target/debug
+libdir=${prefix}/target/release
 
 Name: libsyslog_ng_rust_modules
 Description: Rust modules for syslog-ng

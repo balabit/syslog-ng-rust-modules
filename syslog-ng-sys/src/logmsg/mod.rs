@@ -57,4 +57,11 @@ impl LogMessage {
             ffi::__log_msg_set_value_by_name(&mut *self, c_key.as_ptr(), c_value.as_ptr(), value.len() as i64);
         }
     }
+
+    pub fn set_tag(&mut self, tag: &str) {
+        unsafe {
+            let c_tag = CString::new(tag).unwrap();
+            ffi::log_msg_set_tag_by_name(&mut *self, c_tag.as_ptr());
+        }
+    }
 }

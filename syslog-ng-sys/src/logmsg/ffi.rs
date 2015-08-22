@@ -10,4 +10,5 @@ extern "C" {
     pub fn __log_msg_get_value(m: *const LogMessage, handle: NVHandle, value_len: *mut ssize_t) -> *const c_char;
     pub fn __log_msg_get_value_by_name(m: *const LogMessage, name: *const c_char, value_len: *mut ssize_t) -> *const c_char;
     pub fn __log_msg_set_value_by_name(msg: *mut LogMessage, name: *const c_char, value: *const c_char, value_length: ssize_t);
+    pub fn log_msg_set_tag_by_name(msg: *mut LogMessage, name: *const c_char);
 }

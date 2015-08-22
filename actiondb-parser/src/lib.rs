@@ -23,7 +23,7 @@ mod keys {
 
 pub struct ActiondbParser {
     matcher: Option<Box<Matcher>>,
-    prefix: Option<String>,
+    formatter: MessageFormatter
 }
 
 impl ActiondbParser {
@@ -31,7 +31,7 @@ impl ActiondbParser {
         debug!("ActiondbParser: new()");
         ActiondbParser{
             matcher: None,
-            prefix: None
+            formatter: MessageFormatter::new()
         }
     }
 
@@ -47,47 +47,15 @@ impl ActiondbParser {
         }
     }
 
-    pub fn populate_logmsg(&self, msg: &mut LogMessage, result: &MatchResult) {
-        let mut prefixed_key = String::new();
-        for &(key, value) in result.pairs() {
-            self.set_value_in_logmsg(msg, &mut prefixed_key, key, value);
-        }
-
-        if let Some(name) = result.pattern().name() {
-            self.set_value_in_logmsg(msg, &mut prefixed_key, keys::PATTERN_NAME, name);
-        }
-
-        let uuid = result.pattern().uuid().to_hyphenated_string();
-        self.set_value_in_logmsg(msg, &mut prefixed_key, keys::PATTERN_UUID, &uuid);
-    }
-
     pub fn set_prefix(&mut self, prefix: String) {
-        self.prefix = Some(prefix);
-    }
-
-    fn prepend_prefix(&self, key: &str, buffer: &mut String) {
-        match self.prefix.as_ref() {
-            Some(prefix) => {
-                let _ = buffer.write_str(prefix);
-                let _ = buffer.write_str(key);
-            },
-            None => {
-                let _ = buffer.write_str(key);
-            }
-        };
-    }
-
-    fn set_value_in_logmsg(&self, msg: &mut LogMessage, buffer: &mut String, key: &str, value: &str) {
-        self.prepend_prefix(key, buffer);
-        msg.set_value(&buffer, value);
-        buffer.clear();
+        self.formatter.set_prefix(prefix);
     }
 }
 
 impl RustParser for ActiondbParser {
-    fn process(&self, msg: &mut LogMessage, input: &str) -> bool {
+    fn process(&mut self, msg: &mut LogMessage, input: &str) -> bool {
         if let Some(result) = self.matcher.as_ref().unwrap().parse(input) {
-            self.populate_logmsg(msg, &result);
+            MessageFiller::fill_logmsg(&mut self.formatter, msg, &result);
             true
         } else {
             false
@@ -131,15 +99,105 @@ impl clone::Clone for ActiondbParser {
             Option::Some(matcher) => {
                 ActiondbParser{
                     matcher: Some(matcher.boxed_clone()),
-                    prefix: self.prefix.clone(),
+                    formatter: self.formatter.clone(),
                 }
             },
             Option::None => {
                 ActiondbParser{
                     matcher: None,
-                    prefix: self.prefix.clone(),
+                    formatter: self.formatter.clone(),
                 }
             }
         }
+    }
+}
+
+struct MessageFiller;
+
+impl MessageFiller {
+    fn fill_logmsg(formatter: &mut MessageFormatter, msg: &mut LogMessage, result: &MatchResult) {
+        MessageFiller::fill_values(formatter, msg, result);
+        MessageFiller::fill_name(formatter, msg, result);
+        MessageFiller::fill_uuid(formatter, msg, result);
+        MessageFiller::fill_tags(msg, result);
+    }
+
+    fn fill_values(formatter: &mut MessageFormatter, msg: &mut LogMessage, result: &MatchResult) {
+        MessageFiller::fill_parsed_values(formatter, msg, result);
+        MessageFiller::fill_additional_values(formatter, msg, result);
+    }
+
+    fn fill_parsed_values(formatter: &mut MessageFormatter, msg: &mut LogMessage, result: &MatchResult) {
+        for (key, value) in result.values() {
+            let (key, value) = formatter.format(key, value);
+            msg.set_value(key, value);
+        }
+    }
+
+    fn fill_additional_values(formatter: &mut MessageFormatter, msg: &mut LogMessage, result: &MatchResult) {
+        if let Some(values) = result.pattern().values() {
+            for (key, value) in values {
+                let (key, value) = formatter.format(key, value);
+                msg.set_value(key, value);
+            }
+        }
+    }
+
+    fn fill_name(formatter: &mut MessageFormatter, msg: &mut LogMessage, result: &MatchResult) {
+        if let Some(name) = result.pattern().name() {
+            let (key, value) = formatter.format(keys::PATTERN_NAME, name);
+            msg.set_value(key, value);
+        }
+    }
+
+    fn fill_uuid(formatter: &mut MessageFormatter, msg: &mut LogMessage, result: &MatchResult) {
+        let uuid = result.pattern().uuid().to_hyphenated_string();
+        let (key, value) = formatter.format(keys::PATTERN_UUID, &uuid);
+        msg.set_value(key, value);
+    }
+
+    fn fill_tags(msg: &mut LogMessage, result: &MatchResult) {
+        if let Some(tags) = result.pattern().tags() {
+            for i in tags {
+                msg.set_tag(i);
+            }
+        }
+    }
+}
+
+#[derive(Clone)]
+struct MessageFormatter {
+    buffer: String,
+    prefix: Option<String>
+}
+
+impl MessageFormatter {
+    fn new() -> MessageFormatter {
+        MessageFormatter {
+            buffer: String::new(),
+            prefix: None
+        }
+    }
+
+    fn set_prefix(&mut self, prefix: String) {
+        self.prefix = Some(prefix)
+    }
+
+    fn format<'a, 'b, 'c>(&'a mut self, key: &'b str, value: &'c str) -> (&'a str, &'c str) {
+        self.buffer.clear();
+        self.apply_prefix(key);
+        (&self.buffer, value)
+    }
+
+    fn apply_prefix(&mut self, key: &str) {
+        match self.prefix.as_ref() {
+            Some(prefix) => {
+                let _ = self.buffer.write_str(prefix);
+                let _ = self.buffer.write_str(key);
+            },
+            None => {
+                let _ = self.buffer.write_str(key);
+            }
+        };
     }
 }
