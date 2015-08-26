@@ -70,7 +70,7 @@ impl BaseContext {
 
 impl From<config::Context> for BaseContext {
     fn from(config: config::Context) -> BaseContext {
-        let config::Context{conditions, actions} = config;
+        let config::Context{uuid, conditions, actions} = config;
         BaseContext {
             conditions: conditions,
             actions: actions
