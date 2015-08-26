@@ -3,6 +3,7 @@ use Context;
 use TimerEvent;
 use message;
 
+use uuid::Uuid;
 use std::rc::Rc;
 
 #[test]
@@ -11,7 +12,7 @@ fn test_given_map_context_when_messages_have_the_same_kvpairs_then_they_go_to_th
     let timeout = 30;
     let event = TimerEvent(delta);
     let patterns: Vec<String> = vec!["1".to_string(), "2".to_string(), "3".to_string()];
-    let mut context = Context::new_map(Builder::new(timeout).patterns(patterns).build());
+    let mut context = Context::new_map(Uuid::new_v4(), Builder::new(timeout).patterns(patterns).build());
     let msg1 = message::Builder::new("1".to_string())
                                 .pair("HOST".to_string(), "host".to_string())
                                 .pair("PROGRAM".to_string(), "program".to_string())

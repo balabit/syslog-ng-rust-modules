@@ -1,10 +1,12 @@
 #[macro_use]
 extern crate maplit;
 extern crate correlation;
+extern crate uuid;
 
 use correlation::{config, conditions, Correlator, Message};
 use correlation::action::message;
 use correlation::action::ActionHandlers;
+use uuid::Uuid;
 use std::thread;
 
 struct Printer;
@@ -24,9 +26,9 @@ fn main() {
                                                 .build();
     let actions = vec![ message::Action::new().into() ];
     let contexts = vec!{
-        config::ContextBuilder::new(condition.clone()).actions(actions.clone()).build(),
-        config::ContextBuilder::new(condition.clone()).actions(actions.clone()).build(),
-        config::ContextBuilder::new(condition.clone()).actions(actions.clone()).build(),
+        config::ContextBuilder::new(Uuid::new_v4(), condition.clone()).actions(actions.clone()).build(),
+        config::ContextBuilder::new(Uuid::new_v4(), condition.clone()).actions(actions.clone()).build(),
+        config::ContextBuilder::new(Uuid::new_v4(), condition.clone()).actions(actions.clone()).build(),
     };
     let handlers = ActionHandlers::new(Box::new(Printer));
     let mut correlator = Correlator::new(contexts, handlers);

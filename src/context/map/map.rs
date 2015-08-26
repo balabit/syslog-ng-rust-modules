@@ -1,3 +1,4 @@
+use uuid::Uuid;
 use std::collections::BTreeMap;
 use std::fmt::Write;
 use std::rc::Rc;
@@ -19,9 +20,9 @@ pub struct MapContext {
 }
 
 impl MapContext {
-    pub fn new(conditions: Conditions) -> MapContext {
+    pub fn new(uuid: Uuid, conditions: Conditions) -> MapContext {
         MapContext {
-            base: BaseContext::new(conditions),
+            base: BaseContext::new(uuid, conditions),
             map: BTreeMap::new(),
             format_buffer: String::new()
         }

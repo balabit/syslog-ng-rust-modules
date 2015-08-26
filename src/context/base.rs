@@ -1,3 +1,4 @@
+use uuid::Uuid;
 use std::rc::Rc;
 
 use action::{Action, ExecResult};
@@ -9,13 +10,15 @@ use timer::TimerEvent;
 
 #[derive(Debug)]
 pub struct BaseContext {
+    uuid: Uuid,
     conditions: Conditions,
     actions: Vec<Action>
 }
 
 impl BaseContext {
-    pub fn new(conditions: Conditions) -> BaseContext {
+    pub fn new(uuid: Uuid, conditions: Conditions) -> BaseContext {
         BaseContext {
+            uuid: uuid,
             conditions: conditions,
             actions: Vec::new()
         }
@@ -72,6 +75,7 @@ impl From<config::Context> for BaseContext {
     fn from(config: config::Context) -> BaseContext {
         let config::Context{uuid, conditions, actions} = config;
         BaseContext {
+            uuid: uuid,
             conditions: conditions,
             actions: actions
         }

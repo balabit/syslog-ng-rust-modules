@@ -1,3 +1,4 @@
+use uuid::Uuid;
 use std::rc::Rc;
 
 use super::{config, Conditions, Message, TimerEvent};
@@ -39,15 +40,15 @@ impl Context {
         }
     }
 
-    pub fn new_linear(conditions: Conditions) -> Context {
+    pub fn new_linear(uuid: Uuid, conditions: Conditions) -> Context {
         Context::Linear(
-            LinearContext::new(conditions)
+            LinearContext::new(uuid, conditions)
         )
     }
 
-    pub fn new_map(conditions: Conditions) -> Context {
+    pub fn new_map(uuid: Uuid, conditions: Conditions) -> Context {
         Context::Map(
-            MapContext::new(conditions)
+            MapContext::new(uuid, conditions)
         )
     }
 }
@@ -68,6 +69,7 @@ impl From<Context> for Box<self::event::EventHandler<InternalRequest>> {
 }
 
 mod linear {
+    use uuid::Uuid;
     use std::rc::Rc;
 
     use action::ExecResult;
@@ -88,9 +90,9 @@ mod linear {
     }
 
     impl LinearContext {
-        pub fn new(conditions: Conditions) -> LinearContext {
+        pub fn new(uuid: Uuid, conditions: Conditions) -> LinearContext {
             LinearContext {
-                base: BaseContext::new(conditions),
+                base: BaseContext::new(uuid, conditions),
                 state: State::new()
             }
         }
@@ -147,6 +149,7 @@ mod linear {
 
 #[cfg(test)]
 mod test {
+    use uuid::Uuid;
     use std::rc::Rc;
 
     use message;
@@ -158,7 +161,7 @@ mod test {
     fn test_given_close_condition_with_timeout_when_the_timeout_expires_then_the_condition_is_met() {
         let timeout = 100;
         let msg_id = "1".to_string();
-        let mut context = Context::new_linear(Builder::new(timeout).patterns(vec![msg_id.clone()]).build());
+        let mut context = Context::new_linear(Uuid::new_v4(), Builder::new(timeout).patterns(vec![msg_id.clone()]).build());
         let msg1 = message::Builder::new(msg_id.clone()).build();
         let event = Rc::new(msg1);
         println!("{:?}", &context);
@@ -178,7 +181,7 @@ mod test {
         let timeout = 100;
         let max_size = 3;
         let msg_id = "1".to_string();
-        let mut context = Context::new_linear(Builder::new(timeout).max_size(max_size).patterns(vec![msg_id.clone()]).build());
+        let mut context = Context::new_linear(Uuid::new_v4(), Builder::new(timeout).max_size(max_size).patterns(vec![msg_id.clone()]).build());
         let msg1 = message::Builder::new(msg_id.clone()).build();
         let event = Rc::new(msg1);
         println!("{:?}", &context);
@@ -196,7 +199,7 @@ mod test {
         let timeout = 100;
         let renew_timeout = 10;
         let msg_id = "1".to_string();
-        let mut context = Context::new_linear(Builder::new(timeout).renew_timeout(renew_timeout).patterns(vec![msg_id.clone()]).build());
+        let mut context = Context::new_linear(Uuid::new_v4(), Builder::new(timeout).renew_timeout(renew_timeout).patterns(vec![msg_id.clone()]).build());
         let msg1 = message::Builder::new(msg_id.clone()).build();
         let event = Rc::new(msg1);
         context.on_message(event.clone());
@@ -214,7 +217,7 @@ mod test {
         let timeout = 100;
         let renew_timeout = 10;
         let msg_id = "1".to_string();
-        let mut context = Context::new_linear(Builder::new(timeout).renew_timeout(renew_timeout).patterns(vec![msg_id.clone()]).build());
+        let mut context = Context::new_linear(Uuid::new_v4(), Builder::new(timeout).renew_timeout(renew_timeout).patterns(vec![msg_id.clone()]).build());
         let msg1 = message::Builder::new(msg_id.clone()).build();
         let event = Rc::new(msg1);
         assert_false!(context.is_open());
