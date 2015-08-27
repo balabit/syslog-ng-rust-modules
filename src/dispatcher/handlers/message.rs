@@ -83,3 +83,70 @@ impl reactor::EventHandler<InternalRequest> for MessageEventHandler {
         RequestHandler::Message
     }
 }
+
+
+#[cfg(test)]
+mod test {
+    use uuid::Uuid;
+    use std::cell::RefCell;
+    use std::rc::Rc;
+
+    use action::ExecResult;
+    use context;
+    use dispatcher::request::{InternalRequest, Request};
+    use dispatcher::response::ResponseHandler;
+    use dispatcher::Response;
+    use message::{Builder, PatternId};
+    use reactor::EventHandler;
+
+    use super::MessageEventHandler;
+
+    struct DummyResponseHandler(Rc<RefCell<i32>>);
+
+    impl ResponseHandler<Response> for DummyResponseHandler {
+        fn handle_response(&mut self, _: Response) {
+            *self.0.borrow_mut() += 1;
+        }
+    }
+
+    struct DummyEventHandler {
+        counter: Rc<RefCell<i32>>,
+        ids: Vec<PatternId>
+    }
+
+    impl context::event::EventHandler<InternalRequest> for DummyEventHandler {
+        fn handle_event(&mut self, _: InternalRequest) -> Option<Vec<ExecResult>> {
+            *self.counter.borrow_mut() += 1;
+            None
+        }
+        fn handlers(&self) -> &[PatternId] {
+            &self.ids
+        }
+    }
+
+    #[test]
+    fn test_given_message_event_handler_when_it_receives_a_message_then_it_calls_the_right_handler() {
+        let uuid1 = "1b47ba91-d867-4a8c-9553-a5dfd6ea1274".to_string();
+        let uuid2 = "2b47ba91-d867-4a8c-9553-a5dfd6ea1274".to_string();
+        let response_handler_counter = Rc::new(RefCell::new(0));
+        let response_handler: Box<ResponseHandler<Response>> = Box::new(DummyResponseHandler(response_handler_counter.clone()));
+        let response_handler = Rc::new(RefCell::new(response_handler));
+        let ids_1 = vec![ PatternId::Uuid(Uuid::parse_str(&uuid1).unwrap()) ];
+        let ids_2 = vec![ PatternId::Uuid(Uuid::parse_str(&uuid2).unwrap()) ];
+        let event_handler_counter_1 = Rc::new(RefCell::new(0));
+        let event_handler_counter_2 = Rc::new(RefCell::new(0));
+        let event_handler_1: Box<context::event::EventHandler<InternalRequest>> = Box::new(DummyEventHandler{counter: event_handler_counter_1.clone(), ids: ids_1});
+        let event_handler_2: Box<context::event::EventHandler<InternalRequest>> = Box::new(DummyEventHandler{counter: event_handler_counter_2.clone(), ids: ids_2});
+        let event_handler_1 = Rc::new(RefCell::new(event_handler_1));
+        let event_handler_2 = Rc::new(RefCell::new(event_handler_2));
+        let mut message_event_handler = MessageEventHandler::new(response_handler.clone());
+        message_event_handler.register_handler(event_handler_1);
+        message_event_handler.register_handler(event_handler_2);
+        message_event_handler.handle_event(Request::Message(Rc::new(Builder::new(&uuid1).build())));
+        assert_eq!(1, *event_handler_counter_1.borrow());
+        message_event_handler.handle_event(Request::Message(Rc::new(Builder::new(&uuid1).build())));
+        assert_eq!(2, *event_handler_counter_1.borrow());
+        assert_eq!(0, *event_handler_counter_2.borrow());
+        assert_eq!(0, *response_handler_counter.borrow());
+    }
+}
