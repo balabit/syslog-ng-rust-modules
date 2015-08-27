@@ -10,6 +10,7 @@ use timer::TimerEvent;
 
 #[derive(Debug)]
 pub struct BaseContext {
+    name: Option<String>,
     uuid: Uuid,
     conditions: Conditions,
     actions: Vec<Action>
@@ -18,6 +19,7 @@ pub struct BaseContext {
 impl BaseContext {
     pub fn new(uuid: Uuid, conditions: Conditions) -> BaseContext {
         BaseContext {
+            name: None,
             uuid: uuid,
             conditions: conditions,
             actions: Vec::new()
@@ -75,6 +77,7 @@ impl From<config::Context> for BaseContext {
     fn from(config: config::Context) -> BaseContext {
         let config::Context{name, uuid, conditions, actions} = config;
         BaseContext {
+            name: name,
             uuid: uuid,
             conditions: conditions,
             actions: actions
