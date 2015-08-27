@@ -116,21 +116,6 @@ mod test {
     use state::State;
     use super::Builder;
 
-    /*#[test]
-    fn test_given_close_condition_when_an_unknown_message_received_then_it_is_ignored() {
-        let timeout = 100;
-        let msg_id1 = "11eaf6f8-0640-460f-aee2-a72d2f2ab258".to_string();
-        let msg_id2 = "21eaf6f8-0640-460f-aee2-a72d2f2ab258".to_string();
-        let patterns = vec![
-            PatternId::Uuid(Uuid::parse_str(&msg_id1).unwrap()),
-        ];
-        let condition = Builder::new(timeout).patterns(patterns).build();
-        let msg_which_should_not_be_ignored = message::Builder::new(&msg_id1).build();
-        let msg_which_should_be_ignored = message::Builder::new(&msg_id2).build();
-        assert_true!(condition.ignore_message(&msg_which_should_be_ignored));
-        assert_false!(condition.ignore_message(&msg_which_should_not_be_ignored));
-    }*/
-
     #[test]
     fn test_given_condition_when_an_opening_message_is_received_then_the_state_becomes_opened() {
         let timeout = 100;
