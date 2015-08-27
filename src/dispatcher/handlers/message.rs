@@ -7,7 +7,7 @@ use dispatcher::request::{InternalRequest, Request, RequestHandler};
 use dispatcher::response::ResponseHandler;
 use dispatcher::Response;
 use context::event::EventHandler;
-use message::{PatternId};
+use message::{Message, PatternId};
 use reactor;
 
 pub struct MessageEventHandler {
@@ -37,40 +37,31 @@ impl MessageEventHandler {
             }
         }
     }
+
+    pub fn call_handlers_by_id(&mut self, id: &PatternId, event: Rc<Message>) {
+        if let Some(handlers) = self.handlers.get_mut(id) {
+            for i in handlers.iter_mut() {
+                if let Some(result) = i.borrow_mut().handle_event(Request::Message(event.clone())) {
+                    for i in result.into_iter() {
+                        self.response_handler.borrow_mut().handle_response(i.into());
+                    }
+                }
+            }
+        }
+    }
 }
 
 impl reactor::EventHandler<InternalRequest> for MessageEventHandler {
     type Handler = RequestHandler;
     fn handle_event(&mut self, event: InternalRequest) {
-        println!("map: {:?}", self.handlers.len());
         if let Request::Message(event) = event {
             println!("message event");
-            if let Some(name) = event.name() {
-                println!("message has a name");
-                if let Some(handlers) = self.handlers.get_mut(name) {
-                    for i in handlers.iter_mut() {
-                        if let Some(result) = i.borrow_mut().handle_event(Request::Message(event.clone())) {
-                            for i in result.into_iter() {
-                                self.response_handler.borrow_mut().handle_response(i.into());
-                            }
-                        }
-                    }
-                }
+            if let Some(id) = event.name() {
+                self.call_handlers_by_id(id, event.clone());
             } else {
-                println!("uuid: {:?}", event.uuid());
-                if let Some(handlers) = self.handlers.get_mut(event.uuid()) {
-                    for i in handlers.iter_mut() {
-                        if let Some(result) = i.borrow_mut().handle_event(Request::Message(event.clone())) {
-                            for i in result.into_iter() {
-                                self.response_handler.borrow_mut().handle_response(i.into());
-                            }
-                        }
-                    }
-                } else {
-                    println!("no handler found for this message");
-                }
+                let id = event.uuid();
+                self.call_handlers_by_id(id, event.clone());
             }
-
 
             for i in self.keyless_handlers.iter_mut() {
                 i.borrow_mut().handle_event(Request::Message(event.clone()));
