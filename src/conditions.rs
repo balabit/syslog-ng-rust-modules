@@ -109,7 +109,6 @@ impl Builder {
 
 #[cfg(test)]
 mod test {
-    use uuid::Uuid;
     use std::rc::Rc;
 
     use message;
@@ -138,7 +137,7 @@ mod test {
         let msg_id1 = "11eaf6f8-0640-460f-aee2-a72d2f2ab258".to_string();
         let msg_id2 = "21eaf6f8-0640-460f-aee2-a72d2f2ab258".to_string();
         let patterns = vec![
-            PatternId::Uuid(Uuid::parse_str(&msg_id1).unwrap()),
+            PatternId::Uuid(msg_id1.clone()),
         ];
         let condition = Builder::new(timeout).patterns(patterns).first_opens(true).build();
         let msg_which_should_not_be_ignored = message::Builder::new(&msg_id1).build();
@@ -153,8 +152,8 @@ mod test {
         let msg_id1 = "11eaf6f8-0640-460f-aee2-a72d2f2ab258".to_string();
         let msg_id2 = "21eaf6f8-0640-460f-aee2-a72d2f2ab258".to_string();
         let patterns = vec![
-            PatternId::Uuid(Uuid::parse_str(&msg_id1).unwrap()),
-            PatternId::Uuid(Uuid::parse_str(&msg_id2).unwrap()),
+            PatternId::Uuid(msg_id1.clone()),
+            PatternId::Uuid(msg_id2.clone()),
         ];
         let mut state = State::new();
         let condition = Builder::new(timeout).patterns(patterns).last_closes(true).build();

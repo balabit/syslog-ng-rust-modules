@@ -163,7 +163,7 @@ mod test {
         let timeout = 100;
         let msg_id = "11eaf6f8-0640-460f-aee2-a72d2f2ab258".to_string();
         let patterns = vec![
-            PatternId::Uuid(Uuid::parse_str(&msg_id).unwrap()),
+            PatternId::Uuid(msg_id.clone()),
         ];
         let mut context = Context::new_linear(Uuid::new_v4(), Builder::new(timeout).patterns(patterns).build());
         let msg1 = message::Builder::new(&msg_id).build();
@@ -186,7 +186,7 @@ mod test {
         let max_size = 3;
         let msg_id = "11eaf6f8-0640-460f-aee2-a72d2f2ab258".to_string();
         let patterns = vec![
-            PatternId::Uuid(Uuid::parse_str(&msg_id).unwrap()),
+            PatternId::Uuid(msg_id.clone()),
         ];
         let mut context = Context::new_linear(Uuid::new_v4(), Builder::new(timeout).max_size(max_size).patterns(patterns).build());
         let msg1 = message::Builder::new(&msg_id).build();
@@ -207,7 +207,7 @@ mod test {
         let renew_timeout = 10;
         let msg_id = "11eaf6f8-0640-460f-aee2-a72d2f2ab258".to_string();
         let patterns = vec![
-            PatternId::Uuid(Uuid::parse_str(&msg_id).unwrap()),
+            PatternId::Uuid(msg_id.clone()),
         ];
         let mut context = Context::new_linear(Uuid::new_v4(), Builder::new(timeout).renew_timeout(renew_timeout).patterns(patterns).build());
         let msg1 = message::Builder::new(&msg_id).build();
@@ -228,7 +228,7 @@ mod test {
         let renew_timeout = 10;
         let msg_id = "11eaf6f8-0640-460f-aee2-a72d2f2ab258".to_string();
         let patterns = vec![
-            PatternId::Uuid(Uuid::parse_str(&msg_id).unwrap()),
+            PatternId::Uuid(msg_id.clone()),
         ];
         let mut context = Context::new_linear(Uuid::new_v4(), Builder::new(timeout).renew_timeout(renew_timeout).patterns(patterns).build());
         let msg1 = message::Builder::new(&msg_id).build();

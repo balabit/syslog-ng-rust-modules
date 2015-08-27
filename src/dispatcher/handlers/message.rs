@@ -86,7 +86,6 @@ impl reactor::EventHandler<InternalRequest> for MessageEventHandler {
 
 #[cfg(test)]
 mod test {
-    use uuid::Uuid;
     use std::cell::RefCell;
     use std::rc::Rc;
 
@@ -130,8 +129,8 @@ mod test {
         let response_handler_counter = Rc::new(RefCell::new(0));
         let response_handler: Box<ResponseHandler<Response>> = Box::new(DummyResponseHandler(response_handler_counter.clone()));
         let response_handler = Rc::new(RefCell::new(response_handler));
-        let ids_1 = vec![ PatternId::Uuid(Uuid::parse_str(&uuid1).unwrap()) ];
-        let ids_2 = vec![ PatternId::Uuid(Uuid::parse_str(&uuid2).unwrap()) ];
+        let ids_1 = vec![ PatternId::Uuid(uuid1.clone()) ];
+        let ids_2 = vec![ PatternId::Uuid(uuid2.clone()) ];
         let event_handler_counter_1 = Rc::new(RefCell::new(0));
         let event_handler_counter_2 = Rc::new(RefCell::new(0));
         let event_handler_1: Box<context::event::EventHandler<InternalRequest>> = Box::new(DummyEventHandler{counter: event_handler_counter_1.clone(), ids: ids_1});

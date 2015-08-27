@@ -1,4 +1,3 @@
-use uuid::Uuid;
 use std::collections::BTreeMap;
 
 #[derive(Clone, Debug)]
@@ -31,7 +30,7 @@ pub struct Builder {
 impl Builder {
     pub fn new(uuid: &str) -> Builder {
         Builder {
-            uuid: PatternId::Uuid(Uuid::parse_str(uuid).unwrap()),
+            uuid: PatternId::Uuid(uuid.to_string()),
             name: None,
             data: BTreeMap::new()
         }
@@ -58,6 +57,6 @@ impl Builder {
 
 #[derive(Clone, Debug, Eq, PartialEq, Hash)]
 pub enum PatternId {
-    Uuid(Uuid),
+    Uuid(String),
     Name(String)
 }

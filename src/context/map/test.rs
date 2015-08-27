@@ -16,9 +16,9 @@ fn test_given_map_context_when_messages_have_the_same_kvpairs_then_they_go_to_th
     let msg_id2 = "21eaf6f8-0640-460f-aee2-a72d2f2ab258".to_string();
     let msg_id3 = "31eaf6f8-0640-460f-aee2-a72d2f2ab258".to_string();
     let patterns = vec![
-        PatternId::Uuid(Uuid::parse_str(&msg_id1).unwrap()),
-        PatternId::Uuid(Uuid::parse_str(&msg_id2).unwrap()),
-        PatternId::Uuid(Uuid::parse_str(&msg_id3).unwrap()),
+        PatternId::Uuid(msg_id1.clone()),
+        PatternId::Uuid(msg_id2.clone()),
+        PatternId::Uuid(msg_id3.clone()),
     ];
     let mut context = Context::new_map(Uuid::new_v4(), Builder::new(timeout).patterns(patterns).build());
     let msg1 = message::Builder::new(&msg_id1)
