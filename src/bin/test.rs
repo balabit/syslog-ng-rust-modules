@@ -24,9 +24,9 @@ fn main() {
     let uuid2 = "2b47ba91-d867-4a8c-9553-a5dfd6ea1274".to_string();
     let uuid3 = "3b47ba91-d867-4a8c-9553-a5dfd6ea1274".to_string();
     let patterns = vec![
-        PatternId::Name(uuid1.clone()),
-        PatternId::Name(uuid2.clone()),
-        PatternId::Name(uuid3.clone()),
+        PatternId::Uuid(Uuid::parse_str(&uuid1).unwrap()),
+        PatternId::Uuid(Uuid::parse_str(&uuid2).unwrap()),
+        PatternId::Uuid(Uuid::parse_str(&uuid3).unwrap()),
     ];
     let condition = conditions::Builder::new(100).patterns(patterns)
                                                 .first_opens(true)
