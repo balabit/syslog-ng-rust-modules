@@ -31,7 +31,6 @@ impl MessageEventHandler {
             self.keyless_handlers.push(cloned_handler);
         } else {
             for key in cloned_handler.borrow().handlers() {
-                println!("key: {:?}", key);
                 let handlers = self.handlers.entry(key.clone()).or_insert(Vec::new());
                 handlers.push(cloned_handler.clone());
             }
