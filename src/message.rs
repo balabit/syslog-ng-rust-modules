@@ -1,26 +1,19 @@
+use uuid::Uuid;
 use std::collections::BTreeMap;
 
 #[derive(Clone, Debug)]
 pub struct Message {
-    uuid: String,
-    name: Option<String>,
+    uuid: PatternId,
+    name: Option<PatternId>,
     data: BTreeMap<String, String>
 }
 
 impl Message {
-    pub fn new(uuid: String) -> Message {
-        Message {
-            uuid: uuid,
-            name: None,
-            data: BTreeMap::new()
-        }
-    }
-
-    pub fn uuid(&self) -> &String {
+    pub fn uuid(&self) -> &PatternId {
         &self.uuid
     }
 
-    pub fn name(&self) -> Option<&String> {
+    pub fn name(&self) -> Option<&PatternId> {
         self.name.as_ref()
     }
 
@@ -30,22 +23,22 @@ impl Message {
 }
 
 pub struct Builder {
-    uuid: String,
-    name: Option<String>,
+    uuid: PatternId,
+    name: Option<PatternId>,
     data: BTreeMap<String, String>
 }
 
 impl Builder {
-    pub fn new(uuid: String) -> Builder {
+    pub fn new(uuid: &str) -> Builder {
         Builder {
-            uuid: uuid,
+            uuid: PatternId::Uuid(Uuid::parse_str(uuid).unwrap()),
             name: None,
             data: BTreeMap::new()
         }
     }
 
     pub fn name(&mut self, name: String) -> &mut Builder {
-        self.name = Some(name);
+        self.name = Some(PatternId::Name(name));
         self
     }
 
@@ -61,4 +54,10 @@ impl Builder {
             data: self.data.clone()
         }
     }
+}
+
+#[derive(Clone, Debug, Eq, PartialEq, Hash)]
+pub enum PatternId {
+    Uuid(Uuid),
+    Name(String)
 }

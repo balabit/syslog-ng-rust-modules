@@ -49,7 +49,7 @@ pub mod handlers {
 pub mod message {
     use context::base::BaseContext;
     use state::State;
-    use Message;
+    use message::{Builder, Message};
 
     #[derive(Debug)]
     pub struct ExecResult(Message);
@@ -69,7 +69,7 @@ pub mod message {
         }
 
         pub fn execute(&self, _: &State, _: &BaseContext) -> ExecResult {
-            ExecResult(Message::new("".to_string()))
+            ExecResult(Builder::new("8015340d-5b44-4b16-8a3f-60b505ccd22e").build())
         }
     }
 

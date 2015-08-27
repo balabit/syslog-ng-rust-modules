@@ -1,10 +1,10 @@
 use uuid::Uuid;
 use std::rc::Rc;
 
-use super::{config, Conditions, Message, TimerEvent};
+use super::{config, Conditions, TimerEvent};
 use dispatcher::request::InternalRequest;
-
 use action::ExecResult;
+use message::{Message};
 use self::linear::LinearContext;
 use self::map::MapContext;
 
@@ -77,7 +77,7 @@ mod linear {
     use context;
     use Conditions;
     use context::event::{EventHandler};
-    use Message;
+    use message::{Message, PatternId};
     use state::State;
     use TimerEvent;
     use dispatcher::request::{InternalRequest, Request};
@@ -116,7 +116,7 @@ mod linear {
             self.state.is_open()
         }
 
-        pub fn patterns(&self) -> &[String] {
+        pub fn patterns(&self) -> &[PatternId] {
             &self.base.conditions().patterns
         }
     }
@@ -131,7 +131,7 @@ mod linear {
     }
 
     impl EventHandler<InternalRequest> for LinearContext {
-        fn handlers(&self) -> &[String] {
+        fn handlers(&self) -> &[PatternId] {
             self.patterns()
         }
         fn handle_event(&mut self, event: InternalRequest) -> Option<Vec<ExecResult>> {
@@ -153,6 +153,7 @@ mod test {
     use std::rc::Rc;
 
     use message;
+    use message::PatternId;
     use TimerEvent;
     use super::Context;
     use conditions::Builder;
@@ -160,9 +161,12 @@ mod test {
     #[test]
     fn test_given_close_condition_with_timeout_when_the_timeout_expires_then_the_condition_is_met() {
         let timeout = 100;
-        let msg_id = "1".to_string();
-        let mut context = Context::new_linear(Uuid::new_v4(), Builder::new(timeout).patterns(vec![msg_id.clone()]).build());
-        let msg1 = message::Builder::new(msg_id.clone()).build();
+        let msg_id = "11eaf6f8-0640-460f-aee2-a72d2f2ab258".to_string();
+        let patterns = vec![
+            PatternId::Uuid(Uuid::parse_str(&msg_id).unwrap()),
+        ];
+        let mut context = Context::new_linear(Uuid::new_v4(), Builder::new(timeout).patterns(patterns).build());
+        let msg1 = message::Builder::new(&msg_id).build();
         let event = Rc::new(msg1);
         println!("{:?}", &context);
         assert_false!(context.is_open());
@@ -180,9 +184,12 @@ mod test {
     fn test_given_close_condition_with_max_size_when_the_max_size_reached_then_the_condition_is_met() {
         let timeout = 100;
         let max_size = 3;
-        let msg_id = "1".to_string();
-        let mut context = Context::new_linear(Uuid::new_v4(), Builder::new(timeout).max_size(max_size).patterns(vec![msg_id.clone()]).build());
-        let msg1 = message::Builder::new(msg_id.clone()).build();
+        let msg_id = "11eaf6f8-0640-460f-aee2-a72d2f2ab258".to_string();
+        let patterns = vec![
+            PatternId::Uuid(Uuid::parse_str(&msg_id).unwrap()),
+        ];
+        let mut context = Context::new_linear(Uuid::new_v4(), Builder::new(timeout).max_size(max_size).patterns(patterns).build());
+        let msg1 = message::Builder::new(&msg_id).build();
         let event = Rc::new(msg1);
         println!("{:?}", &context);
         context.on_message(event.clone());
@@ -198,9 +205,12 @@ mod test {
     fn test_given_close_condition_with_renew_timeout_when_the_timeout_expires_without_renewing_messages_then_the_condition_is_met() {
         let timeout = 100;
         let renew_timeout = 10;
-        let msg_id = "1".to_string();
-        let mut context = Context::new_linear(Uuid::new_v4(), Builder::new(timeout).renew_timeout(renew_timeout).patterns(vec![msg_id.clone()]).build());
-        let msg1 = message::Builder::new(msg_id.clone()).build();
+        let msg_id = "11eaf6f8-0640-460f-aee2-a72d2f2ab258".to_string();
+        let patterns = vec![
+            PatternId::Uuid(Uuid::parse_str(&msg_id).unwrap()),
+        ];
+        let mut context = Context::new_linear(Uuid::new_v4(), Builder::new(timeout).renew_timeout(renew_timeout).patterns(patterns).build());
+        let msg1 = message::Builder::new(&msg_id).build();
         let event = Rc::new(msg1);
         context.on_message(event.clone());
         assert_true!(context.is_open());
@@ -216,9 +226,12 @@ mod test {
     fn test_given_close_condition_with_renew_timeout_when_the_timeout_expires_with_renewing_messages_then_the_context_is_not_closed() {
         let timeout = 100;
         let renew_timeout = 10;
-        let msg_id = "1".to_string();
-        let mut context = Context::new_linear(Uuid::new_v4(), Builder::new(timeout).renew_timeout(renew_timeout).patterns(vec![msg_id.clone()]).build());
-        let msg1 = message::Builder::new(msg_id.clone()).build();
+        let msg_id = "11eaf6f8-0640-460f-aee2-a72d2f2ab258".to_string();
+        let patterns = vec![
+            PatternId::Uuid(Uuid::parse_str(&msg_id).unwrap()),
+        ];
+        let mut context = Context::new_linear(Uuid::new_v4(), Builder::new(timeout).renew_timeout(renew_timeout).patterns(patterns).build());
+        let msg1 = message::Builder::new(&msg_id).build();
         let event = Rc::new(msg1);
         assert_false!(context.is_open());
         context.on_message(event.clone());

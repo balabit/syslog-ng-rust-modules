@@ -3,7 +3,8 @@ extern crate maplit;
 extern crate correlation;
 extern crate uuid;
 
-use correlation::{config, conditions, Correlator, Message};
+use correlation::{config, conditions, Correlator};
+use correlation::message::{Builder, PatternId};
 use correlation::action::message;
 use correlation::action::ActionHandlers;
 use uuid::Uuid;
@@ -19,7 +20,14 @@ impl message::ActionHandler for Printer {
 
 #[allow(dead_code)]
 fn main() {
-    let patterns = vec!["1".to_string(), "2".to_string(), "3".to_string()];
+    let uuid1 = "1b47ba91-d867-4a8c-9553-a5dfd6ea1274".to_string();
+    let uuid2 = "2b47ba91-d867-4a8c-9553-a5dfd6ea1274".to_string();
+    let uuid3 = "3b47ba91-d867-4a8c-9553-a5dfd6ea1274".to_string();
+    let patterns = vec![
+        PatternId::Name(uuid1.clone()),
+        PatternId::Name(uuid2.clone()),
+        PatternId::Name(uuid3.clone()),
+    ];
     let condition = conditions::Builder::new(100).patterns(patterns)
                                                 .first_opens(true)
                                                 .last_closes(true)
@@ -32,10 +40,10 @@ fn main() {
     };
     let handlers = ActionHandlers::new(Box::new(Printer));
     let mut correlator = Correlator::new(contexts, handlers);
-    let _ = correlator.push_message(Message::new("1".to_string()));
+    let _ = correlator.push_message(Builder::new(&uuid1).build());
     thread::sleep_ms(20);
-    let _ = correlator.push_message(Message::new("2".to_string()));
+    let _ = correlator.push_message(Builder::new(&uuid2).build());
     thread::sleep_ms(80);
-    let _ = correlator.push_message(Message::new("3".to_string()));
+    let _ = correlator.push_message(Builder::new(&uuid3).build());
     let _ = correlator.stop();
 }
