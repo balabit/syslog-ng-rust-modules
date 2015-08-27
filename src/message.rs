@@ -20,6 +20,10 @@ impl Message {
         &self.uuid
     }
 
+    pub fn name(&self) -> Option<&String> {
+        self.name.as_ref()
+    }
+
     pub fn get(&self, key: &str) -> Option<&String> {
         self.data.get(key)
     }
