@@ -147,4 +147,25 @@ mod test {
         assert_eq!(0, *event_handler_counter_2.borrow());
         assert_eq!(0, *response_handler_counter.borrow());
     }
+
+    #[test]
+    fn test_given_message_event_handler_when_a_message_has_a_name_then_the_event_handlers_are_looked_up_by_the_name() {
+        let uuid1 = "1b47ba91-d867-4a8c-9553-a5dfd6ea1274".to_string();
+        let name = "NAME".to_string();
+        let response_handler_counter = Rc::new(RefCell::new(0));
+        let response_handler: Box<ResponseHandler<Response>> = Box::new(DummyResponseHandler(response_handler_counter.clone()));
+        let response_handler = Rc::new(RefCell::new(response_handler));
+        // this is the key point: the event handler will be registered by the name
+        let ids_1 = vec![ PatternId::Name(name.clone()) ];
+        let event_handler_counter_1 = Rc::new(RefCell::new(0));
+        let event_handler_1: Box<context::event::EventHandler<InternalRequest>> = Box::new(DummyEventHandler{counter: event_handler_counter_1.clone(), ids: ids_1});
+        let event_handler_1 = Rc::new(RefCell::new(event_handler_1));
+        let mut message_event_handler = MessageEventHandler::new(response_handler.clone());
+        message_event_handler.register_handler(event_handler_1);
+        message_event_handler.handle_event(Request::Message(Rc::new(Builder::new(&uuid1).name(name.clone()).build())));
+        assert_eq!(1, *event_handler_counter_1.borrow());
+        message_event_handler.handle_event(Request::Message(Rc::new(Builder::new(&uuid1).name(name.clone()).build())));
+        assert_eq!(2, *event_handler_counter_1.borrow());
+        assert_eq!(0, *response_handler_counter.borrow());
+    }
 }
