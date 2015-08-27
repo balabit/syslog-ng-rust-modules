@@ -47,6 +47,8 @@ impl MessageEventHandler {
                     }
                 }
             }
+        } else {
+            println!("no handler found for id: {:?}", id);
         }
     }
 }
