@@ -5,7 +5,7 @@ pub use self::handlers::ActionHandlers;
 
 #[derive(Clone, Debug)]
 pub enum Action {
-    Message(self::message::Action)
+    Message(self::message::MessageAction)
 }
 
 impl Action {
@@ -61,11 +61,11 @@ pub mod message {
     }
 
     #[derive(Clone, Debug)]
-    pub struct Action;
+    pub struct MessageAction;
 
-    impl Action {
-        pub fn new() -> Action {
-            Action
+    impl MessageAction {
+        pub fn new() -> MessageAction {
+            MessageAction
         }
 
         pub fn execute(&self, _: &State, _: &BaseContext) -> ExecResult {
@@ -73,8 +73,8 @@ pub mod message {
         }
     }
 
-    impl From<Action> for super::Action {
-        fn from(action: Action) -> super::Action {
+    impl From<MessageAction> for super::Action {
+        fn from(action: MessageAction) -> super::Action {
             super::Action::Message(action)
         }
     }

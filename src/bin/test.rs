@@ -32,7 +32,7 @@ fn main() {
                                                 .first_opens(true)
                                                 .last_closes(true)
                                                 .build();
-    let actions = vec![ message::Action::new().into() ];
+    let actions = vec![ message::MessageAction::new().into() ];
     let contexts = vec!{
         config::ContextBuilder::new(Uuid::new_v4(), condition.clone()).actions(actions.clone()).build(),
         config::ContextBuilder::new(Uuid::new_v4(), condition.clone()).actions(actions.clone()).build(),
