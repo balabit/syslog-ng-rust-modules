@@ -4,7 +4,7 @@ extern crate correlation;
 extern crate uuid;
 
 use correlation::{config, conditions, Correlator};
-use correlation::message::{Builder, PatternId};
+use correlation::message::{Builder};
 use correlation::action::message;
 use correlation::action::ActionHandlers;
 use uuid::Uuid;
@@ -24,9 +24,9 @@ fn main() {
     let uuid2 = "2b47ba91-d867-4a8c-9553-a5dfd6ea1274".to_string();
     let uuid3 = "3b47ba91-d867-4a8c-9553-a5dfd6ea1274".to_string();
     let patterns = vec![
-        PatternId::Uuid(uuid1.clone()),
-        PatternId::Uuid(uuid2.clone()),
-        PatternId::Uuid(uuid3.clone()),
+        uuid1.clone(),
+        uuid2.clone(),
+        uuid3.clone(),
     ];
     let condition = conditions::Builder::new(100).patterns(patterns)
                                                 .first_opens(true)

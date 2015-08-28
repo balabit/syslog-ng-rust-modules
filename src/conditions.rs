@@ -1,4 +1,4 @@
-use message::{Message, PatternId};
+use message::{Message};
 use MiliSec;
 use state::State;
 
@@ -12,7 +12,7 @@ pub struct Conditions {
     pub first_opens: Option<bool>,
     pub last_closes: Option<bool>,
     pub max_size: Option<usize>,
-    pub patterns: Vec<PatternId>
+    pub patterns: Vec<String>
 }
 
 impl Conditions {
@@ -96,7 +96,7 @@ impl Builder {
         self
     }
 
-    pub fn patterns(&mut self, patterns: Vec<PatternId>) -> &mut Builder {
+    pub fn patterns(&mut self, patterns: Vec<String>) -> &mut Builder {
         self.conditions.patterns = patterns;
         self
     }
@@ -111,7 +111,6 @@ mod test {
     use std::rc::Rc;
 
     use message;
-    use message::{PatternId};
     use state::State;
     use super::Builder;
 
@@ -121,7 +120,7 @@ mod test {
         let msg_id1 = "11eaf6f8-0640-460f-aee2-a72d2f2ab258".to_string();
         let msg_id2 = "21eaf6f8-0640-460f-aee2-a72d2f2ab258".to_string();
         let patterns = vec![
-            PatternId::Uuid(msg_id1.clone()),
+            msg_id1.clone(),
         ];
         let condition = Builder::new(timeout).patterns(patterns).first_opens(true).build();
         let msg_which_should_not_be_ignored = message::Builder::new(&msg_id1).build();
@@ -136,8 +135,8 @@ mod test {
         let msg_id1 = "11eaf6f8-0640-460f-aee2-a72d2f2ab258".to_string();
         let msg_id2 = "21eaf6f8-0640-460f-aee2-a72d2f2ab258".to_string();
         let patterns = vec![
-            PatternId::Uuid(msg_id1.clone()),
-            PatternId::Uuid(msg_id2.clone()),
+            msg_id1.clone(),
+            msg_id2.clone(),
         ];
         let mut state = State::new();
         let condition = Builder::new(timeout).patterns(patterns).last_closes(true).build();

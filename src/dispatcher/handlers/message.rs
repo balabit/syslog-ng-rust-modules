@@ -7,11 +7,11 @@ use dispatcher::request::{InternalRequest, Request, RequestHandler};
 use dispatcher::response::ResponseHandler;
 use dispatcher::Response;
 use context::event::EventHandler;
-use message::{Message, PatternId};
+use message::{Message};
 use reactor;
 
 pub struct MessageEventHandler {
-    handlers: HashMap<PatternId, Vec<Rc<RefCell<Box<context::event::EventHandler<InternalRequest>>>>>>,
+    handlers: HashMap<String, Vec<Rc<RefCell<Box<context::event::EventHandler<InternalRequest>>>>>>,
     keyless_handlers: Vec<Rc<RefCell<Box<context::event::EventHandler<InternalRequest>>>>>,
     response_handler: Rc<RefCell<Box<ResponseHandler<Response>>>>,
 }
@@ -37,7 +37,7 @@ impl MessageEventHandler {
         }
     }
 
-    fn call_handlers_by_id(&mut self, id: &PatternId, event: Rc<Message>) {
+    fn call_handlers_by_id(&mut self, id: &String, event: Rc<Message>) {
         if let Some(handlers) = self.handlers.get_mut(id) {
             for i in handlers.iter_mut() {
                 if let Some(result) = i.borrow_mut().handle_event(Request::Message(event.clone())) {
@@ -94,7 +94,7 @@ mod test {
     use dispatcher::request::{InternalRequest, Request};
     use dispatcher::response::ResponseHandler;
     use dispatcher::Response;
-    use message::{Builder, PatternId};
+    use message::{Builder};
     use reactor::EventHandler;
 
     use super::MessageEventHandler;
@@ -109,7 +109,7 @@ mod test {
 
     struct DummyEventHandler {
         counter: Rc<RefCell<i32>>,
-        ids: Vec<PatternId>
+        ids: Vec<String>
     }
 
     impl context::event::EventHandler<InternalRequest> for DummyEventHandler {
@@ -117,7 +117,7 @@ mod test {
             *self.counter.borrow_mut() += 1;
             None
         }
-        fn handlers(&self) -> &[PatternId] {
+        fn handlers(&self) -> &[String] {
             &self.ids
         }
     }
@@ -129,8 +129,8 @@ mod test {
         let response_handler_counter = Rc::new(RefCell::new(0));
         let response_handler: Box<ResponseHandler<Response>> = Box::new(DummyResponseHandler(response_handler_counter.clone()));
         let response_handler = Rc::new(RefCell::new(response_handler));
-        let ids_1 = vec![ PatternId::Uuid(uuid1.clone()) ];
-        let ids_2 = vec![ PatternId::Uuid(uuid2.clone()) ];
+        let ids_1 = vec![ uuid1.clone() ];
+        let ids_2 = vec![ uuid2.clone() ];
         let event_handler_counter_1 = Rc::new(RefCell::new(0));
         let event_handler_counter_2 = Rc::new(RefCell::new(0));
         let event_handler_1: Box<context::event::EventHandler<InternalRequest>> = Box::new(DummyEventHandler{counter: event_handler_counter_1.clone(), ids: ids_1});
@@ -156,7 +156,7 @@ mod test {
         let response_handler: Box<ResponseHandler<Response>> = Box::new(DummyResponseHandler(response_handler_counter.clone()));
         let response_handler = Rc::new(RefCell::new(response_handler));
         // this is the key point: the event handler will be registered by the name
-        let ids_1 = vec![ PatternId::Name(name.clone()) ];
+        let ids_1 = vec![ name.clone() ];
         let event_handler_counter_1 = Rc::new(RefCell::new(0));
         let event_handler_1: Box<context::event::EventHandler<InternalRequest>> = Box::new(DummyEventHandler{counter: event_handler_counter_1.clone(), ids: ids_1});
         let event_handler_1 = Rc::new(RefCell::new(event_handler_1));

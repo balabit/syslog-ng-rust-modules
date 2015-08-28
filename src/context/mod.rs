@@ -77,7 +77,7 @@ mod linear {
     use context;
     use Conditions;
     use context::event::{EventHandler};
-    use message::{Message, PatternId};
+    use message::{Message};
     use state::State;
     use TimerEvent;
     use dispatcher::request::{InternalRequest, Request};
@@ -116,7 +116,7 @@ mod linear {
             self.state.is_open()
         }
 
-        pub fn patterns(&self) -> &[PatternId] {
+        pub fn patterns(&self) -> &[String] {
             &self.base.conditions().patterns
         }
     }
@@ -131,7 +131,7 @@ mod linear {
     }
 
     impl EventHandler<InternalRequest> for LinearContext {
-        fn handlers(&self) -> &[PatternId] {
+        fn handlers(&self) -> &[String] {
             self.patterns()
         }
         fn handle_event(&mut self, event: InternalRequest) -> Option<Vec<ExecResult>> {
@@ -153,7 +153,6 @@ mod test {
     use std::rc::Rc;
 
     use message;
-    use message::PatternId;
     use TimerEvent;
     use super::Context;
     use conditions::Builder;
@@ -163,7 +162,7 @@ mod test {
         let timeout = 100;
         let msg_id = "11eaf6f8-0640-460f-aee2-a72d2f2ab258".to_string();
         let patterns = vec![
-            PatternId::Uuid(msg_id.clone()),
+            msg_id.clone(),
         ];
         let mut context = Context::new_linear(Uuid::new_v4(), Builder::new(timeout).patterns(patterns).build());
         let msg1 = message::Builder::new(&msg_id).build();
@@ -186,7 +185,7 @@ mod test {
         let max_size = 3;
         let msg_id = "11eaf6f8-0640-460f-aee2-a72d2f2ab258".to_string();
         let patterns = vec![
-            PatternId::Uuid(msg_id.clone()),
+            msg_id.clone(),
         ];
         let mut context = Context::new_linear(Uuid::new_v4(), Builder::new(timeout).max_size(max_size).patterns(patterns).build());
         let msg1 = message::Builder::new(&msg_id).build();
@@ -207,7 +206,7 @@ mod test {
         let renew_timeout = 10;
         let msg_id = "11eaf6f8-0640-460f-aee2-a72d2f2ab258".to_string();
         let patterns = vec![
-            PatternId::Uuid(msg_id.clone()),
+            msg_id.clone(),
         ];
         let mut context = Context::new_linear(Uuid::new_v4(), Builder::new(timeout).renew_timeout(renew_timeout).patterns(patterns).build());
         let msg1 = message::Builder::new(&msg_id).build();
@@ -228,7 +227,7 @@ mod test {
         let renew_timeout = 10;
         let msg_id = "11eaf6f8-0640-460f-aee2-a72d2f2ab258".to_string();
         let patterns = vec![
-            PatternId::Uuid(msg_id.clone()),
+            msg_id.clone(),
         ];
         let mut context = Context::new_linear(Uuid::new_v4(), Builder::new(timeout).renew_timeout(renew_timeout).patterns(patterns).build());
         let msg1 = message::Builder::new(&msg_id).build();

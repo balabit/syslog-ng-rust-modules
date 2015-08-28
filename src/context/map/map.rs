@@ -5,7 +5,7 @@ use std::rc::Rc;
 
 use action::ExecResult;
 use Conditions;
-use message::{Message, PatternId};
+use message::{Message};
 use state::State;
 use TimerEvent;
 use context::base::BaseContext;
@@ -93,13 +93,13 @@ impl MapContext {
         let _ = self.format_buffer.write_str(message.get("PID").unwrap_or(&empty));
     }
 
-    pub fn patterns(&self) -> &[PatternId] {
+    pub fn patterns(&self) -> &[String] {
         &self.base.conditions().patterns
     }
 }
 
 impl EventHandler<InternalRequest> for MapContext {
-    fn handlers(&self) -> &[PatternId] {
+    fn handlers(&self) -> &[String] {
         self.patterns()
     }
     fn handle_event(&mut self, event: InternalRequest) -> Option<Vec<ExecResult>> {
