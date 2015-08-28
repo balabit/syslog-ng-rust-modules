@@ -10,3 +10,4 @@ path = "src/bin/test.rs"
 [dependencies]
 maplit = "0.1"
 uuid = "0.1"
+serde = "0.5"

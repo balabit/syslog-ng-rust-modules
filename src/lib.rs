@@ -1,6 +1,7 @@
 #[macro_use]
 extern crate maplit;
 extern crate uuid;
+extern crate serde;
 #[macro_use]
 mod macros;
 
