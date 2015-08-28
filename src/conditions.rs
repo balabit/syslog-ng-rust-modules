@@ -151,7 +151,7 @@ mod test {
 }
 
 mod deser {
-
+    use MiliSec;
     use super::Conditions;
     use serde;
     use serde::de::Deserialize;
@@ -165,12 +165,12 @@ mod deser {
     }
 
     enum Field {
-        TIMEOUT,
-        RENEW_TIMEOUT,
-        FIRST_OPENS,
-        LAST_CLOSES,
-        MAX_SIZE,
-        PATTERNS,
+        Timeout,
+        RenewTimeout,
+        FirstOpens,
+        LastCloses,
+        MaxSize,
+        Patterns,
     }
 
     impl serde::Deserialize for Field {
@@ -186,12 +186,12 @@ mod deser {
                     where E: serde::de::Error
                 {
                     match value {
-                        "timeout" => Ok(Field::TIMEOUT),
-                        "renew_timeout" => Ok(Field::RENEW_TIMEOUT),
-                        "first_opens" => Ok(Field::FIRST_OPENS),
-                        "last_closes" => Ok(Field::LAST_CLOSES),
-                        "max_size" => Ok(Field::MAX_SIZE),
-                        "patterns" => Ok(Field::PATTERNS),
+                        "timeout" => Ok(Field::Timeout),
+                        "renew_timeout" => Ok(Field::RenewTimeout),
+                        "first_opens" => Ok(Field::FirstOpens),
+                        "last_closes" => Ok(Field::LastCloses),
+                        "max_size" => Ok(Field::MaxSize),
+                        "patterns" => Ok(Field::Patterns),
                         name @ _ => Err(serde::de::Error::syntax(&format!("Unexpected field: {}", name))),
                     }
                 }
@@ -209,27 +209,29 @@ mod deser {
         fn visit_map<V>(&mut self, mut visitor: V) -> Result<Conditions, V::Error>
             where V: serde::de::MapVisitor
         {
-            let mut timeout = None;
+            let mut timeout: Option<MiliSec> = None;
             let mut renew_timeout = None;
             let mut first_opens = None;
             let mut last_closes = None;
             let mut max_size = None;
             let mut patterns = None;
-            let mut values = None;
 
             loop {
                 match try!(visitor.visit_key()) {
-                    Some(Field::TIMEOUT) => { timeout = Some(try!(visitor.visit_value())); }
-                    Some(Field::RENEW_TIMEOUT) => { renew_timeout = Some(try!(visitor.visit_value())); }
-                    Some(Field::FIRST_OPENS) => { first_opens = Some(try!(visitor.visit_value())); }
-                    Some(Field::LAST_CLOSES) => { last_closes = Some(try!(visitor.visit_value())); }
-                    Some(Field::MAX_SIZE) => { max_size = Some(try!(visitor.visit_value())); }
-                    Some(Field::PATTERNS) => { patterns = Some(try!(visitor.visit_value())); }
+                    Some(Field::Timeout) => { timeout = Some(try!(visitor.visit_value())); }
+                    Some(Field::RenewTimeout) => { renew_timeout = Some(try!(visitor.visit_value())); }
+                    Some(Field::FirstOpens) => { first_opens = Some(try!(visitor.visit_value())); }
+                    Some(Field::LastCloses) => { last_closes = Some(try!(visitor.visit_value())); }
+                    Some(Field::MaxSize) => { max_size = Some(try!(visitor.visit_value())); }
+                    Some(Field::Patterns) => { patterns = Some(try!(visitor.visit_value())); }
                     None => { break; }
                 }
             }
 
-            let timeout = try!(timeout.ok_or(visitor.missing_field("timeout")));
+            let timeout: MiliSec = match timeout {
+                Some(timeout) => timeout,
+                None => return visitor.missing_field("timeout"),
+            };
 
             try!(visitor.end());
 
