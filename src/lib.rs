@@ -2,6 +2,7 @@
 extern crate maplit;
 extern crate uuid;
 extern crate serde;
+extern crate serde_json;
 #[macro_use]
 mod macros;
 

@@ -108,6 +108,8 @@ impl Builder {
 
 #[cfg(test)]
 mod test {
+    use serde_json::from_str;
+    use super::Conditions;
     use std::rc::Rc;
 
     use message;
@@ -146,6 +148,53 @@ mod test {
         state.open();
         state.add_message(msg_closing);
         assert_true!(condition.is_closing(&mut state));
+    }
+
+    #[test]
+    fn test_given_conditions_in_json_when_we_have_only_the_required_ones_then_we_get_the_expected_result() {
+        let json = r#"
+        {
+            "timeout": 100
+        }
+        "#;
+
+        let conditions = from_str(json);
+        println!("{:?}", &conditions);
+        let conditions: Conditions = conditions.ok().expect("Failed to deserialize a Conditions struct with only a timeout field");
+        assert_eq!(conditions.timeout, 100);
+    }
+
+    #[test]
+    fn test_given_conditions_in_json_when_we_have_all_fields_then_we_get_the_expected_result() {
+        let json = r#"
+        {
+            "timeout": 100,
+            "renew_timeout": 50,
+            "first_opens": true,
+            "last_closes": false,
+            "max_size": 42,
+            "patterns": [
+                "1f78c9f1-cd33-4f83-bbcd-9d59f73094d5",
+                "2f78c9f1-cd33-4f83-bbcd-9d59f73094d5",
+                "PATTERN_NAME"
+            ]
+        }
+        "#;
+
+        let expected_patterns = vec![
+                "1f78c9f1-cd33-4f83-bbcd-9d59f73094d5".to_string(),
+                "2f78c9f1-cd33-4f83-bbcd-9d59f73094d5".to_string(),
+                "PATTERN_NAME".to_string(),
+        ];
+        let conditions = from_str(json);
+        println!("{:?}", &conditions);
+        let conditions: Conditions = conditions.ok().expect("Failed to deserialize a Conditions struct");
+        assert_eq!(conditions.timeout, 100);
+        assert_eq!(conditions.renew_timeout, Some(50));
+        assert_eq!(conditions.first_opens, Some(true));
+        assert_eq!(conditions.last_closes, Some(false));
+        assert_eq!(conditions.max_size, Some(42));
+        assert_eq!(conditions.patterns, expected_patterns);
     }
 }
 
