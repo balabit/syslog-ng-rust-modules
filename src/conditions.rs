@@ -3,6 +3,7 @@ use MiliSec;
 use state::State;
 
 const FIRST_OPENS_DEFAULT: bool = false;
+const LAST_CLOSES_DEFAULT: bool = false;
 
 #[derive(Clone, Debug)]
 pub struct Conditions {
@@ -43,13 +44,11 @@ impl Conditions {
     }
 
     fn is_closing_message(&self, state: &State) -> bool {
-        self.last_closes.map_or(false, |last_message_closes_the_context| {
-            if last_message_closes_the_context {
-                self.patterns.last().unwrap() == state.messages().last().unwrap().uuid()
-            } else {
-                false
-            }
-        })
+        if self.last_closes.unwrap_or(LAST_CLOSES_DEFAULT) {
+            self.patterns.last().unwrap() == state.messages().last().unwrap().uuid()
+        } else {
+            false
+        }
     }
 
     fn is_any_timer_expired(&self, state: &State) -> bool {
