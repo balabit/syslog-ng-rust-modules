@@ -149,3 +149,100 @@ mod test {
         assert_true!(condition.is_closing(&mut state));
     }
 }
+
+mod deser {
+
+    use super::Conditions;
+    use serde;
+    use serde::de::Deserialize;
+
+    impl serde::Deserialize for Conditions {
+        fn deserialize<D>(deserializer: &mut D) -> Result<Conditions, D::Error>
+            where D: serde::de::Deserializer
+        {
+            deserializer.visit_struct("Conditions", &[], ConditionsVisitor)
+        }
+    }
+
+    enum Field {
+        TIMEOUT,
+        RENEW_TIMEOUT,
+        FIRST_OPENS,
+        LAST_CLOSES,
+        MAX_SIZE,
+        PATTERNS,
+    }
+
+    impl serde::Deserialize for Field {
+        fn deserialize<D>(deserializer: &mut D) -> Result<Field, D::Error>
+            where D: serde::de::Deserializer
+        {
+            struct FieldVisitor;
+
+            impl serde::de::Visitor for FieldVisitor {
+                type Value = Field;
+
+                fn visit_str<E>(&mut self, value: &str) -> Result<Field, E>
+                    where E: serde::de::Error
+                {
+                    match value {
+                        "timeout" => Ok(Field::TIMEOUT),
+                        "renew_timeout" => Ok(Field::RENEW_TIMEOUT),
+                        "first_opens" => Ok(Field::FIRST_OPENS),
+                        "last_closes" => Ok(Field::LAST_CLOSES),
+                        "max_size" => Ok(Field::MAX_SIZE),
+                        "patterns" => Ok(Field::PATTERNS),
+                        name @ _ => Err(serde::de::Error::syntax(&format!("Unexpected field: {}", name))),
+                    }
+                }
+            }
+
+            deserializer.visit(FieldVisitor)
+        }
+    }
+
+    struct ConditionsVisitor;
+
+    impl serde::de::Visitor for ConditionsVisitor {
+        type Value = Conditions;
+
+        fn visit_map<V>(&mut self, mut visitor: V) -> Result<Conditions, V::Error>
+            where V: serde::de::MapVisitor
+        {
+            let mut timeout = None;
+            let mut renew_timeout = None;
+            let mut first_opens = None;
+            let mut last_closes = None;
+            let mut max_size = None;
+            let mut patterns = None;
+            let mut values = None;
+
+            loop {
+                match try!(visitor.visit_key()) {
+                    Some(Field::TIMEOUT) => { timeout = Some(try!(visitor.visit_value())); }
+                    Some(Field::RENEW_TIMEOUT) => { renew_timeout = Some(try!(visitor.visit_value())); }
+                    Some(Field::FIRST_OPENS) => { first_opens = Some(try!(visitor.visit_value())); }
+                    Some(Field::LAST_CLOSES) => { last_closes = Some(try!(visitor.visit_value())); }
+                    Some(Field::MAX_SIZE) => { max_size = Some(try!(visitor.visit_value())); }
+                    Some(Field::PATTERNS) => { patterns = Some(try!(visitor.visit_value())); }
+                    None => { break; }
+                }
+            }
+
+            let timeout = try!(timeout.ok_or(visitor.missing_field("timeout")));
+
+            try!(visitor.end());
+
+            Ok(
+                Conditions {
+                    timeout: timeout,
+                    renew_timeout: renew_timeout,
+                    first_opens: first_opens,
+                    last_closes: last_closes,
+                    max_size: max_size,
+                    patterns: patterns.unwrap_or(Vec::new())
+                }
+            )
+        }
+    }
+}
