@@ -2,6 +2,8 @@ use message::{Message, PatternId};
 use MiliSec;
 use state::State;
 
+const FIRST_OPENS_DEFAULT: bool = false;
+
 #[derive(Clone, Debug)]
 pub struct Conditions {
     pub timeout: MiliSec,
@@ -25,13 +27,11 @@ impl Conditions {
     }
 
     pub fn is_opening(&self, message: &Message) -> bool {
-        self.first_opens.map_or(true, |first_message_opens_the_context| {
-            if first_message_opens_the_context {
-                self.patterns.first().unwrap() == message.uuid()
-            } else {
-                true
-            }
-        })
+        if self.first_opens.unwrap_or(FIRST_OPENS_DEFAULT) {
+            self.patterns.first().unwrap() == message.uuid()
+        } else {
+            true
+        }
     }
 
     pub fn is_closing(&self, state: &State) -> bool {
