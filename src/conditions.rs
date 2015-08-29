@@ -5,7 +5,7 @@ use state::State;
 const FIRST_OPENS_DEFAULT: bool = false;
 const LAST_CLOSES_DEFAULT: bool = false;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Conditions {
     pub timeout: MiliSec,
     pub renew_timeout: Option<MiliSec>,
