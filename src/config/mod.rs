@@ -3,6 +3,7 @@ use uuid::Uuid;
 use super::Action;
 use super::Conditions;
 
+#[derive(Debug)]
 pub struct Context {
     pub name: Option<String>,
     pub uuid: Uuid,
