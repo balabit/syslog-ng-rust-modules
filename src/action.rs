@@ -2,6 +2,7 @@ use state::State;
 use context::base::BaseContext;
 
 pub use self::handlers::ActionHandlers;
+pub use self::message::MessageAction;
 
 #[derive(Clone, Debug)]
 pub enum Action {
