@@ -4,7 +4,7 @@ use context::base::BaseContext;
 pub use self::handlers::ActionHandlers;
 pub use self::message::MessageAction;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub enum Action {
     Message(self::message::MessageAction)
 }
@@ -139,7 +139,7 @@ pub mod message {
         }
     }
 
-    #[derive(Clone, Debug)]
+    #[derive(Clone, Debug, PartialEq, Eq)]
     pub struct MessageAction;
 
     impl MessageAction {
