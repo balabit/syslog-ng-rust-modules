@@ -33,6 +33,11 @@ impl ContextBuilder {
         self
     }
 
+    pub fn name(&mut self, name: String) -> &mut ContextBuilder {
+        self.name = Some(name);
+        self
+    }
+
     pub fn build(&self) -> Context {
         Context {
             name: self.name.clone(),
