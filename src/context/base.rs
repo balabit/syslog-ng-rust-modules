@@ -2,7 +2,7 @@ use uuid::Uuid;
 use std::rc::Rc;
 
 use action::{Action, ActionType};
-use conditions::Conditions;
+use conditions::{self, Conditions};
 use config;
 use message::Message;
 use state::State;
@@ -71,6 +71,44 @@ impl BaseContext {
             boxed_actions.push(action);
         }
         boxed_actions
+    }
+}
+
+pub struct Builder {
+    name: Option<String>,
+    uuid: Uuid,
+    conditions: Conditions,
+    actions: Vec<Box<Action>>
+}
+
+impl Builder {
+    pub fn new(uuid: Uuid, conditions: Conditions) -> Builder {
+        Builder {
+            name: None,
+            uuid: uuid,
+            conditions: conditions,
+            actions: Vec::new()
+        }
+    }
+
+    pub fn name(&mut self, name: Option<String>) -> &mut Builder {
+        self.name = name;
+        self
+    }
+
+    pub fn actions(&mut self, actions: Vec<Box<Action>>) -> &mut Builder {
+        self.actions = actions;
+        self
+    }
+
+    pub fn build(self) -> BaseContext {
+        let Builder {name, uuid, conditions, actions} = self;
+        BaseContext {
+            name: name,
+            uuid: uuid,
+            conditions: conditions,
+            actions: actions
+        }
     }
 }
 
