@@ -54,11 +54,8 @@ impl BaseContext {
     fn close_state(&self, state: &mut State) {
         state.close();
     }
-}
 
-impl From<config::Context> for BaseContext {
-    fn from(config: config::Context) -> BaseContext {
-        let config::Context{name, uuid, conditions, actions} = config;
+    fn box_the_actions(actions: Vec<ActionType>) -> Vec<Box<Action>> {
         let mut boxed_actions = Vec::new();
         for i in actions.into_iter() {
             let action: Box<Action> = match i {
@@ -69,7 +66,14 @@ impl From<config::Context> for BaseContext {
 
             boxed_actions.push(action);
         }
+        boxed_actions
+    }
+}
 
+impl From<config::Context> for BaseContext {
+    fn from(config: config::Context) -> BaseContext {
+        let config::Context{name, uuid, conditions, actions} = config;
+        let boxed_actions = BaseContext::box_the_actions(actions);
         BaseContext {
             name: name,
             uuid: uuid,
