@@ -34,7 +34,7 @@ impl Correlator {
             let dmux = Demultiplexer::new(rx);
             let exit_condition = Condition::new(false);
             let mut reactor = RequestReactor::new(dmux, exit_condition.clone());
-            let response_handler = Box::new(ResponseHandler::new(dispatcher_output_channel_tx)) as Box<response::ResponseHandler<Response>>;
+            let response_handler = Box::new(ResponseHandler::new(dispatcher_output_channel_tx)) as Box<response::ResponseSender<Response>>;
             let response_handler = Rc::new(RefCell::new(response_handler));
 
             let exit_handler = Box::new(handlers::exit::ExitEventHandler::new(exit_condition, response_handler.clone()));

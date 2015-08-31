@@ -23,8 +23,8 @@ impl ResponseHandler {
     }
 }
 
-impl self::response::ResponseHandler<Response> for ResponseHandler {
-    fn handle_response(&mut self, response: Response) {
+impl self::response::ResponseSender<Response> for ResponseHandler {
+    fn send_response(&mut self, response: Response) {
         let _ = self.sender.send(response);
     }
 }

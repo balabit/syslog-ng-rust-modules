@@ -1,7 +1,7 @@
 use std::cell::RefCell;
 use std::rc::Rc;
 
-use dispatcher::response::ResponseHandler;
+use dispatcher::response::ResponseSender;
 use dispatcher::Response;
 use dispatcher::request::{Request, RequestHandler};
 use condition::Condition;
@@ -10,12 +10,12 @@ use reactor::EventHandler;
 
 pub struct ExitEventHandler {
     condition: Condition,
-    response_handler: Rc<RefCell<Box<ResponseHandler<Response>>>>,
+    response_handler: Rc<RefCell<Box<ResponseSender<Response>>>>,
     stops: u32
 }
 
 impl ExitEventHandler {
-    pub fn new(condition: Condition, response_handler: Rc<RefCell<Box<ResponseHandler<Response>>>>) -> ExitEventHandler {
+    pub fn new(condition: Condition, response_handler: Rc<RefCell<Box<ResponseSender<Response>>>>) -> ExitEventHandler {
         ExitEventHandler {
             condition: condition,
             response_handler: response_handler,
@@ -29,7 +29,7 @@ impl EventHandler<Request<Rc<Message>>> for ExitEventHandler {
     fn handle_event(&mut self, event: Request<Rc<Message>>) {
         if let Request::Exit = event {
             self.stops += 1;
-            self.response_handler.borrow_mut().handle_response(Response::Exit);
+            self.response_handler.borrow_mut().send_response(Response::Exit);
 
             if self.stops >= 2 {
                 self.condition.activate();
