@@ -6,6 +6,7 @@ use context::base::BaseContext;
 pub use self::message::MessageActionType;
 
 use std::cell::RefCell;
+use std::fmt::Debug;
 use std::rc::Rc;
 
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -13,7 +14,7 @@ pub enum ActionType {
     Message(self::message::MessageActionType)
 }
 
-trait Action {
+pub trait Action: Debug {
     fn execute(&self, state: &State, context: &BaseContext);
     fn set_response_sender(&self, _sender: Rc<RefCell<Box<ResponseSender<Response>>>>) {}
 }
