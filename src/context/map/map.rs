@@ -102,8 +102,8 @@ impl EventHandler<InternalRequest> for MapContext {
     fn handlers(&self) -> &[String] {
         self.patterns()
     }
-    fn handle_event(&mut self, event: InternalRequest) -> Option<Vec<ExecResult>> {
-        self.on_event(event)
+    fn handle_event(&mut self, event: InternalRequest) {
+        self.on_event(event);
     }
 }
 

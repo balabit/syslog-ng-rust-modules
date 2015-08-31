@@ -1,6 +1,4 @@
-use action::ExecResult;
-
 pub trait EventHandler<T> {
-    fn handle_event(&mut self, T) -> Option<Vec<ExecResult>>;
+    fn handle_event(&mut self, T);
     fn handlers(&self) -> &[String];
 }

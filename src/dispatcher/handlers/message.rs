@@ -4,8 +4,6 @@ use std::cell::RefCell;
 
 use context;
 use dispatcher::request::{InternalRequest, Request, RequestHandler};
-use dispatcher::response::ResponseHandler;
-use dispatcher::Response;
 use context::event::EventHandler;
 use message::{Message};
 use reactor;
@@ -13,15 +11,13 @@ use reactor;
 pub struct MessageEventHandler {
     handlers: HashMap<String, Vec<Rc<RefCell<Box<context::event::EventHandler<InternalRequest>>>>>>,
     keyless_handlers: Vec<Rc<RefCell<Box<context::event::EventHandler<InternalRequest>>>>>,
-    response_handler: Rc<RefCell<Box<ResponseHandler<Response>>>>,
 }
 
 impl MessageEventHandler {
-    pub fn new(response_handler: Rc<RefCell<Box<ResponseHandler<Response>>>>) -> MessageEventHandler {
+    pub fn new() -> MessageEventHandler {
         MessageEventHandler{
             handlers: HashMap::new(),
-            keyless_handlers: Vec::new(),
-            response_handler: response_handler
+            keyless_handlers: Vec::new()
         }
     }
 
@@ -40,11 +36,7 @@ impl MessageEventHandler {
     fn call_handlers_by_id(&mut self, id: &String, event: Rc<Message>) {
         if let Some(handlers) = self.handlers.get_mut(id) {
             for i in handlers.iter_mut() {
-                if let Some(result) = i.borrow_mut().handle_event(Request::Message(event.clone())) {
-                    for i in result.into_iter() {
-                        self.response_handler.borrow_mut().handle_response(i.into());
-                    }
-                }
+                i.borrow_mut().handle_event(Request::Message(event.clone()));
             }
         } else {
             println!("no handler found for id: {:?}", id);
@@ -113,9 +105,8 @@ mod test {
     }
 
     impl context::event::EventHandler<InternalRequest> for DummyEventHandler {
-        fn handle_event(&mut self, _: InternalRequest) -> Option<Vec<ExecResult>> {
+        fn handle_event(&mut self, _: InternalRequest) {
             *self.counter.borrow_mut() += 1;
-            None
         }
         fn handlers(&self) -> &[String] {
             &self.ids
@@ -137,7 +128,7 @@ mod test {
         let event_handler_2: Box<context::event::EventHandler<InternalRequest>> = Box::new(DummyEventHandler{counter: event_handler_counter_2.clone(), ids: ids_2});
         let event_handler_1 = Rc::new(RefCell::new(event_handler_1));
         let event_handler_2 = Rc::new(RefCell::new(event_handler_2));
-        let mut message_event_handler = MessageEventHandler::new(response_handler.clone());
+        let mut message_event_handler = MessageEventHandler::new();
         message_event_handler.register_handler(event_handler_1);
         message_event_handler.register_handler(event_handler_2);
         message_event_handler.handle_event(Request::Message(Rc::new(Builder::new(&uuid1).build())));
@@ -160,7 +151,7 @@ mod test {
         let event_handler_counter_1 = Rc::new(RefCell::new(0));
         let event_handler_1: Box<context::event::EventHandler<InternalRequest>> = Box::new(DummyEventHandler{counter: event_handler_counter_1.clone(), ids: ids_1});
         let event_handler_1 = Rc::new(RefCell::new(event_handler_1));
-        let mut message_event_handler = MessageEventHandler::new(response_handler.clone());
+        let mut message_event_handler = MessageEventHandler::new();
         message_event_handler.register_handler(event_handler_1);
         message_event_handler.handle_event(Request::Message(Rc::new(Builder::new(&uuid1).name(name.clone()).build())));
         assert_eq!(1, *event_handler_counter_1.borrow());
