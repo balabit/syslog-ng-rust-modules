@@ -8,9 +8,8 @@ pub enum ActionType {
     Message(self::message::MessageActionType)
 }
 
-impl ActionType {
-    pub fn execute(&self, state: &State, context: &BaseContext){
-    }
+trait Action {
+    fn execute(&self, state: &State, context: &BaseContext);
 }
 
 mod deser {
@@ -93,8 +92,8 @@ mod deser {
 
 pub mod message {
     use context::base::BaseContext;
+    use super::Action;
     use state::State;
-    use message::{Builder, Message};
 
     #[derive(Clone, Debug, PartialEq, Eq)]
     pub struct MessageActionType;
@@ -103,8 +102,11 @@ pub mod message {
         pub fn new() -> MessageActionType {
             MessageActionType
         }
+    }
 
-        pub fn execute(&self, _: &State, _: &BaseContext) {
+    impl Action for MessageActionType {
+        fn execute(&self, _state: &State, _context: &BaseContext) {
+
         }
     }
 

@@ -74,7 +74,7 @@ impl Correlator {
     }
 
     fn consume_results(&mut self) {
-        for i in self.dispatcher_output_channel.try_recv() {
+        for _ in self.dispatcher_output_channel.try_recv() {
         }
     }
 
