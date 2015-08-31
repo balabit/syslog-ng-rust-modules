@@ -11,19 +11,19 @@ pub enum Response {
     Exit
 }
 
-pub struct ResponseHandler {
+pub struct ResponseSender {
     sender: Sender<Response>
 }
 
-impl ResponseHandler {
-    pub fn new(sender: Sender<Response>) -> ResponseHandler {
-        ResponseHandler {
+impl ResponseSender {
+    pub fn new(sender: Sender<Response>) -> ResponseSender {
+        ResponseSender {
             sender: sender
         }
     }
 }
 
-impl self::response::ResponseSender<Response> for ResponseHandler {
+impl self::response::ResponseSender<Response> for ResponseSender {
     fn send_response(&mut self, response: Response) {
         let _ = self.sender.send(response);
     }
