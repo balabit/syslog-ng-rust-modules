@@ -93,6 +93,16 @@ impl MapContext {
     }
 }
 
+impl From<BaseContext> for MapContext {
+    fn from(context: BaseContext) -> MapContext {
+        MapContext {
+            base: context,
+            map: BTreeMap::new(),
+            format_buffer: String::new()
+        }
+    }
+}
+
 impl EventHandler<InternalRequest> for MapContext {
     fn handlers(&self) -> &[String] {
         self.patterns()
