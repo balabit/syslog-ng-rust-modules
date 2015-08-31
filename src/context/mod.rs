@@ -132,6 +132,15 @@ mod linear {
         }
     }
 
+    impl From<BaseContext> for LinearContext {
+        fn from(context: BaseContext) -> LinearContext {
+            LinearContext {
+                base: context,
+                state: State::new()
+            }
+        }
+    }
+
     impl EventHandler<InternalRequest> for LinearContext {
         fn handlers(&self) -> &[String] {
             self.patterns()
