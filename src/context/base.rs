@@ -1,7 +1,7 @@
 use uuid::Uuid;
 use std::rc::Rc;
 
-use action::{ActionType};
+use action::{Action, ActionType};
 use conditions::Conditions;
 use config;
 use message::Message;
@@ -13,7 +13,7 @@ pub struct BaseContext {
     name: Option<String>,
     uuid: Uuid,
     conditions: Conditions,
-    actions: Vec<ActionType>
+    actions: Vec<Box<Action>>
 }
 
 impl BaseContext {
@@ -59,11 +59,22 @@ impl BaseContext {
 impl From<config::Context> for BaseContext {
     fn from(config: config::Context) -> BaseContext {
         let config::Context{name, uuid, conditions, actions} = config;
+        let mut boxed_actions = Vec::new();
+        for i in actions.into_iter() {
+            let action: Box<Action> = match i {
+                ActionType::Message(action) => {
+                    Box::new(action)
+                }
+            };
+
+            boxed_actions.push(action);
+        }
+
         BaseContext {
             name: name,
             uuid: uuid,
             conditions: conditions,
-            actions: actions
+            actions: boxed_actions
         }
     }
 }
