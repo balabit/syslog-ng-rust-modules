@@ -81,7 +81,6 @@ mod test {
     use std::cell::RefCell;
     use std::rc::Rc;
 
-    use action::ExecResult;
     use context;
     use dispatcher::request::{InternalRequest, Request};
     use dispatcher::response::ResponseHandler;

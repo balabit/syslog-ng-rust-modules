@@ -3,7 +3,6 @@ use std::rc::Rc;
 
 use super::{config, Conditions, TimerEvent};
 use dispatcher::request::InternalRequest;
-use action::ExecResult;
 use message::{Message};
 use self::linear::LinearContext;
 use self::map::MapContext;
@@ -19,14 +18,14 @@ pub enum Context {
 }
 
 impl Context {
-    pub fn on_timer(&mut self, event: &TimerEvent) -> Option<Vec<ExecResult>> {
+    pub fn on_timer(&mut self, event: &TimerEvent) {
         match *self {
             Context::Linear(ref mut context) => context.on_timer(event),
             Context::Map(ref mut context) => context.on_timer(event),
         }
     }
 
-    pub fn on_message(&mut self, event: Rc<Message>) -> Option<Vec<ExecResult>> {
+    pub fn on_message(&mut self, event: Rc<Message>) {
         match *self {
             Context::Linear(ref mut context) => context.on_message(event),
             Context::Map(ref mut context) => context.on_message(event),
@@ -72,7 +71,6 @@ mod linear {
     use uuid::Uuid;
     use std::rc::Rc;
 
-    use action::ExecResult;
     use config;
     use context;
     use Conditions;
@@ -97,19 +95,18 @@ mod linear {
             }
         }
 
-        pub fn on_event(&mut self, event: InternalRequest) -> Option<Vec<ExecResult>> {
-            match event {
-                Request::Timer(event) => self.on_timer(&event),
-                _ => None,
+        pub fn on_event(&mut self, event: InternalRequest) {
+            if let Request::Timer(event) = event {
+                self.on_timer(&event);
             }
         }
 
-        pub fn on_timer(&mut self, event: &TimerEvent) -> Option<Vec<ExecResult>> {
+        pub fn on_timer(&mut self, event: &TimerEvent) {
             self.base.on_timer(event, &mut self.state)
         }
 
-        pub fn on_message(&mut self, event: Rc<Message>) -> Option<Vec<ExecResult>> {
-            self.base.on_message(event, &mut self.state)
+        pub fn on_message(&mut self, event: Rc<Message>) {
+            self.base.on_message(event, &mut self.state);
         }
 
         pub fn is_open(&self) -> bool {

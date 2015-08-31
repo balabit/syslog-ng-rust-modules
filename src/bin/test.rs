@@ -6,17 +6,8 @@ extern crate uuid;
 use correlation::{config, conditions, Correlator};
 use correlation::message::{Builder};
 use correlation::action::message;
-use correlation::action::ActionHandlers;
 use uuid::Uuid;
 use std::thread;
-
-struct Printer;
-
-impl message::ActionHandler for Printer {
-    fn handle(&mut self, _: message::ExecResult) {
-        println!("I'm the message handler");
-    }
-}
 
 #[allow(dead_code)]
 fn main() {
@@ -38,8 +29,7 @@ fn main() {
         config::ContextBuilder::new(Uuid::new_v4(), condition.clone()).actions(actions.clone()).build(),
         config::ContextBuilder::new(Uuid::new_v4(), condition.clone()).actions(actions.clone()).build(),
     };
-    let handlers = ActionHandlers::new(Box::new(Printer));
-    let mut correlator = Correlator::new(contexts, handlers);
+    let mut correlator = Correlator::new(contexts);
     let _ = correlator.push_message(Builder::new(&uuid1).build());
     thread::sleep_ms(20);
     let _ = correlator.push_message(Builder::new(&uuid2).build());

@@ -3,7 +3,6 @@ use std::collections::BTreeMap;
 use std::fmt::Write;
 use std::rc::Rc;
 
-use action::ExecResult;
 use Conditions;
 use message::{Message};
 use state::State;
@@ -28,26 +27,18 @@ impl MapContext {
         }
     }
 
-    pub fn on_event(&mut self, event: InternalRequest) -> Option<Vec<ExecResult>> {
-        match event {
-            Request::Message(event) => self.on_message(event),
-            _ => None
+    pub fn on_event(&mut self, event: InternalRequest) {
+        if let Request::Message(event) = event {
+            self.on_message(event);
         }
     }
 
-    pub fn on_timer(&mut self, event: &TimerEvent) -> Option<Vec<ExecResult>> {
-        let mut result: Vec<ExecResult> = Vec::new();
-
+    pub fn on_timer(&mut self, event: &TimerEvent) {
         for (_, mut state) in self.map.iter_mut() {
-            if let Some(commands) = self.base.on_timer(event, &mut state) {
-                for i in commands.into_iter() {
-                    result.push(i);
-                }
-            }
+            self.base.on_timer(event, &mut state);
+            
         }
-
         self.remove_closed_states();
-        Some(result)
     }
 
     fn get_closed_state_ids(&self) -> Vec<String> {
@@ -66,18 +57,17 @@ impl MapContext {
         }
     }
 
-    pub fn on_message(&mut self, event: Rc<Message>) -> Option<Vec<ExecResult>> {
+    pub fn on_message(&mut self, event: Rc<Message>) {
         self.format_context_id(&event);
-        let result = self.update_state(event);
+        self.update_state(event);
         self.format_buffer.clear();
         self.remove_closed_states();
-        result
     }
 
-    fn update_state(&mut self, event: Rc<Message>) -> Option<Vec<ExecResult>> {
+    fn update_state(&mut self, event: Rc<Message>) {
         let id = self.format_buffer.clone();
         let state = self.map.entry(id).or_insert(State::new());
-        self.base.on_message(event, state)
+        self.base.on_message(event, state);
     }
 
     pub fn is_open(&mut self) -> bool {

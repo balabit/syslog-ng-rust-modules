@@ -1,7 +1,5 @@
 use std::sync::mpsc::Sender;
 
-use action::ExecResult;
-
 pub mod demux;
 pub mod handlers;
 pub mod response;
@@ -10,7 +8,6 @@ pub mod reactor;
 
 #[derive(Debug)]
 pub enum Response {
-    Event(ExecResult),
     Exit
 }
 
@@ -23,12 +20,6 @@ impl ResponseHandler {
         ResponseHandler {
             sender: sender
         }
-    }
-}
-
-impl Into<Response> for ExecResult {
-    fn into(self) -> Response {
-        Response::Event(self)
     }
 }
 

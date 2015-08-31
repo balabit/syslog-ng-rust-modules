@@ -4,7 +4,6 @@ use std::sync::mpsc;
 use std::thread;
 use std::result::Result;
 
-use action::ActionHandlers;
 use {config, context, Message, MiliSec, Response, Timer};
 use condition::Condition;
 use context::event::EventHandler;
@@ -19,7 +18,6 @@ use reactor::Reactor;
 const TIMER_STEP: MiliSec = 100;
 
 pub struct Correlator {
-    action_handlers: ActionHandlers,
     dispatcher_input_channel: mpsc::Sender<Request<Message>>,
     dispatcher_output_channel: mpsc::Receiver<Response>,
     dispatcher_thread_handle: thread::JoinHandle<()>,
@@ -27,7 +25,7 @@ pub struct Correlator {
 }
 
 impl Correlator {
-    pub fn new(contexts: Vec<config::Context>, action_handlers: ActionHandlers) -> Correlator {
+    pub fn new(contexts: Vec<config::Context>) -> Correlator {
         let (dispatcher_input_channel, rx) = mpsc::channel();
         let (dispatcher_output_channel_tx, dispatcher_output_channel_rx) = mpsc::channel();
         let _ = Timer::from_chan(TIMER_STEP, dispatcher_input_channel.clone());
@@ -63,7 +61,6 @@ impl Correlator {
         });
 
         Correlator {
-            action_handlers: action_handlers,
             dispatcher_input_channel: dispatcher_input_channel,
             dispatcher_output_channel: dispatcher_output_channel_rx,
             dispatcher_thread_handle: handle,
@@ -78,9 +75,6 @@ impl Correlator {
 
     fn consume_results(&mut self) {
         for i in self.dispatcher_output_channel.try_recv() {
-            if let Response::Event(result) = i {
-                self.action_handlers.handle(result);
-            }
         }
     }
 
@@ -109,7 +103,6 @@ impl Correlator {
 
     fn handle_command(&mut self, command: Response) -> Result<(), ()> {
         match command {
-            Response::Event(result) => self.action_handlers.handle(result),
             Response::Exit => {
                 if self.handle_exit_command() {
                     return Err(());
