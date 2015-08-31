@@ -5,6 +5,7 @@ use std::thread;
 use std::result::Result;
 
 use {config, context, Message, MiliSec, Response, Timer};
+use context::Context;
 use condition::Condition;
 use context::event::EventHandler;
 use dispatcher::request::{InternalRequest, Request};
@@ -43,7 +44,20 @@ impl Correlator {
 
             let mut event_handlers = Vec::new();
             for i in contexts.into_iter() {
-                let context: context::Context = i.into();
+                let mut context: context::Context = i.into();
+                match context {
+                    Context::Linear(ref mut context) => {
+                        for action in context.actions_mut() {
+                            action.set_response_sender(response_handler.clone());
+                        }
+                    },
+                    Context::Map(ref mut context) => {
+                        for action in context.actions_mut() {
+                            action.set_response_sender(response_handler.clone());
+                        }
+                    }
+                }
+
                 let event_handler: Box<EventHandler<InternalRequest>> = context.into();
                 let handler = Rc::new(RefCell::new(event_handler));
                 event_handlers.push(handler);

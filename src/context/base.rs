@@ -51,6 +51,10 @@ impl BaseContext {
         }
     }
 
+    pub fn actions_mut(&mut self) -> &mut Vec<Box<Action + 'static>> {
+        &mut self.actions
+    }
+
     fn close_state(&self, state: &mut State) {
         state.close();
     }

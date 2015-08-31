@@ -3,6 +3,7 @@ use std::collections::BTreeMap;
 use std::fmt::Write;
 use std::rc::Rc;
 
+use action::Action;
 use Conditions;
 use message::{Message};
 use state::State;
@@ -36,9 +37,13 @@ impl MapContext {
     pub fn on_timer(&mut self, event: &TimerEvent) {
         for (_, mut state) in self.map.iter_mut() {
             self.base.on_timer(event, &mut state);
-            
+
         }
         self.remove_closed_states();
+    }
+
+    pub fn actions_mut(&mut self) -> &mut Vec<Box<Action + 'static>> {
+        self.base.actions_mut()
     }
 
     fn get_closed_state_ids(&self) -> Vec<String> {

@@ -71,6 +71,7 @@ mod linear {
     use uuid::Uuid;
     use std::rc::Rc;
 
+    use action::Action;
     use config;
     use context;
     use Conditions;
@@ -115,6 +116,10 @@ mod linear {
 
         pub fn patterns(&self) -> &[String] {
             &self.base.conditions().patterns
+        }
+
+        pub fn actions_mut(&mut self) -> &mut Vec<Box<Action + 'static>> {
+            self.base.actions_mut()
         }
     }
 
