@@ -1,7 +1,12 @@
 use state::State;
+use dispatcher::Response;
+use dispatcher::response::ResponseSender;
 use context::base::BaseContext;
 
 pub use self::message::MessageActionType;
+
+use std::cell::RefCell;
+use std::rc::Rc;
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum ActionType {
@@ -10,6 +15,7 @@ pub enum ActionType {
 
 trait Action {
     fn execute(&self, state: &State, context: &BaseContext);
+    fn set_response_sender(&self, _sender: Rc<RefCell<Box<ResponseSender<Response>>>>) {}
 }
 
 mod deser {
