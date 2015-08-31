@@ -2,17 +2,17 @@ use state::State;
 use context::base::BaseContext;
 
 pub use self::handlers::ActionHandlers;
-pub use self::message::MessageAction;
+pub use self::message::MessageActionType;
 
 #[derive(Clone, Debug, Eq, PartialEq)]
-pub enum Action {
-    Message(self::message::MessageAction)
+pub enum ActionType {
+    Message(self::message::MessageActionType)
 }
 
-impl Action {
+impl ActionType {
     pub fn execute(&self, state: &State, context: &BaseContext) -> ExecResult {
         let result = match *self {
-            Action::Message(ref action) => action.execute(state, context)
+            ActionType::Message(ref action) => action.execute(state, context)
         };
 
         ExecResult::from(result)
@@ -26,10 +26,10 @@ pub enum ExecResult {
 
 mod deser {
     use serde;
-    use super::Action;
+    use super::ActionType;
 
-    impl serde::de::Deserialize for Action {
-    fn deserialize<D>(deserializer: &mut D) -> Result<Action, D::Error>
+    impl serde::de::Deserialize for ActionType {
+    fn deserialize<D>(deserializer: &mut D) -> Result<ActionType, D::Error>
                       where D: serde::de::Deserializer {
         enum Field {
             Message,
@@ -59,15 +59,15 @@ mod deser {
             struct Visitor;
 
             impl serde::de::EnumVisitor for Visitor {
-                type Value = Action;
+                type Value = ActionType;
 
-                fn visit<V>(&mut self, mut visitor: V) -> Result<Action, V::Error>
+                fn visit<V>(&mut self, mut visitor: V) -> Result<ActionType, V::Error>
                     where V: serde::de::VariantVisitor
                 {
                     match try!(visitor.visit_variant()) {
                         Field::Message => {
                             let value = try!(visitor.visit_newtype());
-                            Ok(Action::Message(value))
+                            Ok(ActionType::Message(value))
                         }
                     }
                 }
@@ -75,14 +75,14 @@ mod deser {
 
             const VARIANTS: &'static [&'static str] = &["message"];
 
-            deserializer.visit_enum("Action", VARIANTS, Visitor)
+            deserializer.visit_enum("ActionType", VARIANTS, Visitor)
         }
     }
 
     #[cfg(test)]
     mod test {
         use serde_json::from_str;
-        use action::Action;
+        use action::ActionType;
 
         #[test]
         fn test_given_action_when_it_is_deserialized_then_we_get_the_right_result() {
@@ -92,11 +92,11 @@ mod deser {
                 }
             "#;
 
-            let result = from_str::<Action>(text);
+            let result = from_str::<ActionType>(text);
             println!("{:?}", &result);
-            let action = result.ok().expect("Failed to deserialize a valid Action");
+            let action = result.ok().expect("Failed to deserialize a valid ActionType");
             match action {
-                Action::Message(_) => {}
+                ActionType::Message(_) => {}
             }
         }
     }
@@ -140,11 +140,11 @@ pub mod message {
     }
 
     #[derive(Clone, Debug, PartialEq, Eq)]
-    pub struct MessageAction;
+    pub struct MessageActionType;
 
-    impl MessageAction {
-        pub fn new() -> MessageAction {
-            MessageAction
+    impl MessageActionType {
+        pub fn new() -> MessageActionType {
+            MessageActionType
         }
 
         pub fn execute(&self, _: &State, _: &BaseContext) -> ExecResult {
@@ -152,9 +152,9 @@ pub mod message {
         }
     }
 
-    impl From<MessageAction> for super::Action {
-        fn from(action: MessageAction) -> super::Action {
-            super::Action::Message(action)
+    impl From<MessageActionType> for super::ActionType {
+        fn from(action: MessageActionType) -> super::ActionType {
+            super::ActionType::Message(action)
         }
     }
 
@@ -164,25 +164,25 @@ pub mod message {
 
     mod deser {
 
-    use super::MessageAction;
+    use super::MessageActionType;
     use serde;
     use serde::de::Deserialize;
 
-    impl serde::Deserialize for MessageAction {
-        fn deserialize<D>(deserializer: &mut D) -> Result<MessageAction, D::Error>
+    impl serde::Deserialize for MessageActionType {
+        fn deserialize<D>(deserializer: &mut D) -> Result<MessageActionType, D::Error>
             where D: serde::de::Deserializer
         {
-            deserializer.visit_unit_struct("MessageAction", MessageActionVisitor)
+            deserializer.visit_unit_struct("MessageActionType", MessageActionVisitor)
         }
     }
 
     struct MessageActionVisitor;
 
     impl serde::de::Visitor for MessageActionVisitor {
-        type Value = MessageAction;
+        type Value = MessageActionType;
         fn visit_unit<E>(&mut self) -> Result<Self::Value, E>
             where E: serde::de::Error {
-            Ok(MessageAction)
+            Ok(MessageActionType)
         }
     }
     }

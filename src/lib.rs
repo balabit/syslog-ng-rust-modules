@@ -6,7 +6,7 @@ extern crate serde_json;
 #[macro_use]
 mod macros;
 
-pub use action::Action;
+pub use action::ActionType;
 pub use condition::Condition;
 pub use conditions::Conditions;
 pub use context::Context;

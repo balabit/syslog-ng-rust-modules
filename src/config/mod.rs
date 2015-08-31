@@ -1,6 +1,6 @@
 use uuid::Uuid;
 
-use super::Action;
+use super::ActionType;
 use super::Conditions;
 
 mod deser;
@@ -10,14 +10,14 @@ pub struct Context {
     pub name: Option<String>,
     pub uuid: Uuid,
     pub conditions: Conditions,
-    pub actions: Vec<Action>
+    pub actions: Vec<ActionType>
 }
 
 pub struct ContextBuilder {
     name: Option<String>,
     uuid: Uuid,
     conditions: Conditions,
-    actions: Vec<Action>
+    actions: Vec<ActionType>
 }
 
 impl ContextBuilder {
@@ -30,7 +30,7 @@ impl ContextBuilder {
         }
     }
 
-    pub fn actions(&mut self, actions: Vec<Action>) -> &mut ContextBuilder {
+    pub fn actions(&mut self, actions: Vec<ActionType>) -> &mut ContextBuilder {
         self.actions = actions;
         self
     }

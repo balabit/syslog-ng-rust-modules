@@ -1,7 +1,7 @@
 use uuid::Uuid;
 use std::rc::Rc;
 
-use action::{Action, ExecResult};
+use action::{ActionType, ExecResult};
 use conditions::Conditions;
 use config;
 use message::Message;
@@ -13,7 +13,7 @@ pub struct BaseContext {
     name: Option<String>,
     uuid: Uuid,
     conditions: Conditions,
-    actions: Vec<Action>
+    actions: Vec<ActionType>
 }
 
 impl BaseContext {

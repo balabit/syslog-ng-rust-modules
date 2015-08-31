@@ -1,4 +1,4 @@
-use action::Action;
+use action::ActionType;
 use config::Context;
 use serde::de::{
     Deserialize,
@@ -72,7 +72,7 @@ impl ContextVisitor {
         }
     }
 
-    fn parse_actions<V>(actions: Option<Vec<Action>>) -> Result<Vec<Action>, V::Error>
+    fn parse_actions<V>(actions: Option<Vec<ActionType>>) -> Result<Vec<ActionType>, V::Error>
         where V: MapVisitor {
         match actions {
             Some(actions) => Ok(actions),
@@ -121,8 +121,8 @@ impl Visitor for ContextVisitor {
 #[cfg(test)]
 mod test {
     use action::{
-        Action,
-        MessageAction
+        ActionType,
+        MessageActionType
     };
     use conditions;
     use config::{
@@ -166,7 +166,7 @@ mod test {
                                                             "PATTERN_NAME2".to_string(),
                                                             "f13dafee-cd14-4dda-995c-6ed476a21de3".to_string()
                                                         ]).build();
-        let expected_actions = vec![Action::Message(MessageAction::new())];
+        let expected_actions = vec![ActionType::Message(MessageActionType::new())];
         let expected_context = ContextBuilder::new(expected_uuid, expected_conditions)
                                                           .name(expected_name)
                                                           .actions(expected_actions)
