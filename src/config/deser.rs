@@ -1,4 +1,4 @@
-use action::ActionType;
+use config::action::ActionType;
 use config::Context;
 use serde::de::{
     Deserialize,

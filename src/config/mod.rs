@@ -1,9 +1,10 @@
 use uuid::Uuid;
 
-use super::ActionType;
+use config::action::ActionType;
 use super::Conditions;
 
 mod deser;
+pub mod action;
 
 #[derive(Debug, PartialEq, Eq)]
 pub struct Context {

@@ -11,7 +11,6 @@ pub mod base;
 pub mod event;
 pub mod map;
 
-#[derive(Debug)]
 pub enum Context {
     Linear(LinearContext),
     Map(MapContext)
@@ -52,12 +51,6 @@ impl Context {
     }
 }
 
-impl From<config::Context> for Context {
-    fn from(config: config::Context) -> Context {
-        Context::Linear(LinearContext::from(config))
-    }
-}
-
 impl From<Context> for Box<self::event::EventHandler<InternalRequest>> {
     fn from(context: Context) -> Box<self::event::EventHandler<InternalRequest>> {
         match context {
@@ -67,7 +60,7 @@ impl From<Context> for Box<self::event::EventHandler<InternalRequest>> {
     }
 }
 
-mod linear {
+pub mod linear {
     use uuid::Uuid;
     use std::rc::Rc;
 
@@ -82,7 +75,6 @@ mod linear {
     use dispatcher::request::{InternalRequest, Request};
     use context::base::BaseContext;
 
-    #[derive(Debug)]
     pub struct LinearContext {
         base: BaseContext,
         state: State
@@ -120,15 +112,6 @@ mod linear {
 
         pub fn actions_mut(&mut self) -> &mut Vec<Box<Action + 'static>> {
             self.base.actions_mut()
-        }
-    }
-
-    impl From<config::Context> for LinearContext {
-        fn from(config: config::Context) -> LinearContext {
-            LinearContext {
-                base: BaseContext::from(config),
-                state: State::new()
-            }
         }
     }
 

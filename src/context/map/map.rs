@@ -12,7 +12,6 @@ use context::base::BaseContext;
 use context::event::EventHandler;
 use dispatcher::request::{Request, InternalRequest};
 
-#[derive(Debug)]
 pub struct MapContext {
     base: BaseContext,
     map: BTreeMap<String, State>,

@@ -1,14 +1,14 @@
 use uuid::Uuid;
 use std::rc::Rc;
 
-use action::{Action, ActionType};
-use conditions::{self, Conditions};
+use action::Action;
+use conditions::Conditions;
 use config;
+use config::action::ActionType;
 use message::Message;
 use state::State;
 use timer::TimerEvent;
 
-#[derive(Debug)]
 pub struct BaseContext {
     name: Option<String>,
     uuid: Uuid,
@@ -58,20 +58,6 @@ impl BaseContext {
     fn close_state(&self, state: &mut State) {
         state.close();
     }
-
-    fn box_the_actions(actions: Vec<ActionType>) -> Vec<Box<Action>> {
-        let mut boxed_actions = Vec::new();
-        for i in actions.into_iter() {
-            let action: Box<Action> = match i {
-                ActionType::Message(action) => {
-                    Box::new(action)
-                }
-            };
-
-            boxed_actions.push(action);
-        }
-        boxed_actions
-    }
 }
 
 pub struct Builder {
@@ -91,12 +77,12 @@ impl Builder {
         }
     }
 
-    pub fn name(&mut self, name: Option<String>) -> &mut Builder {
+    pub fn name(mut self, name: Option<String>) -> Builder {
         self.name = name;
         self
     }
 
-    pub fn actions(&mut self, actions: Vec<Box<Action>>) -> &mut Builder {
+    pub fn actions(mut self, actions: Vec<Box<Action>>) -> Builder {
         self.actions = actions;
         self
     }
@@ -108,19 +94,6 @@ impl Builder {
             uuid: uuid,
             conditions: conditions,
             actions: actions
-        }
-    }
-}
-
-impl From<config::Context> for BaseContext {
-    fn from(config: config::Context) -> BaseContext {
-        let config::Context{name, uuid, conditions, actions} = config;
-        let boxed_actions = BaseContext::box_the_actions(actions);
-        BaseContext {
-            name: name,
-            uuid: uuid,
-            conditions: conditions,
-            actions: boxed_actions
         }
     }
 }

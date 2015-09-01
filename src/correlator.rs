@@ -4,8 +4,10 @@ use std::sync::mpsc;
 use std::thread;
 use std::result::Result;
 
-use {config, context, Message, MiliSec, Response, Timer};
-use context::Context;
+use {action, config, context, Message, MiliSec, Response, Timer};
+use context::base;
+use context::{Context};
+use context::linear::LinearContext;
 use condition::Condition;
 use context::event::EventHandler;
 use dispatcher::request::{InternalRequest, Request};
@@ -23,6 +25,21 @@ pub struct Correlator {
     dispatcher_output_channel: mpsc::Receiver<Response>,
     dispatcher_thread_handle: thread::JoinHandle<()>,
     exits_received: u32
+}
+
+fn create_context(config_context: config::Context, response_sender: Rc<RefCell<Box<response::ResponseSender<Response>>>>) -> Context {
+    let config::Context{name, uuid, conditions, actions} = config_context;
+    let mut boxed_actions = Vec::new();
+
+    for i in actions.into_iter() {
+        let action = action::from_config(i, response_sender.clone());
+        boxed_actions.push(action);
+    }
+    let mut base = base::Builder::new(uuid, conditions);
+    let mut base = base.name(name);
+    let mut base = base.actions(boxed_actions);
+    let base = base.build();
+    Context::Linear(LinearContext::from(base))
 }
 
 impl Correlator {
@@ -44,7 +61,7 @@ impl Correlator {
 
             let mut event_handlers = Vec::new();
             for i in contexts.into_iter() {
-                let mut context: context::Context = i.into();
+                let mut context: context::Context = create_context(i, response_handler.clone());
                 match context {
                     Context::Linear(ref mut context) => {
                         for action in context.actions_mut() {
