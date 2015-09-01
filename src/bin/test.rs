@@ -5,7 +5,7 @@ extern crate uuid;
 
 use correlation::{config, conditions, Correlator};
 use correlation::message::{Builder};
-use correlation::action::message;
+//use correlation::action::message;
 use uuid::Uuid;
 use std::thread;
 
@@ -23,7 +23,7 @@ fn main() {
                                                 .first_opens(true)
                                                 .last_closes(true)
                                                 .build();
-    let actions = vec![ message::MessageActionType::new().into() ];
+    let actions = vec![ config::action::MessageActionType.into() ];
     let contexts = vec!{
         config::ContextBuilder::new(Uuid::new_v4(), condition.clone()).actions(actions.clone()).build(),
         config::ContextBuilder::new(Uuid::new_v4(), condition.clone()).actions(actions.clone()).build(),
