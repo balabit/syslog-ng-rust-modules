@@ -56,6 +56,9 @@ impl BaseContext {
     }
 
     fn close_state(&self, state: &mut State) {
+        for i in &self.actions {
+            i.execute(state, self);
+        }
         state.close();
     }
 }
