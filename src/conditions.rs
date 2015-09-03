@@ -201,12 +201,17 @@ mod test {
 mod deser {
     use MiliSec;
     use super::Conditions;
-    use serde;
-    use serde::de::Deserialize;
+    use serde::de::{
+        Deserialize,
+        Deserializer,
+        Error,
+        MapVisitor,
+        Visitor
+    };
 
-    impl serde::Deserialize for Conditions {
+    impl Deserialize for Conditions {
         fn deserialize<D>(deserializer: &mut D) -> Result<Conditions, D::Error>
-            where D: serde::de::Deserializer
+            where D: Deserializer
         {
             deserializer.visit_struct("Conditions", &[], ConditionsVisitor)
         }
@@ -221,17 +226,17 @@ mod deser {
         Patterns,
     }
 
-    impl serde::Deserialize for Field {
+    impl Deserialize for Field {
         fn deserialize<D>(deserializer: &mut D) -> Result<Field, D::Error>
-            where D: serde::de::Deserializer
+            where D: Deserializer
         {
             struct FieldVisitor;
 
-            impl serde::de::Visitor for FieldVisitor {
+            impl Visitor for FieldVisitor {
                 type Value = Field;
 
                 fn visit_str<E>(&mut self, value: &str) -> Result<Field, E>
-                    where E: serde::de::Error
+                    where E: Error
                 {
                     match value {
                         "timeout" => Ok(Field::Timeout),
@@ -240,7 +245,7 @@ mod deser {
                         "last_closes" => Ok(Field::LastCloses),
                         "max_size" => Ok(Field::MaxSize),
                         "patterns" => Ok(Field::Patterns),
-                        name @ _ => Err(serde::de::Error::syntax(&format!("Unexpected field: {}", name))),
+                        name @ _ => Err(Error::syntax(&format!("Unexpected field: {}", name))),
                     }
                 }
             }
@@ -251,11 +256,11 @@ mod deser {
 
     struct ConditionsVisitor;
 
-    impl serde::de::Visitor for ConditionsVisitor {
+    impl Visitor for ConditionsVisitor {
         type Value = Conditions;
 
         fn visit_map<V>(&mut self, mut visitor: V) -> Result<Conditions, V::Error>
-            where V: serde::de::MapVisitor
+            where V: MapVisitor
         {
             let mut timeout: Option<MiliSec> = None;
             let mut renew_timeout = None;
