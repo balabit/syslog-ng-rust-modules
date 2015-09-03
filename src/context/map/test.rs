@@ -1,5 +1,5 @@
 use conditions::Builder;
-use Context;
+use context::MapContext;
 use TimerEvent;
 use message;
 
@@ -19,7 +19,7 @@ fn test_given_map_context_when_messages_have_the_same_kvpairs_then_they_go_to_th
         msg_id2.clone(),
         msg_id3.clone(),
     ];
-    let mut context = Context::new_map(Uuid::new_v4(), Builder::new(timeout).patterns(patterns).build());
+    let mut context = MapContext::new(Uuid::new_v4(), Builder::new(timeout).patterns(patterns).build());
     let msg1 = message::Builder::new(&msg_id1)
                                 .pair("HOST".to_string(), "host".to_string())
                                 .pair("PROGRAM".to_string(), "program".to_string())

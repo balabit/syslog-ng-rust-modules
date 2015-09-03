@@ -2,8 +2,9 @@ use uuid::Uuid;
 
 use super::{Conditions};
 use dispatcher::request::InternalRequest;
-use self::linear::LinearContext;
-use self::map::MapContext;
+
+pub use self::linear::LinearContext;
+pub use self::map::MapContext;
 
 pub mod base;
 pub mod event;
@@ -12,16 +13,6 @@ pub mod map;
 pub enum Context {
     Linear(LinearContext),
     Map(MapContext)
-}
-
-impl Context {
-    pub fn new_linear(uuid: Uuid, conditions: Conditions) -> LinearContext {
-        LinearContext::new(uuid, conditions)
-    }
-
-    pub fn new_map(uuid: Uuid, conditions: Conditions) -> MapContext {
-        MapContext::new(uuid, conditions)
-    }
 }
 
 impl From<Context> for Box<self::event::EventHandler<InternalRequest>> {
@@ -115,7 +106,7 @@ mod test {
 
     use message;
     use TimerEvent;
-    use super::Context;
+    use context::LinearContext;
     use conditions::Builder;
 
     #[test]
@@ -125,7 +116,7 @@ mod test {
         let patterns = vec![
             msg_id.clone(),
         ];
-        let mut context = Context::new_linear(Uuid::new_v4(), Builder::new(timeout).patterns(patterns).build());
+        let mut context = LinearContext::new(Uuid::new_v4(), Builder::new(timeout).patterns(patterns).build());
         let msg1 = message::Builder::new(&msg_id).build();
         let event = Rc::new(msg1);
         assert_false!(context.is_open());
@@ -147,7 +138,7 @@ mod test {
         let patterns = vec![
             msg_id.clone(),
         ];
-        let mut context = Context::new_linear(Uuid::new_v4(), Builder::new(timeout).max_size(max_size).patterns(patterns).build());
+        let mut context = LinearContext::new(Uuid::new_v4(), Builder::new(timeout).max_size(max_size).patterns(patterns).build());
         let msg1 = message::Builder::new(&msg_id).build();
         let event = Rc::new(msg1);
         context.on_message(event.clone());
@@ -166,7 +157,7 @@ mod test {
         let patterns = vec![
             msg_id.clone(),
         ];
-        let mut context = Context::new_linear(Uuid::new_v4(), Builder::new(timeout).renew_timeout(renew_timeout).patterns(patterns).build());
+        let mut context = LinearContext::new(Uuid::new_v4(), Builder::new(timeout).renew_timeout(renew_timeout).patterns(patterns).build());
         let msg1 = message::Builder::new(&msg_id).build();
         let event = Rc::new(msg1);
         context.on_message(event.clone());
@@ -187,7 +178,7 @@ mod test {
         let patterns = vec![
             msg_id.clone(),
         ];
-        let mut context = Context::new_linear(Uuid::new_v4(), Builder::new(timeout).renew_timeout(renew_timeout).patterns(patterns).build());
+        let mut context = LinearContext::new(Uuid::new_v4(), Builder::new(timeout).renew_timeout(renew_timeout).patterns(patterns).build());
         let msg1 = message::Builder::new(&msg_id).build();
         let event = Rc::new(msg1);
         assert_false!(context.is_open());
