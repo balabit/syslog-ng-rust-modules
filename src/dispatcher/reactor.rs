@@ -23,7 +23,6 @@ impl RequestReactor {
 
 impl Reactor for RequestReactor {
     type Event = InternalRequest;
-    type Handler = RequestHandler;
     fn handle_events(&mut self) {
         while !self.exit_condition.is_active() {
             if let Some(request) = self.demultiplexer.select() {

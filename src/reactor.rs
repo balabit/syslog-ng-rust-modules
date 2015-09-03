@@ -10,10 +10,9 @@ pub trait EventDemultiplexer {
 
 pub trait Reactor {
     type Event: Event;
-    type Handler;
     fn handle_events(&mut self);
     fn register_handler(&mut self, handler: Box<EventHandler<Self::Event>>);
-    fn remove_handler_by_handler(&mut self, handler: &Self::Handler);
+    fn remove_handler_by_handler(&mut self, handler: &<<Self as Reactor>::Event as Event>::Handler);
 }
 
 pub trait Event {
