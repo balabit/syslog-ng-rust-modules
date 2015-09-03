@@ -15,7 +15,7 @@ pub trait Action {
 
 pub fn from_config(config: ActionType, _sender: Rc<RefCell<Box<ResponseSender<Response>>>>) -> Box<Action> {
     match config {
-        ActionType::Message(action) => Box::new(self::message::MessageActionType {sender: _sender, action: action})
+        ActionType::Message(action) => Box::new(self::message::MessageAction {sender: _sender, action: action})
     }
 }
 
@@ -31,9 +31,9 @@ mod message {
     use state::State;
 
     #[derive(Clone)]
-    pub struct MessageActionType {
+    pub struct MessageAction {
         pub sender: Rc<RefCell<Box<ResponseSender<Response>>>>,
-        pub action: config::action::MessageActionType
+        pub action: config::action::MessageAction
     }
 
     #[derive(Debug)]
@@ -42,7 +42,7 @@ mod message {
         internal: bool
     }
 
-    impl Action for MessageActionType {
+    impl Action for MessageAction {
         fn execute(&self, _state: &State, _context: &BaseContext) {
             let mut message = Builder::new("d6621bd6-4898-4b8c-a4ff-36d0eed7d8dc")
                                     .pair(".context.uuid".to_string(), _context.uuid().to_hyphenated_string())

@@ -1,8 +1,8 @@
-pub use self::message::MessageActionType;
+pub use self::message::MessageAction;
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum ActionType {
-    Message(self::message::MessageActionType)
+    Message(self::message::MessageAction)
 }
 
 mod deser {
@@ -87,41 +87,41 @@ pub mod message {
     use super::ActionType;
 
     #[derive(Clone, Debug, PartialEq, Eq)]
-    pub struct MessageActionType;
+    pub struct MessageAction;
 
-    impl MessageActionType {
-        pub fn new() -> MessageActionType {
-            MessageActionType
+    impl MessageAction {
+        pub fn new() -> MessageAction {
+            MessageAction
         }
     }
 
-    impl From<MessageActionType> for super::ActionType {
-        fn from(action: MessageActionType) -> super::ActionType {
+    impl From<MessageAction> for super::ActionType {
+        fn from(action: MessageAction) -> super::ActionType {
             super::ActionType::Message(action)
         }
     }
 
     mod deser {
 
-    use super::MessageActionType;
+    use super::MessageAction;
     use serde;
     use serde::de::Deserialize;
 
-    impl serde::Deserialize for MessageActionType {
-        fn deserialize<D>(deserializer: &mut D) -> Result<MessageActionType, D::Error>
+    impl serde::Deserialize for MessageAction {
+        fn deserialize<D>(deserializer: &mut D) -> Result<MessageAction, D::Error>
             where D: serde::de::Deserializer
         {
-            deserializer.visit_unit_struct("MessageActionType", MessageActionVisitor)
+            deserializer.visit_unit_struct("MessageAction", MessageActionVisitor)
         }
     }
 
     struct MessageActionVisitor;
 
     impl serde::de::Visitor for MessageActionVisitor {
-        type Value = MessageActionType;
+        type Value = MessageAction;
         fn visit_unit<E>(&mut self) -> Result<Self::Value, E>
             where E: serde::de::Error {
-            Ok(MessageActionType)
+            Ok(MessageAction)
         }
     }
     }

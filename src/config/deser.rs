@@ -122,7 +122,7 @@ impl Visitor for ContextVisitor {
 mod test {
     use config::action::{
         ActionType,
-        MessageActionType
+        MessageAction
     };
     use conditions;
     use config::{
@@ -166,7 +166,7 @@ mod test {
                                                             "PATTERN_NAME2".to_string(),
                                                             "f13dafee-cd14-4dda-995c-6ed476a21de3".to_string()
                                                         ]).build();
-        let expected_actions = vec![ActionType::Message(MessageActionType::new())];
+        let expected_actions = vec![ActionType::Message(MessageAction::new())];
         let expected_context = ContextBuilder::new(expected_uuid, expected_conditions)
                                                           .name(expected_name)
                                                           .actions(expected_actions)
