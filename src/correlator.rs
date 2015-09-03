@@ -5,7 +5,7 @@ use std::sync::mpsc;
 use std::thread;
 use std::result::Result;
 
-use {action, config, context, Message, MiliSec, Response, Timer};
+use {action, config, context, Message, MiliSec, Response};
 use condition::Condition;
 use context::base;
 use context::{Context};
@@ -17,6 +17,7 @@ use dispatcher::response;
 use dispatcher::demux::Demultiplexer;
 use dispatcher::handlers;
 use reactor::{Event, EventHandler, Reactor};
+use timer::Timer;
 
 const TIMER_STEP: MiliSec = 100;
 

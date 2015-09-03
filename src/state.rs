@@ -2,7 +2,7 @@ use std::rc::Rc;
 
 use Message;
 use MiliSec;
-use TimerEvent;
+use timer::TimerEvent;
 
 #[derive(Debug)]
 pub struct State {

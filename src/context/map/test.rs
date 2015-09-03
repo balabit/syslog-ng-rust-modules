@@ -1,6 +1,6 @@
 use conditions::Builder;
 use context::MapContext;
-use TimerEvent;
+use timer::TimerEvent;
 use message;
 
 use uuid::Uuid;

@@ -25,11 +25,11 @@ pub mod linear {
     use uuid::Uuid;
     use std::rc::Rc;
 
-    use Conditions;
+    use conditions::Conditions;
     use context::event::{EventHandler};
     use message::{Message};
     use state::State;
-    use TimerEvent;
+    use timer::TimerEvent;
     use dispatcher::request::{InternalRequest, Request};
     use context::base::BaseContext;
 
@@ -95,7 +95,7 @@ mod test {
     use std::rc::Rc;
 
     use message;
-    use TimerEvent;
+    use timer::TimerEvent;
     use context::LinearContext;
     use conditions::Builder;
 

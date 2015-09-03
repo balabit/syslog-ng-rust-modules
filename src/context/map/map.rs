@@ -3,10 +3,10 @@ use std::collections::BTreeMap;
 use std::fmt::Write;
 use std::rc::Rc;
 
-use Conditions;
+use conditions::Conditions;
 use message::{Message};
 use state::State;
-use TimerEvent;
+use timer::TimerEvent;
 use context::base::BaseContext;
 use context::event::EventHandler;
 use dispatcher::request::{Request, InternalRequest};

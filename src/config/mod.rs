@@ -1,7 +1,7 @@
 use uuid::Uuid;
 
 use config::action::ActionType;
-use super::Conditions;
+use conditions::Conditions;
 
 mod deser;
 pub mod action;
