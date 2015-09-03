@@ -1,9 +1,7 @@
 use uuid::Uuid;
-use std::rc::Rc;
 
-use super::{Conditions, TimerEvent};
+use super::{Conditions};
 use dispatcher::request::InternalRequest;
-use message::{Message};
 use self::linear::LinearContext;
 use self::map::MapContext;
 
@@ -17,37 +15,12 @@ pub enum Context {
 }
 
 impl Context {
-    pub fn on_timer(&mut self, event: &TimerEvent) {
-        match *self {
-            Context::Linear(ref mut context) => context.on_timer(event),
-            Context::Map(ref mut context) => context.on_timer(event),
-        }
+    pub fn new_linear(uuid: Uuid, conditions: Conditions) -> LinearContext {
+        LinearContext::new(uuid, conditions)
     }
 
-    pub fn on_message(&mut self, event: Rc<Message>) {
-        match *self {
-            Context::Linear(ref mut context) => context.on_message(event),
-            Context::Map(ref mut context) => context.on_message(event),
-        }
-    }
-
-    pub fn is_open(&mut self) -> bool {
-        match *self {
-            Context::Linear(ref context) => context.is_open(),
-            Context::Map(ref mut context) => context.is_open(),
-        }
-    }
-
-    pub fn new_linear(uuid: Uuid, conditions: Conditions) -> Context {
-        Context::Linear(
-            LinearContext::new(uuid, conditions)
-        )
-    }
-
-    pub fn new_map(uuid: Uuid, conditions: Conditions) -> Context {
-        Context::Map(
-            MapContext::new(uuid, conditions)
-        )
+    pub fn new_map(uuid: Uuid, conditions: Conditions) -> MapContext {
+        MapContext::new(uuid, conditions)
     }
 }
 
