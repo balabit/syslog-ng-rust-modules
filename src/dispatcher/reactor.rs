@@ -6,7 +6,7 @@ use dispatcher::request::{RequestHandler, InternalRequest, ExternalRequest};
 use reactor::{Event, EventDemultiplexer, EventHandler, Reactor};
 
 pub struct RequestReactor {
-    handlers: BTreeMap<RequestHandler, Box<EventHandler<InternalRequest, Handler=RequestHandler>>>,
+    handlers: BTreeMap<RequestHandler, Box<EventHandler<InternalRequest>>>,
     demultiplexer: Demultiplexer<ExternalRequest>,
     exit_condition: Condition
 }
@@ -37,7 +37,7 @@ impl Reactor for RequestReactor {
             }
         }
     }
-    fn register_handler(&mut self, handler: Box<EventHandler<Self::Event, Handler=RequestHandler>>) {
+    fn register_handler(&mut self, handler: Box<EventHandler<Self::Event>>) {
         self.handlers.insert(handler.handler(), handler);
     }
     fn remove_handler_by_handler(&mut self, handler: &RequestHandler) {

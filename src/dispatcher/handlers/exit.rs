@@ -25,7 +25,6 @@ impl ExitEventHandler {
 }
 
 impl EventHandler<Request<Rc<Message>>> for ExitEventHandler {
-    type Handler = RequestHandler;
     fn handle_event(&mut self, event: Request<Rc<Message>>) {
         if let Request::Exit = event {
             self.stops += 1;
@@ -38,7 +37,7 @@ impl EventHandler<Request<Rc<Message>>> for ExitEventHandler {
             unreachable!("An ExitEventHandler should only receive Exit events");
         }
     }
-    fn handler(&self) -> Self::Handler {
+    fn handler(&self) -> RequestHandler {
         RequestHandler::Exit
     }
 }

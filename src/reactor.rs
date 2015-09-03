@@ -1,7 +1,6 @@
-pub trait EventHandler<T> {
-    type Handler;
+pub trait EventHandler<T: Event> {
     fn handle_event(&mut self, event: T);
-    fn handler(&self) -> Self::Handler;
+    fn handler(&self) -> T::Handler;
 }
 
 pub trait EventDemultiplexer {
@@ -13,7 +12,7 @@ pub trait Reactor {
     type Event: Event;
     type Handler;
     fn handle_events(&mut self);
-    fn register_handler(&mut self, handler: Box<EventHandler<Self::Event, Handler=Self::Handler>>);
+    fn register_handler(&mut self, handler: Box<EventHandler<Self::Event>>);
     fn remove_handler_by_handler(&mut self, handler: &Self::Handler);
 }
 

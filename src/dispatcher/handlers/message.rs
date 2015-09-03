@@ -60,7 +60,6 @@ impl MessageEventHandler {
 }
 
 impl reactor::EventHandler<InternalRequest> for MessageEventHandler {
-    type Handler = RequestHandler;
     fn handle_event(&mut self, event: InternalRequest) {
         if let Request::Message(event) = event {
             println!("message event");
@@ -70,7 +69,7 @@ impl reactor::EventHandler<InternalRequest> for MessageEventHandler {
             unreachable!("MessageEventHandler should only handle Message events");
         }
     }
-    fn handler(&self) -> Self::Handler {
+    fn handler(&self) -> RequestHandler {
         RequestHandler::Message
     }
 }

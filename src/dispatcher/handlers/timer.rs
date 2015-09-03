@@ -22,7 +22,6 @@ impl TimerEventHandler {
 }
 
 impl reactor::EventHandler<InternalRequest> for TimerEventHandler {
-    type Handler = RequestHandler;
     fn handle_event(&mut self, event: InternalRequest) {
             println!("timer event");
             let event: InternalRequest = event.into();
@@ -30,7 +29,7 @@ impl reactor::EventHandler<InternalRequest> for TimerEventHandler {
                 i.borrow_mut().handle_event(event.clone());
             }
     }
-    fn handler(&self) -> Self::Handler {
+    fn handler(&self) -> RequestHandler {
         RequestHandler::Timer
     }
 }

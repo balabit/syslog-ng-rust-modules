@@ -24,7 +24,7 @@ pub struct Correlator {
     dispatcher_input_channel: mpsc::Sender<Request<Message>>,
     dispatcher_output_channel: mpsc::Receiver<Response>,
     dispatcher_thread_handle: thread::JoinHandle<()>,
-    handlers: HashMap<ResponseHandler, Box<EventHandler<Response, Handler=ResponseHandler>>>
+    handlers: HashMap<ResponseHandler, Box<EventHandler<Response>>>
 }
 
 fn create_context(config_context: config::Context, response_sender: Rc<RefCell<Box<response::ResponseSender<Response>>>>) -> Context {
@@ -86,7 +86,7 @@ impl Correlator {
         }
     }
 
-    pub fn register_handler(&mut self, handler: Box<EventHandler<Response, Handler=ResponseHandler>>) {
+    pub fn register_handler(&mut self, handler: Box<EventHandler<Response>>) {
         self.handlers.insert(handler.handler(), handler);
     }
 
@@ -145,8 +145,6 @@ impl ExitHandler {
 }
 
 impl EventHandler<Response> for ExitHandler {
-    type Handler = ResponseHandler;
-
     fn handle_event(&mut self, event: Response) {
         if let Response::Exit = event {
             self.exits_received +=1;
@@ -157,7 +155,7 @@ impl EventHandler<Response> for ExitHandler {
             }
         }
     }
-    fn handler(&self) -> Self::Handler {
+    fn handler(&self) -> ResponseHandler {
         ResponseHandler::Exit
     }
 }
