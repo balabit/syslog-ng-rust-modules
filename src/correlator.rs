@@ -43,6 +43,17 @@ fn create_context(config_context: config::Context, response_sender: Rc<RefCell<B
     Context::Linear(LinearContext::from(base))
 }
 
+fn create_event_handlers(contexts: Vec<config::Context>, response_sender: Rc<RefCell<Box<response::ResponseSender<Response>>>>) -> Vec<Rc<RefCell<Box<context::event::EventHandler<InternalRequest>>>>> {
+    let mut event_handlers = Vec::new();
+    for i in contexts.into_iter() {
+        let context: context::Context = create_context(i, response_sender.clone());
+        let event_handler: Box<context::event::EventHandler<InternalRequest>> = context.into();
+        let handler = Rc::new(RefCell::new(event_handler));
+        event_handlers.push(handler);
+    }
+    event_handlers
+}
+
 impl Correlator {
     pub fn new(contexts: Vec<config::Context>) -> Correlator {
         let (dispatcher_input_channel, rx) = mpsc::channel();
@@ -53,20 +64,14 @@ impl Correlator {
             let dmux = Demultiplexer::new(rx);
             let exit_condition = Condition::new(false);
             let mut reactor = RequestReactor::new(dmux, exit_condition.clone());
-            let response_handler = Box::new(ResponseSender::new(dispatcher_output_channel_tx)) as Box<response::ResponseSender<Response>>;
-            let response_handler = Rc::new(RefCell::new(response_handler));
+            let response_sender = Box::new(ResponseSender::new(dispatcher_output_channel_tx)) as Box<response::ResponseSender<Response>>;
+            let response_sender = Rc::new(RefCell::new(response_sender));
 
-            let exit_handler = Box::new(handlers::exit::ExitEventHandler::new(exit_condition, response_handler.clone()));
+            let exit_handler = Box::new(handlers::exit::ExitEventHandler::new(exit_condition, response_sender.clone()));
             let mut timer_event_handler = Box::new(handlers::timer::TimerEventHandler::new());
             let mut message_event_handler = Box::new(handlers::message::MessageEventHandler::new());
 
-            let mut event_handlers = Vec::new();
-            for i in contexts.into_iter() {
-                let context: context::Context = create_context(i, response_handler.clone());
-                let event_handler: Box<context::event::EventHandler<InternalRequest>> = context.into();
-                let handler = Rc::new(RefCell::new(event_handler));
-                event_handlers.push(handler);
-            }
+            let event_handlers = create_event_handlers(contexts, response_sender);
 
             for i in event_handlers {
                 timer_event_handler.register_handler(i.clone());
