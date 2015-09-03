@@ -72,7 +72,7 @@ mod deser {
     #[cfg(test)]
     mod test {
         use serde_json::from_str;
-        use action::ActionType;
+        use config::action::ActionType;
 
         #[test]
         fn test_given_action_when_it_is_deserialized_then_we_get_the_right_result() {

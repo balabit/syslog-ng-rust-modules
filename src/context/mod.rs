@@ -161,7 +161,6 @@ mod test {
         let mut context = Context::new_linear(Uuid::new_v4(), Builder::new(timeout).patterns(patterns).build());
         let msg1 = message::Builder::new(&msg_id).build();
         let event = Rc::new(msg1);
-        println!("{:?}", &context);
         assert_false!(context.is_open());
         context.on_message(event);
         assert_true!(context.is_open());
@@ -184,13 +183,11 @@ mod test {
         let mut context = Context::new_linear(Uuid::new_v4(), Builder::new(timeout).max_size(max_size).patterns(patterns).build());
         let msg1 = message::Builder::new(&msg_id).build();
         let event = Rc::new(msg1);
-        println!("{:?}", &context);
         context.on_message(event.clone());
         assert_true!(context.is_open());
         context.on_message(event.clone());
         assert_true!(context.is_open());
         context.on_message(event.clone());
-        println!("{:?}", &context);
         assert_false!(context.is_open());
     }
 

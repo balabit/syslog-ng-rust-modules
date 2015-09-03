@@ -120,7 +120,7 @@ impl Visitor for ContextVisitor {
 
 #[cfg(test)]
 mod test {
-    use action::{
+    use config::action::{
         ActionType,
         MessageActionType
     };
