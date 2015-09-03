@@ -1,6 +1,3 @@
-use uuid::Uuid;
-
-use super::{Conditions};
 use dispatcher::request::InternalRequest;
 
 pub use self::linear::LinearContext;
