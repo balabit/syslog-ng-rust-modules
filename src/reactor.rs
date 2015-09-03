@@ -4,7 +4,7 @@ pub trait EventHandler<T: Event> {
 }
 
 pub trait EventDemultiplexer {
-    type Event;
+    type Event: Event;
     fn select(&mut self) -> Option<Self::Event>;
 }
 
