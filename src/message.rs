@@ -19,6 +19,10 @@ impl Message {
     pub fn get(&self, key: &str) -> Option<&String> {
         self.data.get(key)
     }
+
+    pub fn insert(&mut self, key: &str, value: &str) {
+        self.data.insert(key.to_string(), value.to_string());
+    }
 }
 
 pub struct Builder {

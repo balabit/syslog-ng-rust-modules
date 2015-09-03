@@ -28,6 +28,14 @@ impl BaseContext {
         &self.conditions
     }
 
+    pub fn uuid(&self) -> &Uuid {
+        &self.uuid
+    }
+
+    pub fn name(&self) -> Option<&String> {
+        self.name.as_ref()
+    }
+
     pub fn on_timer(&self, event: &TimerEvent, state: &mut State) {
         if state.is_open() {
             state.update_timers(event);
