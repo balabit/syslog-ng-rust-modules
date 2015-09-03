@@ -148,14 +148,12 @@ impl EventHandler<Response> for ExitHandler {
     type Handler = ResponseHandler;
 
     fn handle_event(&mut self, event: Response) {
-        match event {
-            Response::Exit => {
-                self.exits_received +=1;
-                let _ = self.channel.send(Request::Exit);
+        if let Response::Exit = event {
+            self.exits_received +=1;
+            let _ = self.channel.send(Request::Exit);
 
-                if self.exits_received >= 1 {
-                    self.condition.activate()
-                }
+            if self.exits_received >= 1 {
+                self.condition.activate()
             }
         }
     }

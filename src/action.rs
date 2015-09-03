@@ -7,6 +7,8 @@ use context::base::BaseContext;
 use std::cell::RefCell;
 use std::rc::Rc;
 
+pub use self::message::MessageResponse;
+
 pub trait Action {
     fn execute(&self, state: &State, context: &BaseContext);
 }
@@ -31,6 +33,12 @@ mod message {
     pub struct MessageActionType {
         pub sender: Rc<RefCell<Box<ResponseSender<Response>>>>,
         pub action: config::action::MessageActionType
+    }
+
+    #[derive(Debug)]
+    pub struct MessageResponse {
+        message: Message,
+        internal: bool
     }
 
     impl Action for MessageActionType {
