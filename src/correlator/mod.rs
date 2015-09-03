@@ -24,6 +24,8 @@ const TIMER_STEP: MiliSec = 100;
 use self::exit_handler::ExitHandler;
 
 mod exit_handler;
+#[cfg(test)]
+mod test;
 
 pub struct Correlator {
     dispatcher_input_channel: mpsc::Sender<Request<Message>>,

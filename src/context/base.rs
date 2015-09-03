@@ -58,10 +58,12 @@ impl BaseContext {
     }
 
     fn close_state(&self, state: &mut State) {
+        println!("closing state");
         for i in &self.actions {
             i.execute(state, self);
         }
         state.close();
+        println!("state closed");
     }
 }
 
