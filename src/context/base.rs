@@ -3,8 +3,6 @@ use std::rc::Rc;
 
 use action::Action;
 use conditions::Conditions;
-use config;
-use config::action::ActionType;
 use message::Message;
 use state::State;
 use timer::TimerEvent;
@@ -49,10 +47,6 @@ impl BaseContext {
             state.add_message(event);
             state.open();
         }
-    }
-
-    pub fn actions_mut(&mut self) -> &mut Vec<Box<Action + 'static>> {
-        &mut self.actions
     }
 
     fn close_state(&self, state: &mut State) {

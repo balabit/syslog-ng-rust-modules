@@ -1,13 +1,4 @@
-use state::State;
-use dispatcher::Response;
-use dispatcher::response::ResponseSender;
-use context::base::BaseContext;
-
 pub use self::message::MessageActionType;
-
-use std::cell::RefCell;
-use std::fmt::Debug;
-use std::rc::Rc;
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum ActionType {
@@ -93,9 +84,7 @@ mod deser {
 }
 
 pub mod message {
-    use context::base::BaseContext;
     use super::ActionType;
-    use state::State;
 
     #[derive(Clone, Debug, PartialEq, Eq)]
     pub struct MessageActionType;

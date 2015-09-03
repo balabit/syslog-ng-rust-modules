@@ -83,20 +83,10 @@ mod test {
 
     use context;
     use dispatcher::request::{InternalRequest, Request};
-    use dispatcher::response::ResponseSender;
-    use dispatcher::Response;
     use message::{Builder};
     use reactor::EventHandler;
 
     use super::MessageEventHandler;
-
-    struct DummyResponseSender(Rc<RefCell<i32>>);
-
-    impl ResponseSender<Response> for DummyResponseSender {
-        fn send_response(&mut self, _: Response) {
-            *self.0.borrow_mut() += 1;
-        }
-    }
 
     struct DummyEventHandler {
         counter: Rc<RefCell<i32>>,
@@ -117,8 +107,6 @@ mod test {
         let uuid1 = "1b47ba91-d867-4a8c-9553-a5dfd6ea1274".to_string();
         let uuid2 = "2b47ba91-d867-4a8c-9553-a5dfd6ea1274".to_string();
         let response_handler_counter = Rc::new(RefCell::new(0));
-        let response_handler: Box<ResponseSender<Response>> = Box::new(DummyResponseSender(response_handler_counter.clone()));
-        let response_handler = Rc::new(RefCell::new(response_handler));
         let ids_1 = vec![ uuid1.clone() ];
         let ids_2 = vec![ uuid2.clone() ];
         let event_handler_counter_1 = Rc::new(RefCell::new(0));
@@ -143,8 +131,6 @@ mod test {
         let uuid1 = "1b47ba91-d867-4a8c-9553-a5dfd6ea1274".to_string();
         let name = "NAME".to_string();
         let response_handler_counter = Rc::new(RefCell::new(0));
-        let response_handler: Box<ResponseSender<Response>> = Box::new(DummyResponseSender(response_handler_counter.clone()));
-        let response_handler = Rc::new(RefCell::new(response_handler));
         // this is the key point: the event handler will be registered by the name
         let ids_1 = vec![ name.clone() ];
         let event_handler_counter_1 = Rc::new(RefCell::new(0));

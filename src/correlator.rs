@@ -35,9 +35,9 @@ fn create_context(config_context: config::Context, response_sender: Rc<RefCell<B
         let action = action::from_config(i, response_sender.clone());
         boxed_actions.push(action);
     }
-    let mut base = base::Builder::new(uuid, conditions);
-    let mut base = base.name(name);
-    let mut base = base.actions(boxed_actions);
+    let base = base::Builder::new(uuid, conditions);
+    let base = base.name(name);
+    let base = base.actions(boxed_actions);
     let base = base.build();
     Context::Linear(LinearContext::from(base))
 }
@@ -61,20 +61,7 @@ impl Correlator {
 
             let mut event_handlers = Vec::new();
             for i in contexts.into_iter() {
-                let mut context: context::Context = create_context(i, response_handler.clone());
-                match context {
-                    Context::Linear(ref mut context) => {
-                        for action in context.actions_mut() {
-                            action.set_response_sender(response_handler.clone());
-                        }
-                    },
-                    Context::Map(ref mut context) => {
-                        for action in context.actions_mut() {
-                            action.set_response_sender(response_handler.clone());
-                        }
-                    }
-                }
-
+                let context: context::Context = create_context(i, response_handler.clone());
                 let event_handler: Box<context::event::EventHandler<InternalRequest>> = context.into();
                 let handler = Rc::new(RefCell::new(event_handler));
                 event_handlers.push(handler);

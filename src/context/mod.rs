@@ -1,7 +1,7 @@
 use uuid::Uuid;
 use std::rc::Rc;
 
-use super::{config, Conditions, TimerEvent};
+use super::{Conditions, TimerEvent};
 use dispatcher::request::InternalRequest;
 use message::{Message};
 use self::linear::LinearContext;
@@ -64,8 +64,6 @@ pub mod linear {
     use uuid::Uuid;
     use std::rc::Rc;
 
-    use action::Action;
-    use config;
     use context;
     use Conditions;
     use context::event::{EventHandler};
@@ -108,10 +106,6 @@ pub mod linear {
 
         pub fn patterns(&self) -> &[String] {
             &self.base.conditions().patterns
-        }
-
-        pub fn actions_mut(&mut self) -> &mut Vec<Box<Action + 'static>> {
-            self.base.actions_mut()
         }
     }
 
