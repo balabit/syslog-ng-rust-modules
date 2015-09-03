@@ -1,5 +1,7 @@
 use std::sync::mpsc::Sender;
 
+use reactor::Event;
+
 pub mod demux;
 pub mod handlers;
 pub mod response;
@@ -9,6 +11,20 @@ pub mod reactor;
 #[derive(Debug)]
 pub enum Response {
     Exit
+}
+
+#[derive(Debug, Eq, Hash, PartialEq)]
+pub enum ResponseHandler {
+    Exit
+}
+
+impl Event for Response {
+    type Handler = ResponseHandler;
+    fn handler(&self) -> Self::Handler {
+        match *self {
+            Response::Exit => ResponseHandler::Exit
+        }
+    }
 }
 
 pub struct ResponseSender {

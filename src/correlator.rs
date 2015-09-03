@@ -1,22 +1,22 @@
 use std::cell::RefCell;
+use std::collections::HashMap;
 use std::rc::Rc;
 use std::sync::mpsc;
 use std::thread;
 use std::result::Result;
 
 use {action, config, context, Message, MiliSec, Response, Timer};
+use condition::Condition;
 use context::base;
 use context::{Context};
 use context::linear::LinearContext;
-use condition::Condition;
-use context::event::EventHandler;
 use dispatcher::request::{InternalRequest, Request};
 use dispatcher::reactor::RequestReactor;
-use dispatcher::ResponseSender;
+use dispatcher::{ResponseSender, ResponseHandler};
 use dispatcher::response;
 use dispatcher::demux::Demultiplexer;
 use dispatcher::handlers;
-use reactor::Reactor;
+use reactor::{Event, EventHandler, Reactor};
 
 const TIMER_STEP: MiliSec = 100;
 
@@ -24,7 +24,7 @@ pub struct Correlator {
     dispatcher_input_channel: mpsc::Sender<Request<Message>>,
     dispatcher_output_channel: mpsc::Receiver<Response>,
     dispatcher_thread_handle: thread::JoinHandle<()>,
-    exits_received: u32
+    handlers: HashMap<ResponseHandler, Box<EventHandler<Response, Handler=ResponseHandler>>>
 }
 
 fn create_context(config_context: config::Context, response_sender: Rc<RefCell<Box<response::ResponseSender<Response>>>>) -> Context {
@@ -75,7 +75,7 @@ impl Correlator {
                     }
                 }
 
-                let event_handler: Box<EventHandler<InternalRequest>> = context.into();
+                let event_handler: Box<context::event::EventHandler<InternalRequest>> = context.into();
                 let handler = Rc::new(RefCell::new(event_handler));
                 event_handlers.push(handler);
             }
@@ -95,8 +95,12 @@ impl Correlator {
             dispatcher_input_channel: dispatcher_input_channel,
             dispatcher_output_channel: dispatcher_output_channel_rx,
             dispatcher_thread_handle: handle,
-            exits_received: 0
+            handlers: HashMap::new()
         }
+    }
+
+    pub fn register_handler(&mut self, handler: Box<EventHandler<Response, Handler=ResponseHandler>>) {
+        self.handlers.insert(handler.handler(), handler);
     }
 
     pub fn push_message(&mut self, message: Message) -> Result<(), mpsc::SendError<Request<Message>>> {
@@ -104,8 +108,17 @@ impl Correlator {
         self.dispatcher_input_channel.send(Request::Message(message))
     }
 
+    fn handle_event(&mut self, event: Response) {
+        if let Some(handler) = self.handlers.get_mut(&event.handler()) {
+            handler.handle_event(event);
+        } else {
+            println!("no event handler found for handling a Response");
+        }
+    }
+
     fn consume_results(&mut self) {
-        for _ in self.dispatcher_output_channel.try_recv() {
+        for i in self.dispatcher_output_channel.try_recv() {
+            self.handle_event(i);
         }
     }
 
@@ -116,36 +129,50 @@ impl Correlator {
     }
 
     fn stop_dispatcher(&mut self) {
+        let exit_condition = Condition::new(false);
+        let exit_handler = Box::new(ExitHandler::new(exit_condition.clone(), self.dispatcher_input_channel.clone()));
+        self.register_handler(exit_handler);
         let _ = self.dispatcher_input_channel.send(Request::Exit);
-        let _ = self.wait_for_dispatcher_to_exit();
-    }
-
-    fn wait_for_dispatcher_to_exit(&mut self) -> Result<(), ()> {
-        loop {
-            let value = self.dispatcher_output_channel.recv();
-            match value {
-                Ok(value) => {
-                    try!(self.handle_command(value))
-                },
-                _ => {}
+        while !exit_condition.is_active() {
+            if let Ok(event) = self.dispatcher_output_channel.recv() {
+                self.handle_event(event);
             }
         }
     }
+}
 
-    fn handle_command(&mut self, command: Response) -> Result<(), ()> {
-        match command {
+struct ExitHandler {
+    channel: mpsc::Sender<Request<Message>>,
+    exits_received: u32,
+    condition: Condition
+}
+
+impl ExitHandler {
+    pub fn new(condition: Condition, channel: mpsc::Sender<Request<Message>>) -> ExitHandler {
+        ExitHandler {
+            channel: channel,
+            exits_received: 0,
+            condition: condition
+        }
+    }
+}
+
+impl EventHandler<Response> for ExitHandler {
+    type Handler = ResponseHandler;
+
+    fn handle_event(&mut self, event: Response) {
+        match event {
             Response::Exit => {
-                if self.handle_exit_command() {
-                    return Err(());
+                self.exits_received +=1;
+                let _ = self.channel.send(Request::Exit);
+
+                if self.exits_received >= 1 {
+                    self.condition.activate()
                 }
             }
         }
-        Ok(())
     }
-
-    fn handle_exit_command(&mut self) -> bool {
-        let _ = self.dispatcher_input_channel.send(Request::Exit);
-        self.exits_received += 1;
-        self.exits_received >= 1
+    fn handler(&self) -> Self::Handler {
+        ResponseHandler::Exit
     }
 }
