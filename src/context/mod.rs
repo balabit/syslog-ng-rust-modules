@@ -25,7 +25,6 @@ pub mod linear {
     use uuid::Uuid;
     use std::rc::Rc;
 
-    use context;
     use Conditions;
     use context::event::{EventHandler};
     use message::{Message};
@@ -85,12 +84,6 @@ pub mod linear {
         }
         fn handle_event(&mut self, event: InternalRequest) {
             self.on_event(event);
-        }
-    }
-
-    impl From<LinearContext> for Box<context::event::EventHandler<InternalRequest>> {
-        fn from(context: LinearContext) -> Box<context::event::EventHandler<InternalRequest>> {
-            Box::new(context)
         }
     }
 }

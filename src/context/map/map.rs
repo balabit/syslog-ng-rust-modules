@@ -105,9 +105,3 @@ impl EventHandler<InternalRequest> for MapContext {
         self.on_event(event);
     }
 }
-
-impl From<MapContext> for Box<EventHandler<InternalRequest>> {
-    fn from(context: MapContext) -> Box<EventHandler<InternalRequest>> {
-        Box::new(context)
-    }
-}
