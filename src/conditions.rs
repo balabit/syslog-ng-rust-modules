@@ -29,7 +29,7 @@ impl Conditions {
 
     pub fn is_opening(&self, message: &Message) -> bool {
         if self.first_opens.unwrap_or(FIRST_OPENS_DEFAULT) {
-            self.patterns.first().unwrap() == message.uuid()
+            self.is_message_the_first_among_patterns(message)
         } else {
             true
         }
@@ -37,6 +37,14 @@ impl Conditions {
 
     pub fn is_closing(&self, state: &State) -> bool {
         self.is_max_size_reached(state) || self.is_closing_message(state) || self.is_any_timer_expired(state)
+    }
+
+    fn is_message_the_first_among_patterns(&self, message: &Message) -> bool {
+        if let Some(id) = message.name() {
+            self.patterns.first().unwrap() == message.uuid() || self.patterns.first().unwrap() == id
+        } else {
+            self.patterns.first().unwrap() == message.uuid()
+        }
     }
 
     fn is_max_size_reached(&self, state: &State) -> bool {
@@ -195,6 +203,30 @@ mod test {
         assert_eq!(conditions.last_closes, Some(false));
         assert_eq!(conditions.max_size, Some(42));
         assert_eq!(conditions.patterns, expected_patterns);
+    }
+
+    #[test]
+    fn test_given_condition_when_there_are_no_patterns_then_any_message_can_open_the_context() {
+        let timeout = 100;
+        let msg_id = "11eaf6f8-0640-460f-aee2-a72d2f2ab258".to_string();
+        let condition = Builder::new(timeout).build();
+        let msg = message::Builder::new(&msg_id).build();
+        assert_true!(condition.is_opening(&msg));
+    }
+
+    #[test]
+    fn test_given_condition_when_first_opens_is_set_then_the_right_message_can_open_the_context() {
+        let timeout = 100;
+        let patterns = vec![
+                "p1".to_string(),
+                "p2".to_string(),
+                "p3".to_string(),
+        ];
+        let uuid = "e4f3f8b2-3135-4916-a5ea-621a754dab0d".to_string();
+        let msg_id = "p1".to_string();
+        let condition = Builder::new(timeout).patterns(patterns).first_opens(true).build();
+        let msg = message::Builder::new(&uuid).name(msg_id.clone()).build();
+        assert_true!(condition.is_opening(&msg));
     }
 }
 
