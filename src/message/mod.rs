@@ -1,5 +1,9 @@
 use std::collections::BTreeMap;
 
+pub use self::builder::Builder;
+
+mod builder;
+
 #[derive(Clone, Debug)]
 pub struct Message {
     uuid: String,
@@ -22,39 +26,5 @@ impl Message {
 
     pub fn insert(&mut self, key: &str, value: &str) {
         self.data.insert(key.to_string(), value.to_string());
-    }
-}
-
-pub struct Builder {
-    uuid: String,
-    name: Option<String>,
-    data: BTreeMap<String, String>
-}
-
-impl Builder {
-    pub fn new(uuid: &str) -> Builder {
-        Builder {
-            uuid: uuid.to_string(),
-            name: None,
-            data: BTreeMap::new()
-        }
-    }
-
-    pub fn name(&mut self, name: String) -> &mut Builder {
-        self.name = Some(name);
-        self
-    }
-
-    pub fn pair(&mut self, key: String, value: String) -> &mut Builder {
-        self.data.insert(key, value);
-        self
-    }
-
-    pub fn build(&self) -> Message {
-        Message {
-            uuid: self.uuid.clone(),
-            name: self.name.clone(),
-            data: self.data.clone()
-        }
     }
 }
