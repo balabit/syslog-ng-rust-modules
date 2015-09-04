@@ -21,19 +21,19 @@ fn test_given_map_context_when_messages_have_the_same_kvpairs_then_they_go_to_th
     ];
     let mut context = MapContext::new(Uuid::new_v4(), Builder::new(timeout).patterns(patterns).build());
     let msg1 = message::Builder::new(&msg_id1)
-                                .pair("HOST".to_string(), "host".to_string())
-                                .pair("PROGRAM".to_string(), "program".to_string())
-                                .pair("PID".to_string(), "pid".to_string())
+                                .pair("HOST", "host")
+                                .pair("PROGRAM", "program")
+                                .pair("PID", "pid")
                                 .build();
     let msg2 = message::Builder::new(&msg_id2)
-                                .pair("HOST".to_string(), "host2".to_string())
-                                .pair("PROGRAM".to_string(), "program2".to_string())
-                                .pair("PID".to_string(), "pid2".to_string())
+                                .pair("HOST", "host2")
+                                .pair("PROGRAM", "program2")
+                                .pair("PID", "pid2")
                                 .build();
     let msg3 = message::Builder::new(&msg_id3)
-                                .pair("HOST".to_string(), "host".to_string())
-                                .pair("PROGRAM".to_string(), "program".to_string())
-                                .pair("PID".to_string(), "pid".to_string())
+                                .pair("HOST", "host")
+                                .pair("PROGRAM", "program")
+                                .pair("PID", "pid")
                                 .build();
 
     assert_false!(context.is_open());

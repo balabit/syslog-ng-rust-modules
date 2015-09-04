@@ -46,8 +46,8 @@ mod message {
         fn execute(&self, _state: &State, _context: &BaseContext) {
             println!("MessageAction is executed");
             let mut message = Builder::new("d6621bd6-4898-4b8c-a4ff-36d0eed7d8dc")
-                                    .pair(".context.uuid".to_string(), _context.uuid().to_hyphenated_string())
-                                    .pair(".context.len".to_string(), _state.messages().len().to_string())
+                                    .pair(".context.uuid", &_context.uuid().to_hyphenated_string())
+                                    .pair(".context.len", &_state.messages().len().to_string())
                                     .build();
             if let Some(name) = _context.name() {
                 message.insert(".context.name", name);

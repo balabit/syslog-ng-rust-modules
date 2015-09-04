@@ -21,8 +21,8 @@ impl Builder {
         self
     }
 
-    pub fn pair(&mut self, key: String, value: String) -> &mut Builder {
-        self.values.insert(key, value);
+    pub fn pair(&mut self, key: &str, value: &str) -> &mut Builder {
+        self.values.insert(key.to_string(), value.to_string());
         self
     }
 
