@@ -4,7 +4,7 @@ use super::Message;
 pub struct Builder {
     uuid: String,
     name: Option<String>,
-    data: BTreeMap<String, String>
+    values: BTreeMap<String, String>
 }
 
 impl Builder {
@@ -12,7 +12,7 @@ impl Builder {
         Builder {
             uuid: uuid.to_string(),
             name: None,
-            data: BTreeMap::new()
+            values: BTreeMap::new()
         }
     }
 
@@ -22,7 +22,7 @@ impl Builder {
     }
 
     pub fn pair(&mut self, key: String, value: String) -> &mut Builder {
-        self.data.insert(key, value);
+        self.values.insert(key, value);
         self
     }
 
@@ -30,7 +30,7 @@ impl Builder {
         Message {
             uuid: self.uuid.clone(),
             name: self.name.clone(),
-            data: self.data.clone()
+            values: self.values.clone()
         }
     }
 }
