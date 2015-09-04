@@ -141,9 +141,9 @@ mod test {
         let event_handler_1 = Rc::new(RefCell::new(event_handler_1));
         let mut message_event_handler = MessageEventHandler::new();
         message_event_handler.register_handler(event_handler_1);
-        message_event_handler.handle_event(Request::Message(Rc::new(Builder::new(&uuid1).name(name.clone()).build())));
+        message_event_handler.handle_event(Request::Message(Rc::new(Builder::new(&uuid1).name(&name).build())));
         assert_eq!(1, *event_handler_counter_1.borrow());
-        message_event_handler.handle_event(Request::Message(Rc::new(Builder::new(&uuid1).name(name.clone()).build())));
+        message_event_handler.handle_event(Request::Message(Rc::new(Builder::new(&uuid1).name(&name).build())));
         assert_eq!(2, *event_handler_counter_1.borrow());
         assert_eq!(0, *response_handler_counter.borrow());
     }

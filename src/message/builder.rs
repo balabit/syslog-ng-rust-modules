@@ -16,8 +16,8 @@ impl Builder {
         }
     }
 
-    pub fn name(&mut self, name: String) -> &mut Builder {
-        self.name = Some(name);
+    pub fn name(&mut self, name: &str) -> &mut Builder {
+        self.name = Some(name.to_string());
         self
     }
 
