@@ -4,7 +4,7 @@ pub use self::builder::MessageBuilder;
 
 mod builder;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Message {
     uuid: String,
     name: Option<String>,
