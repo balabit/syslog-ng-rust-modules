@@ -1,5 +1,10 @@
+use std::borrow::Borrow;
 use std::collections::BTreeMap;
 
+use message::{
+    Message,
+    MessageBuilder
+};
 use super::ActionType;
 
 mod deser;
@@ -29,5 +34,15 @@ impl MessageAction {
 impl From<MessageAction> for super::ActionType {
     fn from(action: MessageAction) -> super::ActionType {
         super::ActionType::Message(action)
+    }
+}
+
+impl<'a> From<&'a MessageAction> for Message {
+    fn from(action: &'a MessageAction) -> Message {
+        let name = action.name().map(|name| name.borrow());
+        MessageBuilder::new(action.uuid())
+                        .name(name)
+                        .values(action.values())
+                        .build()
     }
 }
