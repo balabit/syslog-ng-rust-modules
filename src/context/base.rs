@@ -78,16 +78,16 @@ impl BaseContext {
     }
 }
 
-pub struct Builder {
+pub struct BaseContextBuilder {
     name: Option<String>,
     uuid: Uuid,
     conditions: Conditions,
     actions: Vec<Box<Action>>
 }
 
-impl Builder {
-    pub fn new(uuid: Uuid, conditions: Conditions) -> Builder {
-        Builder {
+impl BaseContextBuilder {
+    pub fn new(uuid: Uuid, conditions: Conditions) -> BaseContextBuilder {
+        BaseContextBuilder {
             name: None,
             uuid: uuid,
             conditions: conditions,
@@ -95,18 +95,18 @@ impl Builder {
         }
     }
 
-    pub fn name(mut self, name: Option<String>) -> Builder {
+    pub fn name(mut self, name: Option<String>) -> BaseContextBuilder {
         self.name = name;
         self
     }
 
-    pub fn actions(mut self, actions: Vec<Box<Action>>) -> Builder {
+    pub fn actions(mut self, actions: Vec<Box<Action>>) -> BaseContextBuilder {
         self.actions = actions;
         self
     }
 
     pub fn build(self) -> BaseContext {
-        let Builder {name, uuid, conditions, actions} = self;
+        let BaseContextBuilder {name, uuid, conditions, actions} = self;
         BaseContext {
             name: name,
             uuid: uuid,

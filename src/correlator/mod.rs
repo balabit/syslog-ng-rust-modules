@@ -7,7 +7,10 @@ use std::result::Result;
 
 use {action, config, context, Message, MiliSec, Response};
 use condition::Condition;
-use context::base;
+use context::base::{
+    self,
+    BaseContextBuilder
+};
 use context::{Context};
 use context::linear::LinearContext;
 use dispatcher::request::{InternalRequest, Request};
@@ -42,7 +45,7 @@ fn create_context(config_context: config::Context, response_sender: Rc<RefCell<B
         let action = action::from_config(i, response_sender.clone());
         boxed_actions.push(action);
     }
-    let base = base::Builder::new(uuid, conditions);
+    let base = BaseContextBuilder::new(uuid, conditions);
     let base = base.name(name);
     let base = base.actions(boxed_actions);
     let base = base.build();

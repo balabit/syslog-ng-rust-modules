@@ -1,4 +1,6 @@
-use context::base;
+use context::base::{
+    self, BaseContextBuilder
+};
 use super::{
     CONTEXT_NAME,
     CONTEXT_UUID,
@@ -10,10 +12,10 @@ use conditions::ConditionsBuilder;
 use config;
 use dispatcher::Response;
 use dispatcher::response::ResponseSender;
-use std::cell::RefCell;
-use std::rc::Rc;
 use state::State;
 
+use std::cell::RefCell;
+use std::rc::Rc;
 use uuid::Uuid;
 
 struct DummyResponseSender {
@@ -32,7 +34,7 @@ fn test_given_a_message_action_when_it_is_executed_then_it_adds_the_name_and_uui
     let base_context = {
         let conditions = ConditionsBuilder::new(100).build();
         let uuid = Uuid::new_v4();
-        base::Builder::new(uuid, conditions).name(name.clone()).build()
+        BaseContextBuilder::new(uuid, conditions).name(name.clone()).build()
     };
     let state = State::new();
     let responses = Rc::new(RefCell::new(Vec::new()));
