@@ -7,7 +7,10 @@ use conditions::Conditions;
 use message::{Message};
 use state::State;
 use timer::TimerEvent;
-use context::base::BaseContext;
+use context::base::{
+    BaseContext,
+    BaseContextBuilder,
+};
 use context::event::EventHandler;
 use dispatcher::request::{Request, InternalRequest};
 
@@ -20,7 +23,7 @@ pub struct MapContext {
 impl MapContext {
     pub fn new(uuid: Uuid, conditions: Conditions) -> MapContext {
         MapContext {
-            base: BaseContext::new(uuid, conditions),
+            base: BaseContextBuilder::new(uuid, conditions).build(),
             map: BTreeMap::new(),
             format_buffer: String::new()
         }

@@ -7,10 +7,7 @@ use std::result::Result;
 
 use {action, config, context, Message, MiliSec, Response};
 use condition::Condition;
-use context::base::{
-    self,
-    BaseContextBuilder
-};
+use context::base::BaseContextBuilder;
 use context::{Context};
 use context::linear::LinearContext;
 use dispatcher::request::{InternalRequest, Request};

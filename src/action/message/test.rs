@@ -1,6 +1,4 @@
-use context::base::{
-    self, BaseContextBuilder
-};
+use context::base::BaseContextBuilder;
 use super::{
     CONTEXT_NAME,
     CONTEXT_UUID,

@@ -31,7 +31,10 @@ pub mod linear {
     use state::State;
     use timer::TimerEvent;
     use dispatcher::request::{InternalRequest, Request};
-    use context::base::BaseContext;
+    use context::base::{
+        BaseContext,
+        BaseContextBuilder
+    };
 
     pub struct LinearContext {
         base: BaseContext,
@@ -41,7 +44,7 @@ pub mod linear {
     impl LinearContext {
         pub fn new(uuid: Uuid, conditions: Conditions) -> LinearContext {
             LinearContext {
-                base: BaseContext::new(uuid, conditions),
+                base: BaseContextBuilder::new(uuid, conditions).build(),
                 state: State::new()
             }
         }
