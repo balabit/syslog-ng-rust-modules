@@ -1,6 +1,6 @@
 use std::collections::BTreeMap;
 
-pub use self::builder::Builder;
+pub use self::builder::MessageBuilder;
 
 mod builder;
 

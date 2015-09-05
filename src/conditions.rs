@@ -120,7 +120,9 @@ mod test {
     use super::Conditions;
     use std::rc::Rc;
 
-    use message;
+    use message::{
+        MessageBuilder
+    };
     use state::State;
     use super::Builder;
 
@@ -133,8 +135,8 @@ mod test {
             msg_id1.clone(),
         ];
         let condition = Builder::new(timeout).patterns(patterns).first_opens(true).build();
-        let msg_which_should_not_be_ignored = message::Builder::new(&msg_id1).build();
-        let msg_which_should_be_ignored = message::Builder::new(&msg_id2).build();
+        let msg_which_should_not_be_ignored = MessageBuilder::new(&msg_id1).build();
+        let msg_which_should_be_ignored = MessageBuilder::new(&msg_id2).build();
         assert_false!(condition.is_opening(&msg_which_should_be_ignored));
         assert_true!(condition.is_opening(&msg_which_should_not_be_ignored));
     }
@@ -150,8 +152,8 @@ mod test {
         ];
         let mut state = State::new();
         let condition = Builder::new(timeout).patterns(patterns).last_closes(true).build();
-        let msg_1 = message::Builder::new(&msg_id1).build();
-        let msg_closing = Rc::new(message::Builder::new(&msg_id2).build());
+        let msg_1 = MessageBuilder::new(&msg_id1).build();
+        let msg_closing = Rc::new(MessageBuilder::new(&msg_id2).build());
         assert_true!(condition.is_opening(&msg_1));
         state.open();
         state.add_message(msg_closing);
@@ -210,7 +212,7 @@ mod test {
         let timeout = 100;
         let msg_id = "11eaf6f8-0640-460f-aee2-a72d2f2ab258".to_string();
         let condition = Builder::new(timeout).build();
-        let msg = message::Builder::new(&msg_id).build();
+        let msg = MessageBuilder::new(&msg_id).build();
         assert_true!(condition.is_opening(&msg));
     }
 
@@ -225,7 +227,7 @@ mod test {
         let uuid = "e4f3f8b2-3135-4916-a5ea-621a754dab0d".to_string();
         let msg_id = "p1".to_string();
         let condition = Builder::new(timeout).patterns(patterns).first_opens(true).build();
-        let msg = message::Builder::new(&uuid).name(&msg_id).build();
+        let msg = MessageBuilder::new(&uuid).name(&msg_id).build();
         assert_true!(condition.is_opening(&msg));
     }
 }

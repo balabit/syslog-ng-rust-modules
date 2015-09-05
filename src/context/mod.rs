@@ -103,7 +103,9 @@ mod test {
     use uuid::Uuid;
     use std::rc::Rc;
 
-    use message;
+    use message::{
+        MessageBuilder
+    };
     use timer::TimerEvent;
     use context::LinearContext;
     use conditions::Builder;
@@ -116,7 +118,7 @@ mod test {
             msg_id.clone(),
         ];
         let mut context = LinearContext::new(Uuid::new_v4(), Builder::new(timeout).patterns(patterns).build());
-        let msg1 = message::Builder::new(&msg_id).build();
+        let msg1 = MessageBuilder::new(&msg_id).build();
         let event = Rc::new(msg1);
         assert_false!(context.is_open());
         context.on_message(event);
@@ -138,7 +140,7 @@ mod test {
             msg_id.clone(),
         ];
         let mut context = LinearContext::new(Uuid::new_v4(), Builder::new(timeout).max_size(max_size).patterns(patterns).build());
-        let msg1 = message::Builder::new(&msg_id).build();
+        let msg1 = MessageBuilder::new(&msg_id).build();
         let event = Rc::new(msg1);
         context.on_message(event.clone());
         assert_true!(context.is_open());
@@ -157,7 +159,7 @@ mod test {
             msg_id.clone(),
         ];
         let mut context = LinearContext::new(Uuid::new_v4(), Builder::new(timeout).renew_timeout(renew_timeout).patterns(patterns).build());
-        let msg1 = message::Builder::new(&msg_id).build();
+        let msg1 = MessageBuilder::new(&msg_id).build();
         let event = Rc::new(msg1);
         context.on_message(event.clone());
         assert_true!(context.is_open());
@@ -178,7 +180,7 @@ mod test {
             msg_id.clone(),
         ];
         let mut context = LinearContext::new(Uuid::new_v4(), Builder::new(timeout).renew_timeout(renew_timeout).patterns(patterns).build());
-        let msg1 = message::Builder::new(&msg_id).build();
+        let msg1 = MessageBuilder::new(&msg_id).build();
         let event = Rc::new(msg1);
         assert_false!(context.is_open());
         context.on_message(event.clone());

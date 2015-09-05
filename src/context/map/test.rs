@@ -1,7 +1,7 @@
 use conditions::Builder;
 use context::MapContext;
 use timer::TimerEvent;
-use message;
+use message::MessageBuilder;
 
 use uuid::Uuid;
 use std::rc::Rc;
@@ -20,17 +20,17 @@ fn test_given_map_context_when_messages_have_the_same_kvpairs_then_they_go_to_th
         msg_id3.clone(),
     ];
     let mut context = MapContext::new(Uuid::new_v4(), Builder::new(timeout).patterns(patterns).build());
-    let msg1 = message::Builder::new(&msg_id1)
+    let msg1 = MessageBuilder::new(&msg_id1)
                                 .pair("HOST", "host")
                                 .pair("PROGRAM", "program")
                                 .pair("PID", "pid")
                                 .build();
-    let msg2 = message::Builder::new(&msg_id2)
+    let msg2 = MessageBuilder::new(&msg_id2)
                                 .pair("HOST", "host2")
                                 .pair("PROGRAM", "program2")
                                 .pair("PID", "pid2")
                                 .build();
-    let msg3 = message::Builder::new(&msg_id3)
+    let msg3 = MessageBuilder::new(&msg_id3)
                                 .pair("HOST", "host")
                                 .pair("PROGRAM", "program")
                                 .pair("PID", "pid")

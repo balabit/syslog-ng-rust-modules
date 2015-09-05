@@ -123,7 +123,6 @@ mod test {
     use config::action::{
         ActionType,
         message,
-        MessageAction,
     };
     use conditions;
     use config::{
