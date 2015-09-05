@@ -227,7 +227,7 @@ mod test {
         let uuid = "e4f3f8b2-3135-4916-a5ea-621a754dab0d".to_string();
         let msg_id = "p1".to_string();
         let condition = Builder::new(timeout).patterns(patterns).first_opens(true).build();
-        let msg = MessageBuilder::new(&uuid).name(&msg_id).build();
+        let msg = MessageBuilder::new(&uuid).name(Some(&msg_id)).build();
         assert_true!(condition.is_opening(&msg));
     }
 }
