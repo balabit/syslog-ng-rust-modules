@@ -122,7 +122,7 @@ impl Visitor for ContextVisitor {
 mod test {
     use config::action::ActionType;
     use config::action::message::MessageActionBuilder;
-    use conditions;
+    use conditions::ConditionsBuilder;
     use config::{
         Context,
         ContextBuilder
@@ -159,7 +159,7 @@ mod test {
         println!("{:?}", &result);
         let expected_name = "TEST_NAME".to_string();
         let expected_uuid = Uuid::parse_str("86ca9f93-84fb-4813-b037-6526f7a585a3").ok().unwrap();
-        let expected_conditions = conditions::Builder::new(100).
+        let expected_conditions = ConditionsBuilder::new(100).
                                                         first_opens(true).
                                                         patterns(vec![
                                                             "PATTERN_NAME1".to_string(),
@@ -189,7 +189,7 @@ mod test {
         let result = from_str::<Context>(text);
         println!("{:?}", &result);
         let expected_uuid = Uuid::parse_str("86ca9f93-84fb-4813-b037-6526f7a585a3").ok().unwrap();
-        let expected_conditions = conditions::Builder::new(100).build();
+        let expected_conditions = ConditionsBuilder::new(100).build();
         let expected_context = ContextBuilder::new(expected_uuid, expected_conditions).build();
         let context = result.ok().expect("Failed to deserialize a valid Context");
         assert_eq!(&expected_context, &context);

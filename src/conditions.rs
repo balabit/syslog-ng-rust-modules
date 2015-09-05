@@ -74,37 +74,37 @@ impl Conditions {
     }
 }
 
-pub struct Builder {
+pub struct ConditionsBuilder {
     conditions: Conditions
 }
 
-impl Builder {
-    pub fn new(timeout: MiliSec) -> Builder {
-        Builder{
+impl ConditionsBuilder {
+    pub fn new(timeout: MiliSec) -> ConditionsBuilder {
+        ConditionsBuilder {
             conditions: Conditions::new(timeout)
         }
     }
 
-    pub fn renew_timeout(&mut self, timeout: MiliSec) -> &mut Builder {
+    pub fn renew_timeout(&mut self, timeout: MiliSec) -> &mut ConditionsBuilder {
         self.conditions.renew_timeout = Some(timeout);
         self
     }
 
-    pub fn first_opens(&mut self, first_opens: bool) -> &mut Builder {
+    pub fn first_opens(&mut self, first_opens: bool) -> &mut ConditionsBuilder {
         self.conditions.first_opens = Some(first_opens);
         self
     }
 
-    pub fn last_closes(&mut self, last_closes: bool) -> &mut Builder {
+    pub fn last_closes(&mut self, last_closes: bool) -> &mut ConditionsBuilder {
         self.conditions.last_closes = Some(last_closes);
         self
     }
-    pub fn max_size(&mut self, max_size: usize) -> &mut Builder {
+    pub fn max_size(&mut self, max_size: usize) -> &mut ConditionsBuilder {
         self.conditions.max_size = Some(max_size);
         self
     }
 
-    pub fn patterns(&mut self, patterns: Vec<String>) -> &mut Builder {
+    pub fn patterns(&mut self, patterns: Vec<String>) -> &mut ConditionsBuilder {
         self.conditions.patterns = patterns;
         self
     }
@@ -124,7 +124,7 @@ mod test {
         MessageBuilder
     };
     use state::State;
-    use super::Builder;
+    use super::ConditionsBuilder;
 
     #[test]
     fn test_given_condition_when_an_opening_message_is_received_then_the_state_becomes_opened() {
@@ -134,7 +134,7 @@ mod test {
         let patterns = vec![
             msg_id1.clone(),
         ];
-        let condition = Builder::new(timeout).patterns(patterns).first_opens(true).build();
+        let condition = ConditionsBuilder::new(timeout).patterns(patterns).first_opens(true).build();
         let msg_which_should_not_be_ignored = MessageBuilder::new(&msg_id1).build();
         let msg_which_should_be_ignored = MessageBuilder::new(&msg_id2).build();
         assert_false!(condition.is_opening(&msg_which_should_be_ignored));
@@ -151,7 +151,7 @@ mod test {
             msg_id2.clone(),
         ];
         let mut state = State::new();
-        let condition = Builder::new(timeout).patterns(patterns).last_closes(true).build();
+        let condition = ConditionsBuilder::new(timeout).patterns(patterns).last_closes(true).build();
         let msg_1 = MessageBuilder::new(&msg_id1).build();
         let msg_closing = Rc::new(MessageBuilder::new(&msg_id2).build());
         assert_true!(condition.is_opening(&msg_1));
@@ -211,7 +211,7 @@ mod test {
     fn test_given_condition_when_there_are_no_patterns_then_any_message_can_open_the_context() {
         let timeout = 100;
         let msg_id = "11eaf6f8-0640-460f-aee2-a72d2f2ab258".to_string();
-        let condition = Builder::new(timeout).build();
+        let condition = ConditionsBuilder::new(timeout).build();
         let msg = MessageBuilder::new(&msg_id).build();
         assert_true!(condition.is_opening(&msg));
     }
@@ -226,7 +226,7 @@ mod test {
         ];
         let uuid = "e4f3f8b2-3135-4916-a5ea-621a754dab0d".to_string();
         let msg_id = "p1".to_string();
-        let condition = Builder::new(timeout).patterns(patterns).first_opens(true).build();
+        let condition = ConditionsBuilder::new(timeout).patterns(patterns).first_opens(true).build();
         let msg = MessageBuilder::new(&uuid).name(Some(&msg_id)).build();
         assert_true!(condition.is_opening(&msg));
     }

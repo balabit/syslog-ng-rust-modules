@@ -4,6 +4,7 @@ extern crate correlation;
 extern crate uuid;
 
 use correlation::{config, conditions, Correlator};
+use correlation::conditions::ConditionsBuilder;
 use correlation::message::{MessageBuilder};
 use uuid::Uuid;
 use std::thread;
@@ -18,7 +19,7 @@ fn main() {
         uuid2.clone(),
         uuid3.clone(),
     ];
-    let condition = conditions::Builder::new(100).patterns(patterns)
+    let condition = ConditionsBuilder::new(100).patterns(patterns)
                                                 .first_opens(true)
                                                 .last_closes(true)
                                                 .build();

@@ -108,7 +108,7 @@ mod test {
     };
     use timer::TimerEvent;
     use context::LinearContext;
-    use conditions::Builder;
+    use conditions::ConditionsBuilder;
 
     #[test]
     fn test_given_close_condition_with_timeout_when_the_timeout_expires_then_the_condition_is_met() {
@@ -117,7 +117,7 @@ mod test {
         let patterns = vec![
             msg_id.clone(),
         ];
-        let mut context = LinearContext::new(Uuid::new_v4(), Builder::new(timeout).patterns(patterns).build());
+        let mut context = LinearContext::new(Uuid::new_v4(), ConditionsBuilder::new(timeout).patterns(patterns).build());
         let msg1 = MessageBuilder::new(&msg_id).build();
         let event = Rc::new(msg1);
         assert_false!(context.is_open());
@@ -139,7 +139,7 @@ mod test {
         let patterns = vec![
             msg_id.clone(),
         ];
-        let mut context = LinearContext::new(Uuid::new_v4(), Builder::new(timeout).max_size(max_size).patterns(patterns).build());
+        let mut context = LinearContext::new(Uuid::new_v4(), ConditionsBuilder::new(timeout).max_size(max_size).patterns(patterns).build());
         let msg1 = MessageBuilder::new(&msg_id).build();
         let event = Rc::new(msg1);
         context.on_message(event.clone());
@@ -158,7 +158,7 @@ mod test {
         let patterns = vec![
             msg_id.clone(),
         ];
-        let mut context = LinearContext::new(Uuid::new_v4(), Builder::new(timeout).renew_timeout(renew_timeout).patterns(patterns).build());
+        let mut context = LinearContext::new(Uuid::new_v4(), ConditionsBuilder::new(timeout).renew_timeout(renew_timeout).patterns(patterns).build());
         let msg1 = MessageBuilder::new(&msg_id).build();
         let event = Rc::new(msg1);
         context.on_message(event.clone());
@@ -179,7 +179,7 @@ mod test {
         let patterns = vec![
             msg_id.clone(),
         ];
-        let mut context = LinearContext::new(Uuid::new_v4(), Builder::new(timeout).renew_timeout(renew_timeout).patterns(patterns).build());
+        let mut context = LinearContext::new(Uuid::new_v4(), ConditionsBuilder::new(timeout).renew_timeout(renew_timeout).patterns(patterns).build());
         let msg1 = MessageBuilder::new(&msg_id).build();
         let event = Rc::new(msg1);
         assert_false!(context.is_open());

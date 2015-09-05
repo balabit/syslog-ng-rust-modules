@@ -6,7 +6,7 @@ use super::{
 };
 
 use action::Action;
-use conditions;
+use conditions::ConditionsBuilder;
 use config;
 use dispatcher::Response;
 use dispatcher::response::ResponseSender;
@@ -30,7 +30,7 @@ impl ResponseSender<Response> for DummyResponseSender {
 fn test_given_a_message_action_when_it_is_executed_then_it_adds_the_name_and_uuid_of_the_context_to_the_message() {
     let name = Some("name".to_string());
     let base_context = {
-        let conditions = conditions::Builder::new(100).build();
+        let conditions = ConditionsBuilder::new(100).build();
         let uuid = Uuid::new_v4();
         base::Builder::new(uuid, conditions).name(name.clone()).build()
     };
