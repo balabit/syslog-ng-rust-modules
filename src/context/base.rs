@@ -15,15 +15,6 @@ pub struct BaseContext {
 }
 
 impl BaseContext {
-    pub fn new(uuid: Uuid, conditions: Conditions) -> BaseContext {
-        BaseContext {
-            name: None,
-            uuid: uuid,
-            conditions: conditions,
-            actions: Vec::new()
-        }
-    }
-
     pub fn conditions(&self) -> &Conditions {
         &self.conditions
     }

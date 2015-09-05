@@ -3,7 +3,7 @@ extern crate maplit;
 extern crate correlation;
 extern crate uuid;
 
-use correlation::{config, conditions, Correlator};
+use correlation::{config, Correlator};
 use correlation::conditions::ConditionsBuilder;
 use correlation::message::{MessageBuilder};
 use uuid::Uuid;
