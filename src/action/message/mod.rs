@@ -17,7 +17,6 @@ pub struct MessageAction {
 #[derive(Debug)]
 pub struct MessageResponse {
     message: Message,
-    internal: bool
 }
 
 impl Action for MessageAction {
@@ -32,7 +31,6 @@ impl Action for MessageAction {
         }
         let response = MessageResponse {
             message: message,
-            internal: true
         };
         self.sender.borrow_mut().send_response(Response::Message(response));
     }
