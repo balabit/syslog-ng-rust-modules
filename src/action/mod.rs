@@ -7,7 +7,7 @@ use context::base::BaseContext;
 use std::cell::RefCell;
 use std::rc::Rc;
 
-mod message;
+pub mod message;
 
 pub use self::message::MessageResponse;
 
