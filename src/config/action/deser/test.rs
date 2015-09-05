@@ -5,7 +5,9 @@ use config::action::ActionType;
 fn test_given_action_when_it_is_deserialized_then_we_get_the_right_result() {
     let text = r#"
         {
-            "message": null
+            "message": {
+                "uuid": "uuid1"
+            }
         }
     "#;
 
@@ -13,6 +15,8 @@ fn test_given_action_when_it_is_deserialized_then_we_get_the_right_result() {
     println!("{:?}", &result);
     let action = result.ok().expect("Failed to deserialize a valid ActionType");
     match action {
-        ActionType::Message(_) => {}
+        ActionType::Message(message) => {
+            assert_eq!("uuid1", message.uuid());
+        }
     }
 }
