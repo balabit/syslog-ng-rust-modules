@@ -21,6 +21,9 @@ impl MessageAction {
     pub fn name(&self) -> Option<&String> {
         self.name.as_ref()
     }
+    pub fn values(&self) -> &BTreeMap<String, String> {
+        &self.values
+    }
 }
 
 impl From<MessageAction> for super::ActionType {
