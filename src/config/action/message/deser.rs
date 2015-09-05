@@ -93,7 +93,9 @@ impl Visitor for MessageActionVisitor {
 
 #[cfg(test)]
 mod test {
-    use config::action::message::{Builder, MessageAction};
+    use config::action::message::{
+        MessageActionBuilder, MessageAction
+    };
 
     use serde_json::from_str;
 
@@ -110,7 +112,7 @@ mod test {
         }
         "#;
 
-        let expected_message = Builder::new("UUID")
+        let expected_message = MessageActionBuilder::new("UUID")
                                         .name("NAME")
                                         .pair("key1", "value1")
                                         .pair("key2", "value2")
@@ -129,7 +131,7 @@ mod test {
         }
         "#;
 
-        let expected_message = Builder::new("UUID")
+        let expected_message = MessageActionBuilder::new("UUID")
                                         .build();
         let result = from_str::<MessageAction>(text);
         println!("{:?}", &result);

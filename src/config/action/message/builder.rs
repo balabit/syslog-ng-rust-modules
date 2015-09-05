@@ -1,27 +1,27 @@
 use std::collections::BTreeMap;
 use super::MessageAction;
 
-pub struct Builder {
+pub struct MessageActionBuilder {
     uuid: String,
     name: Option<String>,
     values: BTreeMap<String, String>
 }
 
-impl Builder {
-    pub fn new(uuid: &str) -> Builder {
-        Builder {
+impl MessageActionBuilder {
+    pub fn new(uuid: &str) -> MessageActionBuilder {
+        MessageActionBuilder {
             uuid: uuid.to_string(),
             name: None,
             values: BTreeMap::new()
         }
     }
 
-    pub fn name(&mut self, name: &str) -> &mut Builder {
+    pub fn name(&mut self, name: &str) -> &mut MessageActionBuilder {
         self.name = Some(name.to_string());
         self
     }
 
-    pub fn pair(&mut self, key: &str, value: &str) -> &mut Builder {
+    pub fn pair(&mut self, key: &str, value: &str) -> &mut MessageActionBuilder {
         self.values.insert(key.to_string(), value.to_string());
         self
     }

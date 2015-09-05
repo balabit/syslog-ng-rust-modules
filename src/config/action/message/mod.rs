@@ -5,7 +5,7 @@ use super::ActionType;
 mod deser;
 mod builder;
 
-pub use self::builder::Builder;
+pub use self::builder::MessageActionBuilder;
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct MessageAction {
