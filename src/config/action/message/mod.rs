@@ -18,6 +18,9 @@ impl MessageAction {
     pub fn uuid(&self) -> &String {
         &self.uuid
     }
+    pub fn name(&self) -> Option<&String> {
+        self.name.as_ref()
+    }
 }
 
 impl From<MessageAction> for super::ActionType {
