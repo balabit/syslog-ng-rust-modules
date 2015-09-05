@@ -19,6 +19,12 @@ pub struct MessageResponse {
     message: Message,
 }
 
+impl MessageResponse {
+    pub fn message(&self) -> &Message {
+        &self.message
+    }
+}
+
 impl Action for MessageAction {
     fn execute(&self, _state: &State, _context: &BaseContext) {
         println!("MessageAction is executed");
