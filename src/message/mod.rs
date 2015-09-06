@@ -24,6 +24,10 @@ impl Message {
         self.values.get(key)
     }
 
+    pub fn values(&self) -> &BTreeMap<String, String> {
+        &self.values
+    }
+
     pub fn insert(&mut self, key: &str, value: &str) {
         self.values.insert(key.to_string(), value.to_string());
     }
