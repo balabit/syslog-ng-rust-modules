@@ -10,6 +10,7 @@ use condition::Condition;
 use context::base::BaseContextBuilder;
 use context::{Context};
 use context::linear::LinearContext;
+use context::map::MapContext;
 use dispatcher::request::{InternalRequest, Request};
 use dispatcher::reactor::RequestReactor;
 use dispatcher::{ResponseSender, ResponseHandler};
@@ -46,7 +47,11 @@ fn create_context(config_context: config::Context, response_sender: Rc<RefCell<B
     let base = base.name(name);
     let base = base.actions(boxed_actions);
     let base = base.build();
-    Context::Linear(LinearContext::from(base))
+    if let Some(context_id) = context_id {
+        Context::Map(MapContext::new(base, context_id))
+    } else {
+        Context::Linear(LinearContext::from(base))
+    }
 }
 
 fn create_event_handlers(contexts: Vec<config::Context>, response_sender: Rc<RefCell<Box<response::ResponseSender<Response>>>>) -> Vec<Rc<RefCell<Box<context::event::EventHandler<InternalRequest>>>>> {
