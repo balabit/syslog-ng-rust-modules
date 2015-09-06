@@ -1,31 +1,33 @@
-use uuid::Uuid;
+use handlebars::{
+    Handlebars,
+    Template,
+};
 use std::collections::BTreeMap;
-use std::fmt::Write;
 use std::rc::Rc;
 
-use conditions::Conditions;
 use message::{Message};
 use state::State;
 use timer::TimerEvent;
-use context::base::{
-    BaseContext,
-    BaseContextBuilder,
-};
+use context::base::BaseContext;
 use context::event::EventHandler;
 use dispatcher::request::{Request, InternalRequest};
+
+const CONTEXT_ID: &'static str = ".context.id";
 
 pub struct MapContext {
     base: BaseContext,
     map: BTreeMap<String, State>,
-    format_buffer: String
+    context_id: Handlebars,
 }
 
 impl MapContext {
-    pub fn new(uuid: Uuid, conditions: Conditions) -> MapContext {
+    pub fn new(base: BaseContext, context_id: Template) -> MapContext {
+        let mut handlebars = Handlebars::new();
+        handlebars.register_template(CONTEXT_ID, context_id);
         MapContext {
-            base: BaseContextBuilder::new(uuid, conditions).build(),
+            base: base,
             map: BTreeMap::new(),
-            format_buffer: String::new()
+            context_id: handlebars
         }
     }
 
@@ -66,14 +68,12 @@ impl MapContext {
     }
 
     pub fn on_message(&mut self, event: Rc<Message>) {
-        self.format_context_id(&event);
         self.update_state(event);
-        self.format_buffer.clear();
         self.remove_closed_states();
     }
 
     fn update_state(&mut self, event: Rc<Message>) {
-        let id = self.format_buffer.clone();
+        let id = self.context_id.render(CONTEXT_ID, event.values()).ok().expect("Failed to render the compiled Handlebars template");
         let state = self.map.entry(id).or_insert(State::new());
         self.base.on_message(event, state);
     }
@@ -82,27 +82,8 @@ impl MapContext {
         !self.map.is_empty()
     }
 
-    fn format_context_id(&mut self, message: &Message) {
-        let empty = String::new();
-        let _ = self.format_buffer.write_str(message.get("HOST").unwrap_or(&empty));
-        let _ = self.format_buffer.write_str(":");
-        let _ = self.format_buffer.write_str(message.get("PROGRAM").unwrap_or(&empty));
-        let _ = self.format_buffer.write_str(":");
-        let _ = self.format_buffer.write_str(message.get("PID").unwrap_or(&empty));
-    }
-
     pub fn patterns(&self) -> &[String] {
         &self.base.conditions().patterns
-    }
-}
-
-impl From<BaseContext> for MapContext {
-    fn from(context: BaseContext) -> MapContext {
-        MapContext {
-            base: context,
-            map: BTreeMap::new(),
-            format_buffer: String::new()
-        }
     }
 }
 
