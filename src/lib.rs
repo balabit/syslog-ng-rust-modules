@@ -6,6 +6,8 @@ extern crate serde_json;
 extern crate rustc_serialize;
 extern crate handlebars;
 #[macro_use]
+extern crate log;
+#[macro_use]
 mod macros;
 
 pub use correlator::Correlator;
