@@ -83,7 +83,6 @@ impl Correlator {
             let mut message_event_handler = Box::new(handlers::message::MessageEventHandler::new());
 
             let event_handlers = create_event_handlers(contexts, response_sender);
-            println!("event_handlers: {}", event_handlers.len());
 
             for i in event_handlers {
                 timer_event_handler.register_handler(i.clone());

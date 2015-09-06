@@ -35,28 +35,22 @@ impl MessageEventHandler {
 
     fn call_handlers_by_id(&mut self, id: &String, event: Rc<Message>) {
         if let Some(handlers) = self.handlers.get_mut(id) {
-            println!("found handler for id: {:?}", &id);
             for i in handlers.iter_mut() {
                 i.borrow_mut().handle_event(Request::Message(event.clone()));
             }
-        } else {
-            println!("no handler found for id: {:?}", id);
         }
     }
 
     fn call_handlers_by_event(&mut self, event: Rc<Message>) {
         if let Some(id) = event.name() {
-            println!("id(name): {}", id);
             self.call_handlers_by_id(id, event.clone());
         } else {
             let id = event.uuid();
-            println!("id(uuid): {}", id);
             self.call_handlers_by_id(id, event.clone());
         }
     }
 
     fn call_keyless_handlers(&mut self, event: Rc<Message>) {
-        println!("calling keyless handlers");
         for i in self.keyless_handlers.iter_mut() {
             i.borrow_mut().handle_event(Request::Message(event.clone()));
         }
@@ -66,7 +60,6 @@ impl MessageEventHandler {
 impl reactor::EventHandler<InternalRequest> for MessageEventHandler {
     fn handle_event(&mut self, event: InternalRequest) {
         if let Request::Message(event) = event {
-            println!("message event");
             self.call_handlers_by_event(event.clone());
             self.call_keyless_handlers(event.clone());
         } else {

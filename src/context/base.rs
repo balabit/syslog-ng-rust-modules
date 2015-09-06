@@ -39,23 +39,13 @@ impl BaseContext {
     pub fn on_message(&self, event: Rc<Message>, state: &mut State) {
         if state.is_open() {
             state.add_message(event);
-            if self.name.is_none() {
-                println!("{} opened", &self.uuid.to_hyphenated_string());
-            }
             if self.conditions.is_closing(state) {
                 self.close_state(state);
             }
         } else if self.conditions.is_opening(&event) {
             println!("{:?} opening state", &self.name);
-            if self.name.is_none() {
-                println!("{} opening state", &self.uuid.to_hyphenated_string());
-            }
             state.add_message(event);
             state.open();
-            println!("{:?} state opened", &self.name);
-        } else {
-            println!("{:?} state DUNNO", &self.name);
-            println!("Conditions {:?}", &self.conditions);
         }
     }
 
@@ -65,7 +55,6 @@ impl BaseContext {
             i.execute(state, self);
         }
         state.close();
-        println!("{:?} state closed", &self.name);
     }
 }
 

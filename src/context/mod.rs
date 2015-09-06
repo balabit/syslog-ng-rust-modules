@@ -82,8 +82,6 @@ pub mod linear {
 
     impl From<BaseContext> for LinearContext {
         fn from(context: BaseContext) -> LinearContext {
-            println!("LinearContext created with uuid: {}", &context.uuid().to_hyphenated_string());
-            println!("LinearContext created with name: {:?}", &context.name());
             LinearContext {
                 base: context,
                 state: State::new()
@@ -96,7 +94,6 @@ pub mod linear {
             self.patterns()
         }
         fn handle_event(&mut self, event: InternalRequest) {
-            println!("LinearContext: handle_event() {:?}", self.base.name());
             self.on_event(event);
         }
     }
