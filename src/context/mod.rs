@@ -2,6 +2,8 @@ use dispatcher::request::InternalRequest;
 
 pub use self::linear::LinearContext;
 pub use self::map::MapContext;
+pub use self::base::BaseContext;
+pub use self::base::BaseContextBuilder;
 
 pub mod base;
 pub mod event;
