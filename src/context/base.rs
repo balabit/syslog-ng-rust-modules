@@ -43,14 +43,14 @@ impl BaseContext {
                 self.close_state(state);
             }
         } else if self.conditions.is_opening(&event) {
-            println!("{:?} opening state", &self.name);
+            trace!("Context: opening state; uuid={}", &self.uuid);
             state.add_message(event);
             state.open();
         }
     }
 
     fn close_state(&self, state: &mut State) {
-        println!("{:?} closing state", &self.name);
+        trace!("Context: closing state; uuid={}", &self.uuid);
         for i in &self.actions {
             i.execute(state, self);
         }

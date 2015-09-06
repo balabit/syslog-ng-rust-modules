@@ -29,7 +29,7 @@ impl Reactor for RequestReactor {
                 if let Some(handler) = self.handlers.get_mut(&request.handler()) {
                     handler.handle_event(request);
                 } else {
-                    println!("Handler not found for event");
+                    trace!("RequestReactor: no handler found for event");
                 }
             } else {
                 break;

@@ -33,7 +33,7 @@ impl MessageResponse {
 
 impl Action for MessageAction {
     fn execute(&self, _state: &State, _context: &BaseContext) {
-        println!("MessageAction is executed");
+        trace!("MessageAction: executed");
         let mut message = Message::from(&self.action);
         message.insert(".context.uuid", &_context.uuid().to_hyphenated_string());
         message.insert(".context.len", &_state.messages().len().to_string());

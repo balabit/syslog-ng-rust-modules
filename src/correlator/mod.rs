@@ -116,7 +116,7 @@ impl Correlator {
         if let Some(handler) = self.handlers.get_mut(&event.handler()) {
             handler.handle_event(event);
         } else {
-            println!("no event handler found for handling a Response");
+            trace!("no event handler found for handling a Response");
         }
     }
 
