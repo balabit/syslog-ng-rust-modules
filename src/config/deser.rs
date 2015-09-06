@@ -7,6 +7,8 @@ use serde::de::{
     Error,
     Visitor
 };
+
+use handlebars::Template;
 use uuid::Uuid;
 
 const FIELDS: &'static [&'static str] = &["name", "uuid", "conditions", "actions"];
@@ -23,6 +25,7 @@ enum Field {
     Name,
     Uuid,
     Conditions,
+    ContextId,
     Actions,
 }
 
@@ -42,6 +45,7 @@ impl Deserialize for Field {
                     "name" => Ok(Field::Name),
                     "uuid" => Ok(Field::Uuid),
                     "conditions" => Ok(Field::Conditions),
+                    "context_id" => Ok(Field::ContextId),
                     "actions" => Ok(Field::Actions),
                     _ => Err(Error::syntax(&format!("Unexpected field: {}", value))),
                 }
@@ -72,6 +76,26 @@ impl ContextVisitor {
         }
     }
 
+    fn deser_context_id<V>(context_id: Option<String>, uuid: &Uuid) -> Result<Option<Template>, V::Error>
+        where V: MapVisitor {
+        if let Some(context_id) = context_id {
+            ContextVisitor::parse_context_id::<V>(context_id, uuid)
+        } else {
+            Ok(None)
+        }
+    }
+
+    fn parse_context_id<V>(context_id: String, uuid: &Uuid) -> Result<Option<Template>, V::Error>
+        where V: MapVisitor {
+        match Template::compile(context_id) {
+            Ok(context_id) => Ok(Some(context_id)),
+            Err(err) => {
+                let errmsg = format!("Invalid handlebars template in 'context_id' field: uuid={} error={}", uuid, err);
+                return Err(Error::syntax(&errmsg));
+            }
+        }
+    }
+
     fn parse_actions<V>(actions: Option<Vec<ActionType>>) -> Result<Vec<ActionType>, V::Error>
         where V: MapVisitor {
         match actions {
@@ -90,6 +114,7 @@ impl Visitor for ContextVisitor {
         let mut name = None;
         let mut uuid: Option<String> = None;
         let mut conditions = None;
+        let mut context_id: Option<String> = None;
         let mut actions = None;
 
         loop {
@@ -97,12 +122,14 @@ impl Visitor for ContextVisitor {
                 Some(Field::Name) => { name = Some(try!(visitor.visit_value())); }
                 Some(Field::Uuid) => { uuid = Some(try!(visitor.visit_value())); }
                 Some(Field::Conditions) => { conditions = Some(try!(visitor.visit_value())); }
+                Some(Field::ContextId) => { context_id = Some(try!(visitor.visit_value())); }
                 Some(Field::Actions) => { actions = Some(try!(visitor.visit_value())); }
                 None => break
             }
         }
 
         let uuid = try!(ContextVisitor::parse_uuid::<V>(uuid));
+        let context_id = try!(ContextVisitor::deser_context_id::<V>(context_id, &uuid));
         let actions = try!(ContextVisitor::parse_actions::<V>(actions));
 
         try!(visitor.end());
@@ -112,6 +139,7 @@ impl Visitor for ContextVisitor {
                 name: name,
                 uuid: uuid,
                 conditions: conditions.unwrap(),
+                context_id: context_id,
                 actions: actions
             }
         )
@@ -123,10 +151,7 @@ mod test {
     use config::action::ActionType;
     use config::action::message::MessageActionBuilder;
     use conditions::ConditionsBuilder;
-    use config::{
-        Context,
-        ContextBuilder
-    };
+    use config::Context;
     use serde_json::from_str;
     use uuid::Uuid;
 
@@ -167,12 +192,11 @@ mod test {
                                                             "f13dafee-cd14-4dda-995c-6ed476a21de3".to_string()
                                                         ]).build();
         let expected_actions = vec![ActionType::Message(MessageActionBuilder::new("uuid1").build())];
-        let expected_context = ContextBuilder::new(expected_uuid, expected_conditions)
-                                                          .name(expected_name)
-                                                          .actions(expected_actions)
-                                                          .build();
         let context = result.ok().expect("Failed to deserialize a valid Context");
-        assert_eq!(&expected_context, &context);
+        assert_eq!(&Some(expected_name), &context.name);
+        assert_eq!(&expected_uuid, &context.uuid);
+        assert_eq!(&expected_conditions, &context.conditions);
+        assert_eq!(&expected_actions, &context.actions);
     }
 
     #[test]
@@ -190,9 +214,9 @@ mod test {
         println!("{:?}", &result);
         let expected_uuid = Uuid::parse_str("86ca9f93-84fb-4813-b037-6526f7a585a3").ok().unwrap();
         let expected_conditions = ConditionsBuilder::new(100).build();
-        let expected_context = ContextBuilder::new(expected_uuid, expected_conditions).build();
         let context = result.ok().expect("Failed to deserialize a valid Context");
-        assert_eq!(&expected_context, &context);
+        assert_eq!(&expected_uuid, &context.uuid);
+        assert_eq!(&expected_conditions, &context.conditions);
     }
 
     #[test]
@@ -209,5 +233,23 @@ mod test {
         let result = from_str::<Context>(text);
         println!("{:?}", &result);
         let _ = result.err().expect("Successfully deserialized an invalid Context (UUID is invalid)");
+    }
+
+    #[test]
+    fn test_given_config_context_when_it_contains_context_id_then_can_be_deserialized() {
+        let text = r#"
+        {
+            "uuid": "86ca9f93-84fb-4813-b037-6526f7a585a3",
+            "context_id": "{{HOST}}{{PROGRAM}}",
+            "conditions": {
+                "timeout": 100
+            }
+        }
+        "#;
+        let expected_context_id = "{{HOST}}{{PROGRAM}}".to_string();
+        let result = from_str::<Context>(text);
+        println!("{:?}", &result);
+        let context = result.ok().expect("Failed to deserialize a valid Context");
+        assert_eq!(&expected_context_id, &context.context_id.as_ref().unwrap().to_string());
     }
 }

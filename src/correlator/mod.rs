@@ -35,7 +35,7 @@ pub struct Correlator {
 }
 
 fn create_context(config_context: config::Context, response_sender: Rc<RefCell<Box<response::ResponseSender<Response>>>>) -> Context {
-    let config::Context{name, uuid, conditions, actions} = config_context;
+    let config::Context{name, uuid, conditions, context_id, actions} = config_context;
     let mut boxed_actions = Vec::new();
 
     for i in actions.into_iter() {

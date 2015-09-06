@@ -1,3 +1,4 @@
+use handlebars::Template;
 use uuid::Uuid;
 
 use config::action::ActionType;
@@ -6,11 +7,12 @@ use conditions::Conditions;
 mod deser;
 pub mod action;
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug)]
 pub struct Context {
     pub name: Option<String>,
     pub uuid: Uuid,
     pub conditions: Conditions,
+    pub context_id: Option<Template>,
     pub actions: Vec<ActionType>
 }
 
@@ -18,6 +20,7 @@ pub struct ContextBuilder {
     name: Option<String>,
     uuid: Uuid,
     conditions: Conditions,
+    context_id: Option<Template>,
     actions: Vec<ActionType>
 }
 
@@ -27,8 +30,14 @@ impl ContextBuilder {
             name: None,
             uuid: uuid,
             conditions: conditions,
+            context_id: None,
             actions: Vec::new()
         }
+    }
+
+    pub fn context_id(&mut self, context_id: Option<Template>) -> &mut ContextBuilder {
+        self.context_id = context_id;
+        self
     }
 
     pub fn actions(&mut self, actions: Vec<ActionType>) -> &mut ContextBuilder {
@@ -46,6 +55,7 @@ impl ContextBuilder {
             name: self.name.clone(),
             uuid: self.uuid.clone(),
             conditions: self.conditions.clone(),
+            context_id: self.context_id.clone(),
             actions: self.actions.clone()
         }
     }
