@@ -3,6 +3,8 @@ extern crate maplit;
 extern crate uuid;
 extern crate serde;
 extern crate serde_json;
+extern crate rustc_serialize;
+extern crate handlebars;
 #[macro_use]
 mod macros;
 
