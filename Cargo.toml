@@ -22,5 +22,8 @@ path = "dummy-filter"
 [dependencies.in-list-filter]
 path = "in-list-filter"
 
+[dependencies.correlation-parser]
+path = "correlation-parser"
+
 [dependencies.syslog-ng-sys]
 path = "syslog-ng-sys"

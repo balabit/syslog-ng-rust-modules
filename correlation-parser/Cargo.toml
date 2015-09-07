@@ -1,0 +1,20 @@
+[package]
+name = "correlation-parser"
+version = "0.1.0"
+authors = ["Tibor Benke <ihrwein@gmail.com>"]
+
+[lib]
+name = "correlation_parser"
+
+[dependencies]
+log = "*"
+serde_json = "0.5"
+
+[dependencies.correlation]
+path = "../../correlation"
+
+[dependencies.syslog-ng-common]
+path = "../syslog-ng-common/"
+
+[dependencies.syslog-ng-sys]
+path = "../syslog-ng-sys/"
