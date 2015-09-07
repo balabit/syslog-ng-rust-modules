@@ -7,7 +7,7 @@ use conditions::Conditions;
 mod deser;
 pub mod action;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Context {
     pub name: Option<String>,
     pub uuid: Uuid,
