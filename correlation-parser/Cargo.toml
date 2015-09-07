@@ -8,7 +8,8 @@ name = "correlation_parser"
 
 [dependencies]
 log = "*"
-serde_json = "0.5"
+serde = "0.6"
+serde_json = "0.6"
 
 [dependencies.correlation]
 path = "../../correlation"
