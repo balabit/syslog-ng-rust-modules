@@ -1,6 +1,7 @@
 #[macro_use]
 extern crate log;
 extern crate serde_json;
+extern crate serde;
 #[macro_use]
 extern crate syslog_ng_sys;
 extern crate syslog_ng_common;
@@ -11,13 +12,33 @@ use correlation::config::Context;
 use serde_json::from_str;
 use std::borrow::Borrow;
 use std::clone::Clone;
-use std::io::Error;
+use std::io::{
+    Read
+};
+use std::io;
 use std::fs::File;
 use syslog_ng_common::MessageFormatter;
 use syslog_ng_sys::{
     RustParser,
     LogMessage
 };
+
+enum Error {
+    Io(io::Error),
+    SerdeJson(serde_json::error::Error)
+}
+
+impl From<io::Error> for Error {
+    fn from(error: io::Error) -> Error {
+        Error::Io(error)
+    }
+}
+
+impl From<serde_json::error::Error> for Error {
+    fn from(error: serde_json::error::Error) -> Error {
+        Error::SerdeJson(error)
+    }
+}
 
 pub struct CorrelationParser {
     correlator: Option<Correlator>,
@@ -39,14 +60,14 @@ impl CorrelationParser {
     }
 
     fn load_contexts(&mut self, path: &str) -> Result<Vec<Context>, Error> {
-        let file = try!(File::open(path));
+        let mut file = try!(File::open(path));
         let mut buffer = String::new();
         try!(file.read_to_string(&mut buffer));
         match from_str::<Vec<Context>>(&buffer) {
             Ok(contexts) => Ok(contexts),
             Err(error) => {
                 error!("CorrelationParser: failed to load correlation contexts from file: {}", &error);
-                Err()
+                Err(Error::from(error))
             }
         }
     }
