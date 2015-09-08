@@ -23,6 +23,7 @@ use syslog_ng_sys::{
     LogMessage
 };
 
+#[derive(Debug)]
 enum Error {
     Io(io::Error),
     SerdeJson(serde_json::error::Error)
