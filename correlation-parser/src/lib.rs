@@ -58,6 +58,14 @@ impl CorrelationParser {
     }
 
     pub fn set_file(&mut self, path: &str) {
+        match self.load_contexts(path) {
+            Ok(contexts) => {
+                self.config_contexts = Some(contexts);
+            },
+            Err(err) => {
+                error!("CorrelationParser: failed to set config file: {:?}", &err);
+            }
+        }
     }
 
     fn load_contexts(&mut self, path: &str) -> Result<Vec<Context>, Error> {
