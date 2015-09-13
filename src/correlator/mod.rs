@@ -1,5 +1,8 @@
+use serde_json::from_str;
 use std::cell::RefCell;
 use std::collections::HashMap;
+use std::io::Read;
+use std::fs::File;
 use std::rc::Rc;
 use std::sync::mpsc;
 use std::thread;
@@ -68,6 +71,14 @@ fn create_event_handlers(contexts: Vec<config::Context>, response_sender: Rc<Ref
 }
 
 impl Correlator {
+    pub fn from_path(path: &str) -> Result<Correlator, Error> {
+        let mut file = try!(File::open(path));
+        let mut buffer = String::new();
+        try!(file.read_to_string(&mut buffer));
+        let contexts = try!(from_str::<Vec<config::Context>>(&buffer));
+        Ok(Correlator::new(contexts))
+    }
+
     pub fn new(contexts: Vec<config::Context>) -> Correlator {
         let (dispatcher_input_channel, rx) = mpsc::channel();
         let (dispatcher_output_channel_tx, dispatcher_output_channel_rx) = mpsc::channel();
