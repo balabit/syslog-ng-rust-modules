@@ -1,0 +1,28 @@
+[
+    {
+        "name": "MAIL_READ",
+        "uuid": "f7ee6a32-03a6-40d9-bd87-f48d1b4cd563",
+        "conditions": {
+            "timeout": 3600000,
+            "patterns": [
+                "LOGIN",
+                "MAIL_READ",
+                "LOGOUT"
+            ],
+            "first_opens": true,
+            "last_closes": true
+        },
+        "context_id": "{{user_name}}",
+        "actions": [
+            {
+                "message": {
+                    "uuid": "4bbd15c4-ec44-47a2-ada3-f7fe3ff81222",
+                    "name": "MAIL_READ",
+                    "values": {
+                        "MESSAGE": "user logged in, read his mails then logged out"
+                    }
+                }
+            }
+        ]
+    }
+]
