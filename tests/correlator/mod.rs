@@ -2,11 +2,14 @@ use correlation::Correlator;
 use correlation::message::MessageBuilder;
 use correlation::test_utils::correlator::MessageEventHandler;
 
+use env_logger;
+
 use std::cell::RefCell;
 use std::rc::Rc;
 
 #[test]
 fn test_given_correlator_when_messages_are_received_then_they_are_grouped_into_a_context_by_a_context_id() {
+    let _ = env_logger::init();
     let contexts_file = "tests/correlator/contexts.json";
     let mut correlator = Correlator::from_path(contexts_file).ok().expect("Failed to load contexts from a valid contexts_file");
     let login_message = MessageBuilder::new("6d2cba0c-e241-464a-89c3-8035cac8f73e")
