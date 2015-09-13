@@ -25,6 +25,7 @@ pub mod dispatcher;
 pub mod message;
 pub mod reactor;
 mod state;
+pub mod test_utils;
 mod timer;
 
 pub type MiliSec = u32;
