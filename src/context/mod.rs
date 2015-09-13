@@ -52,6 +52,7 @@ pub mod linear {
         }
 
         pub fn on_event(&mut self, event: InternalRequest) {
+            trace!("LinearContext: received event");
             match event {
                 Request::Timer(event) => {
                     self.on_timer(&event)

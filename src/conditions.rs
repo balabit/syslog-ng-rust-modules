@@ -36,6 +36,7 @@ impl Conditions {
     }
 
     pub fn is_closing(&self, state: &State) -> bool {
+        trace!("Conditions: shoud we close this context?");
         self.is_max_size_reached(state) || self.is_closing_message(state) || self.is_any_timer_expired(state)
     }
 

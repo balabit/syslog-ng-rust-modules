@@ -26,6 +26,7 @@ impl Reactor for RequestReactor {
     fn handle_events(&mut self) {
         while !self.exit_condition.is_active() {
             if let Some(request) = self.demultiplexer.select() {
+                trace!("RequestReactor: got event");
                 if let Some(handler) = self.handlers.get_mut(&request.handler()) {
                     handler.handle_event(request);
                 } else {

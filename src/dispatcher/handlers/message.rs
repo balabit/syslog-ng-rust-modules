@@ -60,6 +60,7 @@ impl MessageEventHandler {
 impl reactor::EventHandler<InternalRequest> for MessageEventHandler {
     fn handle_event(&mut self, event: InternalRequest) {
         if let Request::Message(event) = event {
+            trace!("MessageEventHandler: handle_event()");
             self.call_handlers_by_event(event.clone());
             self.call_keyless_handlers(event.clone());
         } else {

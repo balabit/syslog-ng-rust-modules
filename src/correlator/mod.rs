@@ -76,6 +76,7 @@ impl Correlator {
         let mut buffer = String::new();
         try!(file.read_to_string(&mut buffer));
         let contexts = try!(from_str::<Vec<config::Context>>(&buffer));
+        trace!("Correlator: loading contexts from file; len={}", contexts.len());
         Ok(Correlator::new(contexts))
     }
 
@@ -106,6 +107,7 @@ impl Correlator {
             reactor.register_handler(timer_event_handler);
             reactor.register_handler(message_event_handler);
             reactor.handle_events();
+            trace!("Correlator: dispatcher thread exited");
         });
 
         Correlator {
