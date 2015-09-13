@@ -21,10 +21,10 @@ pub mod action;
 pub mod condition;
 mod context;
 mod correlator;
-mod dispatcher;
+pub mod dispatcher;
 pub mod message;
+pub mod reactor;
 mod state;
-mod reactor;
 mod timer;
 
 pub type MiliSec = u32;
