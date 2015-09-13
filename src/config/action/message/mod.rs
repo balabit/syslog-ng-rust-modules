@@ -42,7 +42,7 @@ impl<'a> From<&'a MessageAction> for Message {
         let name = action.name().map(|name| name.borrow());
         MessageBuilder::new(action.uuid())
                         .name(name)
-                        .values(action.values())
+                        .values(action.values().clone())
                         .build()
     }
 }

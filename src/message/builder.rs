@@ -25,8 +25,8 @@ impl MessageBuilder {
         self
     }
 
-    pub fn values(&mut self, values: &BTreeMap<String, String>) -> &mut MessageBuilder {
-        self.values = values.clone();
+    pub fn values(&mut self, values: BTreeMap<String, String>) -> &mut MessageBuilder {
+        self.values = values;
         self
     }
 
