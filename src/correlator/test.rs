@@ -2,11 +2,9 @@ use config;
 use config::action::message::MessageActionBuilder;
 use conditions::ConditionsBuilder;
 use Correlator;
-use dispatcher::ResponseHandler;
 use message::{
     MessageBuilder
 };
-use Response;
 
 use uuid::Uuid;
 use serde_json::from_str;
@@ -14,8 +12,7 @@ use std::rc::Rc;
 use std::cell::RefCell;
 use std::thread;
 
-use reactor::EventHandler;
-use action::MessageResponse;
+use test_utils::correlator::MessageEventHandler;
 
 const JSON_CONFIG: &'static str = r#"
       [
@@ -78,21 +75,6 @@ const JSON_CONFIG: &'static str = r#"
         }
       ]
     "#;
-
-struct MessageEventHandler {
-    responses: Rc<RefCell<Vec<MessageResponse>>>
-}
-
-impl EventHandler<Response> for MessageEventHandler {
-    fn handle_event(&mut self, event: Response) {
-        if let Response::Message(event) = event {
-            self.responses.borrow_mut().push(event);
-        }
-    }
-    fn handler(&self) -> ResponseHandler {
-        ResponseHandler::Message
-    }
-}
 
 #[test]
 fn test_given_manually_built_correlator_when_it_closes_a_context_then_the_actions_are_executed() {
