@@ -17,6 +17,7 @@ use dispatcher::{ResponseSender, ResponseHandler};
 use dispatcher::response;
 use dispatcher::demux::Demultiplexer;
 use dispatcher::handlers;
+pub use self::error::Error;
 use reactor::{Event, EventHandler, Reactor};
 use timer::Timer;
 
@@ -24,6 +25,7 @@ const TIMER_STEP: MiliSec = 100;
 
 use self::exit_handler::ExitHandler;
 
+pub mod error;
 mod exit_handler;
 #[cfg(test)]
 mod test;
