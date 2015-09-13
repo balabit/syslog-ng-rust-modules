@@ -108,7 +108,7 @@ impl Correlator {
     }
 
     pub fn push_message(&mut self, message: Message) -> Result<(), mpsc::SendError<Request<Message>>> {
-        self.consume_results();
+        self.handle_events();
         self.dispatcher_input_channel.send(Request::Message(message))
     }
 
@@ -120,14 +120,14 @@ impl Correlator {
         }
     }
 
-    fn consume_results(&mut self) {
+    pub fn handle_events(&mut self) {
         for i in self.dispatcher_output_channel.try_recv() {
             self.handle_event(i);
         }
     }
 
     pub fn stop(mut self) -> thread::Result<()> {
-        self.consume_results();
+        self.handle_events();
         self.stop_dispatcher();
         self.dispatcher_thread_handle.join()
     }
