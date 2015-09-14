@@ -46,18 +46,10 @@ impl Conditions {
 
     fn is_closing_message(&self, state: &State) -> bool {
         if self.last_closes.unwrap_or(LAST_CLOSES_DEFAULT) {
-            self.is_message_the_last_among_patterns(state)
+            let last_message = state.messages().last().unwrap();
+            last_message.ids().any(|x| x == self.patterns.last().unwrap())
         } else {
             false
-        }
-    }
-
-    fn is_message_the_last_among_patterns(&self, state: &State) -> bool {
-        let last_message = state.messages().last().unwrap();
-        if let Some(id) = last_message.name() {
-            self.patterns.last().unwrap() == last_message.uuid() || self.patterns.last().unwrap() == id
-        } else {
-            self.patterns.last().unwrap() == last_message.uuid()
         }
     }
 
