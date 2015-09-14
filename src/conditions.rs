@@ -29,7 +29,7 @@ impl Conditions {
 
     pub fn is_opening(&self, message: &Message) -> bool {
         if self.first_opens.unwrap_or(FIRST_OPENS_DEFAULT) {
-            self.is_message_the_first_among_patterns(message)
+            message.ids().any(|x| x == self.patterns.first().unwrap())
         } else {
             true
         }
@@ -38,14 +38,6 @@ impl Conditions {
     pub fn is_closing(&self, state: &State) -> bool {
         trace!("Conditions: shoud we close this context?");
         self.is_max_size_reached(state) || self.is_closing_message(state) || self.is_any_timer_expired(state)
-    }
-
-    fn is_message_the_first_among_patterns(&self, message: &Message) -> bool {
-        if let Some(id) = message.name() {
-            self.patterns.first().unwrap() == message.uuid() || self.patterns.first().unwrap() == id
-        } else {
-            self.patterns.first().unwrap() == message.uuid()
-        }
     }
 
     fn is_max_size_reached(&self, state: &State) -> bool {
