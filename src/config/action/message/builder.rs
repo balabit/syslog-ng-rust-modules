@@ -4,14 +4,16 @@ use super::MessageAction;
 pub struct MessageActionBuilder {
     uuid: String,
     name: Option<String>,
+    message: String,
     values: BTreeMap<String, String>
 }
 
 impl MessageActionBuilder {
-    pub fn new(uuid: &str) -> MessageActionBuilder {
+    pub fn new(uuid: &str, message: &str) -> MessageActionBuilder {
         MessageActionBuilder {
             uuid: uuid.to_string(),
             name: None,
+            message: message.to_string(),
             values: BTreeMap::new()
         }
     }
@@ -30,6 +32,7 @@ impl MessageActionBuilder {
         MessageAction {
             uuid: self.uuid.clone(),
             name: self.name.clone(),
+            message: self.message.clone(),
             values: self.values.clone()
         }
     }

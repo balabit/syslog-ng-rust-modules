@@ -16,6 +16,7 @@ pub use self::builder::MessageActionBuilder;
 pub struct MessageAction {
     uuid: String,
     name: Option<String>,
+    message: String,
     values: BTreeMap<String, String>
 }
 
@@ -25,6 +26,9 @@ impl MessageAction {
     }
     pub fn name(&self) -> Option<&String> {
         self.name.as_ref()
+    }
+    pub fn message(&self) -> &String {
+        &self.message
     }
     pub fn values(&self) -> &BTreeMap<String, String> {
         &self.values
