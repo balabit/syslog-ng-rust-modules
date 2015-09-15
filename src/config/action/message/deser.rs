@@ -20,6 +20,7 @@ impl Deserialize for MessageAction {
 enum Field {
     Uuid,
     Name,
+    Message,
     Values,
 }
 
@@ -39,6 +40,7 @@ impl Deserialize for Field {
                     "name" => Ok(Field::Name),
                     "uuid" => Ok(Field::Uuid),
                     "values" => Ok(Field::Values),
+                    "message" => Ok(Field::Message),
                     _ => Err(Error::syntax(&format!("Unexpected field: {}", value))),
                 }
             }
@@ -58,12 +60,14 @@ impl Visitor for MessageActionVisitor {
     {
         let mut name = None;
         let mut uuid = None;
+        let mut message = None;
         let mut values = None;
 
         loop {
             match try!(visitor.visit_key()) {
                 Some(Field::Name) => { name = Some(try!(visitor.visit_value())); }
                 Some(Field::Uuid) => { uuid = Some(try!(visitor.visit_value())); }
+                Some(Field::Message) => { message = Some(try!(visitor.visit_value())); }
                 Some(Field::Values) => { values = Some(try!(visitor.visit_value())); }
                 None => { break; }
             }
@@ -72,6 +76,14 @@ impl Visitor for MessageActionVisitor {
         let uuid = match uuid {
             Some(uuid) => uuid,
             None => return visitor.missing_field("uuid"),
+        };
+
+        let message = match message {
+            Some(message) => message,
+            None => {
+                error!("Missing 'message' field: uuid={}", &uuid);
+                return visitor.missing_field("message");
+            }
         };
 
         let values = match values {
@@ -85,6 +97,7 @@ impl Visitor for MessageActionVisitor {
             MessageAction {
                 name: name,
                 uuid: uuid,
+                message: message,
                 values: values
             }
         )
@@ -105,6 +118,7 @@ mod test {
         {
           "uuid": "UUID",
           "name": "NAME",
+          "message": "message",
           "values": {
             "key1": "value1",
             "key2": "value2"
@@ -112,7 +126,7 @@ mod test {
         }
         "#;
 
-        let expected_message = MessageActionBuilder::new("UUID")
+        let expected_message = MessageActionBuilder::new("UUID", "message")
                                         .name("NAME")
                                         .pair("key1", "value1")
                                         .pair("key2", "value2")
@@ -127,11 +141,12 @@ mod test {
     fn test_given_message_as_a_json_string_when_only_the_required_fields_are_present_then_we_can_deserialize_the_message() {
         let text = r#"
         {
-          "uuid": "UUID"
+          "uuid": "UUID",
+          "message": "message"
         }
         "#;
 
-        let expected_message = MessageActionBuilder::new("UUID")
+        let expected_message = MessageActionBuilder::new("UUID", "message")
                                         .build();
         let result = from_str::<MessageAction>(text);
         println!("{:?}", &result);
