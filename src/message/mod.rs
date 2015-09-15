@@ -10,6 +10,7 @@ mod test;
 pub struct Message {
     uuid: String,
     name: Option<String>,
+    message: String,
     values: BTreeMap<String, String>
 }
 

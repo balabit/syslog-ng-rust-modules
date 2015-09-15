@@ -104,11 +104,11 @@ fn test_given_manually_built_correlator_when_it_closes_a_context_then_the_action
     let message_event_handler = Box::new(MessageEventHandler{responses: responses.clone()});
     let mut correlator = Correlator::new(contexts);
     correlator.register_handler(message_event_handler);
-    let _ = correlator.push_message(MessageBuilder::new(&uuid1).build());
+    let _ = correlator.push_message(MessageBuilder::new(&uuid1, "message").build());
     thread::sleep_ms(20);
-    let _ = correlator.push_message(MessageBuilder::new(&uuid2).build());
+    let _ = correlator.push_message(MessageBuilder::new(&uuid2, "message").build());
     thread::sleep_ms(80);
-    let _ = correlator.push_message(MessageBuilder::new(&uuid3).build());
+    let _ = correlator.push_message(MessageBuilder::new(&uuid3, "message").build());
     let _ = correlator.stop();
     assert_eq!(3, responses.borrow().len());
 }
@@ -140,14 +140,14 @@ fn test_given_correlator_when_it_is_built_from_json_then_it_produces_the_expecte
     let message_event_handler = Box::new(MessageEventHandler{responses: responses.clone()});
     let mut correlator = Correlator::new(contexts);
     correlator.register_handler(message_event_handler);
-    let _ = correlator.push_message(MessageBuilder::new(&uuid1).name(Some("p1")).build());
+    let _ = correlator.push_message(MessageBuilder::new(&uuid1, "message").name(Some("p1")).build());
     thread::sleep_ms(20);
-    let _ = correlator.push_message(MessageBuilder::new(&uuid2).name(Some("p2")).build());
-    let _ = correlator.push_message(MessageBuilder::new(&uuid3).name(Some("p3")).build());
-    let _ = correlator.push_message(MessageBuilder::new(&uuid3).name(Some("p3")).build());
-    let _ = correlator.push_message(MessageBuilder::new(&uuid3).name(Some("p3")).build());
-    let _ = correlator.push_message(MessageBuilder::new(&uuid3).name(Some("p3")).build());
-    let _ = correlator.push_message(MessageBuilder::new(&uuid3).name(Some("p3")).build());
+    let _ = correlator.push_message(MessageBuilder::new(&uuid2, "message").name(Some("p2")).build());
+    let _ = correlator.push_message(MessageBuilder::new(&uuid3, "message").name(Some("p3")).build());
+    let _ = correlator.push_message(MessageBuilder::new(&uuid3, "message").name(Some("p3")).build());
+    let _ = correlator.push_message(MessageBuilder::new(&uuid3, "message").name(Some("p3")).build());
+    let _ = correlator.push_message(MessageBuilder::new(&uuid3, "message").name(Some("p3")).build());
+    let _ = correlator.push_message(MessageBuilder::new(&uuid3, "message").name(Some("p3")).build());
     thread::sleep_ms(200);
     let _ = correlator.stop();
     println!("{:?}", &responses.borrow());

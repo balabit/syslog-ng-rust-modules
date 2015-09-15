@@ -4,14 +4,16 @@ use super::Message;
 pub struct MessageBuilder {
     uuid: String,
     name: Option<String>,
+    message: String,
     values: BTreeMap<String, String>
 }
 
 impl MessageBuilder {
-    pub fn new(uuid: &str) -> MessageBuilder {
+    pub fn new(uuid: &str, message: &str) -> MessageBuilder {
         MessageBuilder {
             uuid: uuid.to_string(),
             name: None,
+            message: message.to_string(),
             values: BTreeMap::new()
         }
     }
@@ -39,6 +41,7 @@ impl MessageBuilder {
         Message {
             uuid: self.uuid.clone(),
             name: self.name.clone(),
+            message: self.message.clone(),
             values: self.values.clone()
         }
     }

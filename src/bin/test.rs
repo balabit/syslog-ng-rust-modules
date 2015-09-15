@@ -30,10 +30,10 @@ fn main() {
         config::ContextBuilder::new(Uuid::new_v4(), condition.clone()).actions(actions.clone()).build(),
     };
     let mut correlator = Correlator::new(contexts);
-    let _ = correlator.push_message(MessageBuilder::new(&uuid1).build());
+    let _ = correlator.push_message(MessageBuilder::new(&uuid1, "message").build());
     thread::sleep_ms(20);
-    let _ = correlator.push_message(MessageBuilder::new(&uuid2).build());
+    let _ = correlator.push_message(MessageBuilder::new(&uuid2, "message").build());
     thread::sleep_ms(80);
-    let _ = correlator.push_message(MessageBuilder::new(&uuid3).build());
+    let _ = correlator.push_message(MessageBuilder::new(&uuid3, "message").build());
     let _ = correlator.stop();
 }

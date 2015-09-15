@@ -32,17 +32,17 @@ fn test_given_map_context_when_messages_have_the_same_kvpairs_then_they_go_to_th
         let context_id = Template::compile("{{HOST}}{{PROGRAM}}{{PID}}".to_string()).unwrap();
         MapContext::new(base_context, context_id)
     };
-    let msg1 = MessageBuilder::new(&msg_id1)
+    let msg1 = MessageBuilder::new(&msg_id1, "message")
                                 .pair("HOST", "host")
                                 .pair("PROGRAM", "program")
                                 .pair("PID", "pid")
                                 .build();
-    let msg2 = MessageBuilder::new(&msg_id2)
+    let msg2 = MessageBuilder::new(&msg_id2, "message")
                                 .pair("HOST", "host2")
                                 .pair("PROGRAM", "program2")
                                 .pair("PID", "pid2")
                                 .build();
-    let msg3 = MessageBuilder::new(&msg_id3)
+    let msg3 = MessageBuilder::new(&msg_id3, "message")
                                 .pair("HOST", "host")
                                 .pair("PROGRAM", "program")
                                 .pair("PID", "pid")

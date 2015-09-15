@@ -12,15 +12,15 @@ fn test_given_correlator_when_messages_are_received_then_they_are_grouped_into_a
     let _ = env_logger::init();
     let contexts_file = "tests/correlator/contexts.json";
     let mut correlator = Correlator::from_path(contexts_file).ok().expect("Failed to load contexts from a valid contexts_file");
-    let login_message = MessageBuilder::new("6d2cba0c-e241-464a-89c3-8035cac8f73e")
+    let login_message = MessageBuilder::new("6d2cba0c-e241-464a-89c3-8035cac8f73e", "message")
                                         .name(Some("LOGIN"))
                                         .pair("user_name", "linus")
                                         .build();
-    let read_message = MessageBuilder::new("60dd1233-5fa6-4e3b-993f-e04ef9b4c164")
+    let read_message = MessageBuilder::new("60dd1233-5fa6-4e3b-993f-e04ef9b4c164", "message")
                                         .name(Some("MAIL_READ"))
                                         .pair("user_name", "linus")
                                         .build();
-    let logout_message = MessageBuilder::new("91ea534a-4880-4853-aec2-7b2a2df9a8c9")
+    let logout_message = MessageBuilder::new("91ea534a-4880-4853-aec2-7b2a2df9a8c9", "message")
                                         .name(Some("LOGOUT"))
                                         .pair("user_name", "linus")
                                         .build();

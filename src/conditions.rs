@@ -129,8 +129,8 @@ mod test {
             msg_id1.clone(),
         ];
         let condition = ConditionsBuilder::new(timeout).patterns(patterns).first_opens(true).build();
-        let msg_which_should_not_be_ignored = MessageBuilder::new(&msg_id1).build();
-        let msg_which_should_be_ignored = MessageBuilder::new(&msg_id2).build();
+        let msg_which_should_not_be_ignored = MessageBuilder::new(&msg_id1, "message").build();
+        let msg_which_should_be_ignored = MessageBuilder::new(&msg_id2, "message").build();
         assert_false!(condition.is_opening(&msg_which_should_be_ignored));
         assert_true!(condition.is_opening(&msg_which_should_not_be_ignored));
     }
@@ -146,8 +146,8 @@ mod test {
         ];
         let mut state = State::new();
         let condition = ConditionsBuilder::new(timeout).patterns(patterns).last_closes(true).build();
-        let msg_1 = MessageBuilder::new(&msg_id1).build();
-        let msg_closing = Rc::new(MessageBuilder::new(&msg_id2).build());
+        let msg_1 = MessageBuilder::new(&msg_id1, "message").build();
+        let msg_closing = Rc::new(MessageBuilder::new(&msg_id2, "message").build());
         assert_true!(condition.is_opening(&msg_1));
         state.open();
         state.add_message(msg_closing);
@@ -206,7 +206,7 @@ mod test {
         let timeout = 100;
         let msg_id = "11eaf6f8-0640-460f-aee2-a72d2f2ab258".to_string();
         let condition = ConditionsBuilder::new(timeout).build();
-        let msg = MessageBuilder::new(&msg_id).build();
+        let msg = MessageBuilder::new(&msg_id, "message").build();
         assert_true!(condition.is_opening(&msg));
     }
 
@@ -221,7 +221,7 @@ mod test {
         let uuid = "e4f3f8b2-3135-4916-a5ea-621a754dab0d".to_string();
         let msg_id = "p1".to_string();
         let condition = ConditionsBuilder::new(timeout).patterns(patterns).first_opens(true).build();
-        let msg = MessageBuilder::new(&uuid).name(Some(&msg_id)).build();
+        let msg = MessageBuilder::new(&uuid, "message").name(Some(&msg_id)).build();
         assert_true!(condition.is_opening(&msg));
     }
 
@@ -238,10 +238,10 @@ mod test {
         let p2 = "p2".to_string();
         let mut state = State::new();
         let condition = ConditionsBuilder::new(timeout).patterns(patterns).first_opens(true).last_closes(true).build();
-        let p1_msg = MessageBuilder::new(&p1_uuid).name(Some(&p1)).build();
+        let p1_msg = MessageBuilder::new(&p1_uuid, "message").name(Some(&p1)).build();
         assert_true!(condition.is_opening(&p1_msg));
         state.add_message(Rc::new(p1_msg));
-        let p2_msg = MessageBuilder::new(&p2_uuid).name(Some(&p2)).build();
+        let p2_msg = MessageBuilder::new(&p2_uuid, "message").name(Some(&p2)).build();
         state.add_message(Rc::new(p2_msg));
         assert_true!(condition.is_closing(&state));
     }

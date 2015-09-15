@@ -44,7 +44,7 @@ impl From<MessageAction> for super::ActionType {
 impl<'a> From<&'a MessageAction> for Message {
     fn from(action: &'a MessageAction) -> Message {
         let name = action.name().map(|name| name.borrow());
-        MessageBuilder::new(action.uuid())
+        MessageBuilder::new(action.uuid(), action.message())
                         .name(name)
                         .values(action.values().clone())
                         .build()
