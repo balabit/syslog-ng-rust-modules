@@ -6,7 +6,8 @@ fn test_given_action_when_it_is_deserialized_then_we_get_the_right_result() {
     let text = r#"
         {
             "message": {
-                "uuid": "uuid1"
+                "uuid": "uuid1",
+                "message": "message"
             }
         }
     "#;

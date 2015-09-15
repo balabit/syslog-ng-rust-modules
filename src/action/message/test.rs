@@ -38,7 +38,7 @@ fn test_given_a_message_action_when_it_is_executed_then_it_adds_the_name_and_uui
     let responses = Rc::new(RefCell::new(Vec::new()));
     let message_action = {
         let response_sender = DummyResponseSender {responses: responses.clone()};
-        let config_action = config::action::message::MessageActionBuilder::new("uuid").build();
+        let config_action = config::action::message::MessageActionBuilder::new("uuid", "message").build();
         MessageAction {
             sender: Rc::new(RefCell::new(Box::new(response_sender))),
             action: config_action

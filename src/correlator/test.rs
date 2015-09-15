@@ -31,7 +31,8 @@ const JSON_CONFIG: &'static str = r#"
           "actions": [
             {
               "message": {
-                  "uuid": "uuid1"
+                  "uuid": "uuid1",
+                  "message": "message_1"
               }
             }
           ]
@@ -46,12 +47,14 @@ const JSON_CONFIG: &'static str = r#"
           "actions": [
             {
               "message": {
-                  "uuid": "uuid1"
+                  "uuid": "uuid1",
+                  "message": "message_2"
               }
             },
             {
               "message": {
-                  "uuid": "uuid2"
+                  "uuid": "uuid2",
+                  "message": "message_2"
               }
             }
           ]
@@ -68,7 +71,8 @@ const JSON_CONFIG: &'static str = r#"
           "actions": [
             {
               "message": {
-                  "uuid": "uuid2"
+                  "uuid": "uuid2",
+                  "message": "message_3"
               }
             }
           ]
@@ -90,7 +94,7 @@ fn test_given_manually_built_correlator_when_it_closes_a_context_then_the_action
                                                 .first_opens(true)
                                                 .last_closes(true)
                                                 .build();
-    let actions = vec![ MessageActionBuilder::new("uuid").build().into() ];
+    let actions = vec![ MessageActionBuilder::new("uuid", "message").build().into() ];
     let contexts = vec!{
         config::ContextBuilder::new(Uuid::new_v4(), condition.clone()).actions(actions.clone()).build(),
         config::ContextBuilder::new(Uuid::new_v4(), condition.clone()).actions(actions.clone()).build(),
