@@ -8,7 +8,7 @@ mod builder;
 
 pub use self::builder::MessageActionBuilder;
 
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct MessageAction {
     pub uuid: String,
     pub name: Option<String>,
