@@ -6,6 +6,8 @@ use message::{
     MessageBuilder
 };
 
+
+use handlebars::Template;
 use uuid::Uuid;
 use serde_json::from_str;
 use std::rc::Rc;
@@ -94,7 +96,8 @@ fn test_given_manually_built_correlator_when_it_closes_a_context_then_the_action
                                                 .first_opens(true)
                                                 .last_closes(true)
                                                 .build();
-    let actions = vec![ MessageActionBuilder::new("uuid", "message").build().into() ];
+    let message = Template::compile("message".to_string()).ok().expect("Failed to compile a handlebars template");
+    let actions = vec![ MessageActionBuilder::new("uuid", message).build().into() ];
     let contexts = vec!{
         config::ContextBuilder::new(Uuid::new_v4(), condition.clone()).actions(actions.clone()).build(),
         config::ContextBuilder::new(Uuid::new_v4(), condition.clone()).actions(actions.clone()).build(),

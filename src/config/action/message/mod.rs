@@ -1,10 +1,6 @@
-use std::borrow::Borrow;
+use handlebars::Template;
 use std::collections::BTreeMap;
 
-use message::{
-    Message,
-    MessageBuilder
-};
 use super::ActionType;
 
 mod deser;
@@ -16,7 +12,7 @@ pub use self::builder::MessageActionBuilder;
 pub struct MessageAction {
     pub uuid: String,
     pub name: Option<String>,
-    pub message: String,
+    pub message: Template,
     pub values: BTreeMap<String, String>
 }
 
@@ -27,7 +23,7 @@ impl MessageAction {
     pub fn name(&self) -> Option<&String> {
         self.name.as_ref()
     }
-    pub fn message(&self) -> &String {
+    pub fn message(&self) -> &Template {
         &self.message
     }
     pub fn values(&self) -> &BTreeMap<String, String> {

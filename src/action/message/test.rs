@@ -12,6 +12,7 @@ use dispatcher::Response;
 use dispatcher::response::ResponseSender;
 use state::State;
 
+use handlebars::Template;
 use std::cell::RefCell;
 use std::rc::Rc;
 use uuid::Uuid;
@@ -38,7 +39,8 @@ fn test_given_a_message_action_when_it_is_executed_then_it_adds_the_name_and_uui
     let responses = Rc::new(RefCell::new(Vec::new()));
     let message_action = {
         let response_sender = DummyResponseSender {responses: responses.clone()};
-        let config_action = config::action::message::MessageActionBuilder::new("uuid", "message").build();
+        let message = Template::compile("message".to_string()).ok().expect("Failed to compile a handlebars template");
+        let config_action = config::action::message::MessageActionBuilder::new("uuid", message).build();
         MessageAction::new(
             Rc::new(RefCell::new(Box::new(response_sender))),
             config_action

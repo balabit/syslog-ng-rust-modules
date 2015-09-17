@@ -1,5 +1,6 @@
 use super::MessageAction;
 
+use handlebars::Template;
 use serde::de::{
     Deserialize,
     Deserializer,
@@ -60,7 +61,7 @@ impl Visitor for MessageActionVisitor {
     {
         let mut name = None;
         let mut uuid = None;
-        let mut message = None;
+        let mut message: Option<String> = None;
         let mut values = None;
 
         loop {
@@ -79,7 +80,14 @@ impl Visitor for MessageActionVisitor {
         };
 
         let message = match message {
-            Some(message) => message,
+            Some(message) => {
+                match Template::compile(message) {
+                    Ok(message) => message,
+                    Err(error) => {
+                        return Err(Error::syntax(&format!("Invalid handlebars template in 'message' field: uuid={}, error={}", &uuid, error)));
+                    }
+                }
+            },
             None => {
                 error!("Missing 'message' field: uuid={}", &uuid);
                 return visitor.missing_field("message");
@@ -110,6 +118,7 @@ mod test {
         MessageActionBuilder, MessageAction
     };
 
+    use handlebars::Template;
     use serde_json::from_str;
 
     #[test]
@@ -126,7 +135,8 @@ mod test {
         }
         "#;
 
-        let expected_message = MessageActionBuilder::new("UUID", "message")
+        let message = Template::compile("message".to_string()).ok().expect("Failed to compile a handlebars template");
+        let expected_message = MessageActionBuilder::new("UUID", message)
                                         .name("NAME")
                                         .pair("key1", "value1")
                                         .pair("key2", "value2")
@@ -146,7 +156,8 @@ mod test {
         }
         "#;
 
-        let expected_message = MessageActionBuilder::new("UUID", "message")
+        let message = Template::compile("message".to_string()).ok().expect("Failed to compile a handlebars template");
+        let expected_message = MessageActionBuilder::new("UUID", message)
                                         .build();
         let result = from_str::<MessageAction>(text);
         println!("{:?}", &result);

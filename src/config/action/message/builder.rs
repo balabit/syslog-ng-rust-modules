@@ -1,19 +1,20 @@
+use handlebars::Template;
 use std::collections::BTreeMap;
 use super::MessageAction;
 
 pub struct MessageActionBuilder {
     uuid: String,
     name: Option<String>,
-    message: String,
+    message: Template,
     values: BTreeMap<String, String>
 }
 
 impl MessageActionBuilder {
-    pub fn new(uuid: &str, message: &str) -> MessageActionBuilder {
+    pub fn new(uuid: &str, message: Template) -> MessageActionBuilder {
         MessageActionBuilder {
             uuid: uuid.to_string(),
             name: None,
-            message: message.to_string(),
+            message: message,
             values: BTreeMap::new()
         }
     }

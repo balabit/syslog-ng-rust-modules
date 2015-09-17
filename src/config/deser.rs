@@ -152,6 +152,7 @@ mod test {
     use config::action::message::MessageActionBuilder;
     use conditions::ConditionsBuilder;
     use config::Context;
+    use handlebars::Template;
     use serde_json::from_str;
     use uuid::Uuid;
 
@@ -192,7 +193,8 @@ mod test {
                                                             "PATTERN_NAME2".to_string(),
                                                             "f13dafee-cd14-4dda-995c-6ed476a21de3".to_string()
                                                         ]).build();
-        let expected_actions = vec![ActionType::Message(MessageActionBuilder::new("uuid1", "message").build())];
+        let message = Template::compile("message".to_string()).ok().expect("Failed to compile a handlebars template");
+        let expected_actions = vec![ActionType::Message(MessageActionBuilder::new("uuid1", message).build())];
         let context = result.ok().expect("Failed to deserialize a valid Context");
         assert_eq!(&Some(expected_name), &context.name);
         assert_eq!(&expected_uuid, &context.uuid);

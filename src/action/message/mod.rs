@@ -8,6 +8,9 @@ use message::{
     MessageBuilder
 };
 
+use handlebars::{
+    Template
+};
 use std::borrow::Borrow;
 use std::cell::RefCell;
 use std::collections::BTreeMap;
@@ -24,7 +27,7 @@ pub struct MessageAction {
     sender: Rc<RefCell<Box<ResponseSender<Response>>>>,
     uuid: String,
     name: Option<String>,
-    message: String,
+    message: Template,
     values: BTreeMap<String, String>
 }
 
@@ -56,7 +59,7 @@ impl Action for MessageAction {
     fn execute(&self, _state: &State, _context: &BaseContext) {
         trace!("MessageAction: executed");
         let name = self.name.as_ref().map(|name| name.borrow());
-        let mut message = MessageBuilder::new(&self.uuid, &self.message)
+        let mut message = MessageBuilder::new(&self.uuid, "moricka message")
                         .name(name)
                         .values(self.values.clone())
                         .build();
