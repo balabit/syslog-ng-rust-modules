@@ -5,6 +5,7 @@ pub use self::builder::MessageBuilder;
 mod builder;
 #[cfg(test)]
 mod test;
+mod to_json;
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Message {
