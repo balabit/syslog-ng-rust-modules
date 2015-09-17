@@ -14,7 +14,6 @@ mod test;
 pub const CONTEXT_UUID: &'static str = ".context.uuid";
 pub const CONTEXT_NAME: &'static str = ".context.name";
 
-#[derive(Clone)]
 pub struct MessageAction {
     pub sender: Rc<RefCell<Box<ResponseSender<Response>>>>,
     pub action: config::action::MessageAction
