@@ -3,8 +3,14 @@ use config;
 use context::base::BaseContext;
 use dispatcher::Response;
 use dispatcher::response::ResponseSender;
-use message::Message;
+use message::{
+    Message,
+    MessageBuilder
+};
+
+use std::borrow::Borrow;
 use std::cell::RefCell;
+use std::collections::BTreeMap;
 use std::rc::Rc;
 use state::State;
 
@@ -16,14 +22,21 @@ pub const CONTEXT_NAME: &'static str = ".context.name";
 
 pub struct MessageAction {
     sender: Rc<RefCell<Box<ResponseSender<Response>>>>,
-    action: config::action::MessageAction
+    uuid: String,
+    name: Option<String>,
+    message: String,
+    values: BTreeMap<String, String>
 }
 
 impl MessageAction {
     pub fn new(sender: Rc<RefCell<Box<ResponseSender<Response>>>>, action: config::action::MessageAction) -> MessageAction {
+        let config::action::MessageAction { uuid, name, message, values } = action;
         MessageAction {
             sender: sender,
-            action: action
+            uuid: uuid,
+            name: name,
+            message: message,
+            values: values
         }
     }
 }
@@ -42,7 +55,11 @@ impl MessageResponse {
 impl Action for MessageAction {
     fn execute(&self, _state: &State, _context: &BaseContext) {
         trace!("MessageAction: executed");
-        let mut message = Message::from(&self.action);
+        let name = self.name.as_ref().map(|name| name.borrow());
+        let mut message = MessageBuilder::new(&self.uuid, &self.message)
+                        .name(name)
+                        .values(self.values.clone())
+                        .build();
         message.insert(".context.uuid", &_context.uuid().to_hyphenated_string());
         message.insert(".context.len", &_state.messages().len().to_string());
         if let Some(name) = _context.name() {
