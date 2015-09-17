@@ -17,6 +17,7 @@ use std::collections::BTreeMap;
 use std::rc::Rc;
 use state::State;
 
+mod error;
 mod renderer_context;
 #[cfg(test)]
 mod test;
