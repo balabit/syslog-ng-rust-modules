@@ -14,10 +14,10 @@ pub use self::builder::MessageActionBuilder;
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct MessageAction {
-    uuid: String,
-    name: Option<String>,
-    message: String,
-    values: BTreeMap<String, String>
+    pub uuid: String,
+    pub name: Option<String>,
+    pub message: String,
+    pub values: BTreeMap<String, String>
 }
 
 impl MessageAction {
