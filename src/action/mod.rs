@@ -17,6 +17,6 @@ pub trait Action {
 
 pub fn from_config(config: ActionType, _sender: Rc<RefCell<Box<ResponseSender<Response>>>>) -> Box<Action> {
     match config {
-        ActionType::Message(action) => Box::new(self::message::MessageAction {sender: _sender, action: action})
+        ActionType::Message(action) => Box::new(self::message::MessageAction::new(_sender, action))
     }
 }

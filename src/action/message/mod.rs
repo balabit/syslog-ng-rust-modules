@@ -15,8 +15,17 @@ pub const CONTEXT_UUID: &'static str = ".context.uuid";
 pub const CONTEXT_NAME: &'static str = ".context.name";
 
 pub struct MessageAction {
-    pub sender: Rc<RefCell<Box<ResponseSender<Response>>>>,
-    pub action: config::action::MessageAction
+    sender: Rc<RefCell<Box<ResponseSender<Response>>>>,
+    action: config::action::MessageAction
+}
+
+impl MessageAction {
+    pub fn new(sender: Rc<RefCell<Box<ResponseSender<Response>>>>, action: config::action::MessageAction) -> MessageAction {
+        MessageAction {
+            sender: sender,
+            action: action
+        }
+    }
 }
 
 #[derive(Debug)]
