@@ -10,6 +10,13 @@ use rustc_serialize::json::{
 use std::collections::BTreeMap;
 use std::rc::Rc;
 
+use super::{
+    CONTEXT_LEN,
+    CONTEXT_NAME,
+    CONTEXT_UUID,
+    MESSAGES,
+};
+
 pub struct RendererContext<'m, 'c> {
     messages: &'m [Rc<Message>],
     context_name: Option<&'c String>,
@@ -30,10 +37,11 @@ impl<'m, 'c> ToJson for RendererContext<'m, 'c> {
     fn to_json(&self) -> Json {
         let mut m: BTreeMap<String, Json> = BTreeMap::new();
         if let Some(name) = self.context_name {
-            m.insert("context.name".to_string(), name.to_json());
+            m.insert(CONTEXT_NAME.to_string(), name.to_json());
         }
-        m.insert("context.uuid".to_string(), self.context_uuid.to_hyphenated_string().to_json());
-        m.insert("messages".to_string(), rc_message_to_json(self.messages));
+        m.insert(CONTEXT_UUID.to_string(), self.context_uuid.to_hyphenated_string().to_json());
+        m.insert(CONTEXT_LEN.to_string(), self.messages.len().to_json());
+        m.insert(MESSAGES.to_string(), rc_message_to_json(self.messages));
         m.to_json()
     }
 }

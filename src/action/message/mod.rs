@@ -25,8 +25,10 @@ mod renderer_context;
 #[cfg(test)]
 mod test;
 
-pub const CONTEXT_UUID: &'static str = ".context.uuid";
-pub const CONTEXT_NAME: &'static str = ".context.name";
+pub const CONTEXT_UUID: &'static str = "context.uuid";
+pub const CONTEXT_NAME: &'static str = "context.name";
+pub const CONTEXT_LEN: &'static str = "context.len";
+pub const MESSAGES: &'static str = "messages";
 const MESSAGE_KEY: &'static str = "MESSAGE";
 
 pub struct MessageAction {
@@ -104,12 +106,7 @@ impl Action for MessageAction {
     fn execute(&self, _state: &State, _context: &BaseContext) {
         trace!("MessageAction: executed");
         match self.render_message(_state, _context) {
-            Ok(mut message) => {
-                message.insert(".context.uuid", &_context.uuid().to_hyphenated_string());
-                message.insert(".context.len", &_state.messages().len().to_string());
-                if let Some(name) = _context.name() {
-                    message.insert(".context.name", name);
-                }
+            Ok(message) => {
                 let response = MessageResponse {
                     message: message,
                 };
