@@ -25,9 +25,9 @@ mod renderer_context;
 #[cfg(test)]
 mod test;
 
-pub const CONTEXT_UUID: &'static str = "context.uuid";
-pub const CONTEXT_NAME: &'static str = "context.name";
-pub const CONTEXT_LEN: &'static str = "context.len";
+pub const CONTEXT_UUID: &'static str = "context_uuid";
+pub const CONTEXT_NAME: &'static str = "context_name";
+pub const CONTEXT_LEN: &'static str = "context_len";
 pub const MESSAGES: &'static str = "messages";
 const MESSAGE: &'static str = "MESSAGE";
 
