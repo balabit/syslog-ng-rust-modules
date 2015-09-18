@@ -5,7 +5,6 @@ use rustc_serialize::json::{
     ToJson
 };
 use std::collections::BTreeMap;
-use std::rc::Rc;
 
 impl<'a> ToJson for &'a Message {
     fn to_json(&self) -> Json {
