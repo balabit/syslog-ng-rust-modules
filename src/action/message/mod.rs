@@ -11,7 +11,6 @@ use message::{
 use handlebars::{
     Context,
     Handlebars,
-    Template
 };
 use std::borrow::Borrow;
 use std::cell::RefCell;
@@ -28,12 +27,12 @@ mod test;
 
 pub const CONTEXT_UUID: &'static str = ".context.uuid";
 pub const CONTEXT_NAME: &'static str = ".context.name";
+const MESSAGE_KEY: &'static str = "MESSAGE";
 
 pub struct MessageAction {
     sender: Rc<RefCell<Box<ResponseSender<Response>>>>,
     uuid: String,
     name: Option<String>,
-    message: Template,
     values: Handlebars
 }
 
@@ -44,12 +43,12 @@ impl MessageAction {
         for (name, template) in values.into_iter() {
             handlebars.register_template(&name, template);
         }
+        handlebars.register_template(MESSAGE_KEY, message);
 
         MessageAction {
             sender: sender,
             uuid: uuid,
             name: name,
-            message: message,
             values: handlebars
         }
     }
@@ -79,9 +78,10 @@ impl MessageAction {
             Context::wraps(&context)
         };
 
-        let rendered_values = try!(self.render_values(&template_context));
+        let mut rendered_values = try!(self.render_values(&template_context));
+        let message = rendered_values.remove(MESSAGE_KEY).expect(&format!("There is no '{}' key in the renderer key-value pairs", MESSAGE_KEY));
         let name = self.name.as_ref().map(|name| name.borrow());
-        let message = MessageBuilder::new(&self.uuid, "moricka message")
+        let message = MessageBuilder::new(&self.uuid, message)
                         .name(name)
                         .values(rendered_values)
                         .build();
