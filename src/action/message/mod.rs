@@ -29,7 +29,7 @@ pub const CONTEXT_UUID: &'static str = "context.uuid";
 pub const CONTEXT_NAME: &'static str = "context.name";
 pub const CONTEXT_LEN: &'static str = "context.len";
 pub const MESSAGES: &'static str = "messages";
-const MESSAGE_KEY: &'static str = "MESSAGE";
+const MESSAGE: &'static str = "MESSAGE";
 
 pub struct MessageAction {
     sender: Rc<RefCell<Box<ResponseSender<Response>>>>,
@@ -45,7 +45,7 @@ impl MessageAction {
         for (name, template) in values.into_iter() {
             handlebars.register_template(&name, template);
         }
-        handlebars.register_template(MESSAGE_KEY, message);
+        handlebars.register_template(MESSAGE, message);
 
         MessageAction {
             sender: sender,
@@ -81,7 +81,7 @@ impl MessageAction {
         };
 
         let mut rendered_values = try!(self.render_values(&template_context));
-        let message = rendered_values.remove(MESSAGE_KEY).expect(&format!("There is no '{}' key in the renderer key-value pairs", MESSAGE_KEY));
+        let message = rendered_values.remove(MESSAGE).expect(&format!("There is no '{}' key in the renderer key-value pairs", MESSAGE));
         let name = self.name.as_ref().map(|name| name.borrow());
         let message = MessageBuilder::new(&self.uuid, message)
                         .name(name)
