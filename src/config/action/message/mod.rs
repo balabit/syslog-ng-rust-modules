@@ -13,7 +13,7 @@ pub struct MessageAction {
     pub uuid: String,
     pub name: Option<String>,
     pub message: Template,
-    pub values: BTreeMap<String, String>
+    pub values: BTreeMap<String, Template>
 }
 
 impl MessageAction {
@@ -26,7 +26,7 @@ impl MessageAction {
     pub fn message(&self) -> &Template {
         &self.message
     }
-    pub fn values(&self) -> &BTreeMap<String, String> {
+    pub fn values(&self) -> &BTreeMap<String, Template> {
         &self.values
     }
 }

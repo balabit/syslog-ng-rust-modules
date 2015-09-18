@@ -53,6 +53,18 @@ impl Deserialize for Field {
 
 struct MessageActionVisitor;
 
+impl MessageActionVisitor {
+    fn compile_template<V>(template_string: String, uuid: &String) -> Result<Template, V::Error>
+        where V: MapVisitor {
+        match Template::compile(template_string) {
+            Ok(message) => Ok(message),
+            Err(error) => {
+                return Err(Error::syntax(&format!("Invalid handlebars template in 'message' field: uuid={}, error={}", &uuid, error)));
+            }
+        }
+    }
+}
+
 impl Visitor for MessageActionVisitor {
     type Value = MessageAction;
 
@@ -62,7 +74,7 @@ impl Visitor for MessageActionVisitor {
         let mut name = None;
         let mut uuid = None;
         let mut message: Option<String> = None;
-        let mut values = None;
+        let mut values: Option<BTreeMap<String, String>> = None;
 
         loop {
             match try!(visitor.visit_key()) {
@@ -81,12 +93,7 @@ impl Visitor for MessageActionVisitor {
 
         let message = match message {
             Some(message) => {
-                match Template::compile(message) {
-                    Ok(message) => message,
-                    Err(error) => {
-                        return Err(Error::syntax(&format!("Invalid handlebars template in 'message' field: uuid={}, error={}", &uuid, error)));
-                    }
-                }
+                try!(MessageActionVisitor::compile_template::<V>(message, &uuid))
             },
             None => {
                 error!("Missing 'message' field: uuid={}", &uuid);
@@ -95,7 +102,14 @@ impl Visitor for MessageActionVisitor {
         };
 
         let values = match values {
-            Some(values) => values,
+            Some(values) => {
+                let mut converted_values = BTreeMap::new();
+                for (key, value) in values.into_iter() {
+                    let template = try!(MessageActionVisitor::compile_template::<V>(value, &uuid));
+                    converted_values.insert(key, template);
+                }
+                converted_values
+            },
             None => BTreeMap::new()
         };
 
@@ -136,10 +150,12 @@ mod test {
         "#;
 
         let message = Template::compile("message".to_string()).ok().expect("Failed to compile a handlebars template");
+        let value1 = Template::compile("value1".to_string()).ok().expect("Failed to compile a handlebars template");
+        let value2 = Template::compile("value2".to_string()).ok().expect("Failed to compile a handlebars template");
         let expected_message = MessageActionBuilder::new("UUID", message)
                                         .name("NAME")
-                                        .pair("key1", "value1")
-                                        .pair("key2", "value2")
+                                        .pair("key1", value1)
+                                        .pair("key2", value2)
                                         .build();
         let result = from_str::<MessageAction>(text);
         println!("{:?}", &result);

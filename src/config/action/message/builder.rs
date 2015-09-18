@@ -6,7 +6,7 @@ pub struct MessageActionBuilder {
     uuid: String,
     name: Option<String>,
     message: Template,
-    values: BTreeMap<String, String>
+    values: BTreeMap<String, Template>
 }
 
 impl MessageActionBuilder {
@@ -24,8 +24,8 @@ impl MessageActionBuilder {
         self
     }
 
-    pub fn pair(&mut self, key: &str, value: &str) -> &mut MessageActionBuilder {
-        self.values.insert(key.to_string(), value.to_string());
+    pub fn pair(&mut self, key: &str, value: Template) -> &mut MessageActionBuilder {
+        self.values.insert(key.to_string(), value);
         self
     }
 
