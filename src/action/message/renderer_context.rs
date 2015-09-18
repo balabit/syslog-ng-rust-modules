@@ -1,4 +1,7 @@
 use message::Message;
+use state::State;
+use context::BaseContext;
+
 use uuid::Uuid;
 use rustc_serialize::json::{
     Json,
@@ -7,16 +10,28 @@ use rustc_serialize::json::{
 use std::collections::BTreeMap;
 use std::rc::Rc;
 
-pub struct RendererContext<'m, 'n, 'u> {
-    messages: &'m Vec<Rc<Message>>,
-    context_name: &'n String,
-    context_uuid: &'u Uuid
+pub struct RendererContext<'m, 'c> {
+    messages: &'m [Rc<Message>],
+    context_name: Option<&'c String>,
+    context_uuid: &'c Uuid
 }
 
-impl<'m, 'n, 'u> ToJson for RendererContext<'m, 'n, 'u> {
+impl<'m, 'c> RendererContext<'m, 'c> {
+    pub fn new<'a>(state: &'m State, context: &'c BaseContext) -> RendererContext<'m, 'c> {
+        RendererContext {
+            messages: state.messages(),
+            context_name: context.name(),
+            context_uuid: context.uuid()
+        }
+    }
+}
+
+impl<'m, 'c> ToJson for RendererContext<'m, 'c> {
     fn to_json(&self) -> Json {
         let mut m: BTreeMap<String, Json> = BTreeMap::new();
-        m.insert("context.name".to_string(), self.context_name.to_json());
+        if let Some(name) = self.context_name {
+            m.insert("context.name".to_string(), name.to_json());
+        }
         m.insert("context.uuid".to_string(), self.context_uuid.to_hyphenated_string().to_json());
         m.insert("messages".to_string(), rc_message_to_json(self.messages));
         m.to_json()
