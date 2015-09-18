@@ -15,6 +15,5 @@ serde_json = "0.6"
 handlebars = "0.10"
 rustc-serialize = "0.3"
 log = "0.3"
-
-[dev-dependencies]
 env_logger = "0.3.1"
+

@@ -1,5 +1,6 @@
 #[macro_use]
 extern crate maplit;
+extern crate env_logger;
 extern crate uuid;
 extern crate serde;
 extern crate serde_json;
