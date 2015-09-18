@@ -24,6 +24,10 @@ impl Message {
         self.name.as_ref()
     }
 
+    pub fn message(&self) -> &String {
+        &self.message
+    }
+
     pub fn get(&self, key: &str) -> Option<&String> {
         self.values.get(key)
     }
