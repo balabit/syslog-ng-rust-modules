@@ -9,6 +9,8 @@ use message::{
 };
 
 use handlebars::{
+    Context,
+    Handlebars,
     Template
 };
 use std::borrow::Borrow;
@@ -16,6 +18,8 @@ use std::cell::RefCell;
 use std::collections::BTreeMap;
 use std::rc::Rc;
 use state::State;
+use self::error::Error;
+use self::renderer_context::RendererContext;
 
 mod error;
 mod renderer_context;
@@ -30,19 +34,58 @@ pub struct MessageAction {
     uuid: String,
     name: Option<String>,
     message: Template,
-    values: BTreeMap<String, String>
+    values: Handlebars
 }
 
 impl MessageAction {
     pub fn new(sender: Rc<RefCell<Box<ResponseSender<Response>>>>, action: config::action::MessageAction) -> MessageAction {
         let config::action::MessageAction { uuid, name, message, values } = action;
+        let mut handlebars = Handlebars::new();
+        for (name, template) in values.into_iter() {
+            handlebars.register_template(&name, template);
+        }
+
         MessageAction {
             sender: sender,
             uuid: uuid,
             name: name,
             message: message,
-            values: values
+            values: handlebars
         }
+    }
+
+    fn render_value(&self, key: &String, template_context: &Context) -> Result<String, Error> {
+        let mut writer = Vec::new();
+        {
+            try!(self.values.renderw(key, &template_context, &mut writer));
+        }
+        let string = try!(String::from_utf8(writer));
+        Ok(string)
+    }
+
+    fn render_values(&self, template_context: &Context) -> Result<BTreeMap<String, String>, Error> {
+        let mut rendered_values = BTreeMap::new();
+        for (key, _) in self.values.get_templates() {
+            let rendered_value = try!(self.render_value(key, &template_context));
+            rendered_values.insert(key.to_string(), rendered_value);
+        }
+        Ok(rendered_values)
+    }
+
+    fn render_message(&self, state: &State, context: &BaseContext) -> Result<Message, Error> {
+        let template_context = {
+            use handlebars::Context;
+            let context = RendererContext::new(state, context);
+            Context::wraps(&context)
+        };
+
+        let rendered_values = try!(self.render_values(&template_context));
+        let name = self.name.as_ref().map(|name| name.borrow());
+        let message = MessageBuilder::new(&self.uuid, "moricka message")
+                        .name(name)
+                        .values(rendered_values)
+                        .build();
+        Ok(message)
     }
 }
 
@@ -60,19 +103,21 @@ impl MessageResponse {
 impl Action for MessageAction {
     fn execute(&self, _state: &State, _context: &BaseContext) {
         trace!("MessageAction: executed");
-        let name = self.name.as_ref().map(|name| name.borrow());
-        let mut message = MessageBuilder::new(&self.uuid, "moricka message")
-                        .name(name)
-                        .values(self.values.clone())
-                        .build();
-        message.insert(".context.uuid", &_context.uuid().to_hyphenated_string());
-        message.insert(".context.len", &_state.messages().len().to_string());
-        if let Some(name) = _context.name() {
-            message.insert(".context.name", name);
+        match self.render_message(_state, _context) {
+            Ok(mut message) => {
+                message.insert(".context.uuid", &_context.uuid().to_hyphenated_string());
+                message.insert(".context.len", &_state.messages().len().to_string());
+                if let Some(name) = _context.name() {
+                    message.insert(".context.name", name);
+                }
+                let response = MessageResponse {
+                    message: message,
+                };
+                self.sender.borrow_mut().send_response(Response::Message(response));
+            },
+            Err(error) => {
+                error!("{}", error);
+            }
         }
-        let response = MessageResponse {
-            message: message,
-        };
-        self.sender.borrow_mut().send_response(Response::Message(response));
     }
 }
