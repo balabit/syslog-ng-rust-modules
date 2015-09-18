@@ -1,4 +1,5 @@
 use std::collections::BTreeMap;
+use std::convert::Into;
 use super::Message;
 
 pub struct MessageBuilder {
@@ -9,11 +10,11 @@ pub struct MessageBuilder {
 }
 
 impl MessageBuilder {
-    pub fn new(uuid: &str, message: &str) -> MessageBuilder {
+    pub fn new<S: Into<String>>(uuid: &str, message: S) -> MessageBuilder {
         MessageBuilder {
             uuid: uuid.to_string(),
             name: None,
-            message: message.to_string(),
+            message: message.into(),
             values: BTreeMap::new()
         }
     }
