@@ -23,10 +23,9 @@ impl TimerEventHandler {
 
 impl reactor::EventHandler<InternalRequest> for TimerEventHandler {
     fn handle_event(&mut self, event: InternalRequest) {
-            let event: InternalRequest = event.into();
-            for i in self.contexts.iter_mut() {
-                i.borrow_mut().handle_event(event.clone());
-            }
+        for i in self.contexts.iter_mut() {
+            i.borrow_mut().handle_event(event.clone());
+        }
     }
     fn handler(&self) -> RequestHandler {
         RequestHandler::Timer
