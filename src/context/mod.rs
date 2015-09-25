@@ -4,8 +4,10 @@ pub use self::linear::LinearContext;
 pub use self::map::MapContext;
 pub use self::base::BaseContext;
 pub use self::base::BaseContextBuilder;
+pub use self::context_map::ContextMap;
 
 pub mod base;
+pub mod context_map;
 pub mod event;
 pub mod linear;
 pub mod map;
