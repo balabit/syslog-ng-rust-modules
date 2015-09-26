@@ -53,6 +53,10 @@ impl LinearContext {
     pub fn patterns(&self) -> &[String] {
         &self.base.conditions().patterns
     }
+
+    pub fn uuid(&self) -> &Uuid {
+        self.base.uuid()
+    }
 }
 
 impl From<BaseContext> for LinearContext {
