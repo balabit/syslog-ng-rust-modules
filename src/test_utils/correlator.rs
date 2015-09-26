@@ -4,7 +4,7 @@ use Response;
 use std::rc::Rc;
 use std::cell::RefCell;
 
-use reactor::EventHandler;
+use correlator::EventHandler;
 use action::MessageResponse;
 
 pub struct MessageEventHandler {

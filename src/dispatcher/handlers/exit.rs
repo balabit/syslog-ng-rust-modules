@@ -1,6 +1,7 @@
 use std::cell::RefCell;
 use std::rc::Rc;
 
+use context::ContextMap;
 use dispatcher::response::ResponseSender;
 use dispatcher::Response;
 use dispatcher::request::{Request, RequestHandler};
@@ -24,8 +25,8 @@ impl ExitEventHandler {
     }
 }
 
-impl EventHandler<Request<Rc<Message>>> for ExitEventHandler {
-    fn handle_event(&mut self, event: Request<Rc<Message>>) {
+impl EventHandler<Request<Rc<Message>>, ContextMap> for ExitEventHandler {
+    fn handle_event(&mut self, event: Request<Rc<Message>>, _: &mut ContextMap) {
         if let Request::Exit = event {
             self.stops += 1;
             self.response_handler.borrow_mut().send_response(Response::Exit);

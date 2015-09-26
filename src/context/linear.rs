@@ -2,7 +2,6 @@ use uuid::Uuid;
 use std::rc::Rc;
 
 use conditions::Conditions;
-use context::event::{EventHandler};
 use message::{Message};
 use state::State;
 use timer::TimerEvent;
@@ -65,14 +64,5 @@ impl From<BaseContext> for LinearContext {
             base: context,
             state: State::new()
         }
-    }
-}
-
-impl EventHandler<InternalRequest> for LinearContext {
-    fn handlers(&self) -> &[String] {
-        self.patterns()
-    }
-    fn handle_event(&mut self, event: InternalRequest) {
-        self.on_event(event);
     }
 }

@@ -9,7 +9,6 @@ use message::{Message};
 use state::State;
 use timer::TimerEvent;
 use context::base::BaseContext;
-use context::event::EventHandler;
 use dispatcher::request::{Request, InternalRequest};
 
 const CONTEXT_ID: &'static str = ".context.id";
@@ -85,14 +84,5 @@ impl MapContext {
 
     pub fn patterns(&self) -> &[String] {
         &self.base.conditions().patterns
-    }
-}
-
-impl EventHandler<InternalRequest> for MapContext {
-    fn handlers(&self) -> &[String] {
-        self.patterns()
-    }
-    fn handle_event(&mut self, event: InternalRequest) {
-        self.on_event(event);
     }
 }

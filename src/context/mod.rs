@@ -8,7 +8,6 @@ pub use self::context_map::ContextMap;
 
 pub mod base;
 pub mod context_map;
-pub mod event;
 pub mod linear;
 pub mod map;
 #[cfg(test)]
@@ -18,12 +17,18 @@ pub enum Context {
     Linear(LinearContext),
     Map(MapContext)
 }
+impl Context {
+    pub fn on_event(&mut self, event: InternalRequest) {
+        match *self {
+            Context::Linear(ref mut context) => context.on_event(event),
+            Context::Map(ref mut context) => context.on_event(event),
+        }
+    }
 
-impl From<Context> for Box<self::event::EventHandler<InternalRequest>> {
-    fn from(context: Context) -> Box<self::event::EventHandler<InternalRequest>> {
-        match context {
-            Context::Linear(context) => Box::new(context),
-            Context::Map(context) => Box::new(context),
+    pub fn patterns(&self) -> &[String] {
+        match *self {
+            Context::Linear(ref context) => context.patterns(),
+            Context::Map(ref context) => context.patterns()
         }
     }
 }

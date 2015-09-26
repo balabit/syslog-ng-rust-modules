@@ -11,17 +11,17 @@ use std::result::Result;
 use {action, config, context, Message, MiliSec, Response};
 use condition::Condition;
 use context::base::BaseContextBuilder;
-use context::{Context};
+use context::{Context, ContextMap};
 use context::linear::LinearContext;
 use context::map::MapContext;
-use dispatcher::request::{InternalRequest, Request};
+use dispatcher::request::{Request};
 use dispatcher::reactor::RequestReactor;
 use dispatcher::{ResponseSender, ResponseHandler};
 use dispatcher::response;
 use dispatcher::demux::Demultiplexer;
 use dispatcher::handlers;
 pub use self::error::Error;
-use reactor::{Event, EventHandler, Reactor};
+use reactor::{Event, Reactor};
 use timer::Timer;
 
 const TIMER_STEP: MiliSec = 100;
@@ -32,6 +32,11 @@ pub mod error;
 mod exit_handler;
 #[cfg(test)]
 mod test;
+
+pub trait EventHandler<T: Event> {
+    fn handle_event(&mut self, event: T);
+    fn handler(&self) -> T::Handler;
+}
 
 pub struct Correlator {
     dispatcher_input_channel: mpsc::Sender<Request<Message>>,
@@ -59,15 +64,13 @@ fn create_context(config_context: config::Context, response_sender: Rc<RefCell<B
     }
 }
 
-fn create_event_handlers(contexts: Vec<config::Context>, response_sender: Rc<RefCell<Box<response::ResponseSender<Response>>>>) -> Vec<Rc<RefCell<Box<context::event::EventHandler<InternalRequest>>>>> {
-    let mut event_handlers = Vec::new();
+fn create_context_map(contexts: Vec<config::Context>, response_sender: Rc<RefCell<Box<response::ResponseSender<Response>>>>) -> ContextMap {
+    let mut context_map = ContextMap::new();
     for i in contexts.into_iter() {
         let context: context::Context = create_context(i, response_sender.clone());
-        let event_handler: Box<context::event::EventHandler<InternalRequest>> = context.into();
-        let handler = Rc::new(RefCell::new(event_handler));
-        event_handlers.push(handler);
+        context_map.insert(context);
     }
-    event_handlers
+    context_map
 }
 
 impl Correlator {
@@ -88,21 +91,15 @@ impl Correlator {
         let handle = thread::spawn(move || {
             let dmux = Demultiplexer::new(rx);
             let exit_condition = Condition::new(false);
-            let mut reactor = RequestReactor::new(dmux, exit_condition.clone());
             let response_sender = Box::new(ResponseSender::new(dispatcher_output_channel_tx)) as Box<response::ResponseSender<Response>>;
             let response_sender = Rc::new(RefCell::new(response_sender));
 
-            let exit_handler = Box::new(handlers::exit::ExitEventHandler::new(exit_condition, response_sender.clone()));
-            let mut timer_event_handler = Box::new(handlers::timer::TimerEventHandler::new());
-            let mut message_event_handler = Box::new(handlers::message::MessageEventHandler::new());
+            let exit_handler = Box::new(handlers::exit::ExitEventHandler::new(exit_condition.clone(), response_sender.clone()));
+            let timer_event_handler = Box::new(handlers::timer::TimerEventHandler::new());
+            let message_event_handler = Box::new(handlers::message::MessageEventHandler::new());
 
-            let event_handlers = create_event_handlers(contexts, response_sender);
-
-            for i in event_handlers {
-                timer_event_handler.register_handler(i.clone());
-                message_event_handler.register_handler(i.clone())
-            }
-
+            let context_map = create_context_map(contexts, response_sender);
+            let mut reactor = RequestReactor::new(dmux, exit_condition, context_map);
             reactor.register_handler(exit_handler);
             reactor.register_handler(timer_event_handler);
             reactor.register_handler(message_event_handler);

@@ -5,7 +5,7 @@ use message::Message;
 use condition::Condition;
 use dispatcher::request::Request;
 use dispatcher::{ResponseHandler};
-use reactor::EventHandler;
+use correlator::EventHandler;
 
 pub struct ExitHandler {
     channel: mpsc::Sender<Request<Message>>,
