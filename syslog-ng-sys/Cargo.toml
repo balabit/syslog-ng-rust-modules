@@ -1,0 +1,16 @@
+[package]
+name = "syslog-ng-sys"
+version = "0.1.0"
+authors = ["tibi"]
+build = "build.rs"
+links = "syslog-ng"
+
+[lib]
+name = "syslog_ng_sys"
+
+[dependencies]
+libc = "*"
+log = "*"
+
+[build-dependencies]
+pkg-config = "0.3.5"
