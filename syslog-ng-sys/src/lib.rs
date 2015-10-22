@@ -6,12 +6,10 @@ pub mod types;
 pub mod logmsg;
 pub mod ffi;
 mod cfg;
-mod messages;
-mod logger;
+pub mod messages;
 
 pub use types::*;
 pub use logmsg::*;
 pub use ffi::*;
 pub use cfg::*;
 pub use messages::*;
-pub use logger::InternalLogger;
