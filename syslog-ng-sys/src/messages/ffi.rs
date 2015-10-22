@@ -1,7 +1,6 @@
 use ::types::*;
 
-#[repr(C)]
-struct EVTREC;
+pub enum EVTREC {}
 
 #[link(name = "syslog-ng")]
 extern "C" {

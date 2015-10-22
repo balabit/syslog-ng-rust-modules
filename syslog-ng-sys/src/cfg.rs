@@ -1,8 +1,7 @@
 use ::types::*;
 use ::ffi::from_c_str_to_borrowed_str;
 
-#[repr(C)]
-pub struct GlobalConfig;
+pub enum GlobalConfig {}
 
 #[link(name = "syslog-ng")]
 extern "C" {
@@ -81,4 +80,3 @@ fn hex_version_when_converted_to_major_version_works() {
     let (major, _) = GlobalConfig::convert_version(version);
     assert_eq!(major, 3);
 }
-
