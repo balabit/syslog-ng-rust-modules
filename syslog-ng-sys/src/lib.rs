@@ -3,7 +3,6 @@ extern crate libc;
 extern crate log;
 
 pub mod types;
-pub mod filter;
 pub mod parser;
 pub mod logmsg;
 pub mod ffi;
@@ -12,7 +11,6 @@ mod messages;
 mod logger;
 
 pub use types::*;
-pub use filter::*;
 pub use parser::*;
 pub use logmsg::*;
 pub use ffi::*;
