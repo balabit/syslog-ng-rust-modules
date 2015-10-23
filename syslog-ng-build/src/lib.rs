@@ -102,7 +102,7 @@ fn compile_and_link_module<P: AsRef<Path>>(dest_path: P) {
             compiler.include("/home/tibi/workspace/syslog-ng/b")
                 .flag("-c")
                 .file(dest_path)
-                .compile("libsyslog-ng-rust-module.a");
+                .compile("librust-module.a");
         },
         Err(err) => {
             println!("{}", err);
