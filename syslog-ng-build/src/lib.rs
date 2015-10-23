@@ -100,12 +100,8 @@ fn compile_and_link_module<P: AsRef<Path>>(dest_path: P) {
             }
 
             compiler.include("/home/tibi/workspace/syslog-ng/b")
-                .include("/home/tibi/workspace/syslog-ng/b/lib");
-            compiler.flag("-c")
+                .flag("-c")
                 .file(dest_path)
-                .include("/usr/include/glib-2.0")
-                .include("/usr/lib/x86_64-linux-gnu/glib-2.0/include")
-                .include("/usr/include/eventlog")
                 .compile("libsyslog-ng-rust-module.a");
         },
         Err(err) => {
