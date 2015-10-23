@@ -1,0 +1,10 @@
+[package]
+name = "syslog-ng-common"
+version = "0.1.0"
+authors = ["Tibor Benke <ihrwein@gmail.com>"]
+
+[dependencies]
+log = "0.3"
+
+[dependencies.syslog-ng-sys]
+path="../syslog-ng-sys"
