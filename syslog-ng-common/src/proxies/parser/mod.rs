@@ -1,6 +1,9 @@
 use syslog_ng_sys::LogMessage;
 use syslog_ng_sys::LogParser;
 
+mod option_error;
+pub use self::option_error::OptionError;
+
 #[repr(C)]
 #[derive(Clone)]
 pub struct RustParserProxy<P> where P: RustParser {
@@ -47,12 +50,6 @@ impl<P> RustParserProxy<P> where P: RustParser {
         let builder = self.builder.as_mut().expect("Failed to get a builder on a new parser proxy instance");
         builder.parent(parent);
     }
-}
-
-#[derive(Debug)]
-pub enum OptionError {
-    MissingRequiredOption(String),
-    InvalidValue{value: String, expected_value: String}
 }
 
 pub trait RustParserBuilder: Clone {
