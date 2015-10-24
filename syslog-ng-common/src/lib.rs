@@ -8,5 +8,6 @@ extern crate syslog_ng_sys;
 pub mod proxies;
 pub mod logger;
 pub mod messages;
+pub mod formatter;
 
 pub mod sys;
