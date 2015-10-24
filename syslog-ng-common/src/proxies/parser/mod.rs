@@ -26,7 +26,6 @@ macro_rules! parser_plugin {
     ($name:ty) => {
 
 pub mod _parser_plugin {
-    extern crate syslog_ng_sys;
     use $crate::sys::{c_int, c_char, ssize_t};
     use $crate::sys::{from_c_str_to_owned_string, from_c_str_to_borrowed_str};
     use $crate::sys::LogMessage;
