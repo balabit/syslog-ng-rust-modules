@@ -52,7 +52,7 @@ fn create_module_info(canonical_name: &str, description: &str) -> String {
 const ModuleInfo module_info =
 {{
   .canonical_name = "{name}",
-  .version = VERSION,
+  .version = SYSLOG_NG_VERSION,
   .description = "{description}",
   .core_revision = VERSION_CURRENT_VER_ONLY,
   .plugins = rust_plugins,
@@ -99,8 +99,7 @@ fn compile_and_link_module<P: AsRef<Path>>(dest_path: P) {
                 compiler.include(i);
             }
 
-            compiler.include("/home/tibi/workspace/syslog-ng/b")
-                .flag("-c")
+            compiler.flag("-c")
                 .file(dest_path)
                 .compile("librust-module.a");
         },
