@@ -12,7 +12,7 @@ pub mod reactor;
 #[derive(Debug)]
 pub enum Response {
     Exit,
-    Message(MessageResponse)
+    Message(MessageResponse),
 }
 
 #[derive(Debug, Eq, Hash, PartialEq)]
@@ -26,20 +26,18 @@ impl Event for Response {
     fn handler(&self) -> Self::Handler {
         match *self {
             Response::Exit => ResponseHandler::Exit,
-            Response::Message(_) => ResponseHandler::Message
+            Response::Message(_) => ResponseHandler::Message,
         }
     }
 }
 
 pub struct ResponseSender {
-    sender: Sender<Response>
+    sender: Sender<Response>,
 }
 
 impl ResponseSender {
     pub fn new(sender: Sender<Response>) -> ResponseSender {
-        ResponseSender {
-            sender: sender
-        }
+        ResponseSender { sender: sender }
     }
 }
 

@@ -15,7 +15,7 @@ mod test;
 
 pub enum Context {
     Linear(LinearContext),
-    Map(MapContext)
+    Map(MapContext),
 }
 impl Context {
     pub fn on_event(&mut self, event: InternalRequest) {
@@ -28,7 +28,7 @@ impl Context {
     pub fn patterns(&self) -> &[String] {
         match *self {
             Context::Linear(ref context) => context.patterns(),
-            Context::Map(ref context) => context.patterns()
+            Context::Map(ref context) => context.patterns(),
         }
     }
 }

@@ -10,16 +10,19 @@ pub struct RequestReactor {
     handlers: BTreeMap<RequestHandler, Box<EventHandler<InternalRequest, ContextMap>>>,
     demultiplexer: Demultiplexer<ExternalRequest>,
     exit_condition: Condition,
-    context_map: ContextMap
+    context_map: ContextMap,
 }
 
 impl RequestReactor {
-    pub fn new(demultiplexer: Demultiplexer<ExternalRequest>, exit_condition: Condition, context_map: ContextMap) -> RequestReactor {
+    pub fn new(demultiplexer: Demultiplexer<ExternalRequest>,
+               exit_condition: Condition,
+               context_map: ContextMap)
+               -> RequestReactor {
         RequestReactor {
             demultiplexer: demultiplexer,
             exit_condition: exit_condition,
             context_map: context_map,
-            handlers: BTreeMap::new()
+            handlers: BTreeMap::new(),
         }
     }
 }

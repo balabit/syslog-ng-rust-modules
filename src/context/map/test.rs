@@ -1,8 +1,5 @@
 use conditions::ConditionsBuilder;
-use context::{
-    BaseContextBuilder,
-    MapContext,
-};
+use context::{BaseContextBuilder, MapContext};
 use timer::TimerEvent;
 use message::MessageBuilder;
 
@@ -33,20 +30,20 @@ fn test_given_map_context_when_messages_have_the_same_kvpairs_then_they_go_to_th
         MapContext::new(base_context, context_id)
     };
     let msg1 = MessageBuilder::new(&msg_id1, "message")
-                                .pair("HOST", "host")
-                                .pair("PROGRAM", "program")
-                                .pair("PID", "pid")
-                                .build();
+                   .pair("HOST", "host")
+                   .pair("PROGRAM", "program")
+                   .pair("PID", "pid")
+                   .build();
     let msg2 = MessageBuilder::new(&msg_id2, "message")
-                                .pair("HOST", "host2")
-                                .pair("PROGRAM", "program2")
-                                .pair("PID", "pid2")
-                                .build();
+                   .pair("HOST", "host2")
+                   .pair("PROGRAM", "program2")
+                   .pair("PID", "pid2")
+                   .build();
     let msg3 = MessageBuilder::new(&msg_id3, "message")
-                                .pair("HOST", "host")
-                                .pair("PROGRAM", "program")
-                                .pair("PID", "pid")
-                                .build();
+                   .pair("HOST", "host")
+                   .pair("PROGRAM", "program")
+                   .pair("PID", "pid")
+                   .build();
 
     assert_false!(context.is_open());
     context.on_message(Rc::new(msg1));

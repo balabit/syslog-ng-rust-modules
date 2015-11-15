@@ -24,11 +24,11 @@ fn main() {
                                                 .last_closes(true)
                                                 .build();
     let actions = vec![ ];
-    let contexts = vec!{
+    let contexts = vec![
         config::ContextBuilder::new(Uuid::new_v4(), condition.clone()).actions(actions.clone()).build(),
         config::ContextBuilder::new(Uuid::new_v4(), condition.clone()).actions(actions.clone()).build(),
         config::ContextBuilder::new(Uuid::new_v4(), condition.clone()).actions(actions.clone()).build(),
-    };
+    ];
     let mut correlator = Correlator::new(contexts);
     let _ = correlator.push_message(MessageBuilder::new(&uuid1, "message").build());
     thread::sleep_ms(20);

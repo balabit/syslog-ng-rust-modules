@@ -4,26 +4,30 @@ use context::Context;
 
 pub struct ContextMap {
     map: HashMap<String, Vec<usize>>,
-    contexts: Vec<Context>
+    contexts: Vec<Context>,
 }
 
 impl ContextMap {
     pub fn new() -> ContextMap {
         ContextMap {
             map: HashMap::new(),
-            contexts: Vec::new()
+            contexts: Vec::new(),
         }
     }
 
     pub fn insert(&mut self, context: Context) {
         self.contexts.push(context);
-        let last_context = self.contexts.last().expect("Failed to remove the last Context from a non empty vector");
+        let last_context = self.contexts
+                               .last()
+                               .expect("Failed to remove the last Context from a non empty vector");
         let index_of_last_context = self.contexts.len() - 1;
         let patterns = last_context.patterns();
         ContextMap::update_indices(&mut self.map, index_of_last_context, patterns);
     }
 
-    fn update_indices(map: &mut HashMap<String, Vec<usize>>, new_index: usize, patterns: &[String]) {
+    fn update_indices(map: &mut HashMap<String, Vec<usize>>,
+                      new_index: usize,
+                      patterns: &[String]) {
         if patterns.is_empty() {
             ContextMap::add_index_to_every_index_vectors(map, new_index);
         } else {
@@ -37,7 +41,9 @@ impl ContextMap {
         }
     }
 
-    fn add_index_to_looked_up_index_vectors(map: &mut HashMap<String, Vec<usize>>, new_index: usize, patterns: &[String]) {
+    fn add_index_to_looked_up_index_vectors(map: &mut HashMap<String, Vec<usize>>,
+                                            new_index: usize,
+                                            patterns: &[String]) {
         for i in patterns {
             map.entry(i.clone()).or_insert(Vec::new()).push(new_index);
         }
@@ -52,7 +58,7 @@ impl ContextMap {
         Iterator {
             ids: ids,
             pos: 0,
-            contexts: &mut self.contexts
+            contexts: &mut self.contexts,
         }
     }
 }
@@ -65,7 +71,7 @@ pub trait StreamingIterator {
 pub struct Iterator<'a> {
     ids: Option<&'a Vec<usize>>,
     pos: usize,
-    contexts: &'a mut Vec<Context>
+    contexts: &'a mut Vec<Context>,
 }
 
 impl<'a> StreamingIterator for Iterator<'a> {
@@ -89,10 +95,7 @@ mod tests {
     use super::*;
 
     use conditions::ConditionsBuilder;
-    use context::{
-        Context,
-        LinearContext
-    };
+    use context::{Context, LinearContext};
     use uuid::Uuid;
 
     fn assert_conext_map_contains_uuid(context_map: &mut ContextMap, uuid: &Uuid, key: &String) {
@@ -106,8 +109,9 @@ mod tests {
     }
 
     #[test]
-    fn test_given_context_map_when_a_context_is_inserted_then_its_patters_are_inserted_to_the_map_with_its_id() {
-        let mut context_map  = ContextMap::new();
+    fn test_given_context_map_when_a_context_is_inserted_then_its_patters_are_inserted_to_the_map_with_its_id
+        () {
+        let mut context_map = ContextMap::new();
         let uuid = Uuid::new_v4();
         let context1 = {
             let conditions = {

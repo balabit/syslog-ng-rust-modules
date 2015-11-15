@@ -12,15 +12,17 @@ use reactor::EventHandler;
 pub struct ExitEventHandler {
     condition: Condition,
     response_handler: Rc<RefCell<Box<ResponseSender<Response>>>>,
-    stops: u32
+    stops: u32,
 }
 
 impl ExitEventHandler {
-    pub fn new(condition: Condition, response_handler: Rc<RefCell<Box<ResponseSender<Response>>>>) -> ExitEventHandler {
+    pub fn new(condition: Condition,
+               response_handler: Rc<RefCell<Box<ResponseSender<Response>>>>)
+               -> ExitEventHandler {
         ExitEventHandler {
             condition: condition,
             response_handler: response_handler,
-            stops: 0
+            stops: 0,
         }
     }
 }

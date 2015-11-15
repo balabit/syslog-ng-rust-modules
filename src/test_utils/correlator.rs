@@ -8,7 +8,7 @@ use correlator::EventHandler;
 use action::MessageResponse;
 
 pub struct MessageEventHandler {
-    pub responses: Rc<RefCell<Vec<MessageResponse>>>
+    pub responses: Rc<RefCell<Vec<MessageResponse>>>,
 }
 
 impl EventHandler<Response> for MessageEventHandler {

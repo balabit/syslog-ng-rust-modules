@@ -1,12 +1,6 @@
 use config::action::ActionType;
 use config::Context;
-use serde::de::{
-    Deserialize,
-    Deserializer,
-    MapVisitor,
-    Error,
-    Visitor
-};
+use serde::de::{Deserialize, Deserializer, MapVisitor, Error, Visitor};
 
 use handlebars::Template;
 use uuid::Uuid;
@@ -60,24 +54,31 @@ struct ContextVisitor;
 
 impl ContextVisitor {
     fn parse_uuid<V>(uuid: Option<String>) -> Result<Uuid, V::Error>
-        where V: MapVisitor {
+        where V: MapVisitor
+    {
         match uuid {
             Some(value) => {
                 match Uuid::parse_str(&value) {
                     Ok(uuid) => Ok(uuid),
                     Err(err) => {
-                        return Err(Error::syntax(&format!("Failed to parse field 'uuid': uuid={} error={}", value, err)));
+                        return Err(Error::syntax(&format!("Failed to parse field 'uuid': \
+                                                           uuid={} error={}",
+                                                          value,
+                                                          err)));
                     }
                 }
-            },
+            }
             None => {
                 return Err(Error::missing_field("uuid"));
             }
         }
     }
 
-    fn deser_context_id<V>(context_id: Option<String>, uuid: &Uuid) -> Result<Option<Template>, V::Error>
-        where V: MapVisitor {
+    fn deser_context_id<V>(context_id: Option<String>,
+                           uuid: &Uuid)
+                           -> Result<Option<Template>, V::Error>
+        where V: MapVisitor
+    {
         if let Some(context_id) = context_id {
             ContextVisitor::parse_context_id::<V>(context_id, uuid)
         } else {
@@ -86,21 +87,26 @@ impl ContextVisitor {
     }
 
     fn parse_context_id<V>(context_id: String, uuid: &Uuid) -> Result<Option<Template>, V::Error>
-        where V: MapVisitor {
+        where V: MapVisitor
+    {
         match Template::compile(context_id) {
             Ok(context_id) => Ok(Some(context_id)),
             Err(err) => {
-                let errmsg = format!("Invalid handlebars template in 'context_id' field: uuid={} error={}", uuid, err);
+                let errmsg = format!("Invalid handlebars template in 'context_id' field: uuid={} \
+                                      error={}",
+                                     uuid,
+                                     err);
                 return Err(Error::syntax(&errmsg));
             }
         }
     }
 
     fn parse_actions<V>(actions: Option<Vec<ActionType>>) -> Result<Vec<ActionType>, V::Error>
-        where V: MapVisitor {
+        where V: MapVisitor
+    {
         match actions {
             Some(actions) => Ok(actions),
-            None => Ok(Vec::new())
+            None => Ok(Vec::new()),
         }
     }
 }
@@ -119,12 +125,22 @@ impl Visitor for ContextVisitor {
 
         loop {
             match try!(visitor.visit_key()) {
-                Some(Field::Name) => { name = Some(try!(visitor.visit_value())); }
-                Some(Field::Uuid) => { uuid = Some(try!(visitor.visit_value())); }
-                Some(Field::Conditions) => { conditions = Some(try!(visitor.visit_value())); }
-                Some(Field::ContextId) => { context_id = Some(try!(visitor.visit_value())); }
-                Some(Field::Actions) => { actions = Some(try!(visitor.visit_value())); }
-                None => break
+                Some(Field::Name) => {
+                    name = Some(try!(visitor.visit_value()));
+                }
+                Some(Field::Uuid) => {
+                    uuid = Some(try!(visitor.visit_value()));
+                }
+                Some(Field::Conditions) => {
+                    conditions = Some(try!(visitor.visit_value()));
+                }
+                Some(Field::ContextId) => {
+                    context_id = Some(try!(visitor.visit_value()));
+                }
+                Some(Field::Actions) => {
+                    actions = Some(try!(visitor.visit_value()));
+                }
+                None => break,
             }
         }
 
@@ -134,15 +150,13 @@ impl Visitor for ContextVisitor {
 
         try!(visitor.end());
 
-        Ok(
-            Context {
-                name: name,
-                uuid: uuid,
-                conditions: conditions.unwrap(),
-                context_id: context_id,
-                actions: actions
-            }
-        )
+        Ok(Context {
+            name: name,
+            uuid: uuid,
+            conditions: conditions.unwrap(),
+            context_id: context_id,
+            actions: actions,
+        })
     }
 }
 
@@ -186,15 +200,19 @@ mod test {
         println!("{:?}", &result);
         let expected_name = "TEST_NAME".to_string();
         let expected_uuid = Uuid::parse_str("86ca9f93-84fb-4813-b037-6526f7a585a3").ok().unwrap();
-        let expected_conditions = ConditionsBuilder::new(100).
-                                                        first_opens(true).
-                                                        patterns(vec![
-                                                            "PATTERN_NAME1".to_string(),
-                                                            "PATTERN_NAME2".to_string(),
-                                                            "f13dafee-cd14-4dda-995c-6ed476a21de3".to_string()
-                                                        ]).build();
-        let message = Template::compile("message".to_string()).ok().expect("Failed to compile a handlebars template");
-        let expected_actions = vec![ActionType::Message(MessageActionBuilder::new("uuid1", message).build())];
+        let expected_conditions = ConditionsBuilder::new(100)
+                                      .first_opens(true)
+                                      .patterns(vec!["PATTERN_NAME1".to_string(),
+                                                     "PATTERN_NAME2".to_string(),
+                                                     "f13dafee-cd14-4dda-995c-6ed476a21de3"
+                                                         .to_string()])
+                                      .build();
+        let message = Template::compile("message".to_string())
+                          .ok()
+                          .expect("Failed to compile a handlebars template");
+        let expected_actions = vec![ActionType::Message(MessageActionBuilder::new("uuid1",
+                                                                                  message)
+                                                            .build())];
         let context = result.ok().expect("Failed to deserialize a valid Context");
         assert_eq!(&Some(expected_name), &context.name);
         assert_eq!(&expected_uuid, &context.uuid);
@@ -203,7 +221,8 @@ mod test {
     }
 
     #[test]
-    fn test_given_config_context_when_it_is_deserialized_and_only_the_required_fields_are_present_then_we_can_deserialize_it_successfully() {
+    fn test_given_config_context_when_it_is_deserialized_and_only_the_required_fields_are_present_then_we_can_deserialize_it_successfully
+        () {
         let text = r#"
         {
             "uuid": "86ca9f93-84fb-4813-b037-6526f7a585a3",
@@ -223,7 +242,8 @@ mod test {
     }
 
     #[test]
-    fn test_given_config_context_when_it_is_deserialized_and_the_uuid_is_invalid_then_we_report_an_error() {
+    fn test_given_config_context_when_it_is_deserialized_and_the_uuid_is_invalid_then_we_report_an_error
+        () {
         let text = r#"
         {
             "uuid": "this is an invalid uuid",
@@ -235,7 +255,8 @@ mod test {
 
         let result = from_str::<Context>(text);
         println!("{:?}", &result);
-        let _ = result.err().expect("Successfully deserialized an invalid Context (UUID is invalid)");
+        let _ = result.err()
+                      .expect("Successfully deserialized an invalid Context (UUID is invalid)");
     }
 
     #[test]
@@ -253,6 +274,7 @@ mod test {
         let result = from_str::<Context>(text);
         println!("{:?}", &result);
         let context = result.ok().expect("Failed to deserialize a valid Context");
-        assert_eq!(&expected_context_id, &context.context_id.as_ref().unwrap().to_string());
+        assert_eq!(&expected_context_id,
+                   &context.context_id.as_ref().unwrap().to_string());
     }
 }

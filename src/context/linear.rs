@@ -2,25 +2,22 @@ use uuid::Uuid;
 use std::rc::Rc;
 
 use conditions::Conditions;
-use message::{Message};
+use message::Message;
 use state::State;
 use timer::TimerEvent;
 use dispatcher::request::{InternalRequest, Request};
-use context::base::{
-    BaseContext,
-    BaseContextBuilder
-};
+use context::base::{BaseContext, BaseContextBuilder};
 
 pub struct LinearContext {
     base: BaseContext,
-    state: State
+    state: State,
 }
 
 impl LinearContext {
     pub fn new(uuid: Uuid, conditions: Conditions) -> LinearContext {
         LinearContext {
             base: BaseContextBuilder::new(uuid, conditions).build(),
-            state: State::new()
+            state: State::new(),
         }
     }
 
@@ -29,10 +26,10 @@ impl LinearContext {
         match event {
             Request::Timer(event) => {
                 self.on_timer(&event)
-            },
+            }
             Request::Message(message) => {
                 self.on_message(message)
-            },
+            }
             _ => {}
         }
     }
@@ -62,7 +59,7 @@ impl From<BaseContext> for LinearContext {
     fn from(context: BaseContext) -> LinearContext {
         LinearContext {
             base: context,
-            state: State::new()
+            state: State::new(),
         }
     }
 }

@@ -6,7 +6,7 @@ pub struct MessageBuilder {
     uuid: String,
     name: Option<String>,
     message: String,
-    values: BTreeMap<String, String>
+    values: BTreeMap<String, String>,
 }
 
 impl MessageBuilder {
@@ -15,7 +15,7 @@ impl MessageBuilder {
             uuid: uuid.to_string(),
             name: None,
             message: message.into(),
-            values: BTreeMap::new()
+            values: BTreeMap::new(),
         }
     }
 
@@ -43,7 +43,7 @@ impl MessageBuilder {
             uuid: self.uuid.clone(),
             name: self.name.clone(),
             message: self.message.clone(),
-            values: self.values.clone()
+            values: self.values.clone(),
         }
     }
 }

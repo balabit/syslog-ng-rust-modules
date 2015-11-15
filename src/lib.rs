@@ -13,7 +13,7 @@ mod macros;
 
 pub use correlator::Correlator;
 pub use config::action::ActionType;
-pub use dispatcher::{Response};
+pub use dispatcher::Response;
 pub use message::Message;
 
 pub mod conditions;

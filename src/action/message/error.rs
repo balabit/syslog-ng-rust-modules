@@ -1,14 +1,11 @@
 use handlebars::RenderError;
-use std::fmt::{
-    Display,
-    Formatter,
-};
+use std::fmt::{Display, Formatter};
 use std::string::FromUtf8Error;
 
 #[derive(Debug)]
 pub enum Error {
     Render(RenderError),
-    FromUtf8(FromUtf8Error)
+    FromUtf8(FromUtf8Error),
 }
 
 impl From<RenderError> for Error {

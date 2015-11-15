@@ -12,7 +12,7 @@ pub struct Message {
     uuid: String,
     name: Option<String>,
     message: String,
-    values: BTreeMap<String, String>
+    values: BTreeMap<String, String>,
 }
 
 impl Message {
@@ -43,14 +43,14 @@ impl Message {
     pub fn ids(&self) -> IdIterator {
         IdIterator {
             message: self,
-            state: 0
+            state: 0,
         }
     }
 }
 
 pub struct IdIterator<'a> {
     message: &'a Message,
-    state: u8
+    state: u8,
 }
 
 impl<'a> Iterator for IdIterator<'a> {
@@ -60,12 +60,12 @@ impl<'a> Iterator for IdIterator<'a> {
             0 => {
                 self.state += 1;
                 Some(self.message.uuid())
-            },
+            }
             1 => {
                 self.state += 1;
                 self.message.name()
-            },
-            _ => None
+            }
+            _ => None,
         }
     }
 }

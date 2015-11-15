@@ -13,7 +13,7 @@ pub struct Context {
     pub uuid: Uuid,
     pub conditions: Conditions,
     pub context_id: Option<Template>,
-    pub actions: Vec<ActionType>
+    pub actions: Vec<ActionType>,
 }
 
 pub struct ContextBuilder {
@@ -21,7 +21,7 @@ pub struct ContextBuilder {
     uuid: Uuid,
     conditions: Conditions,
     context_id: Option<Template>,
-    actions: Vec<ActionType>
+    actions: Vec<ActionType>,
 }
 
 impl ContextBuilder {
@@ -31,7 +31,7 @@ impl ContextBuilder {
             uuid: uuid,
             conditions: conditions,
             context_id: None,
-            actions: Vec::new()
+            actions: Vec::new(),
         }
     }
 
@@ -56,7 +56,7 @@ impl ContextBuilder {
             uuid: self.uuid.clone(),
             conditions: self.conditions.clone(),
             context_id: self.context_id.clone(),
-            actions: self.actions.clone()
+            actions: self.actions.clone(),
         }
     }
 }

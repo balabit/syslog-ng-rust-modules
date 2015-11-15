@@ -1,13 +1,7 @@
 use super::MessageAction;
 
 use handlebars::Template;
-use serde::de::{
-    Deserialize,
-    Deserializer,
-    Error,
-    MapVisitor,
-    Visitor
-};
+use serde::de::{Deserialize, Deserializer, Error, MapVisitor, Visitor};
 use std::collections::BTreeMap;
 
 impl Deserialize for MessageAction {
@@ -55,11 +49,15 @@ struct MessageActionVisitor;
 
 impl MessageActionVisitor {
     fn compile_template<V>(template_string: String, uuid: &String) -> Result<Template, V::Error>
-        where V: MapVisitor {
+        where V: MapVisitor
+    {
         match Template::compile(template_string) {
             Ok(message) => Ok(message),
             Err(error) => {
-                return Err(Error::syntax(&format!("Invalid handlebars template in 'message' field: uuid={}, error={}", &uuid, error)));
+                return Err(Error::syntax(&format!("Invalid handlebars template in 'message' \
+                                                   field: uuid={}, error={}",
+                                                  &uuid,
+                                                  error)));
             }
         }
     }
@@ -78,11 +76,21 @@ impl Visitor for MessageActionVisitor {
 
         loop {
             match try!(visitor.visit_key()) {
-                Some(Field::Name) => { name = Some(try!(visitor.visit_value())); }
-                Some(Field::Uuid) => { uuid = Some(try!(visitor.visit_value())); }
-                Some(Field::Message) => { message = Some(try!(visitor.visit_value())); }
-                Some(Field::Values) => { values = Some(try!(visitor.visit_value())); }
-                None => { break; }
+                Some(Field::Name) => {
+                    name = Some(try!(visitor.visit_value()));
+                }
+                Some(Field::Uuid) => {
+                    uuid = Some(try!(visitor.visit_value()));
+                }
+                Some(Field::Message) => {
+                    message = Some(try!(visitor.visit_value()));
+                }
+                Some(Field::Values) => {
+                    values = Some(try!(visitor.visit_value()));
+                }
+                None => {
+                    break;
+                }
             }
         }
 
@@ -94,7 +102,7 @@ impl Visitor for MessageActionVisitor {
         let message = match message {
             Some(message) => {
                 try!(MessageActionVisitor::compile_template::<V>(message, &uuid))
-            },
+            }
             None => {
                 error!("Missing 'message' field: uuid={}", &uuid);
                 return visitor.missing_field("message");
@@ -109,34 +117,31 @@ impl Visitor for MessageActionVisitor {
                     converted_values.insert(key, template);
                 }
                 converted_values
-            },
-            None => BTreeMap::new()
+            }
+            None => BTreeMap::new(),
         };
 
         try!(visitor.end());
 
-        Ok(
-            MessageAction {
-                name: name,
-                uuid: uuid,
-                message: message,
-                values: values
-            }
-        )
+        Ok(MessageAction {
+            name: name,
+            uuid: uuid,
+            message: message,
+            values: values,
+        })
     }
 }
 
 #[cfg(test)]
 mod test {
-    use config::action::message::{
-        MessageActionBuilder, MessageAction
-    };
+    use config::action::message::{MessageActionBuilder, MessageAction};
 
     use handlebars::Template;
     use serde_json::from_str;
 
     #[test]
-    fn test_given_message_as_a_json_string_when_it_is_deserialized_then_we_get_the_expected_message() {
+    fn test_given_message_as_a_json_string_when_it_is_deserialized_then_we_get_the_expected_message
+        () {
         let text = r#"
         {
           "uuid": "UUID",
@@ -149,14 +154,20 @@ mod test {
         }
         "#;
 
-        let message = Template::compile("message".to_string()).ok().expect("Failed to compile a handlebars template");
-        let value1 = Template::compile("value1".to_string()).ok().expect("Failed to compile a handlebars template");
-        let value2 = Template::compile("value2".to_string()).ok().expect("Failed to compile a handlebars template");
+        let message = Template::compile("message".to_string())
+                          .ok()
+                          .expect("Failed to compile a handlebars template");
+        let value1 = Template::compile("value1".to_string())
+                         .ok()
+                         .expect("Failed to compile a handlebars template");
+        let value2 = Template::compile("value2".to_string())
+                         .ok()
+                         .expect("Failed to compile a handlebars template");
         let expected_message = MessageActionBuilder::new("UUID", message)
-                                        .name("NAME")
-                                        .pair("key1", value1)
-                                        .pair("key2", value2)
-                                        .build();
+                                   .name("NAME")
+                                   .pair("key1", value1)
+                                   .pair("key2", value2)
+                                   .build();
         let result = from_str::<MessageAction>(text);
         println!("{:?}", &result);
         let message = result.ok().expect("Failed to deserialize a valid MessageAction object");
@@ -164,7 +175,8 @@ mod test {
     }
 
     #[test]
-    fn test_given_message_as_a_json_string_when_only_the_required_fields_are_present_then_we_can_deserialize_the_message() {
+    fn test_given_message_as_a_json_string_when_only_the_required_fields_are_present_then_we_can_deserialize_the_message
+        () {
         let text = r#"
         {
           "uuid": "UUID",
@@ -172,9 +184,10 @@ mod test {
         }
         "#;
 
-        let message = Template::compile("message".to_string()).ok().expect("Failed to compile a handlebars template");
-        let expected_message = MessageActionBuilder::new("UUID", message)
-                                        .build();
+        let message = Template::compile("message".to_string())
+                          .ok()
+                          .expect("Failed to compile a handlebars template");
+        let expected_message = MessageActionBuilder::new("UUID", message).build();
         let result = from_str::<MessageAction>(text);
         println!("{:?}", &result);
         let message = result.ok().expect("Failed to deserialize a valid MessageAction object");
@@ -182,7 +195,8 @@ mod test {
     }
 
     #[test]
-    fn test_given_message_as_a_json_string_when_one_of_the_required_fields_are_not_present_then_we_get_error() {
+    fn test_given_message_as_a_json_string_when_one_of_the_required_fields_are_not_present_then_we_get_error
+        () {
         let text = r#"
         {
         }

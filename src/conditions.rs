@@ -1,4 +1,4 @@
-use message::{Message};
+use message::Message;
 use MiliSec;
 use state::State;
 
@@ -12,7 +12,7 @@ pub struct Conditions {
     pub first_opens: Option<bool>,
     pub last_closes: Option<bool>,
     pub max_size: Option<usize>,
-    pub patterns: Vec<String>
+    pub patterns: Vec<String>,
 }
 
 impl Conditions {
@@ -23,7 +23,7 @@ impl Conditions {
             first_opens: None,
             last_closes: None,
             max_size: None,
-            patterns: Vec::new()
+            patterns: Vec::new(),
         }
     }
 
@@ -37,7 +37,8 @@ impl Conditions {
 
     pub fn is_closing(&self, state: &State) -> bool {
         trace!("Conditions: shoud we close this context?");
-        self.is_max_size_reached(state) || self.is_closing_message(state) || self.is_any_timer_expired(state)
+        self.is_max_size_reached(state) || self.is_closing_message(state) ||
+        self.is_any_timer_expired(state)
     }
 
     fn is_max_size_reached(&self, state: &State) -> bool {
@@ -62,21 +63,20 @@ impl Conditions {
     }
 
     fn is_renew_timeout_expired(&self, state: &State) -> bool {
-        self.renew_timeout.map_or(false, |renew_timeout| {
-            state.elapsed_time_since_last_message() >= renew_timeout
-        })
+        self.renew_timeout.map_or(false,
+                                  |renew_timeout| {
+                                      state.elapsed_time_since_last_message() >= renew_timeout
+                                  })
     }
 }
 
 pub struct ConditionsBuilder {
-    conditions: Conditions
+    conditions: Conditions,
 }
 
 impl ConditionsBuilder {
     pub fn new(timeout: MiliSec) -> ConditionsBuilder {
-        ConditionsBuilder {
-            conditions: Conditions::new(timeout)
-        }
+        ConditionsBuilder { conditions: Conditions::new(timeout) }
     }
 
     pub fn renew_timeout(&mut self, timeout: MiliSec) -> &mut ConditionsBuilder {
@@ -114,9 +114,7 @@ mod test {
     use super::Conditions;
     use std::rc::Rc;
 
-    use message::{
-        MessageBuilder
-    };
+    use message::MessageBuilder;
     use state::State;
     use super::ConditionsBuilder;
 
@@ -128,7 +126,10 @@ mod test {
         let patterns = vec![
             msg_id1.clone(),
         ];
-        let condition = ConditionsBuilder::new(timeout).patterns(patterns).first_opens(true).build();
+        let condition = ConditionsBuilder::new(timeout)
+                            .patterns(patterns)
+                            .first_opens(true)
+                            .build();
         let msg_which_should_not_be_ignored = MessageBuilder::new(&msg_id1, "message").build();
         let msg_which_should_be_ignored = MessageBuilder::new(&msg_id2, "message").build();
         assert_false!(condition.is_opening(&msg_which_should_be_ignored));
@@ -145,7 +146,10 @@ mod test {
             msg_id2.clone(),
         ];
         let mut state = State::new();
-        let condition = ConditionsBuilder::new(timeout).patterns(patterns).last_closes(true).build();
+        let condition = ConditionsBuilder::new(timeout)
+                            .patterns(patterns)
+                            .last_closes(true)
+                            .build();
         let msg_1 = MessageBuilder::new(&msg_id1, "message").build();
         let msg_closing = Rc::new(MessageBuilder::new(&msg_id2, "message").build());
         assert_true!(condition.is_opening(&msg_1));
@@ -155,7 +159,8 @@ mod test {
     }
 
     #[test]
-    fn test_given_conditions_in_json_when_we_have_only_the_required_ones_then_we_get_the_expected_result() {
+    fn test_given_conditions_in_json_when_we_have_only_the_required_ones_then_we_get_the_expected_result
+        () {
         let json = r#"
         {
             "timeout": 100
@@ -164,7 +169,8 @@ mod test {
 
         let conditions = from_str(json);
         println!("{:?}", &conditions);
-        let conditions: Conditions = conditions.ok().expect("Failed to deserialize a Conditions struct with only a timeout field");
+        let conditions: Conditions = conditions.ok().expect("Failed to deserialize a Conditions \
+                                                             struct with only a timeout field");
         assert_eq!(conditions.timeout, 100);
     }
 
@@ -192,7 +198,8 @@ mod test {
         ];
         let conditions = from_str(json);
         println!("{:?}", &conditions);
-        let conditions: Conditions = conditions.ok().expect("Failed to deserialize a Conditions struct");
+        let conditions: Conditions = conditions.ok()
+                                               .expect("Failed to deserialize a Conditions struct");
         assert_eq!(conditions.timeout, 100);
         assert_eq!(conditions.renew_timeout, Some(50));
         assert_eq!(conditions.first_opens, Some(true));
@@ -211,7 +218,8 @@ mod test {
     }
 
     #[test]
-    fn test_given_condition_when_first_opens_is_set_then_the_right_message_can_open_the_context() {
+    fn test_given_condition_when_first_opens_is_set_then_the_right_message_can_open_the_context
+                                                                                                () {
         let timeout = 100;
         let patterns = vec![
                 "p1".to_string(),
@@ -220,24 +228,29 @@ mod test {
         ];
         let uuid = "e4f3f8b2-3135-4916-a5ea-621a754dab0d".to_string();
         let msg_id = "p1".to_string();
-        let condition = ConditionsBuilder::new(timeout).patterns(patterns).first_opens(true).build();
+        let condition = ConditionsBuilder::new(timeout)
+                            .patterns(patterns)
+                            .first_opens(true)
+                            .build();
         let msg = MessageBuilder::new(&uuid, "message").name(Some(&msg_id)).build();
         assert_true!(condition.is_opening(&msg));
     }
 
     #[test]
-    fn test_given_conditions_when_last_closes_is_set_and_the_message_has_a_name_then_we_check_that_name() {
+    fn test_given_conditions_when_last_closes_is_set_and_the_message_has_a_name_then_we_check_that_name
+        () {
         let timeout = 100;
-        let patterns = vec![
-                "p1".to_string(),
-                "p2".to_string()
-        ];
+        let patterns = vec!["p1".to_string(), "p2".to_string()];
         let p1_uuid = "e4f3f8b2-3135-4916-a5ea-621a754dab0d".to_string();
         let p2_uuid = "f4f3f8b2-3135-4916-a5ea-621a754dab0d".to_string();
         let p1 = "p1".to_string();
         let p2 = "p2".to_string();
         let mut state = State::new();
-        let condition = ConditionsBuilder::new(timeout).patterns(patterns).first_opens(true).last_closes(true).build();
+        let condition = ConditionsBuilder::new(timeout)
+                            .patterns(patterns)
+                            .first_opens(true)
+                            .last_closes(true)
+                            .build();
         let p1_msg = MessageBuilder::new(&p1_uuid, "message").name(Some(&p1)).build();
         assert_true!(condition.is_opening(&p1_msg));
         state.add_message(Rc::new(p1_msg));
@@ -250,13 +263,7 @@ mod test {
 mod deser {
     use MiliSec;
     use super::Conditions;
-    use serde::de::{
-        Deserialize,
-        Deserializer,
-        Error,
-        MapVisitor,
-        Visitor
-    };
+    use serde::de::{Deserialize, Deserializer, Error, MapVisitor, Visitor};
 
     impl Deserialize for Conditions {
         fn deserialize<D>(deserializer: &mut D) -> Result<Conditions, D::Error>
@@ -320,13 +327,27 @@ mod deser {
 
             loop {
                 match try!(visitor.visit_key()) {
-                    Some(Field::Timeout) => { timeout = Some(try!(visitor.visit_value())); }
-                    Some(Field::RenewTimeout) => { renew_timeout = Some(try!(visitor.visit_value())); }
-                    Some(Field::FirstOpens) => { first_opens = Some(try!(visitor.visit_value())); }
-                    Some(Field::LastCloses) => { last_closes = Some(try!(visitor.visit_value())); }
-                    Some(Field::MaxSize) => { max_size = Some(try!(visitor.visit_value())); }
-                    Some(Field::Patterns) => { patterns = Some(try!(visitor.visit_value())); }
-                    None => { break; }
+                    Some(Field::Timeout) => {
+                        timeout = Some(try!(visitor.visit_value()));
+                    }
+                    Some(Field::RenewTimeout) => {
+                        renew_timeout = Some(try!(visitor.visit_value()));
+                    }
+                    Some(Field::FirstOpens) => {
+                        first_opens = Some(try!(visitor.visit_value()));
+                    }
+                    Some(Field::LastCloses) => {
+                        last_closes = Some(try!(visitor.visit_value()));
+                    }
+                    Some(Field::MaxSize) => {
+                        max_size = Some(try!(visitor.visit_value()));
+                    }
+                    Some(Field::Patterns) => {
+                        patterns = Some(try!(visitor.visit_value()));
+                    }
+                    None => {
+                        break;
+                    }
                 }
             }
 
@@ -337,16 +358,14 @@ mod deser {
 
             try!(visitor.end());
 
-            Ok(
-                Conditions {
-                    timeout: timeout,
-                    renew_timeout: renew_timeout,
-                    first_opens: first_opens,
-                    last_closes: last_closes,
-                    max_size: max_size,
-                    patterns: patterns.unwrap_or(Vec::new())
-                }
-            )
+            Ok(Conditions {
+                timeout: timeout,
+                renew_timeout: renew_timeout,
+                first_opens: first_opens,
+                last_closes: last_closes,
+                max_size: max_size,
+                patterns: patterns.unwrap_or(Vec::new()),
+            })
         }
     }
 }

@@ -1,9 +1,6 @@
 use super::Message;
 
-use rustc_serialize::json::{
-    Json,
-    ToJson
-};
+use rustc_serialize::json::{Json, ToJson};
 use std::collections::BTreeMap;
 
 impl<'a> ToJson for &'a Message {

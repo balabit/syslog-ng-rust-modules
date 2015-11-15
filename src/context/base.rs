@@ -11,7 +11,7 @@ pub struct BaseContext {
     name: Option<String>,
     uuid: Uuid,
     conditions: Conditions,
-    actions: Vec<Box<Action>>
+    actions: Vec<Box<Action>>,
 }
 
 impl BaseContext {
@@ -62,7 +62,7 @@ pub struct BaseContextBuilder {
     name: Option<String>,
     uuid: Uuid,
     conditions: Conditions,
-    actions: Vec<Box<Action>>
+    actions: Vec<Box<Action>>,
 }
 
 impl BaseContextBuilder {
@@ -71,7 +71,7 @@ impl BaseContextBuilder {
             name: None,
             uuid: uuid,
             conditions: conditions,
-            actions: Vec::new()
+            actions: Vec::new(),
         }
     }
 
@@ -91,7 +91,7 @@ impl BaseContextBuilder {
             name: name,
             uuid: uuid,
             conditions: conditions,
-            actions: actions
+            actions: actions,
         }
     }
 }

@@ -1,11 +1,8 @@
-use handlebars::{
-    Handlebars,
-    Template,
-};
+use handlebars::{Handlebars, Template};
 use std::collections::BTreeMap;
 use std::rc::Rc;
 
-use message::{Message};
+use message::Message;
 use state::State;
 use timer::TimerEvent;
 use context::base::BaseContext;
@@ -26,7 +23,7 @@ impl MapContext {
         MapContext {
             base: base,
             map: BTreeMap::new(),
-            context_id: handlebars
+            context_id: handlebars,
         }
     }
 
@@ -35,10 +32,10 @@ impl MapContext {
         match event {
             Request::Timer(event) => {
                 self.on_timer(&event)
-            },
+            }
             Request::Message(message) => {
                 self.on_message(message)
-            },
+            }
             _ => {}
         }
     }
@@ -52,13 +49,16 @@ impl MapContext {
     }
 
     fn get_closed_state_ids(&self) -> Vec<String> {
-        self.map.iter().filter_map(|(id, state)| {
-            if !state.is_open() {
-                Some(id.clone())
-            } else {
-                None
-            }
-        }).collect::<Vec<String>>()
+        self.map
+            .iter()
+            .filter_map(|(id, state)| {
+                if !state.is_open() {
+                    Some(id.clone())
+                } else {
+                    None
+                }
+            })
+            .collect::<Vec<String>>()
     }
 
     fn remove_closed_states(&mut self) {
@@ -73,7 +73,10 @@ impl MapContext {
     }
 
     fn update_state(&mut self, event: Rc<Message>) {
-        let id = self.context_id.render(CONTEXT_ID, event.values()).ok().expect("Failed to render the compiled Handlebars template");
+        let id = self.context_id
+                     .render(CONTEXT_ID, event.values())
+                     .ok()
+                     .expect("Failed to render the compiled Handlebars template");
         let state = self.map.entry(id).or_insert(State::new());
         self.base.on_message(event, state);
     }

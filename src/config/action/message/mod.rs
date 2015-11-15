@@ -13,7 +13,7 @@ pub struct MessageAction {
     pub uuid: String,
     pub name: Option<String>,
     pub message: Template,
-    pub values: BTreeMap<String, Template>
+    pub values: BTreeMap<String, Template>,
 }
 
 impl MessageAction {

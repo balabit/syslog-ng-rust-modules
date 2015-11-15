@@ -1,5 +1,5 @@
 use dispatcher::request::{InternalRequest, Request, RequestHandler};
-use context::{ContextMap};
+use context::ContextMap;
 use context::context_map::StreamingIterator;
 use reactor;
 

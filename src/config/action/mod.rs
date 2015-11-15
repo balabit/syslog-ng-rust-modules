@@ -5,5 +5,5 @@ mod deser;
 
 #[derive(Clone, Debug, PartialEq)]
 pub enum ActionType {
-    Message(self::message::MessageAction)
+    Message(self::message::MessageAction),
 }

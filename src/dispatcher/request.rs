@@ -8,7 +8,7 @@ use timer::TimerEvent;
 pub enum Request<M> {
     Message(M),
     Timer(TimerEvent),
-    Exit
+    Exit,
 }
 
 pub type InternalRequest = Request<Rc<Message>>;
@@ -18,7 +18,7 @@ pub type ExternalRequest = Request<Message>;
 pub enum RequestHandler {
     Message,
     Timer,
-    Exit
+    Exit,
 }
 
 impl reactor::Event for Request<Rc<Message>> {

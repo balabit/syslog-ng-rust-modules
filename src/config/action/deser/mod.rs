@@ -5,22 +5,26 @@ use super::ActionType;
 mod test;
 
 impl serde::de::Deserialize for ActionType {
-fn deserialize<D>(deserializer: &mut D) -> Result<ActionType, D::Error>
-                  where D: serde::de::Deserializer {
-    enum Field {
-        Message,
-    }
+    fn deserialize<D>(deserializer: &mut D) -> Result<ActionType, D::Error>
+        where D: serde::de::Deserializer
+    {
+        enum Field {
+            Message,
+        }
 
     impl serde::de::Deserialize for Field {
-        #[inline]
-        fn deserialize<D>(deserializer: &mut D) -> Result<Field, D::Error>
-            where D: serde::de::Deserializer {
+            #[inline]
+            fn deserialize<D>(deserializer: &mut D) -> Result<Field, D::Error>
+                where D: serde::de::Deserializer
+            {
                 struct FieldVisitor;
 
                 impl serde::de::Visitor for FieldVisitor {
                     type Value = Field;
 
-                    fn visit_str<E>(&mut self, value: &str) -> Result<Field, E> where E: serde::de::Error {
+                    fn visit_str<E>(&mut self, value: &str) -> Result<Field, E>
+                        where E: serde::de::Error
+                    {
                         match value {
                             "message" => Ok(Field::Message),
                             _ => Err(serde::de::Error::unknown_field(value)),

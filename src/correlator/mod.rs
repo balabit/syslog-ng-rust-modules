@@ -14,7 +14,7 @@ use context::base::BaseContextBuilder;
 use context::{Context, ContextMap};
 use context::linear::LinearContext;
 use context::map::MapContext;
-use dispatcher::request::{Request};
+use dispatcher::request::Request;
 use dispatcher::reactor::RequestReactor;
 use dispatcher::{ResponseSender, ResponseHandler};
 use dispatcher::response;
@@ -42,10 +42,12 @@ pub struct Correlator {
     dispatcher_input_channel: mpsc::Sender<Request<Message>>,
     dispatcher_output_channel: mpsc::Receiver<Response>,
     dispatcher_thread_handle: thread::JoinHandle<()>,
-    handlers: HashMap<ResponseHandler, Box<EventHandler<Response>>>
+    handlers: HashMap<ResponseHandler, Box<EventHandler<Response>>>,
 }
 
-fn create_context(config_context: config::Context, response_sender: Rc<RefCell<Box<response::ResponseSender<Response>>>>) -> Context {
+fn create_context(config_context: config::Context,
+                  response_sender: Rc<RefCell<Box<response::ResponseSender<Response>>>>)
+                  -> Context {
     let config::Context{name, uuid, conditions, context_id, actions} = config_context;
     let mut boxed_actions = Vec::new();
 
@@ -64,7 +66,9 @@ fn create_context(config_context: config::Context, response_sender: Rc<RefCell<B
     }
 }
 
-fn create_context_map(contexts: Vec<config::Context>, response_sender: Rc<RefCell<Box<response::ResponseSender<Response>>>>) -> ContextMap {
+fn create_context_map(contexts: Vec<config::Context>,
+                      response_sender: Rc<RefCell<Box<response::ResponseSender<Response>>>>)
+                      -> ContextMap {
     let mut context_map = ContextMap::new();
     for i in contexts.into_iter() {
         let context: context::Context = create_context(i, response_sender.clone());
@@ -79,7 +83,8 @@ impl Correlator {
         let mut buffer = String::new();
         try!(file.read_to_string(&mut buffer));
         let contexts = try!(from_str::<Vec<config::Context>>(&buffer));
-        trace!("Correlator: loading contexts from file; len={}", contexts.len());
+        trace!("Correlator: loading contexts from file; len={}",
+               contexts.len());
         Ok(Correlator::new(contexts))
     }
 
@@ -111,7 +116,7 @@ impl Correlator {
             dispatcher_input_channel: dispatcher_input_channel,
             dispatcher_output_channel: dispatcher_output_channel_rx,
             dispatcher_thread_handle: handle,
-            handlers: HashMap::new()
+            handlers: HashMap::new(),
         }
     }
 
@@ -119,7 +124,9 @@ impl Correlator {
         self.handlers.insert(handler.handler(), handler);
     }
 
-    pub fn push_message(&mut self, message: Message) -> Result<(), mpsc::SendError<Request<Message>>> {
+    pub fn push_message(&mut self,
+                        message: Message)
+                        -> Result<(), mpsc::SendError<Request<Message>>> {
         self.handle_events();
         self.dispatcher_input_channel.send(Request::Message(message))
     }
@@ -146,7 +153,8 @@ impl Correlator {
 
     fn stop_dispatcher(&mut self) {
         let exit_condition = Condition::new(false);
-        let exit_handler = Box::new(ExitHandler::new(exit_condition.clone(), self.dispatcher_input_channel.clone()));
+        let exit_handler = Box::new(ExitHandler::new(exit_condition.clone(),
+                                                     self.dispatcher_input_channel.clone()));
         self.register_handler(exit_handler);
         let _ = self.dispatcher_input_channel.send(Request::Exit);
         while !exit_condition.is_active() {

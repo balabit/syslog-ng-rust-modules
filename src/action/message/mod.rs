@@ -3,15 +3,9 @@ use config;
 use context::base::BaseContext;
 use dispatcher::Response;
 use dispatcher::response::ResponseSender;
-use message::{
-    Message,
-    MessageBuilder
-};
+use message::{Message, MessageBuilder};
 
-use handlebars::{
-    Context,
-    Handlebars,
-};
+use handlebars::{Context, Handlebars};
 use std::borrow::Borrow;
 use std::cell::RefCell;
 use std::collections::BTreeMap;
@@ -35,11 +29,13 @@ pub struct MessageAction {
     sender: Rc<RefCell<Box<ResponseSender<Response>>>>,
     uuid: String,
     name: Option<String>,
-    values: Handlebars
+    values: Handlebars,
 }
 
 impl MessageAction {
-    pub fn new(sender: Rc<RefCell<Box<ResponseSender<Response>>>>, action: config::action::MessageAction) -> MessageAction {
+    pub fn new(sender: Rc<RefCell<Box<ResponseSender<Response>>>>,
+               action: config::action::MessageAction)
+               -> MessageAction {
         let config::action::MessageAction { uuid, name, message, values } = action;
         let mut handlebars = Handlebars::new();
         for (name, template) in values.into_iter() {
@@ -51,7 +47,7 @@ impl MessageAction {
             sender: sender,
             uuid: uuid,
             name: name,
-            values: handlebars
+            values: handlebars,
         }
     }
 
@@ -82,17 +78,23 @@ impl MessageAction {
 
         let mut rendered_values = try!(self.render_values(&template_context));
         MessageAction::extend_with_context_information(&mut rendered_values, state, context);
-        let message = rendered_values.remove(MESSAGE).expect(&format!("There is no '{}' key in the renderer key-value pairs", MESSAGE));
+        let message = rendered_values.remove(MESSAGE)
+                                     .expect(&format!("There is no '{}' key in the renderer \
+                                                       key-value pairs",
+                                                      MESSAGE));
         let name = self.name.as_ref().map(|name| name.borrow());
         let message = MessageBuilder::new(&self.uuid, message)
-                        .name(name)
-                        .values(rendered_values)
-                        .build();
+                          .name(name)
+                          .values(rendered_values)
+                          .build();
         Ok(message)
     }
 
-    fn extend_with_context_information(values: &mut BTreeMap<String, String>, state: &State, context: &BaseContext) {
-        values.insert(CONTEXT_UUID.to_string(), context.uuid().to_hyphenated_string());
+    fn extend_with_context_information(values: &mut BTreeMap<String, String>,
+                                       state: &State,
+                                       context: &BaseContext) {
+        values.insert(CONTEXT_UUID.to_string(),
+                      context.uuid().to_hyphenated_string());
         values.insert(CONTEXT_LEN.to_string(), state.messages().len().to_string());
         if let Some(name) = context.name() {
             values.insert(CONTEXT_NAME.to_string(), name.to_string());
@@ -116,11 +118,9 @@ impl Action for MessageAction {
         trace!("MessageAction: executed");
         match self.render_message(_state, _context) {
             Ok(message) => {
-                let response = MessageResponse {
-                    message: message,
-                };
+                let response = MessageResponse { message: message };
                 self.sender.borrow_mut().send_response(Response::Message(response));
-            },
+            }
             Err(error) => {
                 error!("{}", error);
             }
