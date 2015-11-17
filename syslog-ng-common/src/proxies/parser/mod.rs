@@ -39,8 +39,7 @@ pub mod _parser_plugin {
     use super::*;
 
     #[no_mangle]
-    #[allow(dead_code)]
-    pub extern fn rust_parser_proxy_init(this: &mut RustParserProxy<$name>) -> c_int {
+    pub extern fn native_parser_proxy_init(this: &mut RustParserProxy<$name>) -> c_int {
         let res = this.init();
 
         match res {
@@ -50,13 +49,11 @@ pub mod _parser_plugin {
     }
 
     #[no_mangle]
-    #[allow(dead_code)]
-    pub extern fn rust_parser_proxy_free(_: Box<RustParserProxy<$name>>) {
+    pub extern fn native_parser_proxy_free(_: Box<RustParserProxy<$name>>) {
     }
 
     #[no_mangle]
-    #[allow(dead_code)]
-    pub extern fn rust_parser_proxy_set_option(slf: &mut RustParserProxy<$name>, key: *const c_char, value: *const c_char) {
+    pub extern fn native_parser_proxy_set_option(slf: &mut RustParserProxy<$name>, key: *const c_char, value: *const c_char) {
         let k = from_c_str_to_owned_string(key);
         let v = from_c_str_to_owned_string(value);
 
@@ -64,8 +61,7 @@ pub mod _parser_plugin {
     }
 
     #[no_mangle]
-    #[allow(dead_code)]
-    pub extern fn rust_parser_proxy_process(this: &mut RustParserProxy<$name>, msg: &mut LogMessage, input: *const c_char, _: ssize_t) -> c_int {
+    pub extern fn native_parser_proxy_process(this: &mut RustParserProxy<$name>, msg: &mut LogMessage, input: *const c_char, _: ssize_t) -> c_int {
         let input = from_c_str_to_borrowed_str(input);
 
         match this.process(msg, input) {
@@ -75,8 +71,7 @@ pub mod _parser_plugin {
     }
 
     #[no_mangle]
-    #[allow(dead_code)]
-    pub extern fn rust_parser_proxy_new(parent: *mut LogParser) -> Box<RustParserProxy<$name>> {
+    pub extern fn native_parser_proxy_new(parent: *mut LogParser) -> Box<RustParserProxy<$name>> {
         init_logger();
         let mut proxy = RustParserProxy::new();
         proxy.parent(parent);
@@ -84,8 +79,7 @@ pub mod _parser_plugin {
     }
 
     #[no_mangle]
-    #[allow(dead_code)]
-    pub extern fn rust_parser_proxy_clone(slf: &RustParserProxy<$name>) -> Box<RustParserProxy<$name>> {
+    pub extern fn native_parser_proxy_clone(slf: &RustParserProxy<$name>) -> Box<RustParserProxy<$name>> {
         let cloned = (*slf).clone();
         Box::new(cloned)
     }

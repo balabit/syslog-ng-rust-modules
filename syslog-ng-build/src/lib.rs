@@ -13,7 +13,7 @@ const RUST_DEPS_A_NAME: &'static str = "syslog-ng-native-connector";
 
 fn create_plugins(parser_name: Option<&str>) -> String {
     let head = r#"
-static Plugin rust_plugins[] =
+static Plugin native_plugins[] =
 {
     "#;
     let tail  = r#"
@@ -25,7 +25,7 @@ static Plugin rust_plugins[] =
   {{
     .type = LL_CONTEXT_PARSER,
     .name = "{name}",
-    .parser = &rust_parser,
+    .parser = &native_parser,
  }},
             "#, name=name)
         }
@@ -41,7 +41,7 @@ fn create_module_init(canonical_name: &str) -> String {
 gboolean
 {name}_module_init(GlobalConfig *cfg, CfgArgs *args)
 {{
-  plugin_register(cfg, rust_plugins, G_N_ELEMENTS(rust_plugins));
+  plugin_register(cfg, native_plugins, G_N_ELEMENTS(native_plugins));
   return TRUE;
 }}
     "#, name=name)
@@ -55,8 +55,8 @@ const ModuleInfo module_info =
   .version = SYSLOG_NG_VERSION,
   .description = "{description}",
   .core_revision = VERSION_CURRENT_VER_ONLY,
-  .plugins = rust_plugins,
-  .plugins_len = G_N_ELEMENTS(rust_plugins),
+  .plugins = native_plugins,
+  .plugins_len = G_N_ELEMENTS(native_plugins),
 }};
     "#, name=canonical_name, description=description)
 }
@@ -72,7 +72,7 @@ pub fn create_module_content(canonical_name: &str, description: &str, parser_nam
 #include "plugin.h"
 #include "plugin-types.h"
 
-extern CfgParser rust_parser;
+CfgParser native_parser;
     "#;
 
     format!("{header}{plugins}{module_init}{module_info}", header=header,
