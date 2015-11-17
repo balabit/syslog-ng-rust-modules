@@ -12,10 +12,9 @@ log = "*"
 
 [dependencies.actiondb]
 version = "0.4.0"
-path = "../actiondb"
 
 [dependencies.syslog-ng-common]
-path = "../syslog-ng-rs/syslog-ng-common"
+git = "https://github.com/ihrwein/syslog-ng-rs.git"
 
 [build-dependencies.syslog-ng-build]
-path = "../syslog-ng-rs/syslog-ng-build"
+git = "https://github.com/ihrwein/syslog-ng-rs.git"
