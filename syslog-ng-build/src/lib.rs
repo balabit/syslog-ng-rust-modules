@@ -9,7 +9,7 @@ use std::path::{
     PathBuf
 };
 
-const RUST_DEPS_A_NAME: &'static str = "syslog-ng-rust-deps";
+const RUST_DEPS_A_NAME: &'static str = "syslog-ng-native-connector";
 
 fn create_plugins(parser_name: Option<&str>) -> String {
     let head = r#"
