@@ -20,7 +20,7 @@
                     "name": "MAIL_READ",
                     "message": "message",
                     "values": {
-                        "MESSAGE": "user logged in, read his mails then logged out"
+                        "MESSAGE": "user logged in, read mails then logged out"
                     }
                 }
             }
