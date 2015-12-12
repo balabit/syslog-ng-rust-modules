@@ -99,7 +99,7 @@ pub struct ActiondbParser {
 }
 
 impl RustParser for ActiondbParser {
-    fn process(&mut self, msg: &mut LogMessage, input: &str) -> bool {
+    fn parse(&mut self, msg: &mut LogMessage, input: &str) -> bool {
         if let Some(result) = self.matcher.parse(input) {
             MessageFiller::fill_logmsg(&mut self.formatter, msg, &result);
             true
