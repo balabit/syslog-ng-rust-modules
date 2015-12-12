@@ -4,17 +4,17 @@ use syslog_ng_sys::LogParser;
 pub use proxies::parser::{
     OptionError,
     Parser,
-    RustParserBuilder
+    ParserBuilder
 };
 
 #[repr(C)]
 #[derive(Clone)]
-pub struct RustParserProxy<B> where B: RustParserBuilder {
+pub struct RustParserProxy<B> where B: ParserBuilder {
     pub parser: Option<B::Parser>,
     pub builder: Option<B>
 }
 
-impl<B> RustParserProxy<B> where B: RustParserBuilder {
+impl<B> RustParserProxy<B> where B: ParserBuilder {
     pub fn new() -> RustParserProxy<B> {
         RustParserProxy {
             parser: None,

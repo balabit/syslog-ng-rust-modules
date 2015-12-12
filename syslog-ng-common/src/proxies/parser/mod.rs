@@ -7,7 +7,7 @@ mod proxy;
 pub use self::option_error::OptionError;
 pub use self::proxy::RustParserProxy;
 
-pub trait RustParserBuilder: Clone {
+pub trait ParserBuilder: Clone {
     type Parser: Parser;
     fn new() -> Self;
     fn option(&mut self, name: String, value: String);
