@@ -19,7 +19,7 @@ use syslog_ng_common::formatter::MessageFormatter;
 
 use syslog_ng_common::proxies::parser::{
     Parser,
-    RustParserBuilder,
+    ParserBuilder,
     OptionError
 };
 
@@ -57,7 +57,7 @@ impl ActiondbParserBuilder {
     }
 }
 
-impl RustParserBuilder for ActiondbParserBuilder {
+impl ParserBuilder for ActiondbParserBuilder {
     type Parser = ActiondbParser;
     fn new() -> Self {
         ActiondbParserBuilder {
