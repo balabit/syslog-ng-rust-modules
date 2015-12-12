@@ -18,7 +18,7 @@ use actiondb::matcher::trie::factory::TrieMatcherFactory;
 use syslog_ng_common::formatter::MessageFormatter;
 
 use syslog_ng_common::proxies::parser::{
-    RustParser,
+    Parser,
     RustParserBuilder,
     OptionError
 };
@@ -98,7 +98,7 @@ pub struct ActiondbParser {
     formatter: MessageFormatter
 }
 
-impl RustParser for ActiondbParser {
+impl Parser for ActiondbParser {
     fn parse(&mut self, msg: &mut LogMessage, input: &str) -> bool {
         if let Some(result) = self.matcher.parse(input) {
             MessageFiller::fill_logmsg(&mut self.formatter, msg, &result);
