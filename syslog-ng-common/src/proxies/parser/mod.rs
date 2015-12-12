@@ -8,14 +8,14 @@ pub use self::option_error::OptionError;
 pub use self::proxy::RustParserProxy;
 
 pub trait RustParserBuilder: Clone {
-    type Parser: RustParser;
+    type Parser: Parser;
     fn new() -> Self;
     fn option(&mut self, name: String, value: String);
     fn parent(&mut self, _: *mut LogParser) {}
     fn build(self) -> Result<Self::Parser, OptionError>;
 }
 
-pub trait RustParser: Clone {
+pub trait Parser: Clone {
     fn parse(&mut self, msg: &mut LogMessage, input: &str) -> bool;
 }
 

@@ -3,7 +3,7 @@ use syslog_ng_sys::LogParser;
 
 pub use proxies::parser::{
     OptionError,
-    RustParser,
+    Parser,
     RustParserBuilder
 };
 
