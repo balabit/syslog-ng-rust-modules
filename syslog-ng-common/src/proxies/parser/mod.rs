@@ -16,7 +16,7 @@ pub trait RustParserBuilder: Clone {
 }
 
 pub trait RustParser: Clone {
-    fn process(&mut self, msg: &mut LogMessage, input: &str) -> bool;
+    fn parse(&mut self, msg: &mut LogMessage, input: &str) -> bool;
 }
 
 #[macro_export]
@@ -29,10 +29,7 @@ pub mod _parser_plugin {
     use $crate::sys::LogMessage;
     use $crate::sys::LogParser;
     use $crate::logger::init_logger;
-    use $crate::proxies::parser::{
-        RustParser,
-        RustParserProxy,
-    };
+    use $crate::proxies::parser::RustParserProxy;
 
     use super::*;
 

@@ -46,7 +46,7 @@ impl<B> RustParserProxy<B> where B: RustParserBuilder {
     }
 
     pub fn process(&mut self, msg: &mut LogMessage, input: &str) -> bool {
-        self.parser.as_mut().expect("Called process on a non-existing Rust parser").process(msg, input)
+        self.parser.as_mut().expect("Called process on a non-existing Rust parser").parse(msg, input)
     }
 
     pub fn parent(&mut self, parent: *mut LogParser) {
