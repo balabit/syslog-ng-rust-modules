@@ -17,7 +17,6 @@ pub trait RustParserBuilder: Clone {
 
 pub trait RustParser: Clone {
     type Builder: RustParserBuilder<Parser=Self>;
-    fn init(&mut self) -> bool { true }
     fn process(&mut self, msg: &mut LogMessage, input: &str) -> bool;
 }
 

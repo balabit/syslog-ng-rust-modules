@@ -27,7 +27,7 @@ impl<P> RustParserProxy<P> where P: RustParser {
         match builder.build() {
             Ok(parser) => {
                 self.parser = Some(parser);
-                self.parser.as_mut().expect("Called init on a non-existing Rust Parser").init()
+                true
             },
             Err(error) => {
                 error!("Error: {:?}", error);
