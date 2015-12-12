@@ -9,16 +9,16 @@ pub use proxies::parser::{
 
 #[repr(C)]
 #[derive(Clone)]
-pub struct RustParserProxy<P> where P: RustParser {
-    pub parser: Option<P>,
-    pub builder: Option<P::Builder>
+pub struct RustParserProxy<B> where B: RustParserBuilder {
+    pub parser: Option<B::Parser>,
+    pub builder: Option<B>
 }
 
-impl<P> RustParserProxy<P> where P: RustParser {
-    pub fn new() -> RustParserProxy<P> {
+impl<B> RustParserProxy<B> where B: RustParserBuilder {
+    pub fn new() -> RustParserProxy<B> {
         RustParserProxy {
             parser: None,
-            builder: Some(P::Builder::new())
+            builder: Some(B::new())
         }
     }
 
@@ -38,7 +38,7 @@ impl<P> RustParserProxy<P> where P: RustParser {
 
     pub fn set_option(&mut self, name: String, value: String) {
         if self.builder.is_none() {
-            self.builder = Some(P::Builder::new());
+            self.builder = Some(B::new());
         }
 
         let builder = self.builder.as_mut().expect("Failed to get builder on a RustParserProxy");
