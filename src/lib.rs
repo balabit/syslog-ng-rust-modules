@@ -84,6 +84,7 @@ impl RustParserBuilder for ActiondbParserBuilder {
     fn parent(&mut self, _: *mut LogParser) {}
     fn build(self) -> Result<Self::Parser, OptionError> {
         let ActiondbParserBuilder {matcher, formatter} = self;
+        debug!("ActiondbParser: building");
         let matcher = try!(matcher.ok_or(OptionError::missing_required_option(options::PATTERN_FILE)));
         Ok(ActiondbParser {
             matcher: matcher,
@@ -98,7 +99,6 @@ pub struct ActiondbParser {
 }
 
 impl RustParser for ActiondbParser {
-    type Builder = ActiondbParserBuilder;
     fn process(&mut self, msg: &mut LogMessage, input: &str) -> bool {
         if let Some(result) = self.matcher.parse(input) {
             MessageFiller::fill_logmsg(&mut self.formatter, msg, &result);
@@ -106,11 +106,6 @@ impl RustParser for ActiondbParser {
         } else {
             false
         }
-    }
-
-    fn init(&mut self) -> bool {
-        debug!("ActiondbParser: init()");
-        true
     }
 }
 
@@ -123,4 +118,4 @@ impl Clone for ActiondbParser {
     }
 }
 
-parser_plugin!(ActiondbParser);
+parser_plugin!(ActiondbParserBuilder);
