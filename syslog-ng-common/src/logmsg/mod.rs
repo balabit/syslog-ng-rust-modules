@@ -67,7 +67,7 @@ impl LogMessage {
             logmsg::__log_msg_set_value_by_name(self.0,
                                                 c_key.as_ptr(),
                                                 c_value.as_ptr(),
-                                                value.len() as i64);
+                                                value.len() as isize);
         }
     }
 
