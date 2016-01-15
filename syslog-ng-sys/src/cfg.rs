@@ -12,38 +12,48 @@ extern "C" {
 
 impl GlobalConfig {
 
-    fn hex_to_dec(hex: i32) -> i32 {
+    fn hex_to_dec(hex: u8) -> u8 {
         let mut dec = 0;
         let mut shifted_hex = hex;
 
-        for i in 0..10 {
-            dec += (shifted_hex % 16) * 10i32.pow(i);
+        for i in 0..2 {
+            dec += (shifted_hex % 16) * 10u8.pow(i);
             shifted_hex >>= 4;
         }
 
         dec
     }
 
-    fn convert_version(version: i32) -> (i32,i32) {
-       let minor = GlobalConfig::hex_to_dec(version);
-       let major = GlobalConfig::hex_to_dec(version >> 8);
+    fn convert_version(version: u16) -> (u8, u8) {
+       let minor = GlobalConfig::hex_to_dec(version as u8);
+       let major = GlobalConfig::hex_to_dec((version >> 8) as u8);
        (major, minor)
     }
 
-    pub fn get_user_version(&self) -> (i32,i32) {
-       let version = unsafe {
+    pub fn get_user_version(&self) -> (u8,u8) {
+       let mut version = unsafe {
            cfg_get_user_version(self)
        };
 
-       GlobalConfig::convert_version(version)
+       if version < 0 {
+           error!("User config version must be greater than 0, using 0 as version");
+           version = 0;
+       }
+
+       GlobalConfig::convert_version(version as u16)
     }
 
-    pub fn get_parsed_version(&self) -> (i32,i32) {
-       let version = unsafe {
+    pub fn get_parsed_version(&self) -> (u8,u8) {
+       let mut version = unsafe {
            cfg_get_parsed_version(self)
        };
 
-       GlobalConfig::convert_version(version)
+       if version < 0 {
+           error!("Parsed config version must be greater than 0, using 0 as version");
+           version = 0;
+       }
+
+       GlobalConfig::convert_version(version as u16)
     }
 
     pub fn get_filename(&self) -> &str {
@@ -61,8 +71,8 @@ fn one_digit_hex_number_when_converted_to_decimal_works() {
 
 #[test]
 fn more_digits_hex_number_when_converted_to_decimal_works() {
-    let dec = GlobalConfig::hex_to_dec(0x1122);
-    assert_eq!(dec, 1122);
+    let dec = GlobalConfig::hex_to_dec(0x22);
+    assert_eq!(dec, 22);
 }
 
 #[test]
