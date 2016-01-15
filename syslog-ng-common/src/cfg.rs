@@ -1,5 +1,5 @@
-use syslog_ng_sys::ffi::from_c_str_to_borrowed_str;
 use syslog_ng_sys::cfg;
+use std::ffi::CStr;
 
 pub struct GlobalConfig (*const cfg::GlobalConfig);
 
@@ -30,9 +30,9 @@ impl GlobalConfig {
        convert_version(version as u16)
     }
 
-    pub fn get_filename(&self) -> &str {
+    pub fn get_filename(&self) -> &CStr {
         unsafe {
-            from_c_str_to_borrowed_str(cfg::cfg_get_filename(self.0))
+            CStr::from_ptr(cfg::cfg_get_filename(self.0))
         }
     }
 }
