@@ -16,7 +16,7 @@ pub trait ParserBuilder: Clone {
 }
 
 pub trait Parser: Clone {
-    fn parse(&mut self, msg: LogMessage, input: &str) -> bool;
+    fn parse(&mut self, msg: &mut LogMessage, input: &str) -> bool;
 }
 
 #[macro_export]
@@ -59,9 +59,9 @@ pub mod _parser_plugin {
     #[no_mangle]
     pub extern fn native_parser_proxy_process(this: &mut ParserProxy<$name>, msg: *mut $crate::sys::LogMessage, input: *const c_char, _: ssize_t) -> c_int {
         let input = unsafe { CStr::from_ptr(input).to_str() };
-        let msg = LogMessage::wrap_raw(msg);
+        let mut msg = LogMessage::wrap_raw(msg);
         let result = match input {
-            Ok(input) => this.process(msg, input),
+            Ok(input) => this.process(&mut msg, input),
             Err(err) => {
                 error!("{}", err);
                 false

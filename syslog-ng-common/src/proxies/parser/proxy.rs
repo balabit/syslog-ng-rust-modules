@@ -45,7 +45,7 @@ impl<B> ParserProxy<B> where B: ParserBuilder {
         builder.option(name, value);
     }
 
-    pub fn process(&mut self, msg: LogMessage, input: &str) -> bool {
+    pub fn process(&mut self, msg: &mut LogMessage, input: &str) -> bool {
         self.parser.as_mut().expect("Called process on a non-existing Rust parser").parse(msg, input)
     }
 
