@@ -1,39 +1,33 @@
 use syslog_ng_sys::cfg;
 use std::ffi::CStr;
 
-pub struct GlobalConfig (*const cfg::GlobalConfig);
+pub struct GlobalConfig(*const cfg::GlobalConfig);
 
 impl GlobalConfig {
-    pub fn get_user_version(&self) -> (u8,u8) {
-       let mut version = unsafe {
-           cfg::cfg_get_user_version(self.0)
-       };
+    pub fn get_user_version(&self) -> (u8, u8) {
+        let mut version = unsafe { cfg::cfg_get_user_version(self.0) };
 
-       if version < 0 {
-           error!("User config version must be greater than 0, using 0 as version");
-           version = 0;
-       }
+        if version < 0 {
+            error!("User config version must be greater than 0, using 0 as version");
+            version = 0;
+        }
 
-       convert_version(version as u16)
+        convert_version(version as u16)
     }
 
-    pub fn get_parsed_version(&self) -> (u8,u8) {
-       let mut version = unsafe {
-           cfg::cfg_get_parsed_version(self.0)
-       };
+    pub fn get_parsed_version(&self) -> (u8, u8) {
+        let mut version = unsafe { cfg::cfg_get_parsed_version(self.0) };
 
-       if version < 0 {
-           error!("Parsed config version must be greater than 0, using 0 as version");
-           version = 0;
-       }
+        if version < 0 {
+            error!("Parsed config version must be greater than 0, using 0 as version");
+            version = 0;
+        }
 
-       convert_version(version as u16)
+        convert_version(version as u16)
     }
 
     pub fn get_filename(&self) -> &CStr {
-        unsafe {
-            CStr::from_ptr(cfg::cfg_get_filename(self.0))
-        }
+        unsafe { CStr::from_ptr(cfg::cfg_get_filename(self.0)) }
     }
 }
 
@@ -50,9 +44,9 @@ fn hex_to_dec(hex: u8) -> u8 {
 }
 
 fn convert_version(version: u16) -> (u8, u8) {
-   let minor = hex_to_dec(version as u8);
-   let major = hex_to_dec((version >> 8) as u8);
-   (major, minor)
+    let minor = hex_to_dec(version as u8);
+    let major = hex_to_dec((version >> 8) as u8);
+    (major, minor)
 }
 
 #[test]

@@ -9,7 +9,7 @@ pub enum Msg {
     Warning = 4,
     Notice = 5,
     Info = 6,
-    Debug = 7
+    Debug = 7,
 }
 
 impl From<LogLevel> for Msg {
@@ -19,7 +19,7 @@ impl From<LogLevel> for Msg {
             LogLevel::Warn => Msg::Warning,
             LogLevel::Info => Msg::Info,
             LogLevel::Debug => Msg::Debug,
-            LogLevel::Trace => Msg::Debug
+            LogLevel::Trace => Msg::Debug,
         }
     }
 }
@@ -27,7 +27,6 @@ impl From<LogLevel> for Msg {
 pub struct InternalMessageSender;
 
 impl InternalMessageSender {
-
     pub fn create_and_send(severity: Msg, message: String) {
         unsafe {
             if messages::debug_flag != 0 {

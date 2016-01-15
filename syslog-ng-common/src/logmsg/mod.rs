@@ -5,10 +5,7 @@ use std::collections::BTreeMap;
 use std::str;
 use std::mem;
 use std::slice::from_raw_parts;
-use std::ffi::{
-    CStr,
-    CString
-};
+use std::ffi::{CStr, CString};
 
 #[cfg(test)]
 mod test;
@@ -17,9 +14,7 @@ pub struct LogMessage(*mut logmsg::LogMessage);
 
 impl Drop for LogMessage {
     fn drop(&mut self) {
-        unsafe {
-            logmsg::log_msg_unref(self.0)
-        }
+        unsafe { logmsg::log_msg_unref(self.0) }
     }
 }
 
@@ -69,7 +64,10 @@ impl LogMessage {
         unsafe {
             let c_key = CString::new(key).unwrap();
             let c_value = CString::new(value).unwrap();
-            logmsg::__log_msg_set_value_by_name(self.0, c_key.as_ptr(), c_value.as_ptr(), value.len() as i64);
+            logmsg::__log_msg_set_value_by_name(self.0,
+                                                c_key.as_ptr(),
+                                                c_value.as_ptr(),
+                                                value.len() as i64);
         }
     }
 
@@ -83,7 +81,8 @@ impl LogMessage {
     pub fn values(&self) -> BTreeMap<String, String> {
         let mut values = BTreeMap::new();
         unsafe {
-            let user_data = mem::transmute::<&mut BTreeMap<String, String>, *mut c_void>(&mut values);
+            let user_data = mem::transmute::<&mut BTreeMap<String, String>,
+                                             *mut c_void>(&mut values);
             logmsg::log_msg_values_foreach(self.0, insert_kvpair_to_map, user_data);
         }
         values
@@ -100,14 +99,16 @@ impl LogMessage {
 }
 
 fn c_char_to_string(value: *const c_char) -> String {
-    let bytes = unsafe {
-        CStr::from_ptr(value).to_bytes()
-    };
+    let bytes = unsafe { CStr::from_ptr(value).to_bytes() };
     let str_slice: &str = str::from_utf8(bytes).unwrap();
     str_slice.to_owned()
 }
 
-extern fn insert_tag_to_vec(_: *const logmsg::LogMessage, _: LogTagId, name: *const c_char, user_data: *mut c_void) -> bool {
+extern "C" fn insert_tag_to_vec(_: *const logmsg::LogMessage,
+                                _: LogTagId,
+                                name: *const c_char,
+                                user_data: *mut c_void)
+                                -> bool {
     unsafe {
         let name = c_char_to_string(name);
         let mut vec: &mut Vec<String> = mem::transmute(user_data);
@@ -116,7 +117,12 @@ extern fn insert_tag_to_vec(_: *const logmsg::LogMessage, _: LogTagId, name: *co
     false
 }
 
-extern fn insert_kvpair_to_map(_: NVHandle, name: *const c_char, value: *const c_char, value_len: ssize_t, user_data: *mut c_void) -> bool {
+extern "C" fn insert_kvpair_to_map(_: NVHandle,
+                                   name: *const c_char,
+                                   value: *const c_char,
+                                   value_len: ssize_t,
+                                   user_data: *mut c_void)
+                                   -> bool {
     unsafe {
         let name = c_char_to_string(name);
         let value = LogMessage::c_char_to_str(value, value_len).to_string();

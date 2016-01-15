@@ -1,24 +1,23 @@
-use ::LogMessage;
+use LogMessage;
 use syslog_ng_sys::LogParser;
 
-pub use proxies::parser::{
-    OptionError,
-    Parser,
-    ParserBuilder
-};
+pub use proxies::parser::{OptionError, Parser, ParserBuilder};
 
 #[repr(C)]
 #[derive(Clone)]
-pub struct ParserProxy<B> where B: ParserBuilder {
+pub struct ParserProxy<B>
+    where B: ParserBuilder
+{
     pub parser: Option<B::Parser>,
-    pub builder: Option<B>
+    pub builder: Option<B>,
 }
 
-impl<B> ParserProxy<B> where B: ParserBuilder {
+impl<B> ParserProxy<B> where B: ParserBuilder
+{
     pub fn new() -> ParserProxy<B> {
         ParserProxy {
             parser: None,
-            builder: Some(B::new())
+            builder: Some(B::new()),
         }
     }
 
@@ -28,7 +27,7 @@ impl<B> ParserProxy<B> where B: ParserBuilder {
             Ok(parser) => {
                 self.parser = Some(parser);
                 true
-            },
+            }
             Err(error) => {
                 error!("Error: {:?}", error);
                 false
@@ -46,11 +45,16 @@ impl<B> ParserProxy<B> where B: ParserBuilder {
     }
 
     pub fn process(&mut self, msg: &mut LogMessage, input: &str) -> bool {
-        self.parser.as_mut().expect("Called process on a non-existing Rust parser").parse(msg, input)
+        self.parser
+            .as_mut()
+            .expect("Called process on a non-existing Rust parser")
+            .parse(msg, input)
     }
 
     pub fn parent(&mut self, parent: *mut LogParser) {
-        let builder = self.builder.as_mut().expect("Failed to get a builder on a new parser proxy instance");
+        let builder = self.builder
+                          .as_mut()
+                          .expect("Failed to get a builder on a new parser proxy instance");
         builder.parent(parent);
     }
 }

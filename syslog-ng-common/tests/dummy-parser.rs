@@ -10,11 +10,7 @@ pub struct DummyParser;
 pub struct DummyParserBuilder;
 
 use syslog_ng_common::LogMessage;
-use syslog_ng_common::proxies::parser::{
-    Parser,
-    ParserBuilder,
-    OptionError
-};
+use syslog_ng_common::proxies::parser::{Parser, ParserBuilder, OptionError};
 
 impl ParserBuilder for DummyParserBuilder {
     type Parser = DummyParser;
@@ -44,7 +40,8 @@ parser_plugin!(DummyParserBuilder);
 use syslog_ng_common::sys::logmsg::log_msg_registry_init;
 
 #[test]
-fn test_given_parser_implementation_when_it_receives_a_message_then_it_adds_a_specific_key_value_pair_to_it() {
+fn test_given_parser_implementation_when_it_receives_a_message_then_it_adds_a_specific_key_value_pair_to_it
+    () {
     unsafe {
         // we may initialize it multiple times -> we leak some memory.
         // we may deinit it after each tests, but it's racy: the tests

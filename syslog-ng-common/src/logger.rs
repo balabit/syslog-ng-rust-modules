@@ -1,8 +1,5 @@
 use log::{LogRecord, LogMetadata, Log, LogLevelFilter};
-use messages::{
-    InternalMessageSender,
-    Msg
-};
+use messages::{InternalMessageSender, Msg};
 
 use log;
 

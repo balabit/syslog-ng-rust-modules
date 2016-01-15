@@ -3,14 +3,14 @@ use std::fmt::Write;
 #[derive(Clone)]
 pub struct MessageFormatter {
     buffer: String,
-    prefix: Option<String>
+    prefix: Option<String>,
 }
 
 impl MessageFormatter {
     pub fn new() -> MessageFormatter {
         MessageFormatter {
             buffer: String::new(),
-            prefix: None
+            prefix: None,
         }
     }
 
@@ -29,7 +29,7 @@ impl MessageFormatter {
             Some(prefix) => {
                 let _ = self.buffer.write_str(prefix);
                 let _ = self.buffer.write_str(key);
-            },
+            }
             None => {
                 let _ = self.buffer.write_str(key);
             }

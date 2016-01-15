@@ -1,4 +1,4 @@
-use ::LogMessage;
+use LogMessage;
 use syslog_ng_sys::LogParser;
 
 mod option_error;
