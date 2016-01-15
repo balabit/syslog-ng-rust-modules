@@ -32,6 +32,10 @@ impl LogMessage {
         }
     }
 
+    pub fn wrap_raw(raw: *mut ::sys::LogMessage) -> LogMessage {
+        LogMessage(raw)
+    }
+
     unsafe fn c_char_to_str<'a>(value: *const c_char, len: ssize_t) -> &'a str {
         let slce = from_raw_parts(value, len as usize);
         str::from_utf8(mem::transmute(slce)).unwrap()

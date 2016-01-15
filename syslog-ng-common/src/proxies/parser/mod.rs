@@ -1,4 +1,4 @@
-use syslog_ng_sys::LogMessage;
+use ::LogMessage;
 use syslog_ng_sys::LogParser;
 
 mod option_error;
@@ -16,7 +16,7 @@ pub trait ParserBuilder: Clone {
 }
 
 pub trait Parser: Clone {
-    fn parse(&mut self, msg: &mut LogMessage, input: &str) -> bool;
+    fn parse(&mut self, msg: LogMessage, input: &str) -> bool;
 }
 
 #[macro_export]
@@ -24,12 +24,13 @@ macro_rules! parser_plugin {
     ($name:ty) => {
 
 pub mod _parser_plugin {
-    use $crate::sys::{c_int, c_char, ssize_t};
-    use $crate::sys::{from_c_str_to_owned_string, from_c_str_to_borrowed_str};
-    use $crate::sys::LogMessage;
-    use $crate::sys::LogParser;
+    use $crate::{c_int, c_char, ssize_t};
+    use $crate::LogMessage;
+    use $crate::LogParser;
     use $crate::logger::init_logger;
     use $crate::proxies::parser::ParserProxy;
+
+    use std::ffi::CStr;
 
     use super::*;
 
@@ -49,17 +50,25 @@ pub mod _parser_plugin {
 
     #[no_mangle]
     pub extern fn native_parser_proxy_set_option(slf: &mut ParserProxy<$name>, key: *const c_char, value: *const c_char) {
-        let k = from_c_str_to_owned_string(key);
-        let v = from_c_str_to_owned_string(value);
+        let k: String = unsafe { CStr::from_ptr(key).to_owned().to_string_lossy().into_owned() };
+        let v: String = unsafe { CStr::from_ptr(value).to_owned().to_string_lossy().into_owned() };
 
         slf.set_option(k, v);
     }
 
     #[no_mangle]
-    pub extern fn native_parser_proxy_process(this: &mut ParserProxy<$name>, msg: &mut LogMessage, input: *const c_char, _: ssize_t) -> c_int {
-        let input = from_c_str_to_borrowed_str(input);
+    pub extern fn native_parser_proxy_process(this: &mut ParserProxy<$name>, msg: *mut $crate::sys::LogMessage, input: *const c_char, _: ssize_t) -> c_int {
+        let input = unsafe { CStr::from_ptr(input).to_str() };
+        let msg = LogMessage::wrap_raw(msg);
+        let result = match input {
+            Ok(input) => this.process(msg, input),
+            Err(err) => {
+                error!("{}", err);
+                false
+            }
+        };
 
-        match this.process(msg, input) {
+        match result {
             true => 1,
             false => 0
         }
