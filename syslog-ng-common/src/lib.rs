@@ -10,5 +10,6 @@ pub mod logger;
 pub mod messages;
 pub mod formatter;
 pub mod logmsg;
+pub mod cfg;
 
 pub mod sys;
