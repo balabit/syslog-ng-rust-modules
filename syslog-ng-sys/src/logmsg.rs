@@ -42,4 +42,5 @@ extern "C" {
                                 callback: LogMessageTagsForeachFunc,
                                 user_data: *mut c_void);
     pub fn log_msg_registry_init();
+    pub fn log_msg_registry_deinit();
 }
