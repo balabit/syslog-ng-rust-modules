@@ -11,25 +11,6 @@ extern "C" {
 }
 
 impl GlobalConfig {
-
-    fn hex_to_dec(hex: u8) -> u8 {
-        let mut dec = 0;
-        let mut shifted_hex = hex;
-
-        for i in 0..2 {
-            dec += (shifted_hex % 16) * 10u8.pow(i);
-            shifted_hex >>= 4;
-        }
-
-        dec
-    }
-
-    fn convert_version(version: u16) -> (u8, u8) {
-       let minor = GlobalConfig::hex_to_dec(version as u8);
-       let major = GlobalConfig::hex_to_dec((version >> 8) as u8);
-       (major, minor)
-    }
-
     pub fn get_user_version(&self) -> (u8,u8) {
        let mut version = unsafe {
            cfg_get_user_version(self)
@@ -40,7 +21,7 @@ impl GlobalConfig {
            version = 0;
        }
 
-       GlobalConfig::convert_version(version as u16)
+       convert_version(version as u16)
     }
 
     pub fn get_parsed_version(&self) -> (u8,u8) {
@@ -53,7 +34,7 @@ impl GlobalConfig {
            version = 0;
        }
 
-       GlobalConfig::convert_version(version as u16)
+       convert_version(version as u16)
     }
 
     pub fn get_filename(&self) -> &str {
@@ -61,6 +42,24 @@ impl GlobalConfig {
             from_c_str_to_borrowed_str(cfg_get_filename(self))
         }
     }
+}
+
+fn hex_to_dec(hex: u8) -> u8 {
+    let mut dec = 0;
+    let mut shifted_hex = hex;
+
+    for i in 0..2 {
+        dec += (shifted_hex % 16) * 10u8.pow(i);
+        shifted_hex >>= 4;
+    }
+
+    dec
+}
+
+fn convert_version(version: u16) -> (u8, u8) {
+   let minor = hex_to_dec(version as u8);
+   let major = hex_to_dec((version >> 8) as u8);
+   (major, minor)
 }
 
 #[test]
