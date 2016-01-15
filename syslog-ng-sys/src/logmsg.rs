@@ -3,6 +3,8 @@ use ::types::*;
 pub enum LogMessage{}
 pub type NVHandle = u32;
 pub type LogTagId = u16;
+pub type NVTableForeachFunc = extern fn(handle: NVHandle, name: *const c_char, value: *const c_char, value_len: ssize_t, user_data: *mut c_void) -> bool;
+pub type LogMessageTagsForeachFunc =  extern fn(msg: *const LogMessage, tag_id: LogTagId, name: *const c_char, user_data: *mut c_void) -> bool;
 
 #[link(name = "syslog-ng")]
 extern "C" {
@@ -16,6 +18,3 @@ extern "C" {
     pub fn log_msg_new_empty() -> *mut LogMessage;
     pub fn log_msg_tags_foreach(msg: *const LogMessage, callback: LogMessageTagsForeachFunc, user_data: *mut c_void);
 }
-
-type NVTableForeachFunc = extern fn(handle: NVHandle, name: *const c_char, value: *const c_char, value_len: ssize_t, user_data: *mut c_void) -> bool;
-type LogMessageTagsForeachFunc =  extern fn(msg: *const LogMessage, tag_id: LogTagId, name: *const c_char, user_data: *mut c_void) -> bool;
