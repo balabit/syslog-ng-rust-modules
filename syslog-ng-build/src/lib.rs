@@ -4,10 +4,7 @@ extern crate gcc;
 use std::env;
 use std::fs::File;
 use std::io::Write;
-use std::path::{
-    Path,
-    PathBuf
-};
+use std::path::{Path, PathBuf};
 
 const RUST_DEPS_A_NAME: &'static str = "syslog-ng-native-connector";
 
@@ -16,7 +13,7 @@ fn create_plugins(parser_name: Option<&str>) -> String {
 static Plugin native_plugins[] =
 {
     "#;
-    let tail  = r#"
+    let tail = r#"
 };
     "#;
     let middle = match parser_name {
@@ -27,9 +24,10 @@ static Plugin native_plugins[] =
     .name = "{name}",
     .parser = &native_parser,
  }},
-            "#, name=name)
+            "#,
+                    name = name)
         }
-        None => format!("")
+        None => format!(""),
     };
 
     format!("{}{}{}", head, middle, tail)
@@ -44,7 +42,8 @@ gboolean
   plugin_register(cfg, native_plugins, G_N_ELEMENTS(native_plugins));
   return TRUE;
 }}
-    "#, name=name)
+    "#,
+            name = name)
 }
 
 fn create_module_info(canonical_name: &str, description: &str) -> String {
@@ -58,7 +57,9 @@ const ModuleInfo module_info =
   .plugins = native_plugins,
   .plugins_len = G_N_ELEMENTS(native_plugins),
 }};
-    "#, name=canonical_name, description=description)
+    "#,
+            name = canonical_name,
+            description = description)
 }
 
 fn get_out_dir_file_path(filename: &str) -> PathBuf {
@@ -66,7 +67,10 @@ fn get_out_dir_file_path(filename: &str) -> PathBuf {
     Path::new(&out_dir).join(filename)
 }
 
-pub fn create_module_content(canonical_name: &str, description: &str, parser_name: Option<&str>) -> String {
+pub fn create_module_content(canonical_name: &str,
+                             description: &str,
+                             parser_name: Option<&str>)
+                             -> String {
     let header = r#"
 #include "cfg-parser.h"
 #include "plugin.h"
@@ -75,16 +79,16 @@ pub fn create_module_content(canonical_name: &str, description: &str, parser_nam
 CfgParser native_parser;
     "#;
 
-    format!("{header}{plugins}{module_init}{module_info}", header=header,
-            plugins=create_plugins(parser_name),
-            module_init=create_module_init(canonical_name),
-            module_info=create_module_info(canonical_name, description))
+    format!("{header}{plugins}{module_init}{module_info}",
+            header = header,
+            plugins = create_plugins(parser_name),
+            module_init = create_module_init(canonical_name),
+            module_info = create_module_info(canonical_name, description))
 }
 
 fn link_against_rust_deps() {
     match pkg_config::Config::new().statik(true).find(RUST_DEPS_A_NAME) {
-        Ok(_) => {
-        },
+        Ok(_) => {}
         Err(err) => {
             println!("{}", err);
         }
@@ -100,9 +104,9 @@ fn compile_and_link_module<P: AsRef<Path>>(dest_path: P) {
             }
 
             compiler.flag("-c")
-                .file(dest_path)
-                .compile("librust-module.a");
-        },
+                    .file(dest_path)
+                    .compile("librust-module.a");
+        }
         Err(err) => {
             println!("{}", err);
         }
@@ -111,7 +115,9 @@ fn compile_and_link_module<P: AsRef<Path>>(dest_path: P) {
 
 fn write_module_content_to_file<P: AsRef<Path>>(content: &str, path: P) {
     let mut module_file = File::create(&path).unwrap();
-    module_file.write((&content).as_bytes()).ok().expect("Failed to write module info during build");
+    module_file.write((&content).as_bytes())
+               .ok()
+               .expect("Failed to write module info during build");
 }
 
 fn link_against_module(content: &str) {
