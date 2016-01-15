@@ -9,5 +9,6 @@ pub mod proxies;
 pub mod logger;
 pub mod messages;
 pub mod formatter;
+pub mod logmsg;
 
 pub mod sys;
