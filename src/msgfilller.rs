@@ -1,5 +1,5 @@
 use syslog_ng_common::formatter::MessageFormatter;
-use syslog_ng_common::sys::LogMessage;
+use syslog_ng_common::LogMessage;
 use actiondb::matcher::result::MatchResult;
 
 use keys;

@@ -23,7 +23,7 @@ use syslog_ng_common::proxies::parser::{
     OptionError
 };
 
-use syslog_ng_common::sys::{
+use syslog_ng_common::{
     LogParser,
     LogMessage
 };
