@@ -1,11 +1,7 @@
 use uuid::Uuid;
-use std::rc::Rc;
 
 use action::Action;
 use conditions::Conditions;
-use message::Message;
-use state::State;
-use timer::TimerEvent;
 
 pub struct BaseContext {
     name: Option<String>,
