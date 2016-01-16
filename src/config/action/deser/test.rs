@@ -1,5 +1,5 @@
 use serde_json::from_str;
-use config::action::ActionType;
+use config::action::{ActionType, ExecCondition, ON_CLOSED_DEFAULT, ON_OPENED_DEFAULT};
 
 #[test]
 fn test_given_action_when_it_is_deserialized_then_we_get_the_right_result() {
@@ -20,4 +20,34 @@ fn test_given_action_when_it_is_deserialized_then_we_get_the_right_result() {
             assert_eq!("uuid1", message.uuid());
         }
     }
+}
+
+#[test]
+fn test_given_filled_exec_condition_when_it_is_deserialized_then_it_is_populated_with_the_specified_values() {
+    let text = r#"
+        {
+            "on_opened": true,
+            "on_closed": false
+        }
+    "#;
+
+    let expected = ExecCondition{on_closed: Some(false), on_opened: Some(true)};
+    let result = from_str::<ExecCondition>(text);
+    println!("{:?}", &result);
+    let cond = result.ok().expect("Failed to deserialize a valid ExecCondition");
+    assert_eq!(expected, cond);
+}
+
+#[test]
+fn test_given_filled_exec_condition_when_it_is_deserialized_then_its_missing_fields_are_populated_with_default_values() {
+    let text = r#"
+        {
+        }
+    "#;
+
+    let expected = ExecCondition{on_closed: ON_CLOSED_DEFAULT, on_opened: ON_OPENED_DEFAULT};
+    let result = from_str::<ExecCondition>(text);
+    println!("{:?}", &result);
+    let cond = result.ok().expect("Failed to deserialize a valid ExecCondition");
+    assert_eq!(expected, cond);
 }
