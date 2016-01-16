@@ -1,5 +1,6 @@
-use super::{MessageAction, ON_CLOSED_DEFAULT};
+use super::MessageAction;
 use super::MessageActionBuilder;
+use config::action::ExecCondition;
 
 use handlebars::Template;
 use serde::de::{Deserialize, Deserializer, Error, MapVisitor, Visitor};
@@ -18,8 +19,7 @@ enum Field {
     Name,
     Message,
     Values,
-    OnOpened,
-    OnClosed,
+    When,
 }
 
 impl Deserialize for Field {
@@ -39,8 +39,7 @@ impl Deserialize for Field {
                     "uuid" => Ok(Field::Uuid),
                     "values" => Ok(Field::Values),
                     "message" => Ok(Field::Message),
-                    "on_opened" => Ok(Field::OnOpened),
-                    "on_closed" => Ok(Field::OnClosed),
+                    "when" => Ok(Field::When),
                     _ => Err(Error::syntax(&format!("Unexpected field: {}", value))),
                 }
             }
@@ -78,8 +77,7 @@ impl Visitor for MessageActionVisitor {
         let mut uuid: Option<String> = None;
         let mut message: Option<String> = None;
         let mut values: Option<BTreeMap<String, String>> = None;
-        let mut on_opened: Option<bool> = None;
-        let mut on_closed: Option<bool> = ON_CLOSED_DEFAULT;
+        let mut when: ExecCondition = ExecCondition::new();
 
         loop {
             match try!(visitor.visit_key()) {
@@ -95,11 +93,8 @@ impl Visitor for MessageActionVisitor {
                 Some(Field::Values) => {
                     values = Some(try!(visitor.visit_value()));
                 }
-                Some(Field::OnOpened) => {
-                    on_opened = Some(try!(visitor.visit_value()));
-                }
-                Some(Field::OnClosed) => {
-                    on_closed = Some(try!(visitor.visit_value()));
+                Some(Field::When) => {
+                    when = try!(visitor.visit_value());
                 }
                 None => {
                     break;
@@ -139,8 +134,7 @@ impl Visitor for MessageActionVisitor {
         Ok(MessageActionBuilder::new(uuid, message)
                                 .name(name)
                                 .values(values)
-                                .on_opened(on_opened)
-                                .on_closed(on_closed)
+                                .when(when)
                                 .build())
     }
 }

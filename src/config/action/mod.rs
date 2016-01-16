@@ -16,3 +16,9 @@ pub struct ExecCondition {
     pub on_opened: Option<bool>,
     pub on_closed: Option<bool>,
 }
+
+impl ExecCondition {
+    pub fn new() -> ExecCondition {
+        ExecCondition {on_opened: ON_OPENED_DEFAULT, on_closed: ON_CLOSED_DEFAULT}
+    }
+}

@@ -162,7 +162,7 @@ impl Visitor for ContextVisitor {
 
 #[cfg(test)]
 mod test {
-    use config::action::ActionType;
+    use config::action::{ActionType, ExecCondition};
     use config::action::message::MessageActionBuilder;
     use conditions::ConditionsBuilder;
     use config::Context;
@@ -189,6 +189,10 @@ mod test {
                 {
                     "message": {
                         "uuid": "uuid1",
+                        "when": {
+                            "on_closed": true,
+                            "on_opened": false
+                        },
                         "message": "message"
                     }
                 }
@@ -210,9 +214,8 @@ mod test {
         let message = Template::compile("message".to_string())
                           .ok()
                           .expect("Failed to compile a handlebars template");
-        let expected_actions = vec![ActionType::Message(MessageActionBuilder::new("uuid1",
-                                                                                  message)
-                                                            .build())];
+        let expected_exec_cond = ExecCondition {on_opened: Some(false), on_closed: Some(true)};
+        let expected_actions = vec![ActionType::Message(MessageActionBuilder::new("uuid1", message).when(expected_exec_cond).build())];
         let context = result.ok().expect("Failed to deserialize a valid Context");
         assert_eq!(&Some(expected_name), &context.name);
         assert_eq!(&expected_uuid, &context.uuid);

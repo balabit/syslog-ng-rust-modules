@@ -1,5 +1,6 @@
 use action::Action;
 use config;
+use config::action::ExecCondition;
 use context::base::BaseContext;
 use dispatcher::Response;
 use dispatcher::response::ResponseSender;
@@ -30,15 +31,14 @@ pub struct MessageAction {
     uuid: String,
     name: Option<String>,
     values: Handlebars,
-    on_opened: Option<bool>,
-    on_closed: Option<bool>
+    when: ExecCondition
 }
 
 impl MessageAction {
     pub fn new(sender: Rc<RefCell<Box<ResponseSender<Response>>>>,
                action: config::action::MessageAction)
                -> MessageAction {
-        let config::action::MessageAction { uuid, name, message, values, on_opened, on_closed } = action;
+        let config::action::MessageAction { uuid, name, message, values, when } = action;
         let mut handlebars = Handlebars::new();
         for (name, template) in values.into_iter() {
             handlebars.register_template(&name, template);
@@ -50,8 +50,7 @@ impl MessageAction {
             uuid: uuid,
             name: name,
             values: handlebars,
-            on_opened: on_opened,
-            on_closed: on_closed,
+            when: when,
         }
     }
 
@@ -131,14 +130,14 @@ impl MessageResponse {
 
 impl Action for MessageAction {
     fn on_opened(&self, _state: &State, _context: &BaseContext) {
-        if let Some(true) = self.on_opened {
+        if let Some(true) = self.when.on_opened {
             trace!("MessageAction: on_opened()");
             self.execute(_state, _context);
         }
     }
 
     fn on_closed(&self, _state: &State, _context: &BaseContext) {
-        if let Some(true) = self.on_closed {
+        if let Some(true) = self.when.on_closed {
             trace!("MessageAction: on_closed()");
             self.execute(_state, _context);
         }

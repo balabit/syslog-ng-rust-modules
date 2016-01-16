@@ -1,14 +1,14 @@
 use handlebars::Template;
 use std::collections::BTreeMap;
-use super::{MessageAction, ON_CLOSED_DEFAULT};
+use super::MessageAction;
+use config::action::ExecCondition;
 
 pub struct MessageActionBuilder {
     uuid: String,
     name: Option<String>,
     message: Template,
     values: BTreeMap<String, Template>,
-    on_opened: Option<bool>,
-    on_closed: Option<bool>
+    when: ExecCondition
 }
 
 impl MessageActionBuilder {
@@ -18,8 +18,7 @@ impl MessageActionBuilder {
             name: None,
             message: message,
             values: BTreeMap::new(),
-            on_opened: None,
-            on_closed: ON_CLOSED_DEFAULT
+            when: ExecCondition::new()
         }
     }
 
@@ -28,13 +27,8 @@ impl MessageActionBuilder {
         self
     }
 
-    pub fn on_opened(&mut self, on_opened: Option<bool>) -> &mut MessageActionBuilder {
-        self.on_opened = on_opened;
-        self
-    }
-
-    pub fn on_closed(&mut self, on_closed: Option<bool>) -> &mut MessageActionBuilder {
-        self.on_closed = on_closed;
+    pub fn when(&mut self, when: ExecCondition) -> &mut MessageActionBuilder {
+        self.when = when;
         self
     }
 
@@ -54,8 +48,7 @@ impl MessageActionBuilder {
             name: self.name.clone(),
             message: self.message.clone(),
             values: self.values.clone(),
-            on_opened: self.on_opened,
-            on_closed: self.on_closed,
+            when: self.when.clone()
         }
     }
 }

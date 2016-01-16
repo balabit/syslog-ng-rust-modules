@@ -2,6 +2,7 @@ use handlebars::Template;
 use std::collections::BTreeMap;
 
 use super::ActionType;
+use super::ExecCondition;
 
 mod deser;
 mod builder;
@@ -15,8 +16,7 @@ pub struct MessageAction {
     pub name: Option<String>,
     pub message: Template,
     pub values: BTreeMap<String, Template>,
-    pub on_opened: Option<bool>,
-    pub on_closed: Option<bool>,
+    pub when: ExecCondition
 }
 
 impl MessageAction {
