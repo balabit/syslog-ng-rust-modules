@@ -3,6 +3,7 @@ use std::rc::Rc;
 use Message;
 use MiliSec;
 use timer::TimerEvent;
+use context::BaseContext;
 
 #[derive(Debug)]
 pub struct State {
@@ -30,7 +31,11 @@ impl State {
         self.opened = true;
     }
 
-    pub fn close(&mut self) {
+    pub fn close(&mut self, context: &BaseContext) {
+        trace!("Context: closing state; uuid={}", context.uuid());
+        for i in context.actions() {
+            i.execute(self, context);
+        }
         self.reset();
     }
 
@@ -49,6 +54,28 @@ impl State {
     pub fn add_message(&mut self, message: Rc<Message>) {
         self.messages.push(message);
         self.elapsed_time_since_last_message = 0;
+    }
+
+    pub fn on_timer(&mut self, event: &TimerEvent, context: &BaseContext) {
+        if self.is_open() {
+            self.update_timers(event);
+            if context.conditions().is_closing(self) {
+                self.close(context);
+            }
+        }
+    }
+
+    pub fn on_message(&mut self, event: Rc<Message>, context: &BaseContext) {
+        if self.is_open() {
+            self.add_message(event);
+            if context.conditions().is_closing(self) {
+                self.close(context);
+            }
+        } else if context.conditions().is_opening(&event) {
+            trace!("Context: opening state; uuid={}", context.uuid());
+            self.add_message(event);
+            self.open();
+        }
     }
 
     pub fn update_timers(&mut self, event: &TimerEvent) {

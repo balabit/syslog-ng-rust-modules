@@ -42,8 +42,7 @@ impl MapContext {
 
     pub fn on_timer(&mut self, event: &TimerEvent) {
         for (_, mut state) in self.map.iter_mut() {
-            self.base.on_timer(event, &mut state);
-
+            state.on_timer(event, &self.base);
         }
         self.remove_closed_states();
     }
@@ -78,7 +77,7 @@ impl MapContext {
                      .ok()
                      .expect("Failed to render the compiled Handlebars template");
         let state = self.map.entry(id).or_insert(State::new());
-        self.base.on_message(event, state);
+        state.on_message(event, &self.base);
     }
 
     pub fn is_open(&mut self) -> bool {

@@ -35,11 +35,11 @@ impl LinearContext {
     }
 
     pub fn on_timer(&mut self, event: &TimerEvent) {
-        self.base.on_timer(event, &mut self.state)
+        self.state.on_timer(event, &self.base);
     }
 
     pub fn on_message(&mut self, event: Rc<Message>) {
-        self.base.on_message(event, &mut self.state);
+        self.state.on_message(event, &self.base);
     }
 
     pub fn is_open(&self) -> bool {
