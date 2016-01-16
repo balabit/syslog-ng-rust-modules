@@ -59,22 +59,23 @@ impl State {
     pub fn on_timer(&mut self, event: &TimerEvent, context: &BaseContext) {
         if self.is_open() {
             self.update_timers(event);
-            if context.conditions().is_closing(self) {
-                self.close(context);
-            }
+        }
+        if context.conditions().is_closing(self) {
+            self.close(context);
         }
     }
 
     pub fn on_message(&mut self, event: Rc<Message>, context: &BaseContext) {
         if self.is_open() {
             self.add_message(event);
-            if context.conditions().is_closing(self) {
-                self.close(context);
-            }
         } else if context.conditions().is_opening(&event) {
             trace!("Context: opening state; uuid={}", context.uuid());
             self.add_message(event);
             self.open();
+        }
+
+        if context.conditions().is_closing(self) {
+            self.close(context);
         }
     }
 
