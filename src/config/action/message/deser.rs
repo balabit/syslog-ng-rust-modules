@@ -178,7 +178,7 @@ mod test {
                          .ok()
                          .expect("Failed to compile a handlebars template");
         let expected_message = MessageActionBuilder::new("UUID", message)
-                                   .name("NAME")
+                                   .name(Some("NAME"))
                                    .pair("key1", value1)
                                    .pair("key2", value2)
                                    .build();

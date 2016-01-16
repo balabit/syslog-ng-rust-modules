@@ -23,8 +23,8 @@ impl MessageActionBuilder {
         }
     }
 
-    pub fn name<S: Into<String>>(&mut self, name: S) -> &mut MessageActionBuilder {
-        self.name = Some(name.into());
+    pub fn name<S: Into<String>>(&mut self, name: Option<S>) -> &mut MessageActionBuilder {
+        self.name = name.map(|name| name.into());
         self
     }
 
