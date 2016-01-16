@@ -122,6 +122,8 @@ mod test {
     use message::MessageBuilder;
     use state::State;
     use super::ConditionsBuilder;
+    use context::BaseContextBuilder;
+    use uuid::Uuid;
 
     #[test]
     fn test_given_condition_when_an_opening_message_is_received_then_the_state_becomes_opened() {
@@ -151,16 +153,18 @@ mod test {
             msg_id2.clone(),
         ];
         let mut state = State::new();
-        let condition = ConditionsBuilder::new(timeout)
+        let conditions = ConditionsBuilder::new(timeout)
                             .patterns(patterns)
                             .last_closes(true)
                             .build();
-        let msg_1 = MessageBuilder::new(&msg_id1, "message").build();
+        let context = BaseContextBuilder::new(Uuid::new_v4(), conditions).build();
+        let msg_opening = Rc::new(MessageBuilder::new(&msg_id1, "message").build());
         let msg_closing = Rc::new(MessageBuilder::new(&msg_id2, "message").build());
-        assert_true!(condition.is_opening(&msg_1));
-        state.open();
-        state.add_message(msg_closing);
-        assert_true!(condition.is_closing(&mut state));
+        assert_false!(state.is_open());
+        state.on_message(msg_opening, &context);
+        assert_true!(state.is_open());
+        state.on_message(msg_closing, &context);
+        assert_false!(state.is_open());
     }
 
     #[test]
@@ -251,18 +255,18 @@ mod test {
         let p1 = "p1".to_string();
         let p2 = "p2".to_string();
         let mut state = State::new();
-        let condition = ConditionsBuilder::new(timeout)
+        let conditions = ConditionsBuilder::new(timeout)
                             .patterns(patterns)
                             .first_opens(true)
                             .last_closes(true)
                             .build();
         let p1_msg = MessageBuilder::new(&p1_uuid, "message").name(Some(&p1)).build();
-        assert_true!(condition.is_opening(&p1_msg));
-        state.open();
-        state.add_message(Rc::new(p1_msg));
         let p2_msg = MessageBuilder::new(&p2_uuid, "message").name(Some(&p2)).build();
-        state.add_message(Rc::new(p2_msg));
-        assert_true!(condition.is_closing(&state));
+        let context = BaseContextBuilder::new(Uuid::new_v4(), conditions).build();
+        assert_false!(state.is_open());
+        state.on_message(Rc::new(p1_msg), &context);
+        state.on_message(Rc::new(p2_msg), &context);
+        assert_false!(state.is_open());
     }
 }
 

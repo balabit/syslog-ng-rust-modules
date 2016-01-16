@@ -104,6 +104,18 @@ impl MessageAction {
             values.insert(CONTEXT_NAME.to_string(), name.to_string());
         }
     }
+
+    fn execute(&self, _state: &State, _context: &BaseContext) {
+        match self.render_message(_state, _context) {
+            Ok(message) => {
+                let response = MessageResponse { message: message };
+                self.sender.borrow_mut().send_response(Response::Message(response));
+            }
+            Err(error) => {
+                error!("{}", error);
+            }
+        }
+    }
 }
 
 #[derive(Debug)]
@@ -118,16 +130,17 @@ impl MessageResponse {
 }
 
 impl Action for MessageAction {
-    fn execute(&self, _state: &State, _context: &BaseContext) {
-        trace!("MessageAction: executed");
-        match self.render_message(_state, _context) {
-            Ok(message) => {
-                let response = MessageResponse { message: message };
-                self.sender.borrow_mut().send_response(Response::Message(response));
-            }
-            Err(error) => {
-                error!("{}", error);
-            }
+    fn on_opened(&self, _state: &State, _context: &BaseContext) {
+        if let Some(true) = self.on_opened {
+            trace!("MessageAction: on_opened()");
+            self.execute(_state, _context);
+        }
+    }
+
+    fn on_closed(&self, _state: &State, _context: &BaseContext) {
+        if let Some(true) = self.on_closed {
+            trace!("MessageAction: on_closed()");
+            self.execute(_state, _context);
         }
     }
 }

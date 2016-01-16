@@ -12,7 +12,8 @@ pub mod message;
 pub use self::message::MessageResponse;
 
 pub trait Action {
-    fn execute(&self, state: &State, context: &BaseContext);
+    fn on_opened(&self, state: &State, context: &BaseContext);
+    fn on_closed(&self, state: &State, context: &BaseContext);
 }
 
 pub fn from_config(config: ActionType,

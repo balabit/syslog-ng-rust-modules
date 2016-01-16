@@ -1,7 +1,6 @@
 use context::base::BaseContextBuilder;
 use super::{CONTEXT_LEN, CONTEXT_NAME, CONTEXT_UUID, MessageAction};
 
-use action::Action;
 use conditions::ConditionsBuilder;
 use config;
 use dispatcher::Response;
@@ -72,14 +71,15 @@ fn test_given_message_action_when_it_is_executed_then_it_uses_the_messages_to_re
         BaseContextBuilder::new(uuid, conditions).name(name.clone()).build()
     };
     let state = {
-        let mut state = State::new();
-        state.add_message(Rc::new(MessageBuilder::new("uuid1", "message1")
+        let messages = vec![
+            Rc::new(MessageBuilder::new("uuid1", "message1")
                                       .pair("key1", "value1")
-                                      .build()));
-        state.add_message(Rc::new(MessageBuilder::new("uuid2", "message2")
+                                      .build()),
+            Rc::new(MessageBuilder::new("uuid2", "message2")
                                       .pair("key2", "value2")
-                                      .build()));
-        state
+                                      .build())
+        ];
+        State::with_messages(messages)
     };
     let responses = Rc::new(RefCell::new(Vec::new()));
     let message_action = {
