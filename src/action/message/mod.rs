@@ -30,6 +30,7 @@ pub struct MessageAction {
     uuid: String,
     name: Option<String>,
     values: Handlebars,
+    on_opened: Option<bool>
 }
 
 impl MessageAction {
@@ -48,6 +49,7 @@ impl MessageAction {
             uuid: uuid,
             name: name,
             values: handlebars,
+            on_opened: on_opened
         }
     }
 
