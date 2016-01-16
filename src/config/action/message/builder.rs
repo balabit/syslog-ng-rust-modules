@@ -7,7 +7,8 @@ pub struct MessageActionBuilder {
     name: Option<String>,
     message: Template,
     values: BTreeMap<String, Template>,
-    on_opened: Option<bool>
+    on_opened: Option<bool>,
+    on_closed: Option<bool>
 }
 
 impl MessageActionBuilder {
@@ -17,7 +18,8 @@ impl MessageActionBuilder {
             name: None,
             message: message,
             values: BTreeMap::new(),
-            on_opened: None
+            on_opened: None,
+            on_closed: None
         }
     }
 
@@ -28,6 +30,11 @@ impl MessageActionBuilder {
 
     pub fn on_opened(&mut self, on_opened: Option<bool>) -> &mut MessageActionBuilder {
         self.on_opened = on_opened;
+        self
+    }
+
+    pub fn on_closed(&mut self, on_closed: Option<bool>) -> &mut MessageActionBuilder {
+        self.on_closed = on_closed;
         self
     }
 
@@ -42,7 +49,8 @@ impl MessageActionBuilder {
             name: self.name.clone(),
             message: self.message.clone(),
             values: self.values.clone(),
-            on_opened: self.on_opened
+            on_opened: self.on_opened,
+            on_closed: self.on_closed,
         }
     }
 }

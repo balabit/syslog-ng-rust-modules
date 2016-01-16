@@ -15,6 +15,7 @@ pub struct MessageAction {
     pub message: Template,
     pub values: BTreeMap<String, Template>,
     pub on_opened: Option<bool>,
+    pub on_closed: Option<bool>,
 }
 
 impl MessageAction {

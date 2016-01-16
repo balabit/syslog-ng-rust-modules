@@ -30,14 +30,15 @@ pub struct MessageAction {
     uuid: String,
     name: Option<String>,
     values: Handlebars,
-    on_opened: Option<bool>
+    on_opened: Option<bool>,
+    on_closed: Option<bool>
 }
 
 impl MessageAction {
     pub fn new(sender: Rc<RefCell<Box<ResponseSender<Response>>>>,
                action: config::action::MessageAction)
                -> MessageAction {
-        let config::action::MessageAction { uuid, name, message, values, on_opened } = action;
+        let config::action::MessageAction { uuid, name, message, values, on_opened, on_closed } = action;
         let mut handlebars = Handlebars::new();
         for (name, template) in values.into_iter() {
             handlebars.register_template(&name, template);
@@ -49,7 +50,8 @@ impl MessageAction {
             uuid: uuid,
             name: name,
             values: handlebars,
-            on_opened: on_opened
+            on_opened: on_opened,
+            on_closed: on_closed,
         }
     }
 
