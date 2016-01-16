@@ -12,9 +12,9 @@ pub struct MessageActionBuilder {
 }
 
 impl MessageActionBuilder {
-    pub fn new(uuid: &str, message: Template) -> MessageActionBuilder {
+    pub fn new<S: Into<String>>(uuid: S, message: Template) -> MessageActionBuilder {
         MessageActionBuilder {
-            uuid: uuid.to_string(),
+            uuid: uuid.into(),
             name: None,
             message: message,
             values: BTreeMap::new(),
@@ -23,8 +23,8 @@ impl MessageActionBuilder {
         }
     }
 
-    pub fn name(&mut self, name: &str) -> &mut MessageActionBuilder {
-        self.name = Some(name.to_string());
+    pub fn name<S: Into<String>>(&mut self, name: S) -> &mut MessageActionBuilder {
+        self.name = Some(name.into());
         self
     }
 
@@ -38,8 +38,8 @@ impl MessageActionBuilder {
         self
     }
 
-    pub fn pair(&mut self, key: &str, value: Template) -> &mut MessageActionBuilder {
-        self.values.insert(key.to_string(), value);
+    pub fn pair<S: Into<String>>(&mut self, key: S, value: Template) -> &mut MessageActionBuilder {
+        self.values.insert(key.into(), value);
         self
     }
 
