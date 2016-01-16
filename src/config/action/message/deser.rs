@@ -1,4 +1,5 @@
-use super::MessageAction;
+use super::{MessageAction, ON_CLOSED_DEFAULT};
+use super::MessageActionBuilder;
 
 use handlebars::Template;
 use serde::de::{Deserialize, Deserializer, Error, MapVisitor, Visitor};
@@ -73,12 +74,12 @@ impl Visitor for MessageActionVisitor {
     fn visit_map<V>(&mut self, mut visitor: V) -> Result<MessageAction, V::Error>
         where V: MapVisitor
     {
-        let mut name = None;
-        let mut uuid = None;
+        let mut name: Option<String> = None;
+        let mut uuid: Option<String> = None;
         let mut message: Option<String> = None;
         let mut values: Option<BTreeMap<String, String>> = None;
         let mut on_opened: Option<bool> = None;
-        let mut on_closed: Option<bool> = None;
+        let mut on_closed: Option<bool> = ON_CLOSED_DEFAULT;
 
         loop {
             match try!(visitor.visit_key()) {
@@ -135,14 +136,12 @@ impl Visitor for MessageActionVisitor {
 
         try!(visitor.end());
 
-        Ok(MessageAction {
-            name: name,
-            uuid: uuid,
-            message: message,
-            values: values,
-            on_opened: on_opened,
-            on_closed: on_closed,
-        })
+        Ok(MessageActionBuilder::new(uuid, message)
+                                .name(name)
+                                .values(values)
+                                .on_opened(on_opened)
+                                .on_closed(on_closed)
+                                .build())
     }
 }
 

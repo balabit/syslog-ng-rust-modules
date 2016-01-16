@@ -7,6 +7,7 @@ mod deser;
 mod builder;
 
 pub use self::builder::MessageActionBuilder;
+pub const ON_CLOSED_DEFAULT: Option<bool> = Some(true);
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct MessageAction {

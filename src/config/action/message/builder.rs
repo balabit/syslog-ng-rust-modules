@@ -1,6 +1,6 @@
 use handlebars::Template;
 use std::collections::BTreeMap;
-use super::MessageAction;
+use super::{MessageAction, ON_CLOSED_DEFAULT};
 
 pub struct MessageActionBuilder {
     uuid: String,
@@ -19,7 +19,7 @@ impl MessageActionBuilder {
             message: message,
             values: BTreeMap::new(),
             on_opened: None,
-            on_closed: None
+            on_closed: ON_CLOSED_DEFAULT
         }
     }
 
