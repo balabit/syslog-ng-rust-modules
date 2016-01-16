@@ -17,6 +17,7 @@ enum Field {
     Name,
     Message,
     Values,
+    OnOpened,
 }
 
 impl Deserialize for Field {
@@ -36,6 +37,7 @@ impl Deserialize for Field {
                     "uuid" => Ok(Field::Uuid),
                     "values" => Ok(Field::Values),
                     "message" => Ok(Field::Message),
+                    "on_opened" => Ok(Field::OnOpened),
                     _ => Err(Error::syntax(&format!("Unexpected field: {}", value))),
                 }
             }
@@ -73,6 +75,7 @@ impl Visitor for MessageActionVisitor {
         let mut uuid = None;
         let mut message: Option<String> = None;
         let mut values: Option<BTreeMap<String, String>> = None;
+        let mut on_opened: Option<bool> = None;
 
         loop {
             match try!(visitor.visit_key()) {
@@ -87,6 +90,9 @@ impl Visitor for MessageActionVisitor {
                 }
                 Some(Field::Values) => {
                     values = Some(try!(visitor.visit_value()));
+                }
+                Some(Field::OnOpened) => {
+                    on_opened = Some(try!(visitor.visit_value()));
                 }
                 None => {
                     break;
@@ -128,6 +134,7 @@ impl Visitor for MessageActionVisitor {
             uuid: uuid,
             message: message,
             values: values,
+            on_opened: on_opened
         })
     }
 }

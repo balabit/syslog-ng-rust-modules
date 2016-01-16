@@ -36,7 +36,7 @@ impl MessageAction {
     pub fn new(sender: Rc<RefCell<Box<ResponseSender<Response>>>>,
                action: config::action::MessageAction)
                -> MessageAction {
-        let config::action::MessageAction { uuid, name, message, values } = action;
+        let config::action::MessageAction { uuid, name, message, values, on_opened } = action;
         let mut handlebars = Handlebars::new();
         for (name, template) in values.into_iter() {
             handlebars.register_template(&name, template);
