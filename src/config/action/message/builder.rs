@@ -38,6 +38,11 @@ impl MessageActionBuilder {
         self
     }
 
+    pub fn values(&mut self, values: BTreeMap<String, Template>) -> &mut MessageActionBuilder {
+        self.values = values;
+        self
+    }
+
     pub fn pair<S: Into<String>>(&mut self, key: S, value: Template) -> &mut MessageActionBuilder {
         self.values.insert(key.into(), value);
         self
