@@ -37,7 +37,12 @@ impl Conditions {
 
     pub fn is_closing(&self, state: &State) -> bool {
         trace!("Conditions: shoud we close this context?");
-        self.is_max_size_reached(state) || self.is_closing_message(state) ||
+        state.is_open() && self.is_closing_condition_met(state)
+    }
+
+    fn is_closing_condition_met(&self, state: &State) -> bool {
+        self.is_max_size_reached(state) ||
+        self.is_closing_message(state) ||
         self.is_any_timer_expired(state)
     }
 
@@ -253,6 +258,7 @@ mod test {
                             .build();
         let p1_msg = MessageBuilder::new(&p1_uuid, "message").name(Some(&p1)).build();
         assert_true!(condition.is_opening(&p1_msg));
+        state.open();
         state.add_message(Rc::new(p1_msg));
         let p2_msg = MessageBuilder::new(&p2_uuid, "message").name(Some(&p2)).build();
         state.add_message(Rc::new(p2_msg));
