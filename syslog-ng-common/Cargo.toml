@@ -1,6 +1,6 @@
 [package]
 name = "syslog-ng-common"
-version = "0.3.0"
+version = "0.3.1"
 authors = ["Tibor Benke <ihrwein@gmail.com>"]
 
 [dependencies]
