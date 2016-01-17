@@ -7,7 +7,6 @@ extern crate syslog_ng_sys;
 extern crate syslog_ng_common;
 extern crate correlation;
 
-use correlation::message::Message;
 use correlation::dispatcher::ResponseHandler;
 use correlation::Response;
 use correlation::correlator::EventHandler;
@@ -58,7 +57,7 @@ impl EventHandler<Response> for MessageSender {
 
 #[derive(Clone)]
 pub struct CorrelationParserBuilder {
-    correlator: Option<Correlator>,
+    contexts: Option<Vec<Context>>,
     formatter: MessageFormatter
 }
 
@@ -66,7 +65,7 @@ impl CorrelationParserBuilder {
     pub fn set_file(&mut self, path: &str) {
         match self.load_contexts(path) {
             Ok(contexts) => {
-                self.correlator = Some(Correlator::new(contexts));
+                self.contexts = Some(contexts);
             },
             Err(err) => {
                 error!("CorrelationParser: failed to set config file: {:?}", &err);
@@ -96,7 +95,7 @@ impl ParserBuilder for CorrelationParserBuilder {
     type Parser = CorrelationParser;
     fn new() -> Self {
         CorrelationParserBuilder {
-            correlator: None,
+            contexts: None,
             formatter: MessageFormatter::new()
         }
     }
@@ -111,17 +110,18 @@ impl ParserBuilder for CorrelationParserBuilder {
     }
     fn build(self) -> Result<Self::Parser, OptionError> {
         debug!("Building Rust parser");
-        let CorrelationParserBuilder {correlator, formatter} = self;
-        let correlator = try!(correlator.ok_or(OptionError::missing_required_option(options::CONTEXTS_FILE)));
+        let CorrelationParserBuilder {contexts, formatter} = self;
+        let contexts = try!(contexts.ok_or(OptionError::missing_required_option(options::CONTEXTS_FILE)));
         Ok(CorrelationParser {
-            correlator: correlator,
+            contexts: contexts.clone(),
+            correlator: Correlator::new(contexts),
             formatter: formatter
         })
     }
 }
 
-#[derive(Clone)]
 pub struct CorrelationParser {
+    contexts: Vec<Context>,
     correlator: Correlator,
     formatter: MessageFormatter
 }
@@ -146,6 +146,16 @@ impl Parser for CorrelationParser {
                 error!("{}", err);
                 false
             }
+        }
+    }
+}
+
+impl Clone for CorrelationParser {
+    fn clone(&self) -> CorrelationParser {
+        CorrelationParser {
+            formatter: self.formatter.clone(),
+            contexts: self.contexts.clone(),
+            correlator: Correlator::new(self.contexts.clone())
         }
     }
 }
