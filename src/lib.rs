@@ -2,8 +2,8 @@
 extern crate log;
 extern crate serde_json;
 extern crate serde;
-#[macro_use]
 extern crate syslog_ng_sys;
+#[macro_use]
 extern crate syslog_ng_common;
 extern crate correlation;
 
@@ -166,3 +166,5 @@ impl Clone for CorrelationParser {
         CorrelationParser::new(self.contexts.clone(), self.formatter.clone())
     }
 }
+
+parser_plugin!(CorrelationParserBuilder);
