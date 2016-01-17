@@ -9,7 +9,7 @@ links = "syslog-ng"
 name = "syslog_ng_sys"
 
 [dependencies]
-libc = "0.1"
+libc = "0.2"
 log = "0.3"
 
 [build-dependencies]
