@@ -37,7 +37,7 @@ pub struct Correlator {
     dispatcher_input_channel: mpsc::Sender<Request<Message>>,
     dispatcher_output_channel: mpsc::Receiver<Response>,
     dispatcher_thread_handle: thread::JoinHandle<()>,
-    handlers: HashMap<ResponseHandler, Box<EventHandler<Response, ()>>>,
+    handlers: HashMap<ResponseHandler, Box<EventHandler<Response, mpsc::Sender<Request<Message>>>>>,
 }
 
 fn create_context(config_context: config::Context,
@@ -115,7 +115,7 @@ impl Correlator {
         }
     }
 
-    pub fn register_handler(&mut self, handler: Box<EventHandler<Response, ()>>) {
+    pub fn register_handler(&mut self, handler: Box<EventHandler<Response, mpsc::Sender<Request<Message>>>>) {
         self.handlers.insert(handler.handler(), handler);
     }
 
@@ -128,7 +128,7 @@ impl Correlator {
 
     fn handle_event(&mut self, event: Response) {
         if let Some(handler) = self.handlers.get_mut(&event.handler()) {
-            handler.handle_event(event, &mut ());
+            handler.handle_event(event, &mut self.dispatcher_input_channel);
         } else {
             trace!("no event handler found for handling a Response");
         }

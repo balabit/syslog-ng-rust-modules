@@ -23,8 +23,8 @@ impl ExitHandler {
     }
 }
 
-impl EventHandler<Response, ()> for ExitHandler {
-    fn handle_event(&mut self, event: Response, _: &mut ()) {
+impl EventHandler<Response, mpsc::Sender<Request<Message>>> for ExitHandler {
+    fn handle_event(&mut self, event: Response, _: &mut mpsc::Sender<Request<Message>>) {
         if let Response::Exit = event {
             self.exits_received += 1;
             let _ = self.channel.send(Request::Exit);
