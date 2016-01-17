@@ -21,7 +21,7 @@ use dispatcher::response;
 use dispatcher::demux::Demultiplexer;
 use dispatcher::handlers;
 pub use self::error::Error;
-use reactor::{Event, Reactor};
+use reactor::{Event, Reactor, EventHandler};
 use timer::Timer;
 
 const TIMER_STEP: MiliSec = 100;
@@ -33,16 +33,11 @@ mod exit_handler;
 #[cfg(test)]
 mod test;
 
-pub trait EventHandler<T: Event> {
-    fn handle_event(&mut self, event: T);
-    fn handler(&self) -> T::Handler;
-}
-
 pub struct Correlator {
     dispatcher_input_channel: mpsc::Sender<Request<Message>>,
     dispatcher_output_channel: mpsc::Receiver<Response>,
     dispatcher_thread_handle: thread::JoinHandle<()>,
-    handlers: HashMap<ResponseHandler, Box<EventHandler<Response>>>,
+    handlers: HashMap<ResponseHandler, Box<EventHandler<Response, ()>>>,
 }
 
 fn create_context(config_context: config::Context,
@@ -120,7 +115,7 @@ impl Correlator {
         }
     }
 
-    pub fn register_handler(&mut self, handler: Box<EventHandler<Response>>) {
+    pub fn register_handler(&mut self, handler: Box<EventHandler<Response, ()>>) {
         self.handlers.insert(handler.handler(), handler);
     }
 
@@ -133,7 +128,7 @@ impl Correlator {
 
     fn handle_event(&mut self, event: Response) {
         if let Some(handler) = self.handlers.get_mut(&event.handler()) {
-            handler.handle_event(event);
+            handler.handle_event(event, &mut ());
         } else {
             trace!("no event handler found for handling a Response");
         }
