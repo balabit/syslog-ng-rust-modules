@@ -4,7 +4,7 @@ version = "0.1.0"
 authors = ["Tibor Benke <ihrwein@gmail.com>"]
 
 [lib]
-name = "correlation_parser"
+crate_type = ["dylib"]
 
 [dependencies]
 log = "0.3"
@@ -17,5 +17,5 @@ path = "../correlation"
 [dependencies.syslog-ng-common]
 path = "../syslog-ng-rs/syslog-ng-common/"
 
-[dependencies.syslog-ng-sys]
-path = "../syslog-ng-rs/syslog-ng-sys/"
+[build-dependencies.syslog-ng-build]
+path = "../syslog-ng-rs/syslog-ng-build/"
