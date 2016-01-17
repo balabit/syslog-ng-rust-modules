@@ -2,7 +2,6 @@
 extern crate log;
 extern crate serde_json;
 extern crate serde;
-extern crate syslog_ng_sys;
 #[macro_use]
 extern crate syslog_ng_common;
 extern crate correlation;
