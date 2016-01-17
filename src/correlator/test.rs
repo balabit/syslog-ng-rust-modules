@@ -32,6 +32,10 @@ const JSON_CONFIG: &'static str = r#"
             {
               "message": {
                   "uuid": "uuid1",
+                  "when": {
+                    "on_opened": "true",
+                    "on_closed": "true"
+                  },
                   "message": "message_1"
               }
             }
@@ -170,5 +174,5 @@ fn test_given_correlator_when_it_is_built_from_json_then_it_produces_the_expecte
     thread::sleep_ms(200);
     let _ = correlator.stop();
     println!("{:?}", &responses.borrow());
-    assert_eq!(4, responses.borrow().len());
+    assert_eq!(5, responses.borrow().len());
 }
