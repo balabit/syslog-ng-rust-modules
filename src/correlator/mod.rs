@@ -89,17 +89,17 @@ impl Correlator {
         let _ = Timer::from_chan(TIMER_STEP, dispatcher_input_channel.clone());
 
         let handle = thread::spawn(move || {
-            let dmux = Demultiplexer::new(rx);
             let exit_condition = Condition::new(false);
+            let dmux = Demultiplexer::new(rx, exit_condition.clone());
             let response_sender = Box::new(ResponseSender::new(dispatcher_output_channel_tx)) as Box<response::ResponseSender<Response>>;
             let response_sender = Rc::new(RefCell::new(response_sender));
 
-            let exit_handler = Box::new(handlers::exit::ExitEventHandler::new(exit_condition.clone(), response_sender.clone()));
+            let exit_handler = Box::new(handlers::exit::ExitEventHandler::new(exit_condition, response_sender.clone()));
             let timer_event_handler = Box::new(handlers::timer::TimerEventHandler::new());
             let message_event_handler = Box::new(handlers::message::MessageEventHandler::new());
 
             let context_map = create_context_map(contexts, response_sender);
-            let mut reactor = RequestReactor::new(dmux, exit_condition, context_map);
+            let mut reactor = RequestReactor::new(dmux, context_map);
             reactor.register_handler(exit_handler);
             reactor.register_handler(timer_event_handler);
             reactor.register_handler(message_event_handler);
