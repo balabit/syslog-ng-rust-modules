@@ -8,8 +8,9 @@ extern crate syslog_ng_common;
 extern crate correlation;
 
 use correlation::dispatcher::ResponseHandler;
-use correlation::Response;
-use correlation::correlator::EventHandler;
+use correlation::dispatcher::request::Request;
+use correlation::{Message, Response};
+use correlation::reactor::EventHandler;
 use correlation::Correlator;
 use correlation::config::Context;
 use correlation::message::MessageBuilder;
@@ -19,6 +20,7 @@ use std::clone::Clone;
 use std::io::Read;
 use std::io;
 use std::fs::File;
+use std::sync::mpsc;
 use syslog_ng_common::{MessageFormatter, LogMessage};
 use syslog_ng_common::proxies::parser::{Parser, ParserBuilder, OptionError};
 
@@ -44,10 +46,10 @@ impl From<serde_json::error::Error> for Error {
 
 struct MessageSender;
 
-impl EventHandler<Response> for MessageSender {
-    fn handle_event(&mut self, event: Response) {
+impl EventHandler<Response, mpsc::Sender<Request<Message>>> for MessageSender {
+    fn handle_event(&mut self, event: Response, _: &mut mpsc::Sender<Request<Message>>) {
         if let Response::Message(msg) = event {
-            error!("got synthetic message");
+            debug!("{}", msg.message().message());
         }
     }
     fn handler(&self) -> ResponseHandler {
@@ -112,11 +114,7 @@ impl ParserBuilder for CorrelationParserBuilder {
         debug!("Building Rust parser");
         let CorrelationParserBuilder {contexts, formatter} = self;
         let contexts = try!(contexts.ok_or(OptionError::missing_required_option(options::CONTEXTS_FILE)));
-        Ok(CorrelationParser {
-            contexts: contexts.clone(),
-            correlator: Correlator::new(contexts),
-            formatter: formatter
-        })
+        Ok(CorrelationParser::new(contexts, formatter))
     }
 }
 
@@ -124,6 +122,19 @@ pub struct CorrelationParser {
     contexts: Vec<Context>,
     correlator: Correlator,
     formatter: MessageFormatter
+}
+
+impl CorrelationParser {
+    pub fn new(contexts: Vec<Context>, formatter: MessageFormatter) -> CorrelationParser {
+        let mut correlator = Correlator::new(contexts.clone());
+        correlator.register_handler(Box::new(MessageSender));
+
+        CorrelationParser {
+            correlator: correlator,
+            formatter: formatter,
+            contexts: contexts
+        }
+    }
 }
 
 impl Parser for CorrelationParser {
@@ -152,10 +163,6 @@ impl Parser for CorrelationParser {
 
 impl Clone for CorrelationParser {
     fn clone(&self) -> CorrelationParser {
-        CorrelationParser {
-            formatter: self.formatter.clone(),
-            contexts: self.contexts.clone(),
-            correlator: Correlator::new(self.contexts.clone())
-        }
+        CorrelationParser::new(self.contexts.clone(), self.formatter.clone())
     }
 }
