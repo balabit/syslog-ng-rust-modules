@@ -1,5 +1,5 @@
 use LogMessage;
-use syslog_ng_sys::LogParser;
+use LogParser;
 
 pub use proxies::parser::{OptionError, Parser, ParserBuilder};
 
@@ -51,7 +51,7 @@ impl<B> ParserProxy<B> where B: ParserBuilder
             .parse(msg, input)
     }
 
-    pub fn parent(&mut self, parent: *mut LogParser) {
+    pub fn parent(&mut self, parent: LogParser) {
         let builder = self.builder
                           .as_mut()
                           .expect("Failed to get a builder on a new parser proxy instance");

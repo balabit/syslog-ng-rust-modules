@@ -1,4 +1,5 @@
 pub use syslog_ng_sys::LogMessage;
+pub use syslog_ng_sys::LogParser;
 pub use syslog_ng_sys::GlobalConfig;
 
 pub mod logmsg {
