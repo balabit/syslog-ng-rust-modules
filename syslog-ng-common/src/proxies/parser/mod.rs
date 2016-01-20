@@ -1,5 +1,5 @@
 use LogMessage;
-use syslog_ng_sys::LogParser;
+use LogParser;
 
 mod option_error;
 mod proxy;
@@ -11,7 +11,7 @@ pub trait ParserBuilder: Clone {
     type Parser: Parser;
     fn new() -> Self;
     fn option(&mut self, name: String, value: String);
-    fn parent(&mut self, _: *mut LogParser) {}
+    fn parent(&mut self, _: LogParser) {}
     fn build(self) -> Result<Self::Parser, OptionError>;
 }
 
@@ -27,8 +27,8 @@ pub mod _parser_plugin {
     use $crate::{c_int, c_char, ssize_t};
     use $crate::LogMessage;
     use $crate::LogParser;
-    use $crate::logger::init_logger;
-    use $crate::proxies::parser::ParserProxy;
+    use $crate::init_logger;
+    use $crate::ParserProxy;
 
     use std::ffi::CStr;
 
@@ -75,9 +75,10 @@ pub mod _parser_plugin {
     }
 
     #[no_mangle]
-    pub extern fn native_parser_proxy_new(parent: *mut LogParser) -> Box<ParserProxy<$name>> {
+    pub extern fn native_parser_proxy_new(parent: *mut $crate::sys::LogParser) -> Box<ParserProxy<$name>> {
         init_logger();
         let mut proxy = ParserProxy::new();
+        let parent = LogParser::wrap_raw(parent);
         proxy.parent(parent);
         Box::new(proxy)
     }
