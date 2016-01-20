@@ -10,7 +10,7 @@ pub struct DummyParser;
 pub struct DummyParserBuilder;
 
 use syslog_ng_common::LogMessage;
-use syslog_ng_common::proxies::parser::{Parser, ParserBuilder, OptionError};
+use syslog_ng_common::{Parser, ParserBuilder, OptionError};
 
 impl ParserBuilder for DummyParserBuilder {
     type Parser = DummyParser;

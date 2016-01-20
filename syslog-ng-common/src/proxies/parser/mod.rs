@@ -27,8 +27,8 @@ pub mod _parser_plugin {
     use $crate::{c_int, c_char, ssize_t};
     use $crate::LogMessage;
     use $crate::LogParser;
-    use $crate::logger::init_logger;
-    use $crate::proxies::parser::ParserProxy;
+    use $crate::init_logger;
+    use $crate::ParserProxy;
 
     use std::ffi::CStr;
 
