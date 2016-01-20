@@ -4,10 +4,10 @@ use syslog_ng_sys::messages;
 
 
 pub enum Msg {
-    Fatal = 2,
+    _Fatal = 2,
     Error = 3,
     Warning = 4,
-    Notice = 5,
+    _Notice = 5,
     Info = 6,
     Debug = 7,
 }
