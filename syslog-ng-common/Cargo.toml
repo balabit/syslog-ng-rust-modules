@@ -2,9 +2,14 @@
 name = "syslog-ng-common"
 version = "0.4.0"
 authors = ["Tibor Benke <ihrwein@gmail.com>"]
+homepage = "https://github.com/ihrwein/syslog-ng-rs"
+repository = "https://github.com/ihrwein/syslog-ng-rs"
+keywords = ["syslog-ng"]
+description = "High level bindings for syslog-ng"
+license = "MIT/Apache-2.0"
 
 [dependencies]
 log = "0.3"
 
 [dependencies.syslog-ng-sys]
-path="../syslog-ng-sys"
+syslog-ng-sys = "0.2"
