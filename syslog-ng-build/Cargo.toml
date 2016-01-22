@@ -2,6 +2,7 @@
 name = "syslog-ng-build"
 version = "0.2.0"
 authors = ["Tibor Benke <ihrwein@gmail.com>"]
+license = "MIT/Apache-2.0"
 
 [dependencies]
 gcc = "0.3"
