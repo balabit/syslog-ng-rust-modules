@@ -2,6 +2,11 @@
 name = "syslog-ng-build"
 version = "0.2.0"
 authors = ["Tibor Benke <ihrwein@gmail.com>"]
+homepage = "https://github.com/ihrwein/syslog-ng-rs"
+repository = "https://github.com/ihrwein/syslog-ng-rs"
+keywords = ["syslog-ng"]
+description = "Build script helpers"
+license = "MIT/Apache-2.0"
 
 [dependencies]
 gcc = "0.3"
