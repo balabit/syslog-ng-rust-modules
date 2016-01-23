@@ -1,4 +1,4 @@
-use syslog_ng_common::formatter::MessageFormatter;
+use syslog_ng_common::MessageFormatter;
 use syslog_ng_common::LogMessage;
 use actiondb::matcher::result::MatchResult;
 

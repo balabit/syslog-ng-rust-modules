@@ -10,14 +10,15 @@ use std::clone::Clone;
 
 use actiondb::matcher::{
     Matcher,
-    GenericFactory,
+    PatternLoader,
 };
-use actiondb::matcher::trie::ParserTrie;
+use actiondb::matcher::trie::TrieMatcherSuite;
+use actiondb::matcher::suite::MatcherSuite;
 use actiondb::matcher::trie::factory::TrieMatcherFactory;
 
-use syslog_ng_common::formatter::MessageFormatter;
+use syslog_ng_common::MessageFormatter;
 
-use syslog_ng_common::proxies::parser::{
+use syslog_ng_common::{
     Parser,
     ParserBuilder,
     OptionError
@@ -36,13 +37,13 @@ use self::msgfilller::MessageFiller;
 
 #[derive(Clone)]
 pub struct ActiondbParserBuilder {
-    matcher: Option<ParserTrie>,
+    matcher: Option<<TrieMatcherSuite as MatcherSuite>::Matcher>,
     formatter: MessageFormatter
 }
 
 impl ActiondbParserBuilder {
     pub fn set_pattern_file(&mut self, path: &str) {
-        match GenericFactory::from_file::<TrieMatcherFactory>(path) {
+        match PatternLoader::from_file::<TrieMatcherFactory>(path) {
             Ok(matcher) => {
                 self.matcher = Some(matcher)
             },
@@ -81,7 +82,7 @@ impl ParserBuilder for ActiondbParserBuilder {
         };
 
     }
-    fn parent(&mut self, _: *mut LogParser) {}
+    fn parent(&mut self, _: LogParser) {}
     fn build(self) -> Result<Self::Parser, OptionError> {
         let ActiondbParserBuilder {matcher, formatter} = self;
         debug!("ActiondbParser: building");
@@ -94,7 +95,7 @@ impl ParserBuilder for ActiondbParserBuilder {
 }
 
 pub struct ActiondbParser {
-    matcher: ParserTrie,
+    matcher: <TrieMatcherSuite as MatcherSuite>::Matcher,
     formatter: MessageFormatter
 }
 
