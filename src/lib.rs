@@ -13,11 +13,7 @@ use actiondb::matcher::trie::TrieMatcherSuite;
 use actiondb::matcher::suite::MatcherSuite;
 use actiondb::matcher::trie::factory::TrieMatcherFactory;
 
-use syslog_ng_common::MessageFormatter;
-
-use syslog_ng_common::{Parser, ParserBuilder, OptionError};
-
-use syslog_ng_common::{LogParser, LogMessage};
+use syslog_ng_common::{Parser, ParserBuilder, OptionError, LogParser, LogMessage, MessageFormatter};
 
 pub mod msgfilller;
 pub mod keys;
