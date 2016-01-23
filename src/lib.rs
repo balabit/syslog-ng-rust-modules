@@ -8,26 +8,16 @@ extern crate actiondb;
 use std::borrow::Borrow;
 use std::clone::Clone;
 
-use actiondb::matcher::{
-    Matcher,
-    PatternLoader,
-};
+use actiondb::matcher::{Matcher, PatternLoader};
 use actiondb::matcher::trie::TrieMatcherSuite;
 use actiondb::matcher::suite::MatcherSuite;
 use actiondb::matcher::trie::factory::TrieMatcherFactory;
 
 use syslog_ng_common::MessageFormatter;
 
-use syslog_ng_common::{
-    Parser,
-    ParserBuilder,
-    OptionError
-};
+use syslog_ng_common::{Parser, ParserBuilder, OptionError};
 
-use syslog_ng_common::{
-    LogParser,
-    LogMessage
-};
+use syslog_ng_common::{LogParser, LogMessage};
 
 pub mod msgfilller;
 pub mod keys;
@@ -44,9 +34,7 @@ pub struct ActiondbParserBuilder {
 impl ActiondbParserBuilder {
     pub fn set_pattern_file(&mut self, path: &str) {
         match PatternLoader::from_file::<TrieMatcherFactory>(path) {
-            Ok(matcher) => {
-                self.matcher = Some(matcher)
-            },
+            Ok(matcher) => self.matcher = Some(matcher),
             Err(err) => {
                 error!("ActiondbParser: failed to set 'pattern_file': {}", err);
             }
@@ -63,19 +51,21 @@ impl ParserBuilder for ActiondbParserBuilder {
     fn new() -> Self {
         ActiondbParserBuilder {
             matcher: None,
-            formatter: MessageFormatter::new()
+            formatter: MessageFormatter::new(),
         }
     }
     fn option(&mut self, name: String, value: String) {
-        trace!("ActiondbParserBuilder: set_option(name={}, value={})", &name, &value);
+        trace!("ActiondbParserBuilder: set_option(name={}, value={})",
+               &name,
+               &value);
 
         match name.borrow() {
             options::PATTERN_FILE => {
                 self.set_pattern_file(&value);
-            },
+            }
             options::PREFIX => {
                 self.set_prefix(value);
-            },
+            }
             _ => {
                 debug!("ActiondbParserBuilder: unsupported option: {:?}", &name) ;
             }
@@ -86,17 +76,18 @@ impl ParserBuilder for ActiondbParserBuilder {
     fn build(self) -> Result<Self::Parser, OptionError> {
         let ActiondbParserBuilder {matcher, formatter} = self;
         debug!("ActiondbParser: building");
-        let matcher = try!(matcher.ok_or(OptionError::missing_required_option(options::PATTERN_FILE)));
+        let matcher =
+            try!(matcher.ok_or(OptionError::missing_required_option(options::PATTERN_FILE)));
         Ok(ActiondbParser {
             matcher: matcher,
-            formatter: formatter
+            formatter: formatter,
         })
     }
 }
 
 pub struct ActiondbParser {
     matcher: <TrieMatcherSuite as MatcherSuite>::Matcher,
-    formatter: MessageFormatter
+    formatter: MessageFormatter,
 }
 
 impl Parser for ActiondbParser {
@@ -112,7 +103,7 @@ impl Parser for ActiondbParser {
 
 impl Clone for ActiondbParser {
     fn clone(&self) -> ActiondbParser {
-        ActiondbParser{
+        ActiondbParser {
             matcher: self.matcher.clone(),
             formatter: self.formatter.clone(),
         }

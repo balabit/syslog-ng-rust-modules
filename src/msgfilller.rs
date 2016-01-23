@@ -7,7 +7,9 @@ use keys;
 pub struct MessageFiller;
 
 impl MessageFiller {
-    pub fn fill_logmsg(formatter: &mut MessageFormatter, msg: &mut LogMessage, result: &MatchResult) {
+    pub fn fill_logmsg(formatter: &mut MessageFormatter,
+                       msg: &mut LogMessage,
+                       result: &MatchResult) {
         MessageFiller::fill_values(formatter, msg, result);
         MessageFiller::fill_name(formatter, msg, result);
         MessageFiller::fill_uuid(formatter, msg, result);
@@ -19,14 +21,18 @@ impl MessageFiller {
         MessageFiller::fill_additional_values(formatter, msg, result);
     }
 
-    fn fill_parsed_values(formatter: &mut MessageFormatter, msg: &mut LogMessage, result: &MatchResult) {
+    fn fill_parsed_values(formatter: &mut MessageFormatter,
+                          msg: &mut LogMessage,
+                          result: &MatchResult) {
         for (key, value) in result.values() {
             let (key, value) = formatter.format(key, value);
             msg.set_value(key, value);
         }
     }
 
-    fn fill_additional_values(formatter: &mut MessageFormatter, msg: &mut LogMessage, result: &MatchResult) {
+    fn fill_additional_values(formatter: &mut MessageFormatter,
+                              msg: &mut LogMessage,
+                              result: &MatchResult) {
         if let Some(values) = result.pattern().values() {
             for (key, value) in values {
                 let (key, value) = formatter.format(key, value);
