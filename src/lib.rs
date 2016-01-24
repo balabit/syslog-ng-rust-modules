@@ -108,6 +108,13 @@ impl<M> Clone for ActiondbParser<M> where M: Matcher + Clone {
     }
 }
 
+
+// You can change the matcher implementation by uncommening these lines
+// and commenting out the last lines.
+
+//pub use actiondb::matcher::trie::TrieMatcherSuite;
+//parser_plugin!(ActiondbParserBuilder<TrieMatcherSuite>);
+
 // Note, that it sould be publicly reexported
-pub use actiondb::matcher::trie::TrieMatcherSuite;
-parser_plugin!(ActiondbParserBuilder<TrieMatcherSuite>);
+pub use actiondb::matcher::suffix_array::SuffixArrayMatcherSuite;
+parser_plugin!(ActiondbParserBuilder<SuffixArrayMatcherSuite>);
