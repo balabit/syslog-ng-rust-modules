@@ -1,6 +1,6 @@
 [package]
 name = "actiondb-parser"
-version = "0.2.2"
+version = "0.2.3"
 authors = ["Tibor Benke <tibor.benke@balabit.com>"]
 build = "build.rs"
 homepage = "https://github.com/ihrwein/actiondb-parser"
