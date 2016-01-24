@@ -3,6 +3,11 @@ name = "actiondb-parser"
 version = "0.2.0"
 authors = ["Tibor Benke <tibor.benke@balabit.com>"]
 build = "build.rs"
+homepage = "https://github.com/ihrwein/actiondb-parser"
+repository = "https://github.com/ihrwein/actiondb-parser"
+readme = "README.md"
+keywords = ["log", "parser"]
+description = "A parser module for syslog-ng based on ActionDB"
 license = "MIT/Apache-2.0"
 
 [lib]
