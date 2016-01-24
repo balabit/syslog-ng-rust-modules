@@ -37,7 +37,7 @@ impl ParserBuilder for DummyParserBuilder {
 impl Parser for DummyParser {
     fn parse(&mut self, message: &mut LogMessage, input: &str) -> bool {
         debug!("Processing input in Rust Parser: {}", input);
-        message.set_value("input", input);
+        message.insert("input", input);
         true
     }
 }

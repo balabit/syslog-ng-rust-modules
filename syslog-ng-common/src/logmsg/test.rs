@@ -22,7 +22,7 @@ fn test_given_empty_log_msg_when_values_are_inserted_then_we_can_get_them_back()
         values
     };
 
-    logmsg.set_value("foo", "bar");
-    logmsg.set_value("qux", "baz");
+    logmsg.insert("foo", "bar");
+    logmsg.insert("qux", "baz");
     assert_eq!(&expected_values, &logmsg.values());
 }
