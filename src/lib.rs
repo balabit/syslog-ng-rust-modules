@@ -22,9 +22,9 @@ use actiondb::matcher::MatcherFactory;
 
 use syslog_ng_common::{Parser, ParserBuilder, OptionError, LogParser, LogMessage, MessageFormatter};
 
-pub mod msgfilller;
-pub mod keys;
-pub mod options;
+mod msgfilller;
+mod keys;
+mod options;
 
 use self::msgfilller::MessageFiller;
 
