@@ -29,15 +29,17 @@ pub mod options;
 
 use self::msgfilller::MessageFiller;
 
+type DefaultMatcherSuite = TrieMatcherSuite;
+
 #[derive(Clone)]
 pub struct ActiondbParserBuilder {
-    matcher: Option<<TrieMatcherSuite as MatcherSuite>::Matcher>,
+    matcher: Option<<DefaultMatcherSuite as MatcherSuite>::Matcher>,
     formatter: MessageFormatter
 }
 
 impl ActiondbParserBuilder {
     pub fn set_pattern_file(&mut self, path: &str) {
-        match PatternLoader::from_file::<<TrieMatcherSuite as MatcherSuite>::MatcherFactory>(path) {
+        match PatternLoader::from_file::<<DefaultMatcherSuite as MatcherSuite>::MatcherFactory>(path) {
             Ok(matcher) => self.matcher = Some(matcher),
             Err(err) => {
                 error!("ActiondbParser: failed to set 'pattern_file': {}", err);
@@ -90,7 +92,7 @@ impl ParserBuilder for ActiondbParserBuilder {
 }
 
 pub struct ActiondbParser {
-    matcher: <TrieMatcherSuite as MatcherSuite>::Matcher,
+    matcher: <DefaultMatcherSuite as MatcherSuite>::Matcher,
     formatter: MessageFormatter,
 }
 
