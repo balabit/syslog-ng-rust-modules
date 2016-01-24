@@ -19,7 +19,7 @@ use std::clone::Clone;
 use actiondb::matcher::{Matcher, PatternLoader};
 use actiondb::matcher::trie::TrieMatcherSuite;
 use actiondb::matcher::suite::MatcherSuite;
-use actiondb::matcher::trie::factory::TrieMatcherFactory;
+use actiondb::matcher::MatcherFactory;
 
 use syslog_ng_common::{Parser, ParserBuilder, OptionError, LogParser, LogMessage, MessageFormatter};
 
@@ -37,7 +37,7 @@ pub struct ActiondbParserBuilder {
 
 impl ActiondbParserBuilder {
     pub fn set_pattern_file(&mut self, path: &str) {
-        match PatternLoader::from_file::<TrieMatcherFactory>(path) {
+        match PatternLoader::from_file::<<TrieMatcherSuite as MatcherSuite>::MatcherFactory>(path) {
             Ok(matcher) => self.matcher = Some(matcher),
             Err(err) => {
                 error!("ActiondbParser: failed to set 'pattern_file': {}", err);
