@@ -51,4 +51,8 @@ extern "C" {
                                 user_data: *mut c_void);
     pub fn log_msg_registry_init();
     pub fn log_msg_registry_deinit();
+    pub fn log_msg_set_value(msg: *mut LogMessage,
+                             handle: NVHandle,
+                             value: *const c_char,
+                             value_length: ssize_t);
 }
