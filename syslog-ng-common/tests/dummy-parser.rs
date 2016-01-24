@@ -63,5 +63,5 @@ fn test_given_parser_implementation_when_it_receives_a_message_then_it_adds_a_sp
     let input = "The quick brown ...";
     let result = parser.parse(&mut msg, input);
     assert!(result);
-    assert_eq!(msg.get_value_by_name("input"), input);
+    assert_eq!(msg.get("input"), input);
 }

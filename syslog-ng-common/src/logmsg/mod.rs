@@ -6,7 +6,7 @@
 // option. All files in the project carrying such notice may not be copied,
 // modified, or distributed except according to those terms.
 
-use syslog_ng_sys::{LogTagId, NVHandle, logmsg};
+use syslog_ng_sys::{LogTagId, logmsg};
 use syslog_ng_sys::types::*;
 
 use std::collections::BTreeMap;
@@ -18,6 +18,7 @@ use std::ffi::{CStr, CString};
 #[cfg(test)]
 mod test;
 
+pub struct NVHandle(logmsg::NVHandle);
 pub struct LogMessage(*mut logmsg::LogMessage);
 
 impl Drop for LogMessage {
@@ -47,23 +48,15 @@ impl LogMessage {
     pub fn get_value_handle(value_name: &str) -> NVHandle {
         unsafe {
             let name = CString::new(value_name).unwrap();
-            logmsg::log_msg_get_value_handle(name.as_ptr())
+            NVHandle(logmsg::log_msg_get_value_handle(name.as_ptr()))
         }
     }
 
-    pub fn get_value_by_name(&self, value_name: &str) -> &str {
-        unsafe {
-            let name = CString::new(value_name).unwrap();
-            let mut size: ssize_t = 0;
-            let value = logmsg::__log_msg_get_value_by_name(self.0, name.as_ptr(), &mut size);
-            LogMessage::c_char_to_str(value, size)
-        }
-    }
-
-    pub fn get_value(&self, handle: NVHandle) -> &str {
+    pub fn get<K: Into<NVHandle>>(&self, key: K) -> &str {
+        let handle = key.into();
         unsafe {
             let mut size: ssize_t = 0;
-            let value = logmsg::__log_msg_get_value(self.0, handle, &mut size);
+            let value = logmsg::__log_msg_get_value(self.0, handle.0, &mut size);
             LogMessage::c_char_to_str(value, size)
         }
     }
@@ -125,7 +118,7 @@ extern "C" fn insert_tag_to_vec(_: *const logmsg::LogMessage,
     false
 }
 
-extern "C" fn insert_kvpair_to_map(_: NVHandle,
+extern "C" fn insert_kvpair_to_map(_: logmsg::NVHandle,
                                    name: *const c_char,
                                    value: *const c_char,
                                    value_len: ssize_t,
@@ -138,4 +131,12 @@ extern "C" fn insert_kvpair_to_map(_: NVHandle,
         map.insert(name, value);
     }
     false
+}
+
+impl<'a> Into<NVHandle> for &'a str {
+    fn into(self) -> NVHandle {
+        let name = CString::new(self).unwrap();
+        let handle = unsafe { logmsg::log_msg_get_value_handle(name.as_ptr()) };
+        NVHandle(handle)
+    }
 }
