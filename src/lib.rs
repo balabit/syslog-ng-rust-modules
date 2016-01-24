@@ -8,36 +8,30 @@
 
 #[macro_use]
 extern crate log;
-
 #[macro_use]
 extern crate syslog_ng_common;
 extern crate actiondb;
 
 use std::borrow::Borrow;
-use std::clone::Clone;
 
-use actiondb::matcher::{Matcher, PatternLoader};
-use actiondb::matcher::trie::TrieMatcherSuite;
-use actiondb::matcher::suite::MatcherSuite;
-use actiondb::matcher::trie::factory::TrieMatcherFactory;
-
+use actiondb::matcher::{Matcher, PatternLoader, MatcherSuite, MatcherFactory};
 use syslog_ng_common::{Parser, ParserBuilder, OptionError, LogParser, LogMessage, MessageFormatter};
 
-pub mod msgfilller;
-pub mod keys;
-pub mod options;
+mod msgfilller;
+mod keys;
+mod options;
 
 use self::msgfilller::MessageFiller;
 
 #[derive(Clone)]
-pub struct ActiondbParserBuilder {
-    matcher: Option<<TrieMatcherSuite as MatcherSuite>::Matcher>,
+pub struct ActiondbParserBuilder<MS> where MS: MatcherSuite, MS::Matcher: Clone {
+    matcher: Option<MS::Matcher>,
     formatter: MessageFormatter
 }
 
-impl ActiondbParserBuilder {
+impl<MS> ActiondbParserBuilder<MS> where MS: MatcherSuite, MS::Matcher: Clone {
     pub fn set_pattern_file(&mut self, path: &str) {
-        match PatternLoader::from_file::<TrieMatcherFactory>(path) {
+        match PatternLoader::from_file::<MS::MatcherFactory>(path) {
             Ok(matcher) => self.matcher = Some(matcher),
             Err(err) => {
                 error!("ActiondbParser: failed to set 'pattern_file': {}", err);
@@ -50,8 +44,8 @@ impl ActiondbParserBuilder {
     }
 }
 
-impl ParserBuilder for ActiondbParserBuilder {
-    type Parser = ActiondbParser;
+impl<MS> ParserBuilder for ActiondbParserBuilder<MS> where MS: MatcherSuite + Clone, MS::Matcher: Clone {
+    type Parser = ActiondbParser<MS::Matcher>;
     fn new() -> Self {
         ActiondbParserBuilder {
             matcher: None,
@@ -89,12 +83,12 @@ impl ParserBuilder for ActiondbParserBuilder {
     }
 }
 
-pub struct ActiondbParser {
-    matcher: <TrieMatcherSuite as MatcherSuite>::Matcher,
+pub struct ActiondbParser<M> where M: Matcher + Clone {
+    matcher: M,
     formatter: MessageFormatter,
 }
 
-impl Parser for ActiondbParser {
+impl<M> Parser for ActiondbParser<M> where M: Matcher + Clone {
     fn parse(&mut self, msg: &mut LogMessage, input: &str) -> bool {
         if let Some(result) = self.matcher.parse(input) {
             MessageFiller::fill_logmsg(&mut self.formatter, msg, &result);
@@ -105,8 +99,8 @@ impl Parser for ActiondbParser {
     }
 }
 
-impl Clone for ActiondbParser {
-    fn clone(&self) -> ActiondbParser {
+impl<M> Clone for ActiondbParser<M> where M: Matcher + Clone {
+    fn clone(&self) -> ActiondbParser<M> {
         ActiondbParser {
             matcher: self.matcher.clone(),
             formatter: self.formatter.clone(),
@@ -114,4 +108,13 @@ impl Clone for ActiondbParser {
     }
 }
 
-parser_plugin!(ActiondbParserBuilder);
+
+// You can change the matcher implementation by uncommening these lines
+// and commenting out the last lines.
+
+//pub use actiondb::matcher::trie::TrieMatcherSuite;
+//parser_plugin!(ActiondbParserBuilder<TrieMatcherSuite>);
+
+// Note, that it sould be publicly reexported
+pub use actiondb::matcher::suffix_array::SuffixArrayMatcherSuite;
+parser_plugin!(ActiondbParserBuilder<SuffixArrayMatcherSuite>);

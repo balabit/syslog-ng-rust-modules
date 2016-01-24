@@ -1,6 +1,6 @@
 [package]
 name = "actiondb-parser"
-version = "0.2.2"
+version = "0.2.3"
 authors = ["Tibor Benke <tibor.benke@balabit.com>"]
 build = "build.rs"
 homepage = "https://github.com/ihrwein/actiondb-parser"
@@ -15,8 +15,8 @@ crate_type = ["dylib"]
 
 [dependencies]
 log = "0.3"
-actiondb = "0.6.0"
-syslog-ng-common = "0.4.0"
+actiondb = "^0.6.1"
+syslog-ng-common = "0.5.0"
 
 [build-dependencies]
 syslog-ng-build = "0.2"
