@@ -8,18 +8,13 @@
 
 #[macro_use]
 extern crate log;
-
 #[macro_use]
 extern crate syslog_ng_common;
 extern crate actiondb;
 
 use std::borrow::Borrow;
-use std::clone::Clone;
 
-use actiondb::matcher::{Matcher, PatternLoader};
-use actiondb::matcher::MatcherSuite;
-use actiondb::matcher::MatcherFactory;
-
+use actiondb::matcher::{Matcher, PatternLoader, MatcherSuite, MatcherFactory};
 use syslog_ng_common::{Parser, ParserBuilder, OptionError, LogParser, LogMessage, MessageFormatter};
 
 mod msgfilller;
