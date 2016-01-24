@@ -34,7 +34,7 @@ impl MessageFiller {
                           result: &MatchResult) {
         for (key, value) in result.values() {
             let (key, value) = formatter.format(key, value);
-            msg.set_value(key, value);
+            msg.insert(key, value);
         }
     }
 
@@ -44,7 +44,7 @@ impl MessageFiller {
         if let Some(values) = result.pattern().values() {
             for (key, value) in values {
                 let (key, value) = formatter.format(key, value);
-                msg.set_value(key, value);
+                msg.insert(key, value);
             }
         }
     }
@@ -52,14 +52,14 @@ impl MessageFiller {
     fn fill_name(formatter: &mut MessageFormatter, msg: &mut LogMessage, result: &MatchResult) {
         if let Some(name) = result.pattern().name() {
             let (key, value) = formatter.format(keys::PATTERN_NAME, name);
-            msg.set_value(key, value);
+            msg.insert(key, value);
         }
     }
 
     fn fill_uuid(formatter: &mut MessageFormatter, msg: &mut LogMessage, result: &MatchResult) {
         let uuid = result.pattern().uuid().to_hyphenated_string();
         let (key, value) = formatter.format(keys::PATTERN_UUID, &uuid);
-        msg.set_value(key, value);
+        msg.insert(key, value);
     }
 
     fn fill_tags(msg: &mut LogMessage, result: &MatchResult) {
