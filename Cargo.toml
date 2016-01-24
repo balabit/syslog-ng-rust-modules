@@ -3,6 +3,7 @@ name = "actiondb-parser"
 version = "0.2.0"
 authors = ["Tibor Benke <tibor.benke@balabit.com>"]
 build = "build.rs"
+license = "MIT/Apache-2.0"
 
 [lib]
 crate_type = ["dylib"]
