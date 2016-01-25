@@ -38,3 +38,10 @@ impl From<MessageAction> for super::ActionType {
         super::ActionType::Message(action)
     }
 }
+
+#[derive(Clone, Debug, PartialEq)]
+pub enum InjectMode {
+    Log,
+    Forward,
+    Loopback
+}
