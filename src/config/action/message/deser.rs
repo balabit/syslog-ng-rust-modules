@@ -1,5 +1,6 @@
 use super::MessageAction;
 use super::MessageActionBuilder;
+use super::InjectMode;
 use config::action::ExecCondition;
 
 use handlebars::Template;
@@ -139,9 +140,34 @@ impl Visitor for MessageActionVisitor {
     }
 }
 
+impl Deserialize for InjectMode {
+    fn deserialize<D>(deserializer: &mut D) -> Result<InjectMode, D::Error>
+        where D: Deserializer
+    {
+        struct FieldVisitor;
+
+        impl Visitor for FieldVisitor {
+            type Value = InjectMode;
+
+            fn visit_str<E>(&mut self, value: &str) -> Result<InjectMode, E>
+                where E: Error
+            {
+                match value {
+                    "log" => Ok(InjectMode::Log),
+                    "loopback" => Ok(InjectMode::Loopback),
+                    "forward" => Ok(InjectMode::Forward),
+                    _ => Err(Error::syntax(&format!("Unexpected field: {}", value))),
+                }
+            }
+        }
+
+        deserializer.visit(FieldVisitor)
+    }
+}
+
 #[cfg(test)]
 mod test {
-    use config::action::message::{MessageActionBuilder, MessageAction};
+    use config::action::message::{MessageActionBuilder, MessageAction, InjectMode};
 
     use handlebars::Template;
     use serde_json::from_str;
@@ -212,5 +238,29 @@ mod test {
         let result = from_str::<MessageAction>(text);
         println!("{:?}", &result);
         let _ = result.err().expect("Successfully deserialized an invalid MessageAction object");
+    }
+
+    #[test]
+    fn test_given_inject_modes_when_they_are_deserialized_then_we_get_the_right_result() {
+        let text = r#"
+        ["forward", "log", "loopback", "log"]
+        "#;
+        let expected = vec![InjectMode::Forward, InjectMode::Log, InjectMode::Loopback, InjectMode::Log];
+
+        let result = from_str::<Vec<InjectMode>>(text);
+        println!("{:?}", &result);
+        let array = result.ok().expect("Failed to deserialize a valid array of inject modes");
+        assert_eq!(&expected, &array);
+    }
+
+    #[test]
+    fn test_given_invalid_inject_mode_when_it_is_deserialized_then_we_get_the_right_result() {
+        let text = r#"
+        ["invalid inject mode", "log"]
+        "#;
+
+        let result = from_str::<Vec<InjectMode>>(text);
+        println!("{:?}", &result);
+        let _ = result.err().expect("Successfully deserialized an invalid inject mode");
     }
 }
