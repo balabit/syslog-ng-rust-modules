@@ -1,4 +1,6 @@
 use super::MessageAction;
+use super::MessageActionBuilder;
+use config::action::ExecCondition;
 
 use handlebars::Template;
 use serde::de::{Deserialize, Deserializer, Error, MapVisitor, Visitor};
@@ -17,6 +19,7 @@ enum Field {
     Name,
     Message,
     Values,
+    When,
 }
 
 impl Deserialize for Field {
@@ -36,6 +39,7 @@ impl Deserialize for Field {
                     "uuid" => Ok(Field::Uuid),
                     "values" => Ok(Field::Values),
                     "message" => Ok(Field::Message),
+                    "when" => Ok(Field::When),
                     _ => Err(Error::syntax(&format!("Unexpected field: {}", value))),
                 }
             }
@@ -69,10 +73,11 @@ impl Visitor for MessageActionVisitor {
     fn visit_map<V>(&mut self, mut visitor: V) -> Result<MessageAction, V::Error>
         where V: MapVisitor
     {
-        let mut name = None;
-        let mut uuid = None;
+        let mut name: Option<String> = None;
+        let mut uuid: Option<String> = None;
         let mut message: Option<String> = None;
         let mut values: Option<BTreeMap<String, String>> = None;
+        let mut when: ExecCondition = ExecCondition::new();
 
         loop {
             match try!(visitor.visit_key()) {
@@ -87,6 +92,9 @@ impl Visitor for MessageActionVisitor {
                 }
                 Some(Field::Values) => {
                     values = Some(try!(visitor.visit_value()));
+                }
+                Some(Field::When) => {
+                    when = try!(visitor.visit_value());
                 }
                 None => {
                     break;
@@ -123,12 +131,11 @@ impl Visitor for MessageActionVisitor {
 
         try!(visitor.end());
 
-        Ok(MessageAction {
-            name: name,
-            uuid: uuid,
-            message: message,
-            values: values,
-        })
+        Ok(MessageActionBuilder::new(uuid, message)
+                                .name(name)
+                                .values(values)
+                                .when(when)
+                                .build())
     }
 }
 
@@ -164,7 +171,7 @@ mod test {
                          .ok()
                          .expect("Failed to compile a handlebars template");
         let expected_message = MessageActionBuilder::new("UUID", message)
-                                   .name("NAME")
+                                   .name(Some("NAME"))
                                    .pair("key1", value1)
                                    .pair("key2", value2)
                                    .build();

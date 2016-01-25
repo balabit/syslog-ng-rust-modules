@@ -21,7 +21,7 @@ pub mod config;
 pub mod action;
 pub mod condition;
 mod context;
-mod correlator;
+pub mod correlator;
 pub mod dispatcher;
 pub mod message;
 pub mod reactor;

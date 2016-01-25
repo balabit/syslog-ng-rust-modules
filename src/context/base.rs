@@ -1,11 +1,7 @@
 use uuid::Uuid;
-use std::rc::Rc;
 
 use action::Action;
 use conditions::Conditions;
-use message::Message;
-use state::State;
-use timer::TimerEvent;
 
 pub struct BaseContext {
     name: Option<String>,
@@ -27,34 +23,8 @@ impl BaseContext {
         self.name.as_ref()
     }
 
-    pub fn on_timer(&self, event: &TimerEvent, state: &mut State) {
-        if state.is_open() {
-            state.update_timers(event);
-            if self.conditions.is_closing(state) {
-                self.close_state(state);
-            }
-        }
-    }
-
-    pub fn on_message(&self, event: Rc<Message>, state: &mut State) {
-        if state.is_open() {
-            state.add_message(event);
-            if self.conditions.is_closing(state) {
-                self.close_state(state);
-            }
-        } else if self.conditions.is_opening(&event) {
-            trace!("Context: opening state; uuid={}", &self.uuid);
-            state.add_message(event);
-            state.open();
-        }
-    }
-
-    fn close_state(&self, state: &mut State) {
-        trace!("Context: closing state; uuid={}", &self.uuid);
-        for i in &self.actions {
-            i.execute(state, self);
-        }
-        state.close();
+    pub fn actions(&self) -> &[Box<Action>] {
+        &self.actions
     }
 }
 

@@ -1,5 +1,6 @@
 use action::Action;
 use config;
+use config::action::ExecCondition;
 use context::base::BaseContext;
 use dispatcher::Response;
 use dispatcher::response::ResponseSender;
@@ -30,13 +31,14 @@ pub struct MessageAction {
     uuid: String,
     name: Option<String>,
     values: Handlebars,
+    when: ExecCondition
 }
 
 impl MessageAction {
     pub fn new(sender: Rc<RefCell<Box<ResponseSender<Response>>>>,
                action: config::action::MessageAction)
                -> MessageAction {
-        let config::action::MessageAction { uuid, name, message, values } = action;
+        let config::action::MessageAction { uuid, name, message, values, when } = action;
         let mut handlebars = Handlebars::new();
         for (name, template) in values.into_iter() {
             handlebars.register_template(&name, template);
@@ -48,6 +50,7 @@ impl MessageAction {
             uuid: uuid,
             name: name,
             values: handlebars,
+            when: when,
         }
     }
 
@@ -100,6 +103,18 @@ impl MessageAction {
             values.insert(CONTEXT_NAME.to_string(), name.to_string());
         }
     }
+
+    fn execute(&self, _state: &State, _context: &BaseContext) {
+        match self.render_message(_state, _context) {
+            Ok(message) => {
+                let response = MessageResponse { message: message };
+                self.sender.borrow_mut().send_response(Response::Message(response));
+            }
+            Err(error) => {
+                error!("{}", error);
+            }
+        }
+    }
 }
 
 #[derive(Debug)]
@@ -114,16 +129,17 @@ impl MessageResponse {
 }
 
 impl Action for MessageAction {
-    fn execute(&self, _state: &State, _context: &BaseContext) {
-        trace!("MessageAction: executed");
-        match self.render_message(_state, _context) {
-            Ok(message) => {
-                let response = MessageResponse { message: message };
-                self.sender.borrow_mut().send_response(Response::Message(response));
-            }
-            Err(error) => {
-                error!("{}", error);
-            }
+    fn on_opened(&self, _state: &State, _context: &BaseContext) {
+        if let Some(true) = self.when.on_opened {
+            trace!("MessageAction: on_opened()");
+            self.execute(_state, _context);
+        }
+    }
+
+    fn on_closed(&self, _state: &State, _context: &BaseContext) {
+        if let Some(true) = self.when.on_closed {
+            trace!("MessageAction: on_closed()");
+            self.execute(_state, _context);
         }
     }
 }

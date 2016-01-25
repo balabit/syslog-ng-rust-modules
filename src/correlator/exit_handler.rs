@@ -5,7 +5,7 @@ use message::Message;
 use condition::Condition;
 use dispatcher::request::Request;
 use dispatcher::ResponseHandler;
-use correlator::EventHandler;
+use reactor::EventHandler;
 
 pub struct ExitHandler {
     channel: mpsc::Sender<Request<Message>>,
@@ -23,8 +23,8 @@ impl ExitHandler {
     }
 }
 
-impl EventHandler<Response> for ExitHandler {
-    fn handle_event(&mut self, event: Response) {
+impl EventHandler<Response, mpsc::Sender<Request<Message>>> for ExitHandler {
+    fn handle_event(&mut self, event: Response, _: &mut mpsc::Sender<Request<Message>>) {
         if let Response::Exit = event {
             self.exits_received += 1;
             let _ = self.channel.send(Request::Exit);
