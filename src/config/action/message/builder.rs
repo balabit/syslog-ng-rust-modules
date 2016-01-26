@@ -1,6 +1,8 @@
 use handlebars::Template;
 use std::collections::BTreeMap;
 use super::MessageAction;
+use super::InjectMode;
+use super::INJECT_MODE_DEFAULT;
 use config::action::ExecCondition;
 
 pub struct MessageActionBuilder {
@@ -8,7 +10,8 @@ pub struct MessageActionBuilder {
     name: Option<String>,
     message: Template,
     values: BTreeMap<String, Template>,
-    when: ExecCondition
+    when: ExecCondition,
+    inject_mode: InjectMode
 }
 
 impl MessageActionBuilder {
@@ -18,7 +21,8 @@ impl MessageActionBuilder {
             name: None,
             message: message,
             values: BTreeMap::new(),
-            when: ExecCondition::new()
+            when: ExecCondition::new(),
+            inject_mode: INJECT_MODE_DEFAULT
         }
     }
 
@@ -42,13 +46,19 @@ impl MessageActionBuilder {
         self
     }
 
+    pub fn inject_mode(&mut self, mode: InjectMode) -> &mut MessageActionBuilder {
+        self.inject_mode = mode;
+        self
+    }
+
     pub fn build(&self) -> MessageAction {
         MessageAction {
             uuid: self.uuid.clone(),
             name: self.name.clone(),
             message: self.message.clone(),
             values: self.values.clone(),
-            when: self.when.clone()
+            when: self.when.clone(),
+            inject_mode: self.inject_mode.clone()
         }
     }
 }

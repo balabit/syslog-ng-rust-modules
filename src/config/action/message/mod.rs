@@ -15,7 +15,8 @@ pub struct MessageAction {
     pub name: Option<String>,
     pub message: Template,
     pub values: BTreeMap<String, Template>,
-    pub when: ExecCondition
+    pub when: ExecCondition,
+    pub inject_mode: InjectMode
 }
 
 impl MessageAction {
@@ -31,6 +32,9 @@ impl MessageAction {
     pub fn values(&self) -> &BTreeMap<String, Template> {
         &self.values
     }
+    pub fn inject_mode(&self) -> &InjectMode {
+        &self.inject_mode
+    }
 }
 
 impl From<MessageAction> for super::ActionType {
@@ -38,6 +42,8 @@ impl From<MessageAction> for super::ActionType {
         super::ActionType::Message(action)
     }
 }
+
+pub const INJECT_MODE_DEFAULT: InjectMode = InjectMode::Log;
 
 #[derive(Clone, Debug, PartialEq)]
 pub enum InjectMode {
