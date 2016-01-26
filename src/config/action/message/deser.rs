@@ -1,5 +1,6 @@
 use super::MessageAction;
 use super::MessageActionBuilder;
+use super::{InjectMode, INJECT_MODE_DEFAULT};
 use config::action::ExecCondition;
 
 use handlebars::Template;
@@ -20,6 +21,7 @@ enum Field {
     Message,
     Values,
     When,
+    InjectMode
 }
 
 impl Deserialize for Field {
@@ -40,6 +42,7 @@ impl Deserialize for Field {
                     "values" => Ok(Field::Values),
                     "message" => Ok(Field::Message),
                     "when" => Ok(Field::When),
+                    "inject_mode" => Ok(Field::InjectMode),
                     _ => Err(Error::syntax(&format!("Unexpected field: {}", value))),
                 }
             }
@@ -78,6 +81,7 @@ impl Visitor for MessageActionVisitor {
         let mut message: Option<String> = None;
         let mut values: Option<BTreeMap<String, String>> = None;
         let mut when: ExecCondition = ExecCondition::new();
+        let mut inject_mode = INJECT_MODE_DEFAULT;
 
         loop {
             match try!(visitor.visit_key()) {
@@ -95,6 +99,9 @@ impl Visitor for MessageActionVisitor {
                 }
                 Some(Field::When) => {
                     when = try!(visitor.visit_value());
+                }
+                Some(Field::InjectMode) => {
+                    inject_mode = try!(visitor.visit_value());
                 }
                 None => {
                     break;
@@ -135,13 +142,39 @@ impl Visitor for MessageActionVisitor {
                                 .name(name)
                                 .values(values)
                                 .when(when)
+                                .inject_mode(inject_mode)
                                 .build())
+    }
+}
+
+impl Deserialize for InjectMode {
+    fn deserialize<D>(deserializer: &mut D) -> Result<InjectMode, D::Error>
+        where D: Deserializer
+    {
+        struct FieldVisitor;
+
+        impl Visitor for FieldVisitor {
+            type Value = InjectMode;
+
+            fn visit_str<E>(&mut self, value: &str) -> Result<InjectMode, E>
+                where E: Error
+            {
+                match value {
+                    "log" => Ok(InjectMode::Log),
+                    "loopback" => Ok(InjectMode::Loopback),
+                    "forward" => Ok(InjectMode::Forward),
+                    _ => Err(Error::syntax(&format!("Unexpected field: {}", value))),
+                }
+            }
+        }
+
+        deserializer.visit(FieldVisitor)
     }
 }
 
 #[cfg(test)]
 mod test {
-    use config::action::message::{MessageActionBuilder, MessageAction};
+    use config::action::message::{MessageActionBuilder, MessageAction, InjectMode};
 
     use handlebars::Template;
     use serde_json::from_str;
@@ -212,5 +245,49 @@ mod test {
         let result = from_str::<MessageAction>(text);
         println!("{:?}", &result);
         let _ = result.err().expect("Successfully deserialized an invalid MessageAction object");
+    }
+
+    #[test]
+    fn test_given_inject_modes_when_they_are_deserialized_then_we_get_the_right_result() {
+        let text = r#"
+        ["forward", "log", "loopback", "log"]
+        "#;
+        let expected = vec![InjectMode::Forward, InjectMode::Log, InjectMode::Loopback, InjectMode::Log];
+
+        let result = from_str::<Vec<InjectMode>>(text);
+        println!("{:?}", &result);
+        let array = result.ok().expect("Failed to deserialize a valid array of inject modes");
+        assert_eq!(&expected, &array);
+    }
+
+    #[test]
+    fn test_given_invalid_inject_mode_when_it_is_deserialized_then_we_get_the_right_result() {
+        let text = r#"
+        ["invalid inject mode", "log"]
+        "#;
+
+        let result = from_str::<Vec<InjectMode>>(text);
+        println!("{:?}", &result);
+        let _ = result.err().expect("Successfully deserialized an invalid inject mode");
+    }
+
+    #[test]
+    fn test_given_message_when_it_contains_inject_mode_then_it_can_be_deserialized() {
+        let text = r#"
+        {
+          "uuid": "UUID",
+          "message": "message",
+          "inject_mode": "forward"
+        }
+        "#;
+
+        let message = Template::compile("message".to_string())
+                          .ok()
+                          .expect("Failed to compile a handlebars template");
+        let expected_message = MessageActionBuilder::new("UUID", message).inject_mode(InjectMode::Forward).build();
+        let result = from_str::<MessageAction>(text);
+        println!("{:?}", &result);
+        let message = result.ok().expect("Failed to deserialize a valid MessageAction object");
+        assert_eq!(expected_message, message);
     }
 }
