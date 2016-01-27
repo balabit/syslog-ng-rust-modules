@@ -335,29 +335,14 @@ mod deser {
             let mut max_size = None;
             let mut patterns = None;
 
-            loop {
-                match try!(visitor.visit_key()) {
-                    Some(Field::Timeout) => {
-                        timeout = Some(try!(visitor.visit_value()));
-                    }
-                    Some(Field::RenewTimeout) => {
-                        renew_timeout = Some(try!(visitor.visit_value()));
-                    }
-                    Some(Field::FirstOpens) => {
-                        first_opens = Some(try!(visitor.visit_value()));
-                    }
-                    Some(Field::LastCloses) => {
-                        last_closes = Some(try!(visitor.visit_value()));
-                    }
-                    Some(Field::MaxSize) => {
-                        max_size = Some(try!(visitor.visit_value()));
-                    }
-                    Some(Field::Patterns) => {
-                        patterns = Some(try!(visitor.visit_value()));
-                    }
-                    None => {
-                        break;
-                    }
+            while let Some(field) = try!(visitor.visit_key()) {
+                match field {
+                    Field::Timeout => timeout = Some(try!(visitor.visit_value())),
+                    Field::RenewTimeout => renew_timeout = Some(try!(visitor.visit_value())),
+                    Field::FirstOpens => first_opens = Some(try!(visitor.visit_value())),
+                    Field::LastCloses => last_closes = Some(try!(visitor.visit_value())),
+                    Field::MaxSize => max_size = Some(try!(visitor.visit_value())),
+                    Field::Patterns => patterns = Some(try!(visitor.visit_value())),
                 }
             }
 
