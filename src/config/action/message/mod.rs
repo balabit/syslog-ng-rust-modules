@@ -43,11 +43,15 @@ impl From<MessageAction> for super::ActionType {
     }
 }
 
-pub const INJECT_MODE_DEFAULT: InjectMode = InjectMode::Log;
-
 #[derive(Clone, Debug, PartialEq)]
 pub enum InjectMode {
     Log,
     Forward,
     Loopback
+}
+
+impl Default for InjectMode {
+    fn default() -> InjectMode {
+        InjectMode::Log
+    }
 }

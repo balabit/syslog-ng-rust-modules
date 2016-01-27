@@ -2,7 +2,6 @@ use handlebars::Template;
 use std::collections::BTreeMap;
 use super::MessageAction;
 use super::InjectMode;
-use super::INJECT_MODE_DEFAULT;
 use config::action::ExecCondition;
 
 pub struct MessageActionBuilder {
@@ -22,7 +21,7 @@ impl MessageActionBuilder {
             message: message,
             values: BTreeMap::new(),
             when: ExecCondition::new(),
-            inject_mode: INJECT_MODE_DEFAULT
+            inject_mode: Default::default()
         }
     }
 

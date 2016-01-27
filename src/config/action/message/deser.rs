@@ -1,6 +1,6 @@
 use super::MessageAction;
 use super::MessageActionBuilder;
-use super::{InjectMode, INJECT_MODE_DEFAULT};
+use super::InjectMode;
 use config::action::ExecCondition;
 
 use handlebars::Template;
@@ -81,7 +81,7 @@ impl Visitor for MessageActionVisitor {
         let mut message: Option<String> = None;
         let mut values: Option<BTreeMap<String, String>> = None;
         let mut when: ExecCondition = ExecCondition::new();
-        let mut inject_mode = INJECT_MODE_DEFAULT;
+        let mut inject_mode = Default::default();
 
         while let Some(field) = try!(visitor.visit_key()) {
             match field {
