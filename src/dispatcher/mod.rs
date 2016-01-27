@@ -2,7 +2,7 @@ use std::sync::mpsc::Sender;
 use std::rc::Rc;
 use std::cell::RefCell;
 
-use action::MessageResponse;
+use action::Alert;
 use reactor::Event;
 
 pub mod demux;
@@ -14,7 +14,7 @@ pub mod reactor;
 #[derive(Debug)]
 pub enum Response {
     Exit,
-    Message(MessageResponse),
+    Message(Alert),
 }
 
 #[derive(Debug, Eq, Hash, PartialEq)]

@@ -8,10 +8,10 @@ use std::sync::mpsc;
 use dispatcher::request::Request;
 
 use reactor::EventHandler;
-use action::MessageResponse;
+use action::Alert;
 
 pub struct MessageEventHandler {
-    pub responses: Rc<RefCell<Vec<MessageResponse>>>,
+    pub responses: Rc<RefCell<Vec<Alert>>>,
 }
 
 impl EventHandler<Response, mpsc::Sender<Request<Message>>> for MessageEventHandler {

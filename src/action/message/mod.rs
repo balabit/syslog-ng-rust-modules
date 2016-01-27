@@ -108,7 +108,7 @@ impl MessageAction {
     fn execute(&self, _state: &State, _context: &BaseContext) {
         match self.render_message(_state, _context) {
             Ok(message) => {
-                let response = MessageResponse { message: message, inject_mode: self.inject_mode.clone() };
+                let response = Alert { message: message, inject_mode: self.inject_mode.clone() };
                 self.sender.send_response(Response::Message(response));
             }
             Err(error) => {
@@ -119,12 +119,12 @@ impl MessageAction {
 }
 
 #[derive(Debug)]
-pub struct MessageResponse {
+pub struct Alert {
     message: Message,
     inject_mode: InjectMode
 }
 
-impl MessageResponse {
+impl Alert {
     pub fn message(&self) -> &Message {
         &self.message
     }

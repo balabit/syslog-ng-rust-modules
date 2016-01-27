@@ -6,7 +6,7 @@ use context::base::BaseContext;
 
 pub mod message;
 
-pub use self::message::MessageResponse;
+pub use self::message::Alert;
 
 pub trait Action {
     fn on_opened(&self, state: &State, context: &BaseContext);
