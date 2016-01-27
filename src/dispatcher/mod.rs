@@ -1,4 +1,6 @@
 use std::sync::mpsc::Sender;
+use std::rc::Rc;
+use std::cell::RefCell;
 
 use action::MessageResponse;
 use reactor::Event;
@@ -31,6 +33,7 @@ impl Event for Response {
     }
 }
 
+#[derive(Clone)]
 pub struct ResponseSender {
     sender: Sender<Response>,
 }
@@ -44,5 +47,9 @@ impl ResponseSender {
 impl self::response::ResponseSender<Response> for ResponseSender {
     fn send_response(&mut self, response: Response) {
         let _ = self.sender.send(response);
+    }
+
+    fn boxed_clone(&self) -> Box<self::response::ResponseSender<Response>> {
+        Box::new(self.clone())
     }
 }

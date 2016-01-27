@@ -14,6 +14,7 @@ use std::cell::RefCell;
 use std::rc::Rc;
 use uuid::Uuid;
 
+#[derive(Clone)]
 struct DummyResponseSender {
     responses: Rc<RefCell<Vec<Response>>>,
 }
@@ -21,6 +22,10 @@ struct DummyResponseSender {
 impl ResponseSender<Response> for DummyResponseSender {
     fn send_response(&mut self, response: Response) {
         self.responses.borrow_mut().push(response);
+    }
+
+    fn boxed_clone(&self) -> Box<ResponseSender<Response>> {
+        Box::new(self.clone())
     }
 }
 
