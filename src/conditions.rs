@@ -10,7 +10,7 @@ pub struct Conditions {
     pub timeout: MiliSec,
     pub renew_timeout: Option<MiliSec>,
     pub first_opens: bool,
-    pub last_closes: Option<bool>,
+    pub last_closes: bool,
     pub max_size: Option<usize>,
     pub patterns: Vec<String>,
 }
@@ -21,7 +21,7 @@ impl Conditions {
             timeout: timeout,
             renew_timeout: None,
             first_opens: FIRST_OPENS_DEFAULT,
-            last_closes: None,
+            last_closes: LAST_CLOSES_DEFAULT,
             max_size: None,
             patterns: Vec::new(),
         }
@@ -51,7 +51,7 @@ impl Conditions {
     }
 
     fn is_closing_message(&self, state: &State) -> bool {
-        if self.last_closes.unwrap_or(LAST_CLOSES_DEFAULT) {
+        if self.last_closes {
             let last_message = state.messages().last().unwrap();
             last_message.ids().any(|x| x == self.patterns.last().unwrap())
         } else {
@@ -95,7 +95,7 @@ impl ConditionsBuilder {
     }
 
     pub fn last_closes(&mut self, last_closes: bool) -> &mut ConditionsBuilder {
-        self.conditions.last_closes = Some(last_closes);
+        self.conditions.last_closes = last_closes;
         self
     }
     pub fn max_size(&mut self, max_size: usize) -> &mut ConditionsBuilder {
@@ -212,7 +212,7 @@ mod test {
         assert_eq!(conditions.timeout, 100);
         assert_eq!(conditions.renew_timeout, Some(50));
         assert_eq!(conditions.first_opens, true);
-        assert_eq!(conditions.last_closes, Some(false));
+        assert_eq!(conditions.last_closes, false);
         assert_eq!(conditions.max_size, Some(42));
         assert_eq!(conditions.patterns, expected_patterns);
     }
@@ -272,7 +272,7 @@ mod test {
 
 mod deser {
     use MiliSec;
-    use super::{Conditions, FIRST_OPENS_DEFAULT};
+    use super::{Conditions, FIRST_OPENS_DEFAULT, LAST_CLOSES_DEFAULT};
     use serde::de::{Deserialize, Deserializer, Error, MapVisitor, Visitor};
 
     impl Deserialize for Conditions {
@@ -331,7 +331,7 @@ mod deser {
             let mut timeout: Option<MiliSec> = None;
             let mut renew_timeout = None;
             let mut first_opens = FIRST_OPENS_DEFAULT;
-            let mut last_closes = None;
+            let mut last_closes = LAST_CLOSES_DEFAULT;
             let mut max_size = None;
             let mut patterns = None;
 
@@ -340,7 +340,7 @@ mod deser {
                     Field::Timeout => timeout = Some(try!(visitor.visit_value())),
                     Field::RenewTimeout => renew_timeout = Some(try!(visitor.visit_value())),
                     Field::FirstOpens => first_opens = try!(visitor.visit_value()),
-                    Field::LastCloses => last_closes = Some(try!(visitor.visit_value())),
+                    Field::LastCloses => last_closes = try!(visitor.visit_value()),
                     Field::MaxSize => max_size = Some(try!(visitor.visit_value())),
                     Field::Patterns => patterns = Some(try!(visitor.visit_value())),
                 }
