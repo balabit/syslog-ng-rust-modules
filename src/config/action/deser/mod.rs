@@ -103,17 +103,10 @@ impl serde::de::Deserialize for ExecCondition {
                 let mut on_opened: Option<bool> = ON_OPENED_DEFAULT;
                 let mut on_closed: Option<bool> = ON_CLOSED_DEFAULT;
 
-                loop {
-                    match try!(visitor.visit_key()) {
-                        Some(Field::OnOpened) => {
-                            on_opened = Some(try!(visitor.visit_value()));
-                        }
-                        Some(Field::OnClosed) => {
-                            on_closed = Some(try!(visitor.visit_value()));
-                        }
-                        None => {
-                            break;
-                        }
+                while let Some(field) = try!(visitor.visit_key()) {
+                    match field {
+                        Field::OnOpened => on_opened = Some(try!(visitor.visit_value())),
+                        Field::OnClosed => on_closed = Some(try!(visitor.visit_value()))
                     }
                 }
 
