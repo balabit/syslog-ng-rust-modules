@@ -134,14 +134,14 @@ impl MessageResponse {
 
 impl Action for MessageAction {
     fn on_opened(&self, _state: &State, _context: &BaseContext) {
-        if let Some(true) = self.when.on_opened {
+        if self.when.on_opened {
             trace!("MessageAction: on_opened()");
             self.execute(_state, _context);
         }
     }
 
     fn on_closed(&self, _state: &State, _context: &BaseContext) {
-        if let Some(true) = self.when.on_closed {
+        if self.when.on_closed {
             trace!("MessageAction: on_closed()");
             self.execute(_state, _context);
         }
