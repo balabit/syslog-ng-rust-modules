@@ -9,7 +9,7 @@ const LAST_CLOSES_DEFAULT: bool = false;
 pub struct Conditions {
     pub timeout: MiliSec,
     pub renew_timeout: Option<MiliSec>,
-    pub first_opens: Option<bool>,
+    pub first_opens: bool,
     pub last_closes: Option<bool>,
     pub max_size: Option<usize>,
     pub patterns: Vec<String>,
@@ -20,7 +20,7 @@ impl Conditions {
         Conditions {
             timeout: timeout,
             renew_timeout: None,
-            first_opens: None,
+            first_opens: FIRST_OPENS_DEFAULT,
             last_closes: None,
             max_size: None,
             patterns: Vec::new(),
@@ -28,7 +28,7 @@ impl Conditions {
     }
 
     pub fn is_opening(&self, message: &Message) -> bool {
-        if self.first_opens.unwrap_or(FIRST_OPENS_DEFAULT) {
+        if self.first_opens {
             message.ids().any(|x| x == self.patterns.first().unwrap())
         } else {
             true
@@ -90,7 +90,7 @@ impl ConditionsBuilder {
     }
 
     pub fn first_opens(&mut self, first_opens: bool) -> &mut ConditionsBuilder {
-        self.conditions.first_opens = Some(first_opens);
+        self.conditions.first_opens = first_opens;
         self
     }
 
@@ -211,7 +211,7 @@ mod test {
                                                .expect("Failed to deserialize a Conditions struct");
         assert_eq!(conditions.timeout, 100);
         assert_eq!(conditions.renew_timeout, Some(50));
-        assert_eq!(conditions.first_opens, Some(true));
+        assert_eq!(conditions.first_opens, true);
         assert_eq!(conditions.last_closes, Some(false));
         assert_eq!(conditions.max_size, Some(42));
         assert_eq!(conditions.patterns, expected_patterns);
@@ -272,7 +272,7 @@ mod test {
 
 mod deser {
     use MiliSec;
-    use super::Conditions;
+    use super::{Conditions, FIRST_OPENS_DEFAULT};
     use serde::de::{Deserialize, Deserializer, Error, MapVisitor, Visitor};
 
     impl Deserialize for Conditions {
@@ -330,7 +330,7 @@ mod deser {
         {
             let mut timeout: Option<MiliSec> = None;
             let mut renew_timeout = None;
-            let mut first_opens = None;
+            let mut first_opens = FIRST_OPENS_DEFAULT;
             let mut last_closes = None;
             let mut max_size = None;
             let mut patterns = None;
@@ -339,7 +339,7 @@ mod deser {
                 match field {
                     Field::Timeout => timeout = Some(try!(visitor.visit_value())),
                     Field::RenewTimeout => renew_timeout = Some(try!(visitor.visit_value())),
-                    Field::FirstOpens => first_opens = Some(try!(visitor.visit_value())),
+                    Field::FirstOpens => first_opens = try!(visitor.visit_value()),
                     Field::LastCloses => last_closes = Some(try!(visitor.visit_value())),
                     Field::MaxSize => max_size = Some(try!(visitor.visit_value())),
                     Field::Patterns => patterns = Some(try!(visitor.visit_value())),
