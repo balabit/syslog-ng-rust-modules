@@ -14,7 +14,7 @@ pub mod reactor;
 #[derive(Debug)]
 pub enum Response {
     Exit,
-    Message(Alert),
+    Alert(Alert),
 }
 
 #[derive(Debug, Eq, Hash, PartialEq)]
@@ -28,7 +28,7 @@ impl Event for Response {
     fn handler(&self) -> Self::Handler {
         match *self {
             Response::Exit => ResponseHandler::Exit,
-            Response::Message(_) => ResponseHandler::Message,
+            Response::Alert(_) => ResponseHandler::Message,
         }
     }
 }

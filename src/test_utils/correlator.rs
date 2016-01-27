@@ -16,7 +16,7 @@ pub struct MessageEventHandler {
 
 impl EventHandler<Response, mpsc::Sender<Request<Message>>> for MessageEventHandler {
     fn handle_event(&mut self, event: Response, _: &mut mpsc::Sender<Request<Message>>) {
-        if let Response::Message(event) = event {
+        if let Response::Alert(event) = event {
             self.responses.borrow_mut().push(event);
         }
     }

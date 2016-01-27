@@ -54,7 +54,7 @@ fn test_given_a_message_action_when_it_is_executed_then_it_adds_the_name_and_uui
     message_action.execute(&state, &base_context);
     assert_eq!(1, responses.borrow().len());
     let responses = responses.borrow();
-    if let &Response::Message(ref response) = responses.get(0).unwrap() {
+    if let &Response::Alert(ref response) = responses.get(0).unwrap() {
         assert_eq!(name.as_ref().unwrap(),
                    response.message().get(CONTEXT_NAME).unwrap());
         assert_eq!(&base_context.uuid().to_hyphenated_string(),
@@ -108,7 +108,7 @@ fn test_given_message_action_when_it_is_executed_then_it_uses_the_messages_to_re
     message_action.execute(&state, &base_context);
     assert_eq!(1, responses.borrow().len());
     let responses = responses.borrow();
-    if let &Response::Message(ref response) = responses.get(0).unwrap() {
+    if let &Response::Alert(ref response) = responses.get(0).unwrap() {
         assert_eq!(name.as_ref().unwrap(),
                    response.message().get(CONTEXT_NAME).unwrap());
         assert_eq!(&base_context.uuid().to_hyphenated_string(),

@@ -109,7 +109,7 @@ impl MessageAction {
         match self.render_message(_state, _context) {
             Ok(message) => {
                 let response = Alert { message: message, inject_mode: self.inject_mode.clone() };
-                self.sender.send_response(Response::Message(response));
+                self.sender.send_response(Response::Alert(response));
             }
             Err(error) => {
                 error!("{}", error);
