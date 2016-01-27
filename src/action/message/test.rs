@@ -20,7 +20,7 @@ struct DummyResponseSender {
 }
 
 impl ResponseSender<Response> for DummyResponseSender {
-    fn send_response(&mut self, response: Response) {
+    fn send_response(&self, response: Response) {
         self.responses.borrow_mut().push(response);
     }
 
@@ -47,7 +47,7 @@ fn test_given_a_message_action_when_it_is_executed_then_it_adds_the_name_and_uui
                           .expect("Failed to compile a handlebars template");
         let config_action = config::action::message::MessageActionBuilder::new("uuid", message)
                                 .build();
-        MessageAction::new(Rc::new(RefCell::new(Box::new(response_sender))),
+        MessageAction::new(Box::new(response_sender),
                            config_action)
     };
 
@@ -101,7 +101,7 @@ fn test_given_message_action_when_it_is_executed_then_it_uses_the_messages_to_re
                                           .ok()
                                           .expect("Failed to compile a handlebars template"))
                                 .build();
-        MessageAction::new(Rc::new(RefCell::new(Box::new(response_sender))),
+        MessageAction::new(Box::new(response_sender),
                            config_action)
     };
 

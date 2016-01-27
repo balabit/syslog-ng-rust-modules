@@ -35,18 +35,19 @@ impl Event for Response {
 
 #[derive(Clone)]
 pub struct ResponseSender {
-    sender: Sender<Response>,
+    sender: Rc<RefCell<Sender<Response>>>,
 }
 
 impl ResponseSender {
     pub fn new(sender: Sender<Response>) -> ResponseSender {
-        ResponseSender { sender: sender }
+        ResponseSender { sender: Rc::new(RefCell::new(sender)) }
     }
 }
 
 impl self::response::ResponseSender<Response> for ResponseSender {
-    fn send_response(&mut self, response: Response) {
-        let _ = self.sender.send(response);
+    fn send_response(&self, response: Response) {
+        let sender = self.sender.borrow_mut();
+        let _ = sender.send(response);
     }
 
     fn boxed_clone(&self) -> Box<self::response::ResponseSender<Response>> {

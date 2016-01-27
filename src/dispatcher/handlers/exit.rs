@@ -1,4 +1,3 @@
-use std::cell::RefCell;
 use std::rc::Rc;
 
 use context::ContextMap;
@@ -11,13 +10,13 @@ use reactor::EventHandler;
 
 pub struct ExitEventHandler {
     condition: Condition,
-    response_handler: Rc<RefCell<Box<ResponseSender<Response>>>>,
+    response_handler: Box<ResponseSender<Response>>,
     stops: u32,
 }
 
 impl ExitEventHandler {
     pub fn new(condition: Condition,
-               response_handler: Rc<RefCell<Box<ResponseSender<Response>>>>)
+               response_handler: Box<ResponseSender<Response>>)
                -> ExitEventHandler {
         ExitEventHandler {
             condition: condition,
@@ -31,7 +30,7 @@ impl EventHandler<Request<Rc<Message>>, ContextMap> for ExitEventHandler {
     fn handle_event(&mut self, event: Request<Rc<Message>>, _: &mut ContextMap) {
         if let Request::Exit = event {
             self.stops += 1;
-            self.response_handler.borrow_mut().send_response(Response::Exit);
+            self.response_handler.send_response(Response::Exit);
 
             if self.stops >= 2 {
                 self.condition.activate();
