@@ -1,5 +1,5 @@
 use serde_json::from_str;
-use config::action::{ActionType, ExecCondition, ON_CLOSED_DEFAULT, ON_OPENED_DEFAULT};
+use config::action::{ActionType, ExecCondition};
 
 #[test]
 fn test_given_action_when_it_is_deserialized_then_we_get_the_right_result() {
@@ -31,7 +31,7 @@ fn test_given_filled_exec_condition_when_it_is_deserialized_then_it_is_populated
         }
     "#;
 
-    let expected = ExecCondition{on_closed: Some(false), on_opened: Some(true)};
+    let expected = ExecCondition{on_closed: false, on_opened: true};
     let result = from_str::<ExecCondition>(text);
     println!("{:?}", &result);
     let cond = result.ok().expect("Failed to deserialize a valid ExecCondition");
@@ -45,7 +45,7 @@ fn test_given_filled_exec_condition_when_it_is_deserialized_then_its_missing_fie
         }
     "#;
 
-    let expected = ExecCondition{on_closed: ON_CLOSED_DEFAULT, on_opened: ON_OPENED_DEFAULT};
+    let expected: ExecCondition = Default::default();
     let result = from_str::<ExecCondition>(text);
     println!("{:?}", &result);
     let cond = result.ok().expect("Failed to deserialize a valid ExecCondition");

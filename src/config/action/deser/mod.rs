@@ -1,5 +1,5 @@
 use serde;
-use super::{ActionType, ExecCondition, ON_CLOSED_DEFAULT, ON_OPENED_DEFAULT};
+use super::{ActionType, ExecCondition};
 
 #[cfg(test)]
 mod test;
@@ -100,26 +100,18 @@ impl serde::de::Deserialize for ExecCondition {
             fn visit_map<V>(&mut self, mut visitor: V) -> Result<ExecCondition, V::Error>
                 where V: serde::de::MapVisitor
             {
-                let mut on_opened: Option<bool> = ON_OPENED_DEFAULT;
-                let mut on_closed: Option<bool> = ON_CLOSED_DEFAULT;
+                let mut condition: ExecCondition = Default::default();
 
-                loop {
-                    match try!(visitor.visit_key()) {
-                        Some(Field::OnOpened) => {
-                            on_opened = Some(try!(visitor.visit_value()));
-                        }
-                        Some(Field::OnClosed) => {
-                            on_closed = Some(try!(visitor.visit_value()));
-                        }
-                        None => {
-                            break;
-                        }
+                while let Some(field) = try!(visitor.visit_key()) {
+                    match field {
+                        Field::OnOpened => condition.on_opened = try!(visitor.visit_value()),
+                        Field::OnClosed => condition.on_closed = try!(visitor.visit_value())
                     }
                 }
 
                 try!(visitor.end());
 
-                Ok(ExecCondition{on_opened: on_opened, on_closed: on_closed})
+                Ok(condition)
             }
         }
         deserializer.visit_struct("ExecCondition", &[], ExecConditionVisitor)

@@ -8,17 +8,20 @@ pub enum ActionType {
     Message(self::message::MessageAction),
 }
 
-pub const ON_CLOSED_DEFAULT: Option<bool> = Some(true);
-pub const ON_OPENED_DEFAULT: Option<bool> = None;
-
 #[derive(Clone, Debug, PartialEq)]
 pub struct ExecCondition {
-    pub on_opened: Option<bool>,
-    pub on_closed: Option<bool>,
+    pub on_opened: bool,
+    pub on_closed: bool,
 }
 
 impl ExecCondition {
     pub fn new() -> ExecCondition {
-        ExecCondition {on_opened: ON_OPENED_DEFAULT, on_closed: ON_CLOSED_DEFAULT}
+        Default::default()
+    }
+}
+
+impl Default for ExecCondition {
+    fn default() -> ExecCondition {
+        ExecCondition {on_opened: false, on_closed: true}
     }
 }
