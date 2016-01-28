@@ -1,5 +1,6 @@
 use std::sync::mpsc;
 use std::thread;
+use std::time::Duration;
 
 use MiliSec;
 use dispatcher::request::{ExternalRequest, Request};
@@ -13,7 +14,7 @@ impl Timer {
     pub fn from_chan(ms: MiliSec, tx: mpsc::Sender<ExternalRequest>) {
         thread::spawn(move || {
             loop {
-                thread::sleep_ms(ms);
+                thread::sleep(Duration::from_millis(ms));
                 if tx.send(Request::Timer(TimerEvent(ms))).is_err() {
                     break;
                 }
