@@ -123,24 +123,13 @@ impl Visitor for ContextVisitor {
         let mut context_id: Option<String> = None;
         let mut actions = None;
 
-        loop {
-            match try!(visitor.visit_key()) {
-                Some(Field::Name) => {
-                    name = Some(try!(visitor.visit_value()));
-                }
-                Some(Field::Uuid) => {
-                    uuid = Some(try!(visitor.visit_value()));
-                }
-                Some(Field::Conditions) => {
-                    conditions = Some(try!(visitor.visit_value()));
-                }
-                Some(Field::ContextId) => {
-                    context_id = Some(try!(visitor.visit_value()));
-                }
-                Some(Field::Actions) => {
-                    actions = Some(try!(visitor.visit_value()));
-                }
-                None => break,
+        while let Some(field) = try!(visitor.visit_key()) {
+            match field {
+                Field::Name => name = Some(try!(visitor.visit_value())),
+                Field::Uuid => uuid = Some(try!(visitor.visit_value())),
+                Field::Conditions => conditions = Some(try!(visitor.visit_value())),
+                Field::ContextId => context_id = Some(try!(visitor.visit_value())),
+                Field::Actions => actions = Some(try!(visitor.visit_value())),
             }
         }
 

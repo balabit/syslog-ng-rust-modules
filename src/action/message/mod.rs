@@ -9,9 +9,7 @@ use message::{Message, MessageBuilder};
 
 use handlebars::{Context, Handlebars};
 use std::borrow::Borrow;
-use std::cell::RefCell;
 use std::collections::BTreeMap;
-use std::rc::Rc;
 use state::State;
 use self::error::Error;
 use self::renderer_context::RendererContext;
@@ -28,7 +26,7 @@ pub const MESSAGES: &'static str = "messages";
 const MESSAGE: &'static str = "MESSAGE";
 
 pub struct MessageAction {
-    sender: Rc<RefCell<Box<ResponseSender<Response>>>>,
+    sender: Box<ResponseSender<Response>>,
     uuid: String,
     name: Option<String>,
     values: Handlebars,
@@ -37,7 +35,7 @@ pub struct MessageAction {
 }
 
 impl MessageAction {
-    pub fn new(sender: Rc<RefCell<Box<ResponseSender<Response>>>>,
+    pub fn new(sender: Box<ResponseSender<Response>>,
                action: config::action::MessageAction)
                -> MessageAction {
         let config::action::MessageAction { uuid, name, message, values, when, inject_mode } = action;
@@ -110,8 +108,8 @@ impl MessageAction {
     fn execute(&self, _state: &State, _context: &BaseContext) {
         match self.render_message(_state, _context) {
             Ok(message) => {
-                let response = MessageResponse { message: message, inject_mode: self.inject_mode.clone() };
-                self.sender.borrow_mut().send_response(Response::Message(response));
+                let response = Alert { message: message, inject_mode: self.inject_mode.clone() };
+                self.sender.send_response(Response::Alert(response));
             }
             Err(error) => {
                 error!("{}", error);
@@ -121,12 +119,12 @@ impl MessageAction {
 }
 
 #[derive(Debug)]
-pub struct MessageResponse {
+pub struct Alert {
     message: Message,
     inject_mode: InjectMode
 }
 
-impl MessageResponse {
+impl Alert {
     pub fn message(&self) -> &Message {
         &self.message
     }

@@ -8,15 +8,15 @@ use std::sync::mpsc;
 use dispatcher::request::Request;
 
 use reactor::EventHandler;
-use action::MessageResponse;
+use action::Alert;
 
 pub struct MessageEventHandler {
-    pub responses: Rc<RefCell<Vec<MessageResponse>>>,
+    pub responses: Rc<RefCell<Vec<Alert>>>,
 }
 
 impl EventHandler<Response, mpsc::Sender<Request<Message>>> for MessageEventHandler {
     fn handle_event(&mut self, event: Response, _: &mut mpsc::Sender<Request<Message>>) {
-        if let Response::Message(event) = event {
+        if let Response::Alert(event) = event {
             self.responses.borrow_mut().push(event);
         }
     }

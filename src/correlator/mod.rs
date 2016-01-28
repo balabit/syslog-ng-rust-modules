@@ -1,9 +1,7 @@
 use serde_json::from_str;
-use std::cell::RefCell;
 use std::collections::HashMap;
 use std::io::Read;
 use std::fs::File;
-use std::rc::Rc;
 use std::sync::mpsc;
 use std::thread;
 use std::result::Result;
@@ -41,13 +39,13 @@ pub struct Correlator {
 }
 
 fn create_context(config_context: config::Context,
-                  response_sender: Rc<RefCell<Box<response::ResponseSender<Response>>>>)
+                  response_sender: Box<response::ResponseSender<Response>>)
                   -> Context {
     let config::Context{name, uuid, conditions, context_id, actions} = config_context;
     let mut boxed_actions = Vec::new();
 
     for i in actions.into_iter() {
-        let action = action::from_config(i, response_sender.clone());
+        let action = action::from_config(i, response_sender.boxed_clone());
         boxed_actions.push(action);
     }
     let base = BaseContextBuilder::new(uuid, conditions);
@@ -62,11 +60,11 @@ fn create_context(config_context: config::Context,
 }
 
 fn create_context_map(contexts: Vec<config::Context>,
-                      response_sender: Rc<RefCell<Box<response::ResponseSender<Response>>>>)
+                      response_sender: Box<response::ResponseSender<Response>>)
                       -> ContextMap {
     let mut context_map = ContextMap::new();
     for i in contexts.into_iter() {
-        let context: context::Context = create_context(i, response_sender.clone());
+        let context: context::Context = create_context(i, response_sender.boxed_clone());
         context_map.insert(context);
     }
     context_map
@@ -92,9 +90,8 @@ impl Correlator {
             let exit_condition = Condition::new(false);
             let dmux = Demultiplexer::new(rx, exit_condition.clone());
             let response_sender = Box::new(ResponseSender::new(dispatcher_output_channel_tx)) as Box<response::ResponseSender<Response>>;
-            let response_sender = Rc::new(RefCell::new(response_sender));
 
-            let exit_handler = Box::new(handlers::exit::ExitEventHandler::new(exit_condition, response_sender.clone()));
+            let exit_handler = Box::new(handlers::exit::ExitEventHandler::new(exit_condition, response_sender.boxed_clone()));
             let timer_event_handler = Box::new(handlers::timer::TimerEventHandler::new());
             let message_event_handler = Box::new(handlers::message::MessageEventHandler::new());
 
