@@ -31,6 +31,6 @@ fn test_given_correlator_when_messages_are_received_then_they_are_grouped_into_a
     let _ = correlator.push_message(read_message);
     let _ = correlator.push_message(logout_message);
     correlator.handle_events();
-    correlator.stop();
+    let _ = correlator.stop();
     assert_eq!(1, responses.borrow().len());
 }
