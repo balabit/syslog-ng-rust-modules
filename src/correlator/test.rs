@@ -11,6 +11,7 @@ use serde_json::from_str;
 use std::rc::Rc;
 use std::cell::RefCell;
 use std::thread;
+use std::time::Duration;
 
 use test_utils::correlator::MessageEventHandler;
 
@@ -113,9 +114,9 @@ fn test_given_manually_built_correlator_when_it_closes_a_context_then_the_action
     let mut correlator = Correlator::new(contexts);
     correlator.register_handler(message_event_handler);
     let _ = correlator.push_message(MessageBuilder::new(&uuid1, "message").build());
-    thread::sleep_ms(20);
+    thread::sleep(Duration::from_millis(20));
     let _ = correlator.push_message(MessageBuilder::new(&uuid2, "message").build());
-    thread::sleep_ms(80);
+    thread::sleep(Duration::from_millis(80));
     let _ = correlator.push_message(MessageBuilder::new(&uuid3, "message").build());
     let _ = correlator.stop();
     assert_eq!(3, responses.borrow().len());
@@ -152,7 +153,7 @@ fn test_given_correlator_when_it_is_built_from_json_then_it_produces_the_expecte
     let _ = correlator.push_message(MessageBuilder::new(&uuid1, "message")
                                         .name(Some("p1"))
                                         .build());
-    thread::sleep_ms(20);
+    thread::sleep(Duration::from_millis(20));
     let _ = correlator.push_message(MessageBuilder::new(&uuid2, "message")
                                         .name(Some("p2"))
                                         .build());
@@ -171,7 +172,7 @@ fn test_given_correlator_when_it_is_built_from_json_then_it_produces_the_expecte
     let _ = correlator.push_message(MessageBuilder::new(&uuid3, "message")
                                         .name(Some("p3"))
                                         .build());
-    thread::sleep_ms(200);
+    thread::sleep(Duration::from_millis(200));
     let _ = correlator.stop();
     println!("{:?}", &responses.borrow());
     assert_eq!(5, responses.borrow().len());
