@@ -210,6 +210,25 @@ mod test {
     }
 
     #[test]
+    fn test_given_config_context_when_it_does_not_have_uuid_then_it_cannot_be_deserialized() {
+        let text = r#"{ "conditions": { "timeout": 100 }}"#;
+        let result = from_str::<Context>(text);
+        println!("{:?}", &result);
+        let _ = result.err().expect("Successfully deserialized a config context without an uuid key");
+    }
+
+    #[test]
+    fn test_given_config_context_when_it_contains_an_unknown_key_then_it_cannot_be_deserialized() {
+        let text = r#"
+            {"uuid": "86ca9f93-84fb-4813-b037-6526f7a585a3",
+            "conditions": { "timeout": 100},
+            "unknown": "unknown" }"#;
+        let result = from_str::<Context>(text);
+        println!("{:?}", &result);
+        let _ = result.err().expect("Successfully deserialized a config context with an unknown key");
+    }
+
+    #[test]
     fn test_given_config_context_when_it_is_deserialized_and_only_the_required_fields_are_present_then_we_can_deserialize_it_successfully
         () {
         let text = r#"
