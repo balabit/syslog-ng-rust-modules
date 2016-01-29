@@ -23,7 +23,8 @@ fn test_given_action_when_it_is_deserialized_then_we_get_the_right_result() {
 }
 
 #[test]
-fn test_given_filled_exec_condition_when_it_is_deserialized_then_it_is_populated_with_the_specified_values() {
+fn test_given_filled_exec_condition_when_it_is_deserialized_then_it_is_populated_with_the_specified_values
+    () {
     let text = r#"
         {
             "on_opened": true,
@@ -31,7 +32,10 @@ fn test_given_filled_exec_condition_when_it_is_deserialized_then_it_is_populated
         }
     "#;
 
-    let expected = ExecCondition{on_closed: false, on_opened: true};
+    let expected = ExecCondition {
+        on_closed: false,
+        on_opened: true,
+    };
     let result = from_str::<ExecCondition>(text);
     println!("{:?}", &result);
     let cond = result.ok().expect("Failed to deserialize a valid ExecCondition");
@@ -39,7 +43,8 @@ fn test_given_filled_exec_condition_when_it_is_deserialized_then_it_is_populated
 }
 
 #[test]
-fn test_given_filled_exec_condition_when_it_is_deserialized_then_its_missing_fields_are_populated_with_default_values() {
+fn test_given_filled_exec_condition_when_it_is_deserialized_then_its_missing_fields_are_populated_with_default_values
+    () {
     let text = r#"
         {
         }

@@ -41,8 +41,7 @@ impl Conditions {
     }
 
     fn is_closing_condition_met(&self, state: &State) -> bool {
-        self.is_max_size_reached(state) ||
-        self.is_closing_message(state) ||
+        self.is_max_size_reached(state) || self.is_closing_message(state) ||
         self.is_any_timer_expired(state)
     }
 
@@ -68,10 +67,9 @@ impl Conditions {
     }
 
     fn is_renew_timeout_expired(&self, state: &State) -> bool {
-        self.renew_timeout.map_or(false,
-                                  |renew_timeout| {
-                                      state.elapsed_time_since_last_message() >= renew_timeout
-                                  })
+        self.renew_timeout.map_or(false, |renew_timeout| {
+            state.elapsed_time_since_last_message() >= renew_timeout
+        })
     }
 }
 
@@ -155,9 +153,9 @@ mod test {
         ];
         let mut state = State::new();
         let conditions = ConditionsBuilder::new(timeout)
-                            .patterns(patterns)
-                            .last_closes(true)
-                            .build();
+                             .patterns(patterns)
+                             .last_closes(true)
+                             .build();
         let context = BaseContextBuilder::new(Uuid::new_v4(), conditions).build();
         let msg_opening = Rc::new(MessageBuilder::new(&msg_id1, "message").build());
         let msg_closing = Rc::new(MessageBuilder::new(&msg_id2, "message").build());
@@ -229,7 +227,7 @@ mod test {
 
     #[test]
     fn test_given_condition_when_first_opens_is_set_then_the_right_message_can_open_the_context
-                                                                                                () {
+        () {
         let timeout = Duration::from_millis(100);
         let patterns = vec![
                 "p1".to_string(),
@@ -257,10 +255,10 @@ mod test {
         let p2 = "p2".to_string();
         let mut state = State::new();
         let conditions = ConditionsBuilder::new(timeout)
-                            .patterns(patterns)
-                            .first_opens(true)
-                            .last_closes(true)
-                            .build();
+                             .patterns(patterns)
+                             .first_opens(true)
+                             .last_closes(true)
+                             .build();
         let p1_msg = MessageBuilder::new(&p1_uuid, "message").name(Some(&p1)).build();
         let p2_msg = MessageBuilder::new(&p2_uuid, "message").name(Some(&p2)).build();
         let context = BaseContextBuilder::new(Uuid::new_v4(), conditions).build();

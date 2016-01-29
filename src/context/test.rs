@@ -33,7 +33,7 @@ fn test_given_close_condition_with_timeout_when_the_timeout_expires_then_the_con
 
 #[test]
 fn test_given_close_condition_with_max_size_when_the_max_size_reached_then_the_condition_is_met
-                                                                                                () {
+    () {
     let timeout = Duration::from_millis(100);
     let max_size = 3;
     let msg_id = "11eaf6f8-0640-460f-aee2-a72d2f2ab258".to_string();

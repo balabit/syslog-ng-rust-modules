@@ -10,7 +10,7 @@ pub struct MessageActionBuilder {
     message: Template,
     values: BTreeMap<String, Template>,
     when: ExecCondition,
-    inject_mode: InjectMode
+    inject_mode: InjectMode,
 }
 
 impl MessageActionBuilder {
@@ -21,7 +21,7 @@ impl MessageActionBuilder {
             message: message,
             values: BTreeMap::new(),
             when: ExecCondition::new(),
-            inject_mode: Default::default()
+            inject_mode: Default::default(),
         }
     }
 
@@ -57,7 +57,7 @@ impl MessageActionBuilder {
             message: self.message.clone(),
             values: self.values.clone(),
             when: self.when.clone(),
-            inject_mode: self.inject_mode.clone()
+            inject_mode: self.inject_mode.clone(),
         }
     }
 }

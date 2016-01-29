@@ -16,7 +16,7 @@ pub struct MessageAction {
     pub message: Template,
     pub values: BTreeMap<String, Template>,
     pub when: ExecCondition,
-    pub inject_mode: InjectMode
+    pub inject_mode: InjectMode,
 }
 
 impl MessageAction {
@@ -47,7 +47,7 @@ impl From<MessageAction> for super::ActionType {
 pub enum InjectMode {
     Log,
     Forward,
-    Loopback
+    Loopback,
 }
 
 impl Default for InjectMode {

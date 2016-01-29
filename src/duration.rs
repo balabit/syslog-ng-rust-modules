@@ -14,7 +14,7 @@ impl de::Visitor for Visitor {
     type Value = SerializableDuration;
 
     fn visit_u64<E>(&mut self, v: u64) -> Result<SerializableDuration, E>
-        where E: de::Error,
+        where E: de::Error
     {
         match FromPrimitive::from_u64(v) {
             Some(v) => Ok(SerializableDuration(Duration::from_millis(v))),
@@ -23,7 +23,7 @@ impl de::Visitor for Visitor {
     }
 
     fn visit_str<E>(&mut self, s: &str) -> Result<SerializableDuration, E>
-        where E: de::Error,
+        where E: de::Error
     {
         match FromStr::from_str(s) {
             Ok(value) => Ok(SerializableDuration(Duration::from_millis(value))),
@@ -34,7 +34,7 @@ impl de::Visitor for Visitor {
 
 impl de::Deserialize for SerializableDuration {
     fn deserialize<D>(deserializer: &mut D) -> Result<SerializableDuration, D::Error>
-        where D: de::Deserializer,
+        where D: de::Deserializer
     {
         deserializer.visit_str(Visitor)
     }
@@ -50,7 +50,8 @@ mod tests {
     fn test_given_valid_duration_when_it_is_deserialized_then_we_get_the_right_result() {
         let result = serde_json::from_str::<SerializableDuration>("100");
         println!("{:?}", &result);
-        let duration = result.ok().expect("Failed to deserialize a valid SerializableDuration value");
+        let duration = result.ok()
+                             .expect("Failed to deserialize a valid SerializableDuration value");
         assert_eq!(Duration::from_millis(100), duration.0);
     }
 

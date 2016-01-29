@@ -55,8 +55,7 @@ fn test_given_a_message_action_when_it_is_executed_then_it_adds_the_name_and_uui
                           .expect("Failed to compile a handlebars template");
         let config_action = config::action::message::MessageActionBuilder::new("uuid", message)
                                 .build();
-        MessageAction::new(Box::new(response_sender),
-                           config_action)
+        MessageAction::new(Box::new(response_sender), config_action)
     };
 
     message_action.execute(&state, &base_context);
@@ -84,14 +83,12 @@ fn test_given_message_action_when_it_is_executed_then_it_uses_the_messages_to_re
         BaseContextBuilder::new(uuid, conditions).name(name.clone()).build()
     };
     let state = {
-        let messages = vec![
-            Rc::new(MessageBuilder::new("uuid1", "message1")
-                                      .pair("key1", "value1")
-                                      .build()),
-            Rc::new(MessageBuilder::new("uuid2", "message2")
-                                      .pair("key2", "value2")
-                                      .build())
-        ];
+        let messages = vec![Rc::new(MessageBuilder::new("uuid1", "message1")
+                                        .pair("key1", "value1")
+                                        .build()),
+                            Rc::new(MessageBuilder::new("uuid2", "message2")
+                                        .pair("key2", "value2")
+                                        .build())];
         State::with_messages(messages)
     };
     let responses = Rc::new(RefCell::new(Vec::new()));
@@ -109,8 +106,7 @@ fn test_given_message_action_when_it_is_executed_then_it_uses_the_messages_to_re
                                           .ok()
                                           .expect("Failed to compile a handlebars template"))
                                 .build();
-        MessageAction::new(Box::new(response_sender),
-                           config_action)
+        MessageAction::new(Box::new(response_sender), config_action)
     };
 
     message_action.execute(&state, &base_context);

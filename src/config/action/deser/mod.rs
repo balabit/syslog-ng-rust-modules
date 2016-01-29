@@ -12,7 +12,7 @@ impl serde::de::Deserialize for ActionType {
             Message,
         }
 
-    impl serde::de::Deserialize for Field {
+        impl serde::de::Deserialize for Field {
             #[inline]
             fn deserialize<D>(deserializer: &mut D) -> Result<Field, D::Error>
                 where D: serde::de::Deserializer
@@ -83,7 +83,10 @@ impl serde::de::Deserialize for ExecCondition {
                         match value {
                             "on_opened" => Ok(Field::OnOpened),
                             "on_closed" => Ok(Field::OnClosed),
-                            _ => Err(serde::de::Error::syntax(&format!("Unexpected field: {}", value))),
+                            _ => {
+                                Err(serde::de::Error::syntax(&format!("Unexpected field: {}",
+                                                                      value)))
+                            }
                         }
                     }
                 }
@@ -105,7 +108,7 @@ impl serde::de::Deserialize for ExecCondition {
                 while let Some(field) = try!(visitor.visit_key()) {
                     match field {
                         Field::OnOpened => condition.on_opened = try!(visitor.visit_value()),
-                        Field::OnClosed => condition.on_closed = try!(visitor.visit_value())
+                        Field::OnClosed => condition.on_closed = try!(visitor.visit_value()),
                     }
                 }
 

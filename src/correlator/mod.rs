@@ -85,14 +85,17 @@ impl Correlator {
     pub fn new(contexts: Vec<config::Context>) -> Correlator {
         let (dispatcher_input_channel, rx) = mpsc::channel();
         let (dispatcher_output_channel_tx, dispatcher_output_channel_rx) = mpsc::channel();
-        let _ = Timer::from_chan(Duration::from_millis(TIMER_STEP_MS), dispatcher_input_channel.clone());
+        let _ = Timer::from_chan(Duration::from_millis(TIMER_STEP_MS),
+                                 dispatcher_input_channel.clone());
 
         let handle = thread::spawn(move || {
             let exit_condition = Condition::new(false);
             let dmux = Demultiplexer::new(rx, exit_condition.clone());
             let response_sender = Box::new(ResponseSender::new(dispatcher_output_channel_tx)) as Box<response::ResponseSender<Response>>;
 
-            let exit_handler = Box::new(handlers::exit::ExitEventHandler::new(exit_condition, response_sender.boxed_clone()));
+            let exit_handler =
+                Box::new(handlers::exit::ExitEventHandler::new(exit_condition,
+                                                               response_sender.boxed_clone()));
             let timer_event_handler = Box::new(handlers::timer::TimerEventHandler::new());
             let message_event_handler = Box::new(handlers::message::MessageEventHandler::new());
 
@@ -113,7 +116,8 @@ impl Correlator {
         }
     }
 
-    pub fn register_handler(&mut self, handler: Box<EventHandler<Response, mpsc::Sender<Request<Message>>>>) {
+    pub fn register_handler(&mut self,
+                            handler: Box<EventHandler<Response, mpsc::Sender<Request<Message>>>>) {
         self.handlers.insert(handler.handler(), handler);
     }
 

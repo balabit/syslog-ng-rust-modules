@@ -21,7 +21,7 @@ enum Field {
     Message,
     Values,
     When,
-    InjectMode
+    InjectMode,
 }
 
 impl Deserialize for Field {
@@ -90,7 +90,7 @@ impl Visitor for MessageActionVisitor {
                 Field::Message => message = Some(try!(visitor.visit_value())),
                 Field::Values => values = Some(try!(visitor.visit_value())),
                 Field::When => when = try!(visitor.visit_value()),
-                Field::InjectMode => inject_mode = try!(visitor.visit_value())
+                Field::InjectMode => inject_mode = try!(visitor.visit_value()),
             }
         }
 
@@ -100,9 +100,7 @@ impl Visitor for MessageActionVisitor {
         };
 
         let message = match message {
-            Some(message) => {
-                try!(MessageActionVisitor::compile_template::<V>(message, &uuid))
-            }
+            Some(message) => try!(MessageActionVisitor::compile_template::<V>(message, &uuid)),
             None => {
                 error!("Missing 'message' field: uuid={}", &uuid);
                 return visitor.missing_field("message");
@@ -124,11 +122,11 @@ impl Visitor for MessageActionVisitor {
         try!(visitor.end());
 
         Ok(MessageActionBuilder::new(uuid, message)
-                                .name(name)
-                                .values(values)
-                                .when(when)
-                                .inject_mode(inject_mode)
-                                .build())
+               .name(name)
+               .values(values)
+               .when(when)
+               .inject_mode(inject_mode)
+               .build())
     }
 }
 
@@ -237,7 +235,10 @@ mod test {
         let text = r#"
         ["forward", "log", "loopback", "log"]
         "#;
-        let expected = vec![InjectMode::Forward, InjectMode::Log, InjectMode::Loopback, InjectMode::Log];
+        let expected = vec![InjectMode::Forward,
+                            InjectMode::Log,
+                            InjectMode::Loopback,
+                            InjectMode::Log];
 
         let result = from_str::<Vec<InjectMode>>(text);
         println!("{:?}", &result);
@@ -269,7 +270,9 @@ mod test {
         let message = Template::compile("message".to_string())
                           .ok()
                           .expect("Failed to compile a handlebars template");
-        let expected_message = MessageActionBuilder::new("UUID", message).inject_mode(InjectMode::Forward).build();
+        let expected_message = MessageActionBuilder::new("UUID", message)
+                                   .inject_mode(InjectMode::Forward)
+                                   .build();
         let result = from_str::<MessageAction>(text);
         println!("{:?}", &result);
         let message = result.ok().expect("Failed to deserialize a valid MessageAction object");
