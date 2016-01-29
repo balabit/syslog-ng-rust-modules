@@ -1,14 +1,14 @@
 use message::Message;
-use MiliSec;
 use state::State;
+use std::time::Duration;
 
 const FIRST_OPENS_DEFAULT: bool = false;
 const LAST_CLOSES_DEFAULT: bool = false;
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Conditions {
-    pub timeout: MiliSec,
-    pub renew_timeout: Option<MiliSec>,
+    pub timeout: Duration,
+    pub renew_timeout: Option<Duration>,
     pub first_opens: bool,
     pub last_closes: bool,
     pub max_size: Option<usize>,
@@ -16,7 +16,7 @@ pub struct Conditions {
 }
 
 impl Conditions {
-    fn new(timeout: MiliSec) -> Conditions {
+    fn new(timeout: Duration) -> Conditions {
         Conditions {
             timeout: timeout,
             renew_timeout: None,
@@ -41,8 +41,7 @@ impl Conditions {
     }
 
     fn is_closing_condition_met(&self, state: &State) -> bool {
-        self.is_max_size_reached(state) ||
-        self.is_closing_message(state) ||
+        self.is_max_size_reached(state) || self.is_closing_message(state) ||
         self.is_any_timer_expired(state)
     }
 
@@ -68,10 +67,9 @@ impl Conditions {
     }
 
     fn is_renew_timeout_expired(&self, state: &State) -> bool {
-        self.renew_timeout.map_or(false,
-                                  |renew_timeout| {
-                                      state.elapsed_time_since_last_message() >= renew_timeout
-                                  })
+        self.renew_timeout.map_or(false, |renew_timeout| {
+            state.elapsed_time_since_last_message() >= renew_timeout
+        })
     }
 }
 
@@ -80,11 +78,11 @@ pub struct ConditionsBuilder {
 }
 
 impl ConditionsBuilder {
-    pub fn new(timeout: MiliSec) -> ConditionsBuilder {
+    pub fn new(timeout: Duration) -> ConditionsBuilder {
         ConditionsBuilder { conditions: Conditions::new(timeout) }
     }
 
-    pub fn renew_timeout(&mut self, timeout: MiliSec) -> &mut ConditionsBuilder {
+    pub fn renew_timeout(&mut self, timeout: Duration) -> &mut ConditionsBuilder {
         self.conditions.renew_timeout = Some(timeout);
         self
     }
@@ -124,10 +122,11 @@ mod test {
     use super::ConditionsBuilder;
     use context::BaseContextBuilder;
     use uuid::Uuid;
+    use std::time::Duration;
 
     #[test]
     fn test_given_condition_when_an_opening_message_is_received_then_the_state_becomes_opened() {
-        let timeout = 100;
+        let timeout = Duration::from_millis(100);
         let msg_id1 = "11eaf6f8-0640-460f-aee2-a72d2f2ab258".to_string();
         let msg_id2 = "21eaf6f8-0640-460f-aee2-a72d2f2ab258".to_string();
         let patterns = vec![
@@ -145,7 +144,7 @@ mod test {
 
     #[test]
     fn test_given_condition_when_a_closing_message_is_received_then_the_state_becomes_closed() {
-        let timeout = 100;
+        let timeout = Duration::from_millis(100);
         let msg_id1 = "11eaf6f8-0640-460f-aee2-a72d2f2ab258".to_string();
         let msg_id2 = "21eaf6f8-0640-460f-aee2-a72d2f2ab258".to_string();
         let patterns = vec![
@@ -154,9 +153,9 @@ mod test {
         ];
         let mut state = State::new();
         let conditions = ConditionsBuilder::new(timeout)
-                            .patterns(patterns)
-                            .last_closes(true)
-                            .build();
+                             .patterns(patterns)
+                             .last_closes(true)
+                             .build();
         let context = BaseContextBuilder::new(Uuid::new_v4(), conditions).build();
         let msg_opening = Rc::new(MessageBuilder::new(&msg_id1, "message").build());
         let msg_closing = Rc::new(MessageBuilder::new(&msg_id2, "message").build());
@@ -180,7 +179,7 @@ mod test {
         println!("{:?}", &conditions);
         let conditions: Conditions = conditions.ok().expect("Failed to deserialize a Conditions \
                                                              struct with only a timeout field");
-        assert_eq!(conditions.timeout, 100);
+        assert_eq!(conditions.timeout, Duration::from_millis(100));
     }
 
     #[test]
@@ -209,8 +208,8 @@ mod test {
         println!("{:?}", &conditions);
         let conditions: Conditions = conditions.ok()
                                                .expect("Failed to deserialize a Conditions struct");
-        assert_eq!(conditions.timeout, 100);
-        assert_eq!(conditions.renew_timeout, Some(50));
+        assert_eq!(conditions.timeout, Duration::from_millis(100));
+        assert_eq!(conditions.renew_timeout, Some(Duration::from_millis(50)));
         assert_eq!(conditions.first_opens, true);
         assert_eq!(conditions.last_closes, false);
         assert_eq!(conditions.max_size, Some(42));
@@ -219,7 +218,7 @@ mod test {
 
     #[test]
     fn test_given_condition_when_there_are_no_patterns_then_any_message_can_open_the_context() {
-        let timeout = 100;
+        let timeout = Duration::from_millis(100);
         let msg_id = "11eaf6f8-0640-460f-aee2-a72d2f2ab258".to_string();
         let condition = ConditionsBuilder::new(timeout).build();
         let msg = MessageBuilder::new(&msg_id, "message").build();
@@ -228,8 +227,8 @@ mod test {
 
     #[test]
     fn test_given_condition_when_first_opens_is_set_then_the_right_message_can_open_the_context
-                                                                                                () {
-        let timeout = 100;
+        () {
+        let timeout = Duration::from_millis(100);
         let patterns = vec![
                 "p1".to_string(),
                 "p2".to_string(),
@@ -248,7 +247,7 @@ mod test {
     #[test]
     fn test_given_conditions_when_last_closes_is_set_and_the_message_has_a_name_then_we_check_that_name
         () {
-        let timeout = 100;
+        let timeout = Duration::from_millis(100);
         let patterns = vec!["p1".to_string(), "p2".to_string()];
         let p1_uuid = "e4f3f8b2-3135-4916-a5ea-621a754dab0d".to_string();
         let p2_uuid = "f4f3f8b2-3135-4916-a5ea-621a754dab0d".to_string();
@@ -256,10 +255,10 @@ mod test {
         let p2 = "p2".to_string();
         let mut state = State::new();
         let conditions = ConditionsBuilder::new(timeout)
-                            .patterns(patterns)
-                            .first_opens(true)
-                            .last_closes(true)
-                            .build();
+                             .patterns(patterns)
+                             .first_opens(true)
+                             .last_closes(true)
+                             .build();
         let p1_msg = MessageBuilder::new(&p1_uuid, "message").name(Some(&p1)).build();
         let p2_msg = MessageBuilder::new(&p2_uuid, "message").name(Some(&p2)).build();
         let context = BaseContextBuilder::new(Uuid::new_v4(), conditions).build();
@@ -271,9 +270,10 @@ mod test {
 }
 
 mod deser {
-    use MiliSec;
     use super::{Conditions, FIRST_OPENS_DEFAULT, LAST_CLOSES_DEFAULT};
     use serde::de::{Deserialize, Deserializer, Error, MapVisitor, Visitor};
+    use std::time::Duration;
+    use duration::SerializableDuration;
 
     impl Deserialize for Conditions {
         fn deserialize<D>(deserializer: &mut D) -> Result<Conditions, D::Error>
@@ -328,8 +328,8 @@ mod deser {
         fn visit_map<V>(&mut self, mut visitor: V) -> Result<Conditions, V::Error>
             where V: MapVisitor
         {
-            let mut timeout: Option<MiliSec> = None;
-            let mut renew_timeout = None;
+            let mut timeout: Option<SerializableDuration> = None;
+            let mut renew_timeout: Option<SerializableDuration> = None;
             let mut first_opens = FIRST_OPENS_DEFAULT;
             let mut last_closes = LAST_CLOSES_DEFAULT;
             let mut max_size = None;
@@ -346,10 +346,12 @@ mod deser {
                 }
             }
 
-            let timeout: MiliSec = match timeout {
-                Some(timeout) => timeout,
+            let timeout: Duration = match timeout {
+                Some(timeout) => timeout.0,
                 None => return visitor.missing_field("timeout"),
             };
+
+            let renew_timeout = renew_timeout.map(|timeout| timeout.0);
 
             try!(visitor.end());
 

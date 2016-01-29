@@ -22,6 +22,9 @@ impl ExecCondition {
 
 impl Default for ExecCondition {
     fn default() -> ExecCondition {
-        ExecCondition {on_opened: false, on_closed: true}
+        ExecCondition {
+            on_opened: false,
+            on_closed: true,
+        }
     }
 }

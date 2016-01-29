@@ -6,11 +6,12 @@ use message::MessageBuilder;
 use handlebars::Template;
 use uuid::Uuid;
 use std::rc::Rc;
+use std::time::Duration;
 
 #[test]
 fn test_given_map_context_when_messages_have_the_same_kvpairs_then_they_go_to_the_same_context() {
-    let delta = 10;
-    let timeout = 30;
+    let delta = Duration::from_millis(10);
+    let timeout = Duration::from_millis(30);
     let event = TimerEvent(delta);
     let msg_id1 = "11eaf6f8-0640-460f-aee2-a72d2f2ab258".to_string();
     let msg_id2 = "21eaf6f8-0640-460f-aee2-a72d2f2ab258".to_string();

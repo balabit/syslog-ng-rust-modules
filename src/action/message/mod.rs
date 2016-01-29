@@ -31,14 +31,15 @@ pub struct MessageAction {
     name: Option<String>,
     values: Handlebars,
     when: ExecCondition,
-    inject_mode: InjectMode
+    inject_mode: InjectMode,
 }
 
 impl MessageAction {
     pub fn new(sender: Box<ResponseSender<Response>>,
                action: config::action::MessageAction)
                -> MessageAction {
-        let config::action::MessageAction { uuid, name, message, values, when, inject_mode } = action;
+        let config::action::MessageAction { uuid, name, message, values, when, inject_mode } =
+            action;
         let mut handlebars = Handlebars::new();
         for (name, template) in values.into_iter() {
             handlebars.register_template(&name, template);
@@ -51,7 +52,7 @@ impl MessageAction {
             name: name,
             values: handlebars,
             when: when,
-            inject_mode: inject_mode
+            inject_mode: inject_mode,
         }
     }
 
@@ -108,7 +109,10 @@ impl MessageAction {
     fn execute(&self, _state: &State, _context: &BaseContext) {
         match self.render_message(_state, _context) {
             Ok(message) => {
-                let response = Alert { message: message, inject_mode: self.inject_mode.clone() };
+                let response = Alert {
+                    message: message,
+                    inject_mode: self.inject_mode.clone(),
+                };
                 self.sender.send_response(Response::Alert(response));
             }
             Err(error) => {
@@ -121,7 +125,7 @@ impl MessageAction {
 #[derive(Debug)]
 pub struct Alert {
     message: Message,
-    inject_mode: InjectMode
+    inject_mode: InjectMode,
 }
 
 impl Alert {

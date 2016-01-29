@@ -5,9 +5,10 @@ extern crate uuid;
 
 use correlation::{config, Correlator};
 use correlation::conditions::ConditionsBuilder;
-use correlation::message::{MessageBuilder};
+use correlation::message::MessageBuilder;
 use uuid::Uuid;
 use std::thread;
+use std::time::Duration;
 
 #[allow(dead_code)]
 fn main() {
@@ -19,11 +20,12 @@ fn main() {
         uuid2.clone(),
         uuid3.clone(),
     ];
-    let condition = ConditionsBuilder::new(100).patterns(patterns)
-                                                .first_opens(true)
-                                                .last_closes(true)
-                                                .build();
-    let actions = vec![ ];
+    let condition = ConditionsBuilder::new(Duration::from_millis(100))
+                        .patterns(patterns)
+                        .first_opens(true)
+                        .last_closes(true)
+                        .build();
+    let actions = vec![];
     let contexts = vec![
         config::ContextBuilder::new(Uuid::new_v4(), condition.clone()).actions(actions.clone()).build(),
         config::ContextBuilder::new(Uuid::new_v4(), condition.clone()).actions(actions.clone()).build(),
@@ -31,9 +33,9 @@ fn main() {
     ];
     let mut correlator = Correlator::new(contexts);
     let _ = correlator.push_message(MessageBuilder::new(&uuid1, "message").build());
-    thread::sleep_ms(20);
+    thread::sleep(Duration::from_millis(20));
     let _ = correlator.push_message(MessageBuilder::new(&uuid2, "message").build());
-    thread::sleep_ms(80);
+    thread::sleep(Duration::from_millis(80));
     let _ = correlator.push_message(MessageBuilder::new(&uuid3, "message").build());
     let _ = correlator.stop();
 }

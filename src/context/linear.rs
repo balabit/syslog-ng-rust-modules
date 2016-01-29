@@ -14,6 +14,7 @@ pub struct LinearContext {
 }
 
 impl LinearContext {
+    #[allow(dead_code)]
     pub fn new(uuid: Uuid, conditions: Conditions) -> LinearContext {
         LinearContext {
             base: BaseContextBuilder::new(uuid, conditions).build(),
@@ -24,12 +25,8 @@ impl LinearContext {
     pub fn on_event(&mut self, event: InternalRequest) {
         trace!("LinearContext: received event");
         match event {
-            Request::Timer(event) => {
-                self.on_timer(&event)
-            }
-            Request::Message(message) => {
-                self.on_message(message)
-            }
+            Request::Timer(event) => self.on_timer(&event),
+            Request::Message(message) => self.on_message(message),
             _ => {}
         }
     }
@@ -42,6 +39,7 @@ impl LinearContext {
         self.state.on_message(event, &self.base);
     }
 
+    #[allow(dead_code)]
     pub fn is_open(&self) -> bool {
         self.state.is_open()
     }
@@ -50,6 +48,7 @@ impl LinearContext {
         &self.base.conditions().patterns
     }
 
+    #[allow(dead_code)]
     pub fn uuid(&self) -> &Uuid {
         self.base.uuid()
     }

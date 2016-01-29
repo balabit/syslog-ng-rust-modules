@@ -8,6 +8,8 @@ extern crate rustc_serialize;
 extern crate handlebars;
 #[macro_use]
 extern crate log;
+extern crate num;
+
 #[macro_use]
 mod macros;
 
@@ -28,5 +30,4 @@ pub mod reactor;
 mod state;
 pub mod test_utils;
 mod timer;
-
-pub type MiliSec = u32;
+mod duration;

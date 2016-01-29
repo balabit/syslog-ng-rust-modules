@@ -1,4 +1,3 @@
-use config::action::ActionType;
 use config::Context;
 use serde::de::{Deserialize, Deserializer, MapVisitor, Error, Visitor};
 
@@ -100,15 +99,6 @@ impl ContextVisitor {
             }
         }
     }
-
-    fn parse_actions<V>(actions: Option<Vec<ActionType>>) -> Result<Vec<ActionType>, V::Error>
-        where V: MapVisitor
-    {
-        match actions {
-            Some(actions) => Ok(actions),
-            None => Ok(Vec::new()),
-        }
-    }
 }
 
 impl Visitor for ContextVisitor {
@@ -135,7 +125,7 @@ impl Visitor for ContextVisitor {
 
         let uuid = try!(ContextVisitor::parse_uuid::<V>(uuid));
         let context_id = try!(ContextVisitor::deser_context_id::<V>(context_id, &uuid));
-        let actions = try!(ContextVisitor::parse_actions::<V>(actions));
+        let actions = actions.unwrap_or(Vec::new());
 
         try!(visitor.end());
 
@@ -158,6 +148,7 @@ mod test {
     use handlebars::Template;
     use serde_json::from_str;
     use uuid::Uuid;
+    use std::time::Duration;
 
     #[test]
     fn test_given_config_context_when_it_is_deserialized_then_we_get_the_right_results() {
@@ -193,7 +184,7 @@ mod test {
         println!("{:?}", &result);
         let expected_name = "TEST_NAME".to_string();
         let expected_uuid = Uuid::parse_str("86ca9f93-84fb-4813-b037-6526f7a585a3").ok().unwrap();
-        let expected_conditions = ConditionsBuilder::new(100)
+        let expected_conditions = ConditionsBuilder::new(Duration::from_millis(100))
                                       .first_opens(true)
                                       .patterns(vec!["PATTERN_NAME1".to_string(),
                                                      "PATTERN_NAME2".to_string(),
@@ -203,13 +194,38 @@ mod test {
         let message = Template::compile("message".to_string())
                           .ok()
                           .expect("Failed to compile a handlebars template");
-        let expected_exec_cond = ExecCondition {on_opened: false, on_closed: true};
-        let expected_actions = vec![ActionType::Message(MessageActionBuilder::new("uuid1", message).when(expected_exec_cond).build())];
+        let expected_exec_cond = ExecCondition {
+            on_opened: false,
+            on_closed: true,
+        };
+        let expected_actions = vec![ActionType::Message(MessageActionBuilder::new("uuid1",
+                                                                                  message)
+                                                            .when(expected_exec_cond)
+                                                            .build())];
         let context = result.ok().expect("Failed to deserialize a valid Context");
         assert_eq!(&Some(expected_name), &context.name);
         assert_eq!(&expected_uuid, &context.uuid);
         assert_eq!(&expected_conditions, &context.conditions);
         assert_eq!(&expected_actions, &context.actions);
+    }
+
+    #[test]
+    fn test_given_config_context_when_it_does_not_have_uuid_then_it_cannot_be_deserialized() {
+        let text = r#"{ "conditions": { "timeout": 100 }}"#;
+        let result = from_str::<Context>(text);
+        println!("{:?}", &result);
+        let _ = result.err().expect("Successfully deserialized a config context without an uuid key");
+    }
+
+    #[test]
+    fn test_given_config_context_when_it_contains_an_unknown_key_then_it_cannot_be_deserialized() {
+        let text = r#"
+            {"uuid": "86ca9f93-84fb-4813-b037-6526f7a585a3",
+            "conditions": { "timeout": 100},
+            "unknown": "unknown" }"#;
+        let result = from_str::<Context>(text);
+        println!("{:?}", &result);
+        let _ = result.err().expect("Successfully deserialized a config context with an unknown key");
     }
 
     #[test]
@@ -227,7 +243,7 @@ mod test {
         let result = from_str::<Context>(text);
         println!("{:?}", &result);
         let expected_uuid = Uuid::parse_str("86ca9f93-84fb-4813-b037-6526f7a585a3").ok().unwrap();
-        let expected_conditions = ConditionsBuilder::new(100).build();
+        let expected_conditions = ConditionsBuilder::new(Duration::from_millis(100)).build();
         let context = result.ok().expect("Failed to deserialize a valid Context");
         assert_eq!(&expected_uuid, &context.uuid);
         assert_eq!(&expected_conditions, &context.conditions);

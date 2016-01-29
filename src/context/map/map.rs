@@ -30,12 +30,8 @@ impl MapContext {
     pub fn on_event(&mut self, event: InternalRequest) {
         trace!("MapContext: received event");
         match event {
-            Request::Timer(event) => {
-                self.on_timer(&event)
-            }
-            Request::Message(message) => {
-                self.on_message(message)
-            }
+            Request::Timer(event) => self.on_timer(&event),
+            Request::Message(message) => self.on_message(message),
             _ => {}
         }
     }
@@ -80,6 +76,7 @@ impl MapContext {
         state.on_message(event, &self.base);
     }
 
+    #[allow(dead_code)]
     pub fn is_open(&mut self) -> bool {
         !self.map.is_empty()
     }

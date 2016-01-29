@@ -6,12 +6,15 @@ use condition::Condition;
 
 pub struct Demultiplexer<T> {
     channel: Receiver<T>,
-    condition: Condition
+    condition: Condition,
 }
 
 impl<T> Demultiplexer<T> {
     pub fn new(channel: Receiver<T>, condition: Condition) -> Demultiplexer<T> {
-        Demultiplexer {channel: channel, condition: condition}
+        Demultiplexer {
+            channel: channel,
+            condition: condition,
+        }
     }
 }
 

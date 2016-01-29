@@ -97,6 +97,7 @@ mod tests {
     use conditions::ConditionsBuilder;
     use context::{Context, LinearContext};
     use uuid::Uuid;
+    use std::time::Duration;
 
     fn assert_conext_map_contains_uuid(context_map: &mut ContextMap, uuid: &Uuid, key: &String) {
         let mut iter = context_map.contexts_iter_mut(key);
@@ -116,7 +117,7 @@ mod tests {
         let context1 = {
             let conditions = {
                 let patterns = vec!["A".to_string(), "B".to_string()];
-                ConditionsBuilder::new(100).patterns(patterns).build()
+                ConditionsBuilder::new(Duration::from_millis(100)).patterns(patterns).build()
             };
             LinearContext::new(uuid.clone(), conditions)
         };
