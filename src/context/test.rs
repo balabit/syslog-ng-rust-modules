@@ -23,11 +23,11 @@ fn test_given_close_condition_with_timeout_when_the_timeout_expires_then_the_con
     assert_false!(context.is_open());
     context.on_message(event);
     assert_true!(context.is_open());
-    context.on_timer(&mut TimerEvent(50));
+    context.on_timer(&mut TimerEvent::from_millis(50));
     assert_true!(context.is_open());
-    context.on_timer(&mut TimerEvent(49));
+    context.on_timer(&mut TimerEvent::from_millis(49));
     assert_true!(context.is_open());
-    context.on_timer(&mut TimerEvent(1));
+    context.on_timer(&mut TimerEvent::from_millis(1));
     assert_false!(context.is_open());
 }
 
@@ -73,11 +73,11 @@ fn test_given_close_condition_with_renew_timeout_when_the_timeout_expires_withou
     let event = Rc::new(msg1);
     context.on_message(event.clone());
     assert_true!(context.is_open());
-    context.on_timer(&mut TimerEvent(8));
+    context.on_timer(&mut TimerEvent::from_millis(8));
     assert_true!(context.is_open());
-    context.on_timer(&mut TimerEvent(1));
+    context.on_timer(&mut TimerEvent::from_millis(1));
     assert_true!(context.is_open());
-    context.on_timer(&mut TimerEvent(1));
+    context.on_timer(&mut TimerEvent::from_millis(1));
     assert_false!(context.is_open());
 }
 
@@ -100,12 +100,12 @@ fn test_given_close_condition_with_renew_timeout_when_the_timeout_expires_with_r
     assert_false!(context.is_open());
     context.on_message(event.clone());
     assert_true!(context.is_open());
-    context.on_timer(&mut TimerEvent(8));
+    context.on_timer(&mut TimerEvent::from_millis(8));
     assert_true!(context.is_open());
-    context.on_timer(&mut TimerEvent(1));
+    context.on_timer(&mut TimerEvent::from_millis(1));
     assert_true!(context.is_open());
     context.on_message(event.clone());
     assert_true!(context.is_open());
-    context.on_timer(&mut TimerEvent(1));
+    context.on_timer(&mut TimerEvent::from_millis(1));
     assert_true!(context.is_open());
 }
