@@ -80,6 +80,7 @@ impl MapContext {
         state.on_message(event, &self.base);
     }
 
+    #[allow(dead_code)]
     pub fn is_open(&mut self) -> bool {
         !self.map.is_empty()
     }

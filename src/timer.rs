@@ -8,6 +8,7 @@ use dispatcher::request::{ExternalRequest, Request};
 pub struct TimerEvent(pub Duration);
 
 impl TimerEvent {
+    #[allow(dead_code)]
     pub fn from_millis(ms: u64) -> TimerEvent {
         TimerEvent(Duration::from_millis(ms))
     }
