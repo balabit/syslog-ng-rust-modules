@@ -20,7 +20,7 @@ fn main() {
         uuid2.clone(),
         uuid3.clone(),
     ];
-    let condition = ConditionsBuilder::new(100).patterns(patterns)
+    let condition = ConditionsBuilder::new(Duration::from_millis(100)).patterns(patterns)
                                                 .first_opens(true)
                                                 .last_closes(true)
                                                 .build();

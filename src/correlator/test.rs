@@ -95,7 +95,7 @@ fn test_given_manually_built_correlator_when_it_closes_a_context_then_the_action
         uuid2.clone(),
         uuid3.clone(),
     ];
-    let condition = ConditionsBuilder::new(100)
+    let condition = ConditionsBuilder::new(Duration::from_millis(100))
                         .patterns(patterns)
                         .first_opens(true)
                         .last_closes(true)

@@ -11,6 +11,7 @@ use state::State;
 use env_logger;
 use handlebars::Template;
 use std::cell::RefCell;
+use std::time::Duration;
 use std::rc::Rc;
 use uuid::Uuid;
 
@@ -34,7 +35,7 @@ fn test_given_a_message_action_when_it_is_executed_then_it_adds_the_name_and_uui
     () {
     let name = Some("name".to_string());
     let base_context = {
-        let conditions = ConditionsBuilder::new(100).build();
+        let conditions = ConditionsBuilder::new(Duration::from_millis(100)).build();
         let uuid = Uuid::new_v4();
         BaseContextBuilder::new(uuid, conditions).name(name.clone()).build()
     };
@@ -71,7 +72,7 @@ fn test_given_message_action_when_it_is_executed_then_it_uses_the_messages_to_re
     let _ = env_logger::init();
     let name = Some("name".to_string());
     let base_context = {
-        let conditions = ConditionsBuilder::new(100).build();
+        let conditions = ConditionsBuilder::new(Duration::from_millis(100)).build();
         let uuid = Uuid::new_v4();
         BaseContextBuilder::new(uuid, conditions).name(name.clone()).build()
     };

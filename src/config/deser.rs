@@ -158,6 +158,7 @@ mod test {
     use handlebars::Template;
     use serde_json::from_str;
     use uuid::Uuid;
+    use std::time::Duration;
 
     #[test]
     fn test_given_config_context_when_it_is_deserialized_then_we_get_the_right_results() {
@@ -193,7 +194,7 @@ mod test {
         println!("{:?}", &result);
         let expected_name = "TEST_NAME".to_string();
         let expected_uuid = Uuid::parse_str("86ca9f93-84fb-4813-b037-6526f7a585a3").ok().unwrap();
-        let expected_conditions = ConditionsBuilder::new(100)
+        let expected_conditions = ConditionsBuilder::new(Duration::from_millis(100))
                                       .first_opens(true)
                                       .patterns(vec!["PATTERN_NAME1".to_string(),
                                                      "PATTERN_NAME2".to_string(),
@@ -227,7 +228,7 @@ mod test {
         let result = from_str::<Context>(text);
         println!("{:?}", &result);
         let expected_uuid = Uuid::parse_str("86ca9f93-84fb-4813-b037-6526f7a585a3").ok().unwrap();
-        let expected_conditions = ConditionsBuilder::new(100).build();
+        let expected_conditions = ConditionsBuilder::new(Duration::from_millis(100)).build();
         let context = result.ok().expect("Failed to deserialize a valid Context");
         assert_eq!(&expected_uuid, &context.uuid);
         assert_eq!(&expected_conditions, &context.conditions);

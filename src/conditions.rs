@@ -124,10 +124,11 @@ mod test {
     use super::ConditionsBuilder;
     use context::BaseContextBuilder;
     use uuid::Uuid;
+    use std::time::Duration;
 
     #[test]
     fn test_given_condition_when_an_opening_message_is_received_then_the_state_becomes_opened() {
-        let timeout = 100;
+        let timeout = Duration::from_millis(100);
         let msg_id1 = "11eaf6f8-0640-460f-aee2-a72d2f2ab258".to_string();
         let msg_id2 = "21eaf6f8-0640-460f-aee2-a72d2f2ab258".to_string();
         let patterns = vec![
@@ -145,7 +146,7 @@ mod test {
 
     #[test]
     fn test_given_condition_when_a_closing_message_is_received_then_the_state_becomes_closed() {
-        let timeout = 100;
+        let timeout = Duration::from_millis(100);
         let msg_id1 = "11eaf6f8-0640-460f-aee2-a72d2f2ab258".to_string();
         let msg_id2 = "21eaf6f8-0640-460f-aee2-a72d2f2ab258".to_string();
         let patterns = vec![
@@ -180,7 +181,7 @@ mod test {
         println!("{:?}", &conditions);
         let conditions: Conditions = conditions.ok().expect("Failed to deserialize a Conditions \
                                                              struct with only a timeout field");
-        assert_eq!(conditions.timeout, 100);
+        assert_eq!(conditions.timeout, Duration::from_millis(100));
     }
 
     #[test]
@@ -209,8 +210,8 @@ mod test {
         println!("{:?}", &conditions);
         let conditions: Conditions = conditions.ok()
                                                .expect("Failed to deserialize a Conditions struct");
-        assert_eq!(conditions.timeout, 100);
-        assert_eq!(conditions.renew_timeout, Some(50));
+        assert_eq!(conditions.timeout, Duration::from_millis(100));
+        assert_eq!(conditions.renew_timeout, Some(Duration::from_millis(50)));
         assert_eq!(conditions.first_opens, true);
         assert_eq!(conditions.last_closes, false);
         assert_eq!(conditions.max_size, Some(42));
@@ -219,7 +220,7 @@ mod test {
 
     #[test]
     fn test_given_condition_when_there_are_no_patterns_then_any_message_can_open_the_context() {
-        let timeout = 100;
+        let timeout = Duration::from_millis(100);
         let msg_id = "11eaf6f8-0640-460f-aee2-a72d2f2ab258".to_string();
         let condition = ConditionsBuilder::new(timeout).build();
         let msg = MessageBuilder::new(&msg_id, "message").build();
@@ -229,7 +230,7 @@ mod test {
     #[test]
     fn test_given_condition_when_first_opens_is_set_then_the_right_message_can_open_the_context
                                                                                                 () {
-        let timeout = 100;
+        let timeout = Duration::from_millis(100);
         let patterns = vec![
                 "p1".to_string(),
                 "p2".to_string(),
@@ -248,7 +249,7 @@ mod test {
     #[test]
     fn test_given_conditions_when_last_closes_is_set_and_the_message_has_a_name_then_we_check_that_name
         () {
-        let timeout = 100;
+        let timeout = Duration::from_millis(100);
         let patterns = vec!["p1".to_string(), "p2".to_string()];
         let p1_uuid = "e4f3f8b2-3135-4916-a5ea-621a754dab0d".to_string();
         let p2_uuid = "f4f3f8b2-3135-4916-a5ea-621a754dab0d".to_string();
