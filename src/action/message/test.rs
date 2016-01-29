@@ -31,6 +31,13 @@ impl ResponseSender<Response> for DummyResponseSender {
 }
 
 #[test]
+fn test_given_dummy_response_handler_can_be_cloned() {
+    let responses = Rc::new(RefCell::new(Vec::new()));
+    let response_sender = DummyResponseSender { responses: responses.clone() };
+    let _ = response_sender.boxed_clone();
+}
+
+#[test]
 fn test_given_a_message_action_when_it_is_executed_then_it_adds_the_name_and_uuid_of_the_context_to_the_message
     () {
     let name = Some("name".to_string());
