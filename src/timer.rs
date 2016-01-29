@@ -7,6 +7,12 @@ use dispatcher::request::{ExternalRequest, Request};
 #[derive(Clone, Copy, Debug)]
 pub struct TimerEvent(pub Duration);
 
+impl TimerEvent {
+    pub fn from_millis(ms: u64) -> TimerEvent {
+        TimerEvent(Duration::from_millis(ms))
+    }
+}
+
 pub struct Timer;
 
 impl Timer {
