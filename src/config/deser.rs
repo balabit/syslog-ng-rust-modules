@@ -1,4 +1,3 @@
-use config::action::ActionType;
 use config::Context;
 use serde::de::{Deserialize, Deserializer, MapVisitor, Error, Visitor};
 
@@ -100,15 +99,6 @@ impl ContextVisitor {
             }
         }
     }
-
-    fn parse_actions<V>(actions: Option<Vec<ActionType>>) -> Result<Vec<ActionType>, V::Error>
-        where V: MapVisitor
-    {
-        match actions {
-            Some(actions) => Ok(actions),
-            None => Ok(Vec::new()),
-        }
-    }
 }
 
 impl Visitor for ContextVisitor {
@@ -135,7 +125,7 @@ impl Visitor for ContextVisitor {
 
         let uuid = try!(ContextVisitor::parse_uuid::<V>(uuid));
         let context_id = try!(ContextVisitor::deser_context_id::<V>(context_id, &uuid));
-        let actions = try!(ContextVisitor::parse_actions::<V>(actions));
+        let actions = actions.unwrap_or(Vec::new());
 
         try!(visitor.end());
 
