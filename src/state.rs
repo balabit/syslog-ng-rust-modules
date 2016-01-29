@@ -1,14 +1,14 @@
 use std::rc::Rc;
 
 use Message;
-use MiliSec;
 use timer::TimerEvent;
+use std::time::Duration;
 use context::BaseContext;
 
 #[derive(Debug)]
 pub struct State {
-    elapsed_time: MiliSec,
-    elapsed_time_since_last_message: MiliSec,
+    elapsed_time: Duration,
+    elapsed_time_since_last_message: Duration,
     messages: Vec<Rc<Message>>,
     opened: bool,
 }
@@ -20,8 +20,8 @@ impl State {
 
     pub fn with_messages(messages: Vec<Rc<Message>>) -> State {
         State {
-            elapsed_time: 0,
-            elapsed_time_since_last_message: 0,
+            elapsed_time: Duration::from_secs(0),
+            elapsed_time_since_last_message: Duration::from_secs(0),
             messages: messages,
             opened: false,
         }
@@ -47,11 +47,11 @@ impl State {
         self.reset();
     }
 
-    pub fn elapsed_time(&self) -> MiliSec {
+    pub fn elapsed_time(&self) -> Duration {
         self.elapsed_time
     }
 
-    pub fn elapsed_time_since_last_message(&self) -> MiliSec {
+    pub fn elapsed_time_since_last_message(&self) -> Duration {
         self.elapsed_time_since_last_message
     }
 
@@ -61,7 +61,7 @@ impl State {
 
     fn add_message(&mut self, message: Rc<Message>) {
         self.messages.push(message);
-        self.elapsed_time_since_last_message = 0;
+        self.elapsed_time_since_last_message = Duration::from_secs(0);
     }
 
     pub fn on_timer(&mut self, event: &TimerEvent, context: &BaseContext) {
@@ -88,13 +88,13 @@ impl State {
 
     pub fn update_timers(&mut self, event: &TimerEvent) {
         let delta = event.0;
-        self.elapsed_time += delta;
-        self.elapsed_time_since_last_message += delta;
+        self.elapsed_time = self.elapsed_time + delta;
+        self.elapsed_time_since_last_message = self.elapsed_time_since_last_message + delta;
     }
 
     fn reset(&mut self) {
-        self.elapsed_time = 0;
-        self.elapsed_time_since_last_message = 0;
+        self.elapsed_time = Duration::from_secs(0);
+        self.elapsed_time_since_last_message = Duration::from_secs(0);
         self.messages.clear();
         self.opened = false;
     }

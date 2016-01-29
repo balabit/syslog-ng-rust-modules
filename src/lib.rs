@@ -30,5 +30,4 @@ pub mod reactor;
 mod state;
 pub mod test_utils;
 mod timer;
-
-pub type MiliSec = u64;
+mod duration;

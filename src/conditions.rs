@@ -1,14 +1,14 @@
 use message::Message;
-use MiliSec;
 use state::State;
+use std::time::Duration;
 
 const FIRST_OPENS_DEFAULT: bool = false;
 const LAST_CLOSES_DEFAULT: bool = false;
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Conditions {
-    pub timeout: MiliSec,
-    pub renew_timeout: Option<MiliSec>,
+    pub timeout: Duration,
+    pub renew_timeout: Option<Duration>,
     pub first_opens: bool,
     pub last_closes: bool,
     pub max_size: Option<usize>,
@@ -16,7 +16,7 @@ pub struct Conditions {
 }
 
 impl Conditions {
-    fn new(timeout: MiliSec) -> Conditions {
+    fn new(timeout: Duration) -> Conditions {
         Conditions {
             timeout: timeout,
             renew_timeout: None,
@@ -80,11 +80,11 @@ pub struct ConditionsBuilder {
 }
 
 impl ConditionsBuilder {
-    pub fn new(timeout: MiliSec) -> ConditionsBuilder {
+    pub fn new(timeout: Duration) -> ConditionsBuilder {
         ConditionsBuilder { conditions: Conditions::new(timeout) }
     }
 
-    pub fn renew_timeout(&mut self, timeout: MiliSec) -> &mut ConditionsBuilder {
+    pub fn renew_timeout(&mut self, timeout: Duration) -> &mut ConditionsBuilder {
         self.conditions.renew_timeout = Some(timeout);
         self
     }
@@ -271,9 +271,10 @@ mod test {
 }
 
 mod deser {
-    use MiliSec;
     use super::{Conditions, FIRST_OPENS_DEFAULT, LAST_CLOSES_DEFAULT};
     use serde::de::{Deserialize, Deserializer, Error, MapVisitor, Visitor};
+    use std::time::Duration;
+    use duration::SerializableDuration;
 
     impl Deserialize for Conditions {
         fn deserialize<D>(deserializer: &mut D) -> Result<Conditions, D::Error>
@@ -328,8 +329,8 @@ mod deser {
         fn visit_map<V>(&mut self, mut visitor: V) -> Result<Conditions, V::Error>
             where V: MapVisitor
         {
-            let mut timeout: Option<MiliSec> = None;
-            let mut renew_timeout = None;
+            let mut timeout: Option<SerializableDuration> = None;
+            let mut renew_timeout: Option<SerializableDuration> = None;
             let mut first_opens = FIRST_OPENS_DEFAULT;
             let mut last_closes = LAST_CLOSES_DEFAULT;
             let mut max_size = None;
@@ -346,10 +347,12 @@ mod deser {
                 }
             }
 
-            let timeout: MiliSec = match timeout {
-                Some(timeout) => timeout,
+            let timeout: Duration = match timeout {
+                Some(timeout) => timeout.0,
                 None => return visitor.missing_field("timeout"),
             };
+
+            let renew_timeout = renew_timeout.map(|timeout| timeout.0);
 
             try!(visitor.end());
 
