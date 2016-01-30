@@ -36,7 +36,7 @@ impl Reactor<ContextMap> for RequestReactor {
         }
     }
     fn register_handler(&mut self, handler: Box<EventHandler<Self::Event, ContextMap>>) {
-        self.handlers.insert(handler.handler(), handler);
+        self.handlers.insert(handler.handle(), handler);
     }
     fn remove_handler_by_handler(&mut self, handler: &RequestHandler) {
         self.handlers.remove(handler);

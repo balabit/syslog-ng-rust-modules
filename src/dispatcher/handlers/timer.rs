@@ -16,7 +16,7 @@ impl EventHandler<InternalRequest, ContextMap> for TimerEventHandler {
             i.on_event(event.clone());
         }
     }
-    fn handler(&self) -> RequestHandler {
+    fn handle(&self) -> RequestHandler {
         RequestHandler::Timer
     }
 }

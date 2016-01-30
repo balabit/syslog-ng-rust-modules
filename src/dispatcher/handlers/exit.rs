@@ -39,7 +39,7 @@ impl EventHandler<Request<Rc<Message>>, ContextMap> for ExitEventHandler {
             unreachable!("An ExitEventHandler should only receive Exit events");
         }
     }
-    fn handler(&self) -> RequestHandler {
+    fn handle(&self) -> RequestHandler {
         RequestHandler::Exit
     }
 }

@@ -20,7 +20,7 @@ impl EventHandler<Response, mpsc::Sender<Request<Message>>> for MessageEventHand
             self.responses.borrow_mut().push(event);
         }
     }
-    fn handler(&self) -> ResponseHandler {
+    fn handle(&self) -> ResponseHandler {
         ResponseHandler::Message
     }
 }

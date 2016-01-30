@@ -118,7 +118,7 @@ impl Correlator {
 
     pub fn register_handler(&mut self,
                             handler: Box<EventHandler<Response, mpsc::Sender<Request<Message>>>>) {
-        self.handlers.insert(handler.handler(), handler);
+        self.handlers.insert(handler.handle(), handler);
     }
 
     pub fn push_message(&mut self,

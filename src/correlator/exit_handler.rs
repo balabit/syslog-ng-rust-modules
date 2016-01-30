@@ -34,7 +34,7 @@ impl EventHandler<Response, mpsc::Sender<Request<Message>>> for ExitHandler {
             }
         }
     }
-    fn handler(&self) -> ResponseHandler {
+    fn handle(&self) -> ResponseHandler {
         ResponseHandler::Exit
     }
 }

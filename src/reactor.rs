@@ -1,6 +1,6 @@
 pub trait EventHandler<T: Event, D> {
     fn handle_event(&mut self, event: T, shared_data: &mut D);
-    fn handler(&self) -> T::Handle;
+    fn handle(&self) -> T::Handle;
 }
 
 pub trait EventDemultiplexer {

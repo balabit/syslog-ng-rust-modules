@@ -25,7 +25,7 @@ impl reactor::EventHandler<InternalRequest, ContextMap> for MessageEventHandler 
             unreachable!("MessageEventHandler should only handle Message events");
         }
     }
-    fn handler(&self) -> RequestHandler {
+    fn handle(&self) -> RequestHandler {
         RequestHandler::Message
     }
 }
