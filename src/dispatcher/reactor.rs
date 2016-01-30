@@ -2,17 +2,17 @@ use std::collections::BTreeMap;
 
 use context::ContextMap;
 use dispatcher::demux::Demultiplexer;
-use dispatcher::request::{RequestHandle, InternalRequest, ExternalRequest};
+use dispatcher::request::{RequestHandle, Request};
 use reactor::{Event, EventDemultiplexer, EventHandler, Reactor};
 
 pub struct RequestReactor {
-    handlers: BTreeMap<RequestHandle, Box<EventHandler<InternalRequest, ContextMap>>>,
-    demultiplexer: Demultiplexer<ExternalRequest>,
+    handlers: BTreeMap<RequestHandle, Box<EventHandler<Request, ContextMap>>>,
+    demultiplexer: Demultiplexer<Request>,
     context_map: ContextMap,
 }
 
 impl RequestReactor {
-    pub fn new(demultiplexer: Demultiplexer<ExternalRequest>,
+    pub fn new(demultiplexer: Demultiplexer<Request>,
                context_map: ContextMap)
                -> RequestReactor {
         RequestReactor {
@@ -24,7 +24,7 @@ impl RequestReactor {
 }
 
 impl Reactor<ContextMap> for RequestReactor {
-    type Event = InternalRequest;
+    type Event = Request;
     fn handle_events(&mut self) {
         while let Some(request) = self.demultiplexer.select() {
             trace!("RequestReactor: got event");

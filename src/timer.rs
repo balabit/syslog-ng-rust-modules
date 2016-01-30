@@ -2,7 +2,7 @@ use std::sync::mpsc;
 use std::thread;
 use std::time::Duration;
 
-use dispatcher::request::{ExternalRequest, Request};
+use dispatcher::request::Request;
 
 #[derive(Clone, Copy, Debug)]
 pub struct TimerEvent(pub Duration);
@@ -17,7 +17,7 @@ impl TimerEvent {
 pub struct Timer;
 
 impl Timer {
-    pub fn from_chan(duration: Duration, tx: mpsc::Sender<ExternalRequest>) {
+    pub fn from_chan(duration: Duration, tx: mpsc::Sender<Request>) {
         thread::spawn(move || {
             while let Ok(_) = tx.send(Request::Timer(TimerEvent(duration))) {
                 thread::sleep(duration);

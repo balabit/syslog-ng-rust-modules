@@ -1,12 +1,12 @@
 use handlebars::{Handlebars, Template};
 use std::collections::BTreeMap;
-use std::rc::Rc;
+use std::sync::Arc;
 
 use message::Message;
 use state::State;
 use timer::TimerEvent;
 use context::base::BaseContext;
-use dispatcher::request::{Request, InternalRequest};
+use dispatcher::request::Request;
 
 const CONTEXT_ID: &'static str = ".context.id";
 
@@ -27,7 +27,7 @@ impl MapContext {
         }
     }
 
-    pub fn on_event(&mut self, event: InternalRequest) {
+    pub fn on_event(&mut self, event: Request) {
         trace!("MapContext: received event");
         match event {
             Request::Timer(event) => self.on_timer(&event),
@@ -62,12 +62,12 @@ impl MapContext {
         }
     }
 
-    pub fn on_message(&mut self, event: Rc<Message>) {
+    pub fn on_message(&mut self, event: Arc<Message>) {
         self.update_state(event);
         self.remove_closed_states();
     }
 
-    fn update_state(&mut self, event: Rc<Message>) {
+    fn update_state(&mut self, event: Arc<Message>) {
         let id = self.context_id
                      .render(CONTEXT_ID, event.values())
                      .ok()

@@ -1,4 +1,4 @@
-use dispatcher::request::{InternalRequest, Request, RequestHandle};
+use dispatcher::request::{Request, RequestHandle};
 use context::ContextMap;
 use context::context_map::StreamingIterator;
 use reactor;
@@ -11,8 +11,8 @@ impl MessageEventHandler {
     }
 }
 
-impl reactor::EventHandler<InternalRequest, ContextMap> for MessageEventHandler {
-    fn handle_event(&mut self, event: InternalRequest, data: &mut ContextMap) {
+impl reactor::EventHandler<Request, ContextMap> for MessageEventHandler {
+    fn handle_event(&mut self, event: Request, data: &mut ContextMap) {
         trace!("MessageEventHandler: handle_event()");
         if let Request::Message(event) = event {
             for i in event.ids() {

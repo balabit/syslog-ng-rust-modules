@@ -1,4 +1,4 @@
-use std::rc::Rc;
+use std::sync::Arc;
 
 use Message;
 use timer::TimerEvent;
@@ -9,7 +9,7 @@ use context::BaseContext;
 pub struct State {
     elapsed_time: Duration,
     elapsed_time_since_last_message: Duration,
-    messages: Vec<Rc<Message>>,
+    messages: Vec<Arc<Message>>,
     opened: bool,
 }
 
@@ -18,7 +18,7 @@ impl State {
         State::with_messages(Vec::new())
     }
 
-    pub fn with_messages(messages: Vec<Rc<Message>>) -> State {
+    pub fn with_messages(messages: Vec<Arc<Message>>) -> State {
         State {
             elapsed_time: Duration::from_secs(0),
             elapsed_time_since_last_message: Duration::from_secs(0),
@@ -55,11 +55,11 @@ impl State {
         self.elapsed_time_since_last_message
     }
 
-    pub fn messages(&self) -> &[Rc<Message>] {
+    pub fn messages(&self) -> &[Arc<Message>] {
         &self.messages
     }
 
-    fn add_message(&mut self, message: Rc<Message>) {
+    fn add_message(&mut self, message: Arc<Message>) {
         self.messages.push(message);
         self.elapsed_time_since_last_message = Duration::from_secs(0);
     }
@@ -73,7 +73,7 @@ impl State {
         }
     }
 
-    pub fn on_message(&mut self, event: Rc<Message>, context: &BaseContext) {
+    pub fn on_message(&mut self, event: Arc<Message>, context: &BaseContext) {
         if self.is_open() {
             self.add_message(event);
         } else if context.conditions().is_opening(&event) {

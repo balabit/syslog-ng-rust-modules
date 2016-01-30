@@ -5,7 +5,7 @@ use message::MessageBuilder;
 
 use handlebars::Template;
 use uuid::Uuid;
-use std::rc::Rc;
+use std::sync::Arc;
 use std::time::Duration;
 
 #[test]
@@ -47,11 +47,11 @@ fn test_given_map_context_when_messages_have_the_same_kvpairs_then_they_go_to_th
                    .build();
 
     assert_false!(context.is_open());
-    context.on_message(Rc::new(msg1));
+    context.on_message(Arc::new(msg1));
     assert_true!(context.is_open());
     context.on_timer(&event);
-    context.on_message(Rc::new(msg2));
-    context.on_message(Rc::new(msg3));
+    context.on_message(Arc::new(msg2));
+    context.on_message(Arc::new(msg3));
     context.on_timer(&event);
     context.on_timer(&event);
     assert_true!(context.is_open());

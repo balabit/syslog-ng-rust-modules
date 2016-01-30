@@ -13,6 +13,7 @@ use handlebars::Template;
 use std::cell::RefCell;
 use std::time::Duration;
 use std::rc::Rc;
+use std::sync::Arc;
 use uuid::Uuid;
 
 #[derive(Clone)]
@@ -83,10 +84,10 @@ fn test_given_message_action_when_it_is_executed_then_it_uses_the_messages_to_re
         BaseContextBuilder::new(uuid, conditions).name(name.clone()).build()
     };
     let state = {
-        let messages = vec![Rc::new(MessageBuilder::new("uuid1", "message1")
+        let messages = vec![Arc::new(MessageBuilder::new("uuid1", "message1")
                                         .pair("key1", "value1")
                                         .build()),
-                            Rc::new(MessageBuilder::new("uuid2", "message2")
+                            Arc::new(MessageBuilder::new("uuid2", "message2")
                                         .pair("key2", "value2")
                                         .build())];
         State::with_messages(messages)

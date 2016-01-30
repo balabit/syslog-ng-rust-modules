@@ -1,4 +1,4 @@
-use dispatcher::request::InternalRequest;
+use dispatcher::request::Request;
 
 pub use self::linear::LinearContext;
 pub use self::map::MapContext;
@@ -18,7 +18,7 @@ pub enum Context {
     Map(MapContext),
 }
 impl Context {
-    pub fn on_event(&mut self, event: InternalRequest) {
+    pub fn on_event(&mut self, event: Request) {
         match *self {
             Context::Linear(ref mut context) => context.on_event(event),
             Context::Map(ref mut context) => context.on_event(event),

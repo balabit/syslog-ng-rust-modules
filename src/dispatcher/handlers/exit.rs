@@ -1,11 +1,8 @@
-use std::rc::Rc;
-
 use context::ContextMap;
 use dispatcher::response::ResponseSender;
 use dispatcher::Response;
 use dispatcher::request::{Request, RequestHandle};
 use condition::Condition;
-use message::Message;
 use reactor::EventHandler;
 
 pub struct ExitEventHandler {
@@ -26,8 +23,8 @@ impl ExitEventHandler {
     }
 }
 
-impl EventHandler<Request<Rc<Message>>, ContextMap> for ExitEventHandler {
-    fn handle_event(&mut self, event: Request<Rc<Message>>, _: &mut ContextMap) {
+impl EventHandler<Request, ContextMap> for ExitEventHandler {
+    fn handle_event(&mut self, event: Request, _: &mut ContextMap) {
         if let Request::Exit = event {
             self.stops += 1;
             self.response_handler.send_response(Response::Exit);

@@ -1,6 +1,5 @@
 use dispatcher::ResponseHandle;
 use Response;
-use Message;
 
 use std::rc::Rc;
 use std::cell::RefCell;
@@ -14,8 +13,8 @@ pub struct MessageEventHandler {
     pub responses: Rc<RefCell<Vec<Alert>>>,
 }
 
-impl EventHandler<Response, mpsc::Sender<Request<Message>>> for MessageEventHandler {
-    fn handle_event(&mut self, event: Response, _: &mut mpsc::Sender<Request<Message>>) {
+impl EventHandler<Response, mpsc::Sender<Request>> for MessageEventHandler {
+    fn handle_event(&mut self, event: Response, _: &mut mpsc::Sender<Request>) {
         if let Response::Alert(event) = event {
             self.responses.borrow_mut().push(event);
         }

@@ -6,6 +6,7 @@ use std::sync::mpsc;
 use std::thread;
 use std::result::Result;
 use std::time::Duration;
+use std::sync::Arc;
 
 use {action, config, context, Message, Response};
 use condition::Condition;
@@ -33,10 +34,10 @@ mod exit_handler;
 mod test;
 
 pub struct Correlator {
-    dispatcher_input_channel: mpsc::Sender<Request<Message>>,
+    dispatcher_input_channel: mpsc::Sender<Request>,
     dispatcher_output_channel: mpsc::Receiver<Response>,
     dispatcher_thread_handle: thread::JoinHandle<()>,
-    handlers: HashMap<ResponseHandle, Box<EventHandler<Response, mpsc::Sender<Request<Message>>>>>,
+    handlers: HashMap<ResponseHandle, Box<EventHandler<Response, mpsc::Sender<Request>>>>,
 }
 
 fn create_context(config_context: config::Context,
@@ -117,15 +118,15 @@ impl Correlator {
     }
 
     pub fn register_handler(&mut self,
-                            handler: Box<EventHandler<Response, mpsc::Sender<Request<Message>>>>) {
+                            handler: Box<EventHandler<Response, mpsc::Sender<Request>>>) {
         self.handlers.insert(handler.handle(), handler);
     }
 
     pub fn push_message(&mut self,
                         message: Message)
-                        -> Result<(), mpsc::SendError<Request<Message>>> {
+                        -> Result<(), mpsc::SendError<Request>> {
         self.handle_events();
-        self.dispatcher_input_channel.send(Request::Message(message))
+        self.dispatcher_input_channel.send(Request::Message(Arc::new(message)))
     }
 
     fn handle_event(&mut self, event: Response) {

@@ -1,11 +1,11 @@
 use uuid::Uuid;
-use std::rc::Rc;
+use std::sync::Arc;
 
 use conditions::Conditions;
 use message::Message;
 use state::State;
 use timer::TimerEvent;
-use dispatcher::request::{InternalRequest, Request};
+use dispatcher::request::Request;
 use context::base::{BaseContext, BaseContextBuilder};
 
 pub struct LinearContext {
@@ -22,7 +22,7 @@ impl LinearContext {
         }
     }
 
-    pub fn on_event(&mut self, event: InternalRequest) {
+    pub fn on_event(&mut self, event: Request) {
         trace!("LinearContext: received event");
         match event {
             Request::Timer(event) => self.on_timer(&event),
@@ -35,7 +35,7 @@ impl LinearContext {
         self.state.on_timer(event, &self.base);
     }
 
-    pub fn on_message(&mut self, event: Rc<Message>) {
+    pub fn on_message(&mut self, event: Arc<Message>) {
         self.state.on_message(event, &self.base);
     }
 

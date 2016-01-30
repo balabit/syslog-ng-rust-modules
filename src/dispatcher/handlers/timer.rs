@@ -1,4 +1,4 @@
-use dispatcher::request::{InternalRequest, RequestHandle};
+use dispatcher::request::{Request, RequestHandle};
 use context::ContextMap;
 use reactor::EventHandler;
 
@@ -10,8 +10,8 @@ impl TimerEventHandler {
     }
 }
 
-impl EventHandler<InternalRequest, ContextMap> for TimerEventHandler {
-    fn handle_event(&mut self, event: InternalRequest, data: &mut ContextMap) {
+impl EventHandler<Request, ContextMap> for TimerEventHandler {
+    fn handle_event(&mut self, event: Request, data: &mut ContextMap) {
         for i in data.contexts_mut() {
             i.on_event(event.clone());
         }

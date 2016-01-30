@@ -5,12 +5,12 @@ use context::BaseContext;
 use uuid::Uuid;
 use rustc_serialize::json::{Json, ToJson};
 use std::collections::BTreeMap;
-use std::rc::Rc;
+use std::sync::Arc;
 
 use super::{CONTEXT_LEN, CONTEXT_NAME, CONTEXT_UUID, MESSAGES};
 
 pub struct RendererContext<'m, 'c> {
-    messages: &'m [Rc<Message>],
+    messages: &'m [Arc<Message>],
     context_name: Option<&'c String>,
     context_uuid: &'c Uuid,
 }
@@ -39,7 +39,7 @@ impl<'m, 'c> ToJson for RendererContext<'m, 'c> {
     }
 }
 
-fn rc_message_to_json(messages: &[Rc<Message>]) -> Json {
+fn rc_message_to_json(messages: &[Arc<Message>]) -> Json {
     let mut array: Vec<&Message> = Vec::new();
     for i in messages {
         array.push(i);

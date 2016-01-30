@@ -1,6 +1,6 @@
 use std::sync::mpsc::Receiver;
 
-use dispatcher::request::{InternalRequest, ExternalRequest};
+use dispatcher::request::Request;
 use reactor::EventDemultiplexer;
 use condition::Condition;
 
@@ -18,8 +18,8 @@ impl<T> Demultiplexer<T> {
     }
 }
 
-impl EventDemultiplexer for Demultiplexer<ExternalRequest> {
-    type Event = InternalRequest;
+impl EventDemultiplexer for Demultiplexer<Request> {
+    type Event = Request;
     fn select(&mut self) -> Option<Self::Event> {
         if !self.condition.is_active() {
             let data = self.channel.recv().ok();
