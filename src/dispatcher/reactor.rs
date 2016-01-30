@@ -2,11 +2,11 @@ use std::collections::BTreeMap;
 
 use context::ContextMap;
 use dispatcher::demux::Demultiplexer;
-use dispatcher::request::{RequestHandler, InternalRequest, ExternalRequest};
+use dispatcher::request::{RequestHandle, InternalRequest, ExternalRequest};
 use reactor::{Event, EventDemultiplexer, EventHandler, Reactor};
 
 pub struct RequestReactor {
-    handlers: BTreeMap<RequestHandler, Box<EventHandler<InternalRequest, ContextMap>>>,
+    handlers: BTreeMap<RequestHandle, Box<EventHandler<InternalRequest, ContextMap>>>,
     demultiplexer: Demultiplexer<ExternalRequest>,
     context_map: ContextMap,
 }
@@ -38,7 +38,7 @@ impl Reactor<ContextMap> for RequestReactor {
     fn register_handler(&mut self, handler: Box<EventHandler<Self::Event, ContextMap>>) {
         self.handlers.insert(handler.handle(), handler);
     }
-    fn remove_handler_by_handle(&mut self, handler: &RequestHandler) {
+    fn remove_handler_by_handle(&mut self, handler: &RequestHandle) {
         self.handlers.remove(handler);
     }
 }

@@ -3,7 +3,7 @@ use std::rc::Rc;
 use context::ContextMap;
 use dispatcher::response::ResponseSender;
 use dispatcher::Response;
-use dispatcher::request::{Request, RequestHandler};
+use dispatcher::request::{Request, RequestHandle};
 use condition::Condition;
 use message::Message;
 use reactor::EventHandler;
@@ -39,7 +39,7 @@ impl EventHandler<Request<Rc<Message>>, ContextMap> for ExitEventHandler {
             unreachable!("An ExitEventHandler should only receive Exit events");
         }
     }
-    fn handle(&self) -> RequestHandler {
-        RequestHandler::Exit
+    fn handle(&self) -> RequestHandle {
+        RequestHandle::Exit
     }
 }

@@ -1,4 +1,4 @@
-use dispatcher::request::{InternalRequest, Request, RequestHandler};
+use dispatcher::request::{InternalRequest, Request, RequestHandle};
 use context::ContextMap;
 use context::context_map::StreamingIterator;
 use reactor;
@@ -25,7 +25,7 @@ impl reactor::EventHandler<InternalRequest, ContextMap> for MessageEventHandler 
             unreachable!("MessageEventHandler should only handle Message events");
         }
     }
-    fn handle(&self) -> RequestHandler {
-        RequestHandler::Message
+    fn handle(&self) -> RequestHandle {
+        RequestHandle::Message
     }
 }

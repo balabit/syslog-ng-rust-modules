@@ -15,19 +15,19 @@ pub type InternalRequest = Request<Rc<Message>>;
 pub type ExternalRequest = Request<Message>;
 
 #[derive(Clone, Debug, Eq, PartialEq, PartialOrd, Ord)]
-pub enum RequestHandler {
+pub enum RequestHandle {
     Message,
     Timer,
     Exit,
 }
 
 impl reactor::Event for Request<Rc<Message>> {
-    type Handle = RequestHandler;
+    type Handle = RequestHandle;
     fn handle(&self) -> Self::Handle {
         match *self {
-            Request::Message(_) => RequestHandler::Message,
-            Request::Timer(_) => RequestHandler::Timer,
-            Request::Exit => RequestHandler::Exit,
+            Request::Message(_) => RequestHandle::Message,
+            Request::Timer(_) => RequestHandle::Timer,
+            Request::Exit => RequestHandle::Exit,
         }
     }
 }
