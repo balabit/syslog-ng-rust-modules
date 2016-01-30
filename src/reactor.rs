@@ -12,7 +12,7 @@ pub trait Reactor<D> {
     type Event: Event;
     fn handle_events(&mut self);
     fn register_handler(&mut self, handler: Box<EventHandler<Self::Event, D>>);
-    fn remove_handler_by_handler(&mut self,
+    fn remove_handler_by_handle(&mut self,
                                  handler: &<<Self as Reactor<D>>::Event as Event>::Handle);
 }
 
