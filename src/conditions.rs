@@ -51,8 +51,9 @@ impl Conditions {
 
     fn is_closing_message(&self, state: &State) -> bool {
         if self.last_closes {
-            let last_message = state.messages().last().unwrap();
-            last_message.ids().any(|x| x == self.patterns.last().unwrap())
+            state.messages().last().iter().any(|last_message| {
+                self.patterns.last().iter().any(|last|{ last_message.ids().any(|id| &id == last)})
+            })
         } else {
             false
         }
