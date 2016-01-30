@@ -241,7 +241,7 @@ mod test {
                             .patterns(patterns)
                             .first_opens(true)
                             .build();
-        let msg = MessageBuilder::new(&uuid, "message").name(Some(&msg_id)).build();
+        let msg = MessageBuilder::new(&uuid, "message").name(Some(msg_id)).build();
         assert_true!(condition.is_opening(&msg));
     }
 
@@ -260,8 +260,8 @@ mod test {
                              .first_opens(true)
                              .last_closes(true)
                              .build();
-        let p1_msg = MessageBuilder::new(&p1_uuid, "message").name(Some(&p1)).build();
-        let p2_msg = MessageBuilder::new(&p2_uuid, "message").name(Some(&p2)).build();
+        let p1_msg = MessageBuilder::new(&p1_uuid, "message").name(Some(p1)).build();
+        let p2_msg = MessageBuilder::new(&p2_uuid, "message").name(Some(p2)).build();
         let context = BaseContextBuilder::new(Uuid::new_v4(), conditions).build();
         assert_false!(state.is_open());
         state.on_message(Rc::new(p1_msg), &context);
