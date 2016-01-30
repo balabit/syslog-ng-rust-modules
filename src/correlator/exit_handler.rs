@@ -4,7 +4,7 @@ use Response;
 use message::Message;
 use condition::Condition;
 use dispatcher::request::Request;
-use dispatcher::ResponseHandler;
+use dispatcher::ResponseHandle;
 use reactor::EventHandler;
 
 pub struct ExitHandler {
@@ -34,7 +34,7 @@ impl EventHandler<Response, mpsc::Sender<Request<Message>>> for ExitHandler {
             }
         }
     }
-    fn handle(&self) -> ResponseHandler {
-        ResponseHandler::Exit
+    fn handle(&self) -> ResponseHandle {
+        ResponseHandle::Exit
     }
 }

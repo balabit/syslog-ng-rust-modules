@@ -18,17 +18,17 @@ pub enum Response {
 }
 
 #[derive(Debug, Eq, Hash, PartialEq)]
-pub enum ResponseHandler {
+pub enum ResponseHandle {
     Exit,
     Alert,
 }
 
 impl Event for Response {
-    type Handle = ResponseHandler;
+    type Handle = ResponseHandle;
     fn handler(&self) -> Self::Handle {
         match *self {
-            Response::Exit => ResponseHandler::Exit,
-            Response::Alert(_) => ResponseHandler::Alert,
+            Response::Exit => ResponseHandle::Exit,
+            Response::Alert(_) => ResponseHandle::Alert,
         }
     }
 }

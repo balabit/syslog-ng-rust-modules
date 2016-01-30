@@ -15,7 +15,7 @@ use context::linear::LinearContext;
 use context::map::MapContext;
 use dispatcher::request::Request;
 use dispatcher::reactor::RequestReactor;
-use dispatcher::{ResponseSender, ResponseHandler};
+use dispatcher::{ResponseSender, ResponseHandle};
 use dispatcher::response;
 use dispatcher::demux::Demultiplexer;
 use dispatcher::handlers;
@@ -36,7 +36,7 @@ pub struct Correlator {
     dispatcher_input_channel: mpsc::Sender<Request<Message>>,
     dispatcher_output_channel: mpsc::Receiver<Response>,
     dispatcher_thread_handle: thread::JoinHandle<()>,
-    handlers: HashMap<ResponseHandler, Box<EventHandler<Response, mpsc::Sender<Request<Message>>>>>,
+    handlers: HashMap<ResponseHandle, Box<EventHandler<Response, mpsc::Sender<Request<Message>>>>>,
 }
 
 fn create_context(config_context: config::Context,

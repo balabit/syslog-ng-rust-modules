@@ -1,4 +1,4 @@
-use dispatcher::ResponseHandler;
+use dispatcher::ResponseHandle;
 use Response;
 use Message;
 
@@ -20,7 +20,7 @@ impl EventHandler<Response, mpsc::Sender<Request<Message>>> for MessageEventHand
             self.responses.borrow_mut().push(event);
         }
     }
-    fn handle(&self) -> ResponseHandler {
-        ResponseHandler::Alert
+    fn handle(&self) -> ResponseHandle {
+        ResponseHandle::Alert
     }
 }
