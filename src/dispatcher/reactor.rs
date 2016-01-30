@@ -28,7 +28,7 @@ impl Reactor<ContextMap> for RequestReactor {
     fn handle_events(&mut self) {
         while let Some(request) = self.demultiplexer.select() {
             trace!("RequestReactor: got event");
-            if let Some(handler) = self.handlers.get_mut(&request.handler()) {
+            if let Some(handler) = self.handlers.get_mut(&request.handle()) {
                 handler.handle_event(request, &mut self.context_map);
             } else {
                 trace!("RequestReactor: no handler found for event");

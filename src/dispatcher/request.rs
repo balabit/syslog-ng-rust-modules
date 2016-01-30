@@ -23,7 +23,7 @@ pub enum RequestHandler {
 
 impl reactor::Event for Request<Rc<Message>> {
     type Handle = RequestHandler;
-    fn handler(&self) -> Self::Handle {
+    fn handle(&self) -> Self::Handle {
         match *self {
             Request::Message(_) => RequestHandler::Message,
             Request::Timer(_) => RequestHandler::Timer,

@@ -18,5 +18,5 @@ pub trait Reactor<D> {
 
 pub trait Event {
     type Handle;
-    fn handler(&self) -> Self::Handle;
+    fn handle(&self) -> Self::Handle;
 }

@@ -25,7 +25,7 @@ pub enum ResponseHandle {
 
 impl Event for Response {
     type Handle = ResponseHandle;
-    fn handler(&self) -> Self::Handle {
+    fn handle(&self) -> Self::Handle {
         match *self {
             Response::Exit => ResponseHandle::Exit,
             Response::Alert(_) => ResponseHandle::Alert,

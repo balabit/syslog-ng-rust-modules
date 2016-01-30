@@ -129,7 +129,7 @@ impl Correlator {
     }
 
     fn handle_event(&mut self, event: Response) {
-        if let Some(handler) = self.handlers.get_mut(&event.handler()) {
+        if let Some(handler) = self.handlers.get_mut(&event.handle()) {
             handler.handle_event(event, &mut self.dispatcher_input_channel);
         } else {
             trace!("no event handler found for handling a Response");
