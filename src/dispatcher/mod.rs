@@ -20,7 +20,7 @@ pub enum Response {
 #[derive(Debug, Eq, Hash, PartialEq)]
 pub enum ResponseHandler {
     Exit,
-    Message,
+    Alert,
 }
 
 impl Event for Response {
@@ -28,7 +28,7 @@ impl Event for Response {
     fn handler(&self) -> Self::Handle {
         match *self {
             Response::Exit => ResponseHandler::Exit,
-            Response::Alert(_) => ResponseHandler::Message,
+            Response::Alert(_) => ResponseHandler::Alert,
         }
     }
 }

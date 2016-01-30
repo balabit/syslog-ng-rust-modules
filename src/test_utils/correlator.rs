@@ -21,6 +21,6 @@ impl EventHandler<Response, mpsc::Sender<Request<Message>>> for MessageEventHand
         }
     }
     fn handle(&self) -> ResponseHandler {
-        ResponseHandler::Message
+        ResponseHandler::Alert
     }
 }
