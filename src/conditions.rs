@@ -282,6 +282,20 @@ mod test {
         let mut state = State::new();
         state.on_message(Rc::new(msg), &context);
     }
+
+    #[test]
+    fn test_given_condition_when_last_closes_is_set_but_there_are_no_patterns_then_we_do_not_panic() {
+        let msg = MessageBuilder::new("e4f3f8b2-3135-4916-a5ea-621a754dab0d", "message")
+                                 .name(Some("p1"))
+                                 .build();
+        let conditions = ConditionsBuilder::new(Duration::from_millis(100))
+                             .patterns(Vec::new())
+                             .last_closes(true)
+                             .build();
+        let context = BaseContextBuilder::new(Uuid::new_v4(), conditions).build();
+        let mut state = State::new();
+        state.on_message(Rc::new(msg), &context);
+    }
 }
 
 mod deser {
