@@ -19,11 +19,8 @@ pub struct Timer;
 impl Timer {
     pub fn from_chan(duration: Duration, tx: mpsc::Sender<ExternalRequest>) {
         thread::spawn(move || {
-            loop {
+            while let Ok(_) = tx.send(Request::Timer(TimerEvent(duration))) {
                 thread::sleep(duration);
-                if tx.send(Request::Timer(TimerEvent(duration))).is_err() {
-                    break;
-                }
             }
         });
     }
