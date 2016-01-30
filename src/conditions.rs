@@ -29,7 +29,7 @@ impl Conditions {
 
     pub fn is_opening(&self, message: &Message) -> bool {
         if self.first_opens {
-            message.ids().any(|x| x == self.patterns.first().unwrap())
+            self.patterns.first().iter().any(|first|{ message.ids().any(|id| &id == first)})
         } else {
             true
         }
