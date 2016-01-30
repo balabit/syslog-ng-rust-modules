@@ -26,7 +26,7 @@ pub const MESSAGES: &'static str = "messages";
 const MESSAGE: &'static str = "MESSAGE";
 
 pub struct MessageAction {
-    sender: Box<ResponseSender<Response>>,
+    sender: Box<ResponseSender>,
     uuid: String,
     name: Option<String>,
     values: Handlebars,
@@ -35,7 +35,7 @@ pub struct MessageAction {
 }
 
 impl MessageAction {
-    pub fn new(sender: Box<ResponseSender<Response>>,
+    pub fn new(sender: Box<ResponseSender>,
                action: config::action::MessageAction)
                -> MessageAction {
         let config::action::MessageAction { uuid, name, message, values, when, inject_mode } =

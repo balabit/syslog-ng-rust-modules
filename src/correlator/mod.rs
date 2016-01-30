@@ -41,7 +41,7 @@ pub struct Correlator {
 }
 
 fn create_context(config_context: config::Context,
-                  response_sender: Box<response::ResponseSender<Response>>)
+                  response_sender: Box<response::ResponseSender>)
                   -> Context {
     let config::Context{name, uuid, conditions, context_id, actions} = config_context;
     let mut boxed_actions = Vec::new();
@@ -62,7 +62,7 @@ fn create_context(config_context: config::Context,
 }
 
 fn create_context_map(contexts: Vec<config::Context>,
-                      response_sender: Box<response::ResponseSender<Response>>)
+                      response_sender: Box<response::ResponseSender>)
                       -> ContextMap {
     let mut context_map = ContextMap::new();
     for i in contexts.into_iter() {
@@ -92,7 +92,7 @@ impl Correlator {
         let handle = thread::spawn(move || {
             let exit_condition = Condition::new(false);
             let dmux = Demultiplexer::new(rx, exit_condition.clone());
-            let response_sender = Box::new(ResponseSender::new(dispatcher_output_channel_tx)) as Box<response::ResponseSender<Response>>;
+            let response_sender = Box::new(ResponseSender::new(dispatcher_output_channel_tx)) as Box<response::ResponseSender>;
 
             let exit_handler =
                 Box::new(handlers::exit::ExitEventHandler::new(exit_condition,

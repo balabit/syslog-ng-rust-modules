@@ -7,13 +7,13 @@ use reactor::EventHandler;
 
 pub struct ExitEventHandler {
     condition: Condition,
-    response_handler: Box<ResponseSender<Response>>,
+    response_handler: Box<ResponseSender>,
     stops: u32,
 }
 
 impl ExitEventHandler {
     pub fn new(condition: Condition,
-               response_handler: Box<ResponseSender<Response>>)
+               response_handler: Box<ResponseSender>)
                -> ExitEventHandler {
         ExitEventHandler {
             condition: condition,

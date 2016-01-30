@@ -44,13 +44,13 @@ impl ResponseSender {
     }
 }
 
-impl self::response::ResponseSender<Response> for ResponseSender {
+impl self::response::ResponseSender for ResponseSender {
     fn send_response(&self, response: Response) {
         let sender = self.sender.borrow_mut();
         let _ = sender.send(response);
     }
 
-    fn boxed_clone(&self) -> Box<self::response::ResponseSender<Response>> {
+    fn boxed_clone(&self) -> Box<self::response::ResponseSender> {
         Box::new(self.clone())
     }
 }

@@ -21,12 +21,12 @@ struct DummyResponseSender {
     responses: Rc<RefCell<Vec<Response>>>,
 }
 
-impl ResponseSender<Response> for DummyResponseSender {
+impl ResponseSender for DummyResponseSender {
     fn send_response(&self, response: Response) {
         self.responses.borrow_mut().push(response);
     }
 
-    fn boxed_clone(&self) -> Box<ResponseSender<Response>> {
+    fn boxed_clone(&self) -> Box<ResponseSender> {
         Box::new(self.clone())
     }
 }
