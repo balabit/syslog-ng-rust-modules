@@ -127,7 +127,7 @@ impl Visitor for MessageActionVisitor {
             name: name,
             values: values,
             when: when,
-            inject_mode: inject_mode
+            inject_mode: inject_mode,
         })
     }
 }

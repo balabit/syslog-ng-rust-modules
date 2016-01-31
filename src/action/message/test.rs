@@ -85,11 +85,11 @@ fn test_given_message_action_when_it_is_executed_then_it_uses_the_messages_to_re
     };
     let state = {
         let messages = vec![Arc::new(MessageBuilder::new("uuid1", "message1")
-                                        .pair("key1", "value1")
-                                        .build()),
+                                         .pair("key1", "value1")
+                                         .build()),
                             Arc::new(MessageBuilder::new("uuid2", "message2")
-                                        .pair("key2", "value2")
-                                        .build())];
+                                         .pair("key2", "value2")
+                                         .build())];
         State::with_messages(messages)
     };
     let responses = Rc::new(RefCell::new(Vec::new()));

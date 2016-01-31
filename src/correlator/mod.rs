@@ -122,9 +122,7 @@ impl Correlator {
         self.handlers.insert(handler.handle(), handler);
     }
 
-    pub fn push_message(&mut self,
-                        message: Message)
-                        -> Result<(), mpsc::SendError<Request>> {
+    pub fn push_message(&mut self, message: Message) -> Result<(), mpsc::SendError<Request>> {
         self.handle_events();
         self.dispatcher_input_channel.send(Request::Message(Arc::new(message)))
     }

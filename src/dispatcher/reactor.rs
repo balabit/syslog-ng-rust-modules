@@ -12,9 +12,7 @@ pub struct RequestReactor {
 }
 
 impl RequestReactor {
-    pub fn new(demultiplexer: Demultiplexer<Request>,
-               context_map: ContextMap)
-               -> RequestReactor {
+    pub fn new(demultiplexer: Demultiplexer<Request>, context_map: ContextMap) -> RequestReactor {
         RequestReactor {
             demultiplexer: demultiplexer,
             context_map: context_map,

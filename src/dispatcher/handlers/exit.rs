@@ -12,9 +12,7 @@ pub struct ExitEventHandler {
 }
 
 impl ExitEventHandler {
-    pub fn new(condition: Condition,
-               response_handler: Box<ResponseSender>)
-               -> ExitEventHandler {
+    pub fn new(condition: Condition, response_handler: Box<ResponseSender>) -> ExitEventHandler {
         ExitEventHandler {
             condition: condition,
             response_handler: response_handler,

@@ -29,7 +29,7 @@ impl Conditions {
 
     pub fn is_opening(&self, message: &Message) -> bool {
         if self.first_opens {
-            self.patterns.first().iter().any(|first|{ message.ids().any(|id| &id == first)})
+            self.patterns.first().iter().any(|first| message.ids().any(|id| &id == first))
         } else {
             true
         }
@@ -52,7 +52,7 @@ impl Conditions {
     fn is_closing_message(&self, state: &State) -> bool {
         if self.last_closes {
             state.messages().last().iter().any(|last_message| {
-                self.patterns.last().iter().any(|last|{ last_message.ids().any(|id| &id == last)})
+                self.patterns.last().iter().any(|last| last_message.ids().any(|id| &id == last))
             })
         } else {
             false
@@ -270,10 +270,11 @@ mod test {
     }
 
     #[test]
-    fn test_given_condition_when_first_opens_is_set_but_there_are_no_patterns_then_we_do_not_panic() {
+    fn test_given_condition_when_first_opens_is_set_but_there_are_no_patterns_then_we_do_not_panic
+        () {
         let msg = MessageBuilder::new("e4f3f8b2-3135-4916-a5ea-621a754dab0d", "message")
-                                 .name(Some("p1"))
-                                 .build();
+                      .name(Some("p1"))
+                      .build();
         let conditions = ConditionsBuilder::new(Duration::from_millis(100))
                              .patterns(Vec::new())
                              .first_opens(true)
@@ -284,10 +285,11 @@ mod test {
     }
 
     #[test]
-    fn test_given_condition_when_last_closes_is_set_but_there_are_no_patterns_then_we_do_not_panic() {
+    fn test_given_condition_when_last_closes_is_set_but_there_are_no_patterns_then_we_do_not_panic
+        () {
         let msg = MessageBuilder::new("e4f3f8b2-3135-4916-a5ea-621a754dab0d", "message")
-                                 .name(Some("p1"))
-                                 .build();
+                      .name(Some("p1"))
+                      .build();
         let conditions = ConditionsBuilder::new(Duration::from_millis(100))
                              .patterns(Vec::new())
                              .last_closes(true)
