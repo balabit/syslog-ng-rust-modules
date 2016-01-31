@@ -1,5 +1,5 @@
 use handlebars::Template;
-use std::collections::BTreeMap;
+use handlebars::Handlebars;
 
 use super::ActionType;
 use super::ExecCondition;
@@ -9,12 +9,11 @@ mod builder;
 
 pub use self::builder::MessageActionBuilder;
 
-#[derive(Clone, Debug, PartialEq)]
 pub struct MessageAction {
     pub uuid: String,
     pub name: Option<String>,
     pub message: Template,
-    pub values: BTreeMap<String, Template>,
+    pub values: Handlebars,
     pub when: ExecCondition,
     pub inject_mode: InjectMode,
 }
@@ -29,7 +28,7 @@ impl MessageAction {
     pub fn message(&self) -> &Template {
         &self.message
     }
-    pub fn values(&self) -> &BTreeMap<String, Template> {
+    pub fn values(&self) -> &Handlebars {
         &self.values
     }
     pub fn inject_mode(&self) -> &InjectMode {

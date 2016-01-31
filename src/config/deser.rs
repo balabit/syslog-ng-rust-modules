@@ -181,7 +181,6 @@ mod test {
         "#;
 
         let result = from_str::<Context>(text);
-        println!("{:?}", &result);
         let expected_name = "TEST_NAME".to_string();
         let expected_uuid = Uuid::parse_str("86ca9f93-84fb-4813-b037-6526f7a585a3").ok().unwrap();
         let expected_conditions = ConditionsBuilder::new(Duration::from_millis(100))
@@ -206,14 +205,13 @@ mod test {
         assert_eq!(&Some(expected_name), &context.name);
         assert_eq!(&expected_uuid, &context.uuid);
         assert_eq!(&expected_conditions, &context.conditions);
-        assert_eq!(&expected_actions, &context.actions);
+        assert_eq!(&expected_actions.len(), &context.actions.len());
     }
 
     #[test]
     fn test_given_config_context_when_it_does_not_have_uuid_then_it_cannot_be_deserialized() {
         let text = r#"{ "conditions": { "timeout": 100 }}"#;
         let result = from_str::<Context>(text);
-        println!("{:?}", &result);
         let _ = result.err().expect("Successfully deserialized a config context without an uuid key");
     }
 
@@ -224,7 +222,6 @@ mod test {
             "conditions": { "timeout": 100},
             "unknown": "unknown" }"#;
         let result = from_str::<Context>(text);
-        println!("{:?}", &result);
         let _ = result.err().expect("Successfully deserialized a config context with an unknown key");
     }
 
@@ -241,7 +238,6 @@ mod test {
         "#;
 
         let result = from_str::<Context>(text);
-        println!("{:?}", &result);
         let expected_uuid = Uuid::parse_str("86ca9f93-84fb-4813-b037-6526f7a585a3").ok().unwrap();
         let expected_conditions = ConditionsBuilder::new(Duration::from_millis(100)).build();
         let context = result.ok().expect("Failed to deserialize a valid Context");
@@ -262,7 +258,6 @@ mod test {
         "#;
 
         let result = from_str::<Context>(text);
-        println!("{:?}", &result);
         let _ = result.err()
                       .expect("Successfully deserialized an invalid Context (UUID is invalid)");
     }
@@ -280,7 +275,6 @@ mod test {
         "#;
         let expected_context_id = "{{HOST}}{{PROGRAM}}".to_string();
         let result = from_str::<Context>(text);
-        println!("{:?}", &result);
         let context = result.ok().expect("Failed to deserialize a valid Context");
         assert_eq!(&expected_context_id,
                    &context.context_id.as_ref().unwrap().to_string());

@@ -7,7 +7,6 @@ use conditions::Conditions;
 mod deser;
 pub mod action;
 
-#[derive(Debug, Clone)]
 pub struct Context {
     pub name: Option<String>,
     pub uuid: Uuid,
@@ -35,28 +34,28 @@ impl ContextBuilder {
         }
     }
 
-    pub fn context_id(&mut self, context_id: Option<Template>) -> &mut ContextBuilder {
+    pub fn context_id(mut self, context_id: Option<Template>) -> ContextBuilder {
         self.context_id = context_id;
         self
     }
 
-    pub fn actions(&mut self, actions: Vec<ActionType>) -> &mut ContextBuilder {
+    pub fn actions(mut self, actions: Vec<ActionType>) -> ContextBuilder {
         self.actions = actions;
         self
     }
 
-    pub fn name(&mut self, name: String) -> &mut ContextBuilder {
+    pub fn name(mut self, name: String) -> ContextBuilder {
         self.name = Some(name);
         self
     }
 
-    pub fn build(&self) -> Context {
+    pub fn build(self) -> Context {
         Context {
-            name: self.name.clone(),
-            uuid: self.uuid.clone(),
-            conditions: self.conditions.clone(),
-            context_id: self.context_id.clone(),
-            actions: self.actions.clone(),
+            name: self.name,
+            uuid: self.uuid,
+            conditions: self.conditions,
+            context_id: self.context_id,
+            actions: self.actions,
         }
     }
 }

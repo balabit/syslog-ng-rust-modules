@@ -38,19 +38,15 @@ impl MessageAction {
     pub fn new(sender: Box<ResponseSender>,
                action: config::action::MessageAction)
                -> MessageAction {
-        let config::action::MessageAction { uuid, name, message, values, when, inject_mode } =
+        let config::action::MessageAction { uuid, name, message, mut values, when, inject_mode } =
             action;
-        let mut handlebars = Handlebars::new();
-        for (name, template) in values.into_iter() {
-            handlebars.register_template(&name, template);
-        }
-        handlebars.register_template(MESSAGE, message);
+        values.register_template(MESSAGE, message);
 
         MessageAction {
             sender: sender,
             uuid: uuid,
             name: name,
-            values: handlebars,
+            values: values,
             when: when,
             inject_mode: inject_mode,
         }
