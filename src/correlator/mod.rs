@@ -149,8 +149,7 @@ impl Correlator {
 
     fn stop_dispatcher(&mut self) {
         let exit_condition = Condition::new(false);
-        let exit_handler = Box::new(ExitHandler::new(exit_condition.clone(),
-                                                     self.dispatcher_input_channel.clone()));
+        let exit_handler = Box::new(ExitHandler::new(exit_condition.clone()));
         self.register_handler(exit_handler);
         let _ = self.dispatcher_input_channel.send(Request::Exit);
         while !exit_condition.is_active() {

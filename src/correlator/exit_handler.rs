@@ -7,15 +7,13 @@ use dispatcher::ResponseHandle;
 use reactor::EventHandler;
 
 pub struct ExitHandler {
-    channel: mpsc::Sender<Request>,
     exits_received: u32,
     condition: Condition,
 }
 
 impl ExitHandler {
-    pub fn new(condition: Condition, channel: mpsc::Sender<Request>) -> ExitHandler {
+    pub fn new(condition: Condition) -> ExitHandler {
         ExitHandler {
-            channel: channel,
             exits_received: 0,
             condition: condition,
         }
@@ -23,10 +21,10 @@ impl ExitHandler {
 }
 
 impl EventHandler<Response, mpsc::Sender<Request>> for ExitHandler {
-    fn handle_event(&mut self, event: Response, _: &mut mpsc::Sender<Request>) {
+    fn handle_event(&mut self, event: Response, channel: &mut mpsc::Sender<Request>) {
         if let Response::Exit = event {
             self.exits_received += 1;
-            let _ = self.channel.send(Request::Exit);
+            let _ = channel.send(Request::Exit);
 
             if self.exits_received >= 1 {
                 self.condition.activate()
