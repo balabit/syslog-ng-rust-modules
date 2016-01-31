@@ -1,13 +1,12 @@
 use action::Action;
 use config;
-use config::action::ExecCondition;
 use config::action::message::InjectMode;
 use context::base::BaseContext;
 use dispatcher::Response;
 use dispatcher::response::ResponseSender;
 use message::{Message, MessageBuilder};
 
-use handlebars::{Context, Handlebars};
+use handlebars::Context;
 use std::borrow::Borrow;
 use std::collections::BTreeMap;
 use state::State;
@@ -27,35 +26,26 @@ const MESSAGE: &'static str = "MESSAGE";
 
 pub struct MessageAction {
     sender: Box<ResponseSender>,
-    uuid: String,
-    name: Option<String>,
-    values: Handlebars,
-    when: ExecCondition,
-    inject_mode: InjectMode,
+    action: config::action::MessageAction,
 }
 
 impl MessageAction {
     pub fn new(sender: Box<ResponseSender>,
-               action: config::action::MessageAction)
+               mut action: config::action::MessageAction)
                -> MessageAction {
-        let config::action::MessageAction { uuid, name, message, mut values, when, inject_mode } =
-            action;
-        values.register_template(MESSAGE, message);
+        let message = action.message.clone();
+        action.values.register_template(MESSAGE, message);
 
         MessageAction {
             sender: sender,
-            uuid: uuid,
-            name: name,
-            values: values,
-            when: when,
-            inject_mode: inject_mode,
+            action: action,
         }
     }
 
     fn render_value(&self, key: &String, template_context: &Context) -> Result<String, Error> {
         let mut writer = Vec::new();
         {
-            try!(self.values.renderw(key, &template_context, &mut writer));
+            try!(self.action.values.renderw(key, &template_context, &mut writer));
         }
         let string = try!(String::from_utf8(writer));
         Ok(string)
@@ -63,7 +53,7 @@ impl MessageAction {
 
     fn render_values(&self, template_context: &Context) -> Result<BTreeMap<String, String>, Error> {
         let mut rendered_values = BTreeMap::new();
-        for (key, _) in self.values.get_templates() {
+        for (key, _) in self.action.values.get_templates() {
             let rendered_value = try!(self.render_value(key, &template_context));
             rendered_values.insert(key.to_string(), rendered_value);
         }
@@ -83,8 +73,8 @@ impl MessageAction {
                                      .expect(&format!("There is no '{}' key in the renderer \
                                                        key-value pairs",
                                                       MESSAGE));
-        let name = self.name.as_ref().map(|name| name.borrow());
-        let message = MessageBuilder::new(&self.uuid, message)
+        let name = self.action.name.as_ref().map(|name| name.borrow());
+        let message = MessageBuilder::new(&self.action.uuid, message)
                           .name(name)
                           .values(rendered_values)
                           .build();
@@ -107,7 +97,7 @@ impl MessageAction {
             Ok(message) => {
                 let response = Alert {
                     message: message,
-                    inject_mode: self.inject_mode.clone(),
+                    inject_mode: self.action.inject_mode.clone(),
                 };
                 self.sender.send_response(Response::Alert(response));
             }
@@ -132,14 +122,14 @@ impl Alert {
 
 impl Action for MessageAction {
     fn on_opened(&self, _state: &State, _context: &BaseContext) {
-        if self.when.on_opened {
+        if self.action.when.on_opened {
             trace!("MessageAction: on_opened()");
             self.execute(_state, _context);
         }
     }
 
     fn on_closed(&self, _state: &State, _context: &BaseContext) {
-        if self.when.on_closed {
+        if self.action.when.on_closed {
             trace!("MessageAction: on_closed()");
             self.execute(_state, _context);
         }
