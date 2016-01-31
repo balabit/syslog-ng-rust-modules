@@ -1,4 +1,4 @@
-use config;
+use config::{ContextBuilder, Context};
 use config::action::message::MessageActionBuilder;
 use conditions::ConditionsBuilder;
 use Correlator;
@@ -104,9 +104,9 @@ fn test_given_manually_built_correlator_when_it_closes_a_context_then_the_action
                       .ok()
                       .expect("Failed to compile a handlebars template");
     let contexts = vec![
-        config::ContextBuilder::new(Uuid::new_v4(), condition.clone()).actions(vec![MessageActionBuilder::new("uuid", message.clone()).build().into()]).build(),
-        config::ContextBuilder::new(Uuid::new_v4(), condition.clone()).actions(vec![MessageActionBuilder::new("uuid", message.clone()).build().into()]).build(),
-        config::ContextBuilder::new(Uuid::new_v4(), condition.clone()).actions(vec![MessageActionBuilder::new("uuid", message).build().into()]).build(),
+        ContextBuilder::new(Uuid::new_v4(), condition.clone()).actions(vec![MessageActionBuilder::new("uuid", message.clone()).build().into()]).build(),
+        ContextBuilder::new(Uuid::new_v4(), condition.clone()).actions(vec![MessageActionBuilder::new("uuid", message.clone()).build().into()]).build(),
+        ContextBuilder::new(Uuid::new_v4(), condition.clone()).actions(vec![MessageActionBuilder::new("uuid", message).build().into()]).build(),
     ];
     let responses = Rc::new(RefCell::new(Vec::new()));
     let message_event_handler = Box::new(MessageEventHandler { responses: responses.clone() });
@@ -123,7 +123,7 @@ fn test_given_manually_built_correlator_when_it_closes_a_context_then_the_action
 
 #[test]
 fn test_given_correlator_when_it_is_built_from_json_then_we_get_the_expected_correlator() {
-    let result = from_str::<Vec<config::Context>>(JSON_CONFIG);
+    let result = from_str::<Vec<Context>>(JSON_CONFIG);
     let expected_name = "CONTEXT_NAME_1".to_string();
     let expected_uuid = "185e96da-c00e-454b-b4fe-9d0a14a86335".to_string();
     let mut contexts = result.ok().expect("Failed to deserialize a config::Context from JSON");
@@ -141,7 +141,7 @@ fn test_given_correlator_when_it_is_built_from_json_then_it_produces_the_expecte
     let uuid1 = "1b47ba91-d867-4a8c-9553-a5dfd6ea1274".to_string();
     let uuid2 = "2b47ba91-d867-4a8c-9553-a5dfd6ea1274".to_string();
     let uuid3 = "3b47ba91-d867-4a8c-9553-a5dfd6ea1274".to_string();
-    let result = from_str::<Vec<config::Context>>(JSON_CONFIG);
+    let result = from_str::<Vec<Context>>(JSON_CONFIG);
     let contexts = result.ok().expect("Failed to deserialize a config::Context from JSON");
     let responses = Rc::new(RefCell::new(Vec::new()));
     let message_event_handler = Box::new(MessageEventHandler { responses: responses.clone() });
