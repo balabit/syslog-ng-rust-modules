@@ -22,12 +22,12 @@ pub trait EventDemultiplexer {
     fn select(&mut self) -> Option<Self::Event>;
 }
 
-pub trait Reactor<D> {
+pub trait Reactor {
     type Event: Event;
     fn handle_events(&mut self);
-    fn register_handler(&mut self, handler: Box<EventHandler<Self::Event, D>>);
+    fn register_handler(&mut self, handler: Box<for<'a> EventHandler<Self::Event, SharedData<'a>>>);
     fn remove_handler_by_handle(&mut self,
-                                 handler: &<<Self as Reactor<D>>::Event as Event>::Handle);
+                                 handler: &<<Self as Reactor>::Event as Event>::Handle);
 }
 
 pub trait Event {
