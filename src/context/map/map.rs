@@ -7,6 +7,7 @@ use state::State;
 use timer::TimerEvent;
 use context::base::BaseContext;
 use dispatcher::request::Request;
+use dispatcher::response::ResponseSender;
 
 const CONTEXT_ID: &'static str = ".context.id";
 
@@ -27,18 +28,18 @@ impl MapContext {
         }
     }
 
-    pub fn on_event(&mut self, event: Request) {
+    pub fn on_event(&mut self, event: Request, responder: &mut ResponseSender) {
         trace!("MapContext: received event");
         match event {
-            Request::Timer(event) => self.on_timer(&event),
-            Request::Message(message) => self.on_message(message),
+            Request::Timer(event) => self.on_timer(&event, responder),
+            Request::Message(message) => self.on_message(message, responder),
             _ => {}
         }
     }
 
-    pub fn on_timer(&mut self, event: &TimerEvent) {
+    pub fn on_timer(&mut self, event: &TimerEvent, responder: &mut ResponseSender) {
         for (_, mut state) in self.map.iter_mut() {
-            state.on_timer(event, &self.base);
+            state.on_timer(event, &self.base, responder);
         }
         self.remove_closed_states();
     }
@@ -62,18 +63,18 @@ impl MapContext {
         }
     }
 
-    pub fn on_message(&mut self, event: Arc<Message>) {
-        self.update_state(event);
+    pub fn on_message(&mut self, event: Arc<Message>, responder: &mut ResponseSender) {
+        self.update_state(event, responder);
         self.remove_closed_states();
     }
 
-    fn update_state(&mut self, event: Arc<Message>) {
+    fn update_state(&mut self, event: Arc<Message>, responder: &mut ResponseSender) {
         let id = self.context_id
                      .render(CONTEXT_ID, event.values())
                      .ok()
                      .expect("Failed to render the compiled Handlebars template");
         let state = self.map.entry(id).or_insert(State::new());
-        state.on_message(event, &self.base);
+        state.on_message(event, &self.base, responder);
     }
 
     #[allow(dead_code)]

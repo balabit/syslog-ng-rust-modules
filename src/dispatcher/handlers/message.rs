@@ -17,7 +17,7 @@ impl<'a> EventHandler<Request, SharedData<'a>> for MessageEventHandler {
             for i in event.ids() {
                 let mut iter = data.map.contexts_iter_mut(i);
                 while let Some(context) = iter.next() {
-                    context.on_event(Request::Message(event.clone()));
+                    context.on_event(Request::Message(event.clone()), data.responder);
                 }
             }
         } else {

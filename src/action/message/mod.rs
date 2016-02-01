@@ -92,7 +92,7 @@ impl MessageAction {
         }
     }
 
-    fn execute(&self, _state: &State, _context: &BaseContext) {
+    fn execute(&self, _state: &State, _context: &BaseContext, responder: &mut ResponseSender) {
         match self.render_message(_state, _context) {
             Ok(message) => {
                 let response = Alert {
@@ -121,17 +121,17 @@ impl Alert {
 }
 
 impl Action for MessageAction {
-    fn on_opened(&self, _state: &State, _context: &BaseContext) {
+    fn on_opened(&self, _state: &State, _context: &BaseContext, responder: &mut ResponseSender) {
         if self.action.when.on_opened {
             trace!("MessageAction: on_opened()");
-            self.execute(_state, _context);
+            self.execute(_state, _context, responder);
         }
     }
 
-    fn on_closed(&self, _state: &State, _context: &BaseContext) {
+    fn on_closed(&self, _state: &State, _context: &BaseContext, responder: &mut ResponseSender) {
         if self.action.when.on_closed {
             trace!("MessageAction: on_closed()");
-            self.execute(_state, _context);
+            self.execute(_state, _context, responder);
         }
     }
 }

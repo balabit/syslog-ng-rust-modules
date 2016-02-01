@@ -6,6 +6,7 @@ use message::Message;
 use state::State;
 use timer::TimerEvent;
 use dispatcher::request::Request;
+use dispatcher::response::ResponseSender;
 use context::base::{BaseContext, BaseContextBuilder};
 
 pub struct LinearContext {
@@ -22,21 +23,21 @@ impl LinearContext {
         }
     }
 
-    pub fn on_event(&mut self, event: Request) {
+    pub fn on_event(&mut self, event: Request, responder: &mut ResponseSender) {
         trace!("LinearContext: received event");
         match event {
-            Request::Timer(event) => self.on_timer(&event),
-            Request::Message(message) => self.on_message(message),
+            Request::Timer(event) => self.on_timer(&event, responder),
+            Request::Message(message) => self.on_message(message, responder),
             _ => {}
         }
     }
 
-    pub fn on_timer(&mut self, event: &TimerEvent) {
-        self.state.on_timer(event, &self.base);
+    pub fn on_timer(&mut self, event: &TimerEvent, responder: &mut ResponseSender) {
+        self.state.on_timer(event, &self.base, responder);
     }
 
-    pub fn on_message(&mut self, event: Arc<Message>) {
-        self.state.on_message(event, &self.base);
+    pub fn on_message(&mut self, event: Arc<Message>, responder: &mut ResponseSender) {
+        self.state.on_message(event, &self.base, responder);
     }
 
     #[allow(dead_code)]
