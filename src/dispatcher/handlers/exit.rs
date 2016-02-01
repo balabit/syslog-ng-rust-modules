@@ -1,9 +1,8 @@
-use context::ContextMap;
 use dispatcher::response::ResponseSender;
 use dispatcher::Response;
 use dispatcher::request::{Request, RequestHandle};
 use condition::Condition;
-use reactor::EventHandler;
+use reactor::{EventHandler, SharedData};
 
 pub struct ExitEventHandler {
     condition: Condition,
@@ -21,8 +20,8 @@ impl ExitEventHandler {
     }
 }
 
-impl EventHandler<Request, ContextMap> for ExitEventHandler {
-    fn handle_event(&mut self, event: Request, _: &mut ContextMap) {
+impl<'a> EventHandler<Request, SharedData<'a>> for ExitEventHandler {
+    fn handle_event(&mut self, event: Request, _: &mut SharedData) {
         if let Request::Exit = event {
             self.stops += 1;
             self.response_handler.send_response(Response::Exit);
