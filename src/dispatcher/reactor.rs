@@ -4,19 +4,22 @@ use context::ContextMap;
 use dispatcher::demux::Demultiplexer;
 use dispatcher::request::{RequestHandle, Request};
 use reactor::{Event, EventDemultiplexer, EventHandler, Reactor};
+use dispatcher::response::ResponseSender;
 
 pub struct RequestReactor {
     handlers: BTreeMap<RequestHandle, Box<EventHandler<Request, ContextMap>>>,
     demultiplexer: Demultiplexer<Request>,
     context_map: ContextMap,
+    responder: Box<ResponseSender>
 }
 
 impl RequestReactor {
-    pub fn new(demultiplexer: Demultiplexer<Request>, context_map: ContextMap) -> RequestReactor {
+    pub fn new(demultiplexer: Demultiplexer<Request>, context_map: ContextMap, responder: Box<ResponseSender>) -> RequestReactor {
         RequestReactor {
             demultiplexer: demultiplexer,
             context_map: context_map,
             handlers: BTreeMap::new(),
+            responder: responder
         }
     }
 }

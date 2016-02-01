@@ -100,8 +100,8 @@ impl Correlator {
             let timer_event_handler = Box::new(handlers::timer::TimerEventHandler::new());
             let message_event_handler = Box::new(handlers::message::MessageEventHandler::new());
 
-            let context_map = create_context_map(contexts, response_sender);
-            let mut reactor = RequestReactor::new(dmux, context_map);
+            let context_map = create_context_map(contexts, response_sender.boxed_clone());
+            let mut reactor = RequestReactor::new(dmux, context_map, response_sender);
             reactor.register_handler(exit_handler);
             reactor.register_handler(timer_event_handler);
             reactor.register_handler(message_event_handler);
