@@ -1,3 +1,17 @@
+use dispatcher::response::ResponseSender;
+use context::ContextMap;
+
+pub struct SharedData<'a> {
+    pub responder: &'a mut ResponseSender,
+    pub map: &'a mut ContextMap,
+}
+
+impl<'a> SharedData<'a> {
+    pub fn new(map: &'a mut ContextMap, responder: &'a mut ResponseSender) -> SharedData<'a> {
+        SharedData { map: map, responder: responder }
+    }
+}
+
 pub trait EventHandler<T: Event, D> {
     fn handle_event(&mut self, event: T, shared_data: &mut D);
     fn handle(&self) -> T::Handle;
