@@ -6,9 +6,11 @@ use message::MessageBuilder;
 use timer::TimerEvent;
 use context::LinearContext;
 use conditions::ConditionsBuilder;
+use dispatcher::response::MockResponseSender;
 
 #[test]
 fn test_given_close_condition_with_timeout_when_the_timeout_expires_then_the_condition_is_met() {
+    let mut responder = MockResponseSender::new();
     let timeout = Duration::from_millis(100);
     let msg_id = "11eaf6f8-0640-460f-aee2-a72d2f2ab258".to_string();
     let patterns = vec![
@@ -21,19 +23,20 @@ fn test_given_close_condition_with_timeout_when_the_timeout_expires_then_the_con
     let msg1 = MessageBuilder::new(&msg_id, "message").build();
     let event = Arc::new(msg1);
     assert_false!(context.is_open());
-    context.on_message(event);
+    context.on_message(event, &mut responder);
     assert_true!(context.is_open());
-    context.on_timer(&mut TimerEvent::from_millis(50));
+    context.on_timer(&mut TimerEvent::from_millis(50), &mut responder);
     assert_true!(context.is_open());
-    context.on_timer(&mut TimerEvent::from_millis(49));
+    context.on_timer(&mut TimerEvent::from_millis(49), &mut responder);
     assert_true!(context.is_open());
-    context.on_timer(&mut TimerEvent::from_millis(1));
+    context.on_timer(&mut TimerEvent::from_millis(1), &mut responder);
     assert_false!(context.is_open());
 }
 
 #[test]
 fn test_given_close_condition_with_max_size_when_the_max_size_reached_then_the_condition_is_met
     () {
+    let mut responder = MockResponseSender::new();
     let timeout = Duration::from_millis(100);
     let max_size = 3;
     let msg_id = "11eaf6f8-0640-460f-aee2-a72d2f2ab258".to_string();
@@ -47,17 +50,18 @@ fn test_given_close_condition_with_max_size_when_the_max_size_reached_then_the_c
                                              .build());
     let msg1 = MessageBuilder::new(&msg_id, "message").build();
     let event = Arc::new(msg1);
-    context.on_message(event.clone());
+    context.on_message(event.clone(), &mut responder);
     assert_true!(context.is_open());
-    context.on_message(event.clone());
+    context.on_message(event.clone(), &mut responder);
     assert_true!(context.is_open());
-    context.on_message(event.clone());
+    context.on_message(event.clone(), &mut responder);
     assert_false!(context.is_open());
 }
 
 #[test]
 fn test_given_close_condition_with_renew_timeout_when_the_timeout_expires_without_renewing_messages_then_the_condition_is_met
     () {
+    let mut responder = MockResponseSender::new();
     let timeout = Duration::from_millis(100);
     let renew_timeout = Duration::from_millis(10);
     let msg_id = "11eaf6f8-0640-460f-aee2-a72d2f2ab258".to_string();
@@ -71,19 +75,20 @@ fn test_given_close_condition_with_renew_timeout_when_the_timeout_expires_withou
                                              .build());
     let msg1 = MessageBuilder::new(&msg_id, "message").build();
     let event = Arc::new(msg1);
-    context.on_message(event.clone());
+    context.on_message(event.clone(), &mut responder);
     assert_true!(context.is_open());
-    context.on_timer(&mut TimerEvent::from_millis(8));
+    context.on_timer(&mut TimerEvent::from_millis(8), &mut responder);
     assert_true!(context.is_open());
-    context.on_timer(&mut TimerEvent::from_millis(1));
+    context.on_timer(&mut TimerEvent::from_millis(1), &mut responder);
     assert_true!(context.is_open());
-    context.on_timer(&mut TimerEvent::from_millis(1));
+    context.on_timer(&mut TimerEvent::from_millis(1), &mut responder);
     assert_false!(context.is_open());
 }
 
 #[test]
 fn test_given_close_condition_with_renew_timeout_when_the_timeout_expires_with_renewing_messages_then_the_context_is_not_closed
     () {
+    let mut responder = MockResponseSender::new();
     let timeout = Duration::from_millis(100);
     let renew_timeout = Duration::from_millis(10);
     let msg_id = "11eaf6f8-0640-460f-aee2-a72d2f2ab258".to_string();
@@ -98,14 +103,14 @@ fn test_given_close_condition_with_renew_timeout_when_the_timeout_expires_with_r
     let msg1 = MessageBuilder::new(&msg_id, "message").build();
     let event = Arc::new(msg1);
     assert_false!(context.is_open());
-    context.on_message(event.clone());
+    context.on_message(event.clone(), &mut responder);
     assert_true!(context.is_open());
-    context.on_timer(&mut TimerEvent::from_millis(8));
+    context.on_timer(&mut TimerEvent::from_millis(8), &mut responder);
     assert_true!(context.is_open());
-    context.on_timer(&mut TimerEvent::from_millis(1));
+    context.on_timer(&mut TimerEvent::from_millis(1), &mut responder);
     assert_true!(context.is_open());
-    context.on_message(event.clone());
+    context.on_message(event.clone(), &mut responder);
     assert_true!(context.is_open());
-    context.on_timer(&mut TimerEvent::from_millis(1));
+    context.on_timer(&mut TimerEvent::from_millis(1), &mut responder);
     assert_true!(context.is_open());
 }

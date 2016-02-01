@@ -4,9 +4,10 @@ use super::{CONTEXT_LEN, CONTEXT_NAME, CONTEXT_UUID, MessageAction};
 use conditions::ConditionsBuilder;
 use config;
 use dispatcher::Response;
-use dispatcher::response::ResponseSender;
+use dispatcher::response::{ResponseSender, MockResponseSender};
 use message::MessageBuilder;
 use state::State;
+use action::Action;
 
 use env_logger;
 use handlebars::Template;
@@ -41,6 +42,7 @@ fn test_given_dummy_response_handler_can_be_cloned() {
 #[test]
 fn test_given_a_message_action_when_it_is_executed_then_it_adds_the_name_and_uuid_of_the_context_to_the_message
     () {
+    let mut responder = MockResponseSender::new();
     let name = Some("name".to_string());
     let base_context = {
         let conditions = ConditionsBuilder::new(Duration::from_millis(100)).build();
@@ -59,7 +61,7 @@ fn test_given_a_message_action_when_it_is_executed_then_it_adds_the_name_and_uui
         MessageAction::new(Box::new(response_sender), config_action)
     };
 
-    message_action.execute(&state, &base_context);
+    message_action.on_closed(&state, &base_context, &mut responder);
     assert_eq!(1, responses.borrow().len());
     let responses = responses.borrow();
     if let &Response::Alert(ref response) = responses.get(0).unwrap() {
@@ -76,6 +78,7 @@ fn test_given_a_message_action_when_it_is_executed_then_it_adds_the_name_and_uui
 #[test]
 fn test_given_message_action_when_it_is_executed_then_it_uses_the_messages_to_render_the_message_and_additonal_templated_values
     () {
+    let mut responder = MockResponseSender::new();
     let _ = env_logger::init();
     let name = Some("name".to_string());
     let base_context = {
@@ -110,7 +113,7 @@ fn test_given_message_action_when_it_is_executed_then_it_uses_the_messages_to_re
         MessageAction::new(Box::new(response_sender), config_action)
     };
 
-    message_action.execute(&state, &base_context);
+    message_action.on_closed(&state, &base_context, &mut responder);
     assert_eq!(1, responses.borrow().len());
     let responses = responses.borrow();
     if let &Response::Alert(ref response) = responses.get(0).unwrap() {

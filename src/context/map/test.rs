@@ -2,6 +2,7 @@ use conditions::ConditionsBuilder;
 use context::{BaseContextBuilder, MapContext};
 use timer::TimerEvent;
 use message::MessageBuilder;
+use dispatcher::response::MockResponseSender;
 
 use handlebars::Template;
 use uuid::Uuid;
@@ -10,6 +11,7 @@ use std::time::Duration;
 
 #[test]
 fn test_given_map_context_when_messages_have_the_same_kvpairs_then_they_go_to_the_same_context() {
+    let mut responder = MockResponseSender::new();
     let delta = Duration::from_millis(10);
     let timeout = Duration::from_millis(30);
     let event = TimerEvent(delta);
@@ -47,14 +49,14 @@ fn test_given_map_context_when_messages_have_the_same_kvpairs_then_they_go_to_th
                    .build();
 
     assert_false!(context.is_open());
-    context.on_message(Arc::new(msg1));
+    context.on_message(Arc::new(msg1), &mut responder);
     assert_true!(context.is_open());
-    context.on_timer(&event);
-    context.on_message(Arc::new(msg2));
-    context.on_message(Arc::new(msg3));
-    context.on_timer(&event);
-    context.on_timer(&event);
+    context.on_timer(&event, &mut responder);
+    context.on_message(Arc::new(msg2), &mut responder);
+    context.on_message(Arc::new(msg3), &mut responder);
+    context.on_timer(&event, &mut responder);
+    context.on_timer(&event, &mut responder);
     assert_true!(context.is_open());
-    context.on_timer(&event);
+    context.on_timer(&event, &mut responder);
     assert_false!(context.is_open());
 }

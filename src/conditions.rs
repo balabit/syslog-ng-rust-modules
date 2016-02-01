@@ -124,6 +124,7 @@ mod test {
     use context::BaseContextBuilder;
     use uuid::Uuid;
     use std::time::Duration;
+    use dispatcher::response::MockResponseSender;
 
     #[test]
     fn test_given_condition_when_an_opening_message_is_received_then_the_state_becomes_opened() {
@@ -145,6 +146,7 @@ mod test {
 
     #[test]
     fn test_given_condition_when_a_closing_message_is_received_then_the_state_becomes_closed() {
+        let mut responder = MockResponseSender::new();
         let timeout = Duration::from_millis(100);
         let msg_id1 = "11eaf6f8-0640-460f-aee2-a72d2f2ab258".to_string();
         let msg_id2 = "21eaf6f8-0640-460f-aee2-a72d2f2ab258".to_string();
@@ -161,9 +163,9 @@ mod test {
         let msg_opening = Arc::new(MessageBuilder::new(&msg_id1, "message").build());
         let msg_closing = Arc::new(MessageBuilder::new(&msg_id2, "message").build());
         assert_false!(state.is_open());
-        state.on_message(msg_opening, &context);
+        state.on_message(msg_opening, &context, &mut responder);
         assert_true!(state.is_open());
-        state.on_message(msg_closing, &context);
+        state.on_message(msg_closing, &context, &mut responder);
         assert_false!(state.is_open());
     }
 
@@ -248,6 +250,7 @@ mod test {
     #[test]
     fn test_given_conditions_when_last_closes_is_set_and_the_message_has_a_name_then_we_check_that_name
         () {
+        let mut responder = MockResponseSender::new();
         let timeout = Duration::from_millis(100);
         let patterns = vec!["p1".to_string(), "p2".to_string()];
         let p1_uuid = "e4f3f8b2-3135-4916-a5ea-621a754dab0d".to_string();
@@ -264,14 +267,15 @@ mod test {
         let p2_msg = MessageBuilder::new(&p2_uuid, "message").name(Some(p2)).build();
         let context = BaseContextBuilder::new(Uuid::new_v4(), conditions).build();
         assert_false!(state.is_open());
-        state.on_message(Arc::new(p1_msg), &context);
-        state.on_message(Arc::new(p2_msg), &context);
+        state.on_message(Arc::new(p1_msg), &context, &mut responder);
+        state.on_message(Arc::new(p2_msg), &context, &mut responder);
         assert_false!(state.is_open());
     }
 
     #[test]
     fn test_given_condition_when_first_opens_is_set_but_there_are_no_patterns_then_we_do_not_panic
         () {
+        let mut responder = MockResponseSender::new();
         let msg = MessageBuilder::new("e4f3f8b2-3135-4916-a5ea-621a754dab0d", "message")
                       .name(Some("p1"))
                       .build();
@@ -281,12 +285,13 @@ mod test {
                              .build();
         let context = BaseContextBuilder::new(Uuid::new_v4(), conditions).build();
         let mut state = State::new();
-        state.on_message(Arc::new(msg), &context);
+        state.on_message(Arc::new(msg), &context, &mut responder);
     }
 
     #[test]
     fn test_given_condition_when_last_closes_is_set_but_there_are_no_patterns_then_we_do_not_panic
         () {
+        let mut responder = MockResponseSender::new();
         let msg = MessageBuilder::new("e4f3f8b2-3135-4916-a5ea-621a754dab0d", "message")
                       .name(Some("p1"))
                       .build();
@@ -296,7 +301,7 @@ mod test {
                              .build();
         let context = BaseContextBuilder::new(Uuid::new_v4(), conditions).build();
         let mut state = State::new();
-        state.on_message(Arc::new(msg), &context);
+        state.on_message(Arc::new(msg), &context, &mut responder);
     }
 }
 
