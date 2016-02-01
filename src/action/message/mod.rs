@@ -25,19 +25,16 @@ pub const MESSAGES: &'static str = "messages";
 const MESSAGE: &'static str = "MESSAGE";
 
 pub struct MessageAction {
-    sender: Box<ResponseSender>,
     action: config::action::MessageAction,
 }
 
 impl MessageAction {
-    pub fn new(sender: Box<ResponseSender>,
-               mut action: config::action::MessageAction)
+    pub fn new(mut action: config::action::MessageAction)
                -> MessageAction {
         let message = action.message.clone();
         action.values.register_template(MESSAGE, message);
 
         MessageAction {
-            sender: sender,
             action: action,
         }
     }

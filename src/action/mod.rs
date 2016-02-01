@@ -12,8 +12,8 @@ pub trait Action {
     fn on_closed(&self, state: &State, context: &BaseContext, &mut ResponseSender);
 }
 
-pub fn from_config(config: ActionType, _sender: Box<ResponseSender>) -> Box<Action> {
+pub fn from_config(config: ActionType) -> Box<Action> {
     match config {
-        ActionType::Message(action) => Box::new(self::message::MessageAction::new(_sender, action)),
+        ActionType::Message(action) => Box::new(self::message::MessageAction::new(action)),
     }
 }

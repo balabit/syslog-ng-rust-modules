@@ -40,14 +40,12 @@ pub struct Correlator {
     handlers: HashMap<ResponseHandle, Box<EventHandler<Response, mpsc::Sender<Request>>>>,
 }
 
-fn create_context(config_context: config::Context,
-                  response_sender: Box<response::ResponseSender>)
-                  -> Context {
+fn create_context(config_context: config::Context) -> Context {
     let config::Context{name, uuid, conditions, context_id, actions} = config_context;
     let mut boxed_actions = Vec::new();
 
     for i in actions.into_iter() {
-        let action = action::from_config(i, response_sender.boxed_clone());
+        let action = action::from_config(i);
         boxed_actions.push(action);
     }
     let base = BaseContextBuilder::new(uuid, conditions);
@@ -61,12 +59,10 @@ fn create_context(config_context: config::Context,
     }
 }
 
-fn create_context_map(contexts: Vec<config::Context>,
-                      response_sender: Box<response::ResponseSender>)
-                      -> ContextMap {
+fn create_context_map(contexts: Vec<config::Context>) -> ContextMap {
     let mut context_map = ContextMap::new();
     for i in contexts.into_iter() {
-        let context: context::Context = create_context(i, response_sender.boxed_clone());
+        let context: context::Context = create_context(i);
         context_map.insert(context);
     }
     context_map
@@ -100,7 +96,7 @@ impl Correlator {
             let timer_event_handler = Box::new(handlers::timer::TimerEventHandler::new());
             let message_event_handler = Box::new(handlers::message::MessageEventHandler::new());
 
-            let context_map = create_context_map(contexts, response_sender.boxed_clone());
+            let context_map = create_context_map(contexts);
             let mut reactor = RequestReactor::new(dmux, context_map, response_sender);
             reactor.register_handler(exit_handler);
             reactor.register_handler(timer_event_handler);

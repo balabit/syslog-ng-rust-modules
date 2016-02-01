@@ -4,40 +4,16 @@ use super::{CONTEXT_LEN, CONTEXT_NAME, CONTEXT_UUID, MessageAction};
 use conditions::ConditionsBuilder;
 use config;
 use dispatcher::Response;
-use dispatcher::response::{ResponseSender, MockResponseSender};
+use dispatcher::response::MockResponseSender;
 use message::MessageBuilder;
 use state::State;
 use action::Action;
 
 use env_logger;
 use handlebars::Template;
-use std::cell::RefCell;
 use std::time::Duration;
-use std::rc::Rc;
 use std::sync::Arc;
 use uuid::Uuid;
-
-#[derive(Clone)]
-struct DummyResponseSender {
-    responses: Rc<RefCell<Vec<Response>>>,
-}
-
-impl ResponseSender for DummyResponseSender {
-    fn send_response(&mut self, response: Response) {
-        self.responses.borrow_mut().push(response);
-    }
-
-    fn boxed_clone(&self) -> Box<ResponseSender> {
-        Box::new(self.clone())
-    }
-}
-
-#[test]
-fn test_given_dummy_response_handler_can_be_cloned() {
-    let responses = Rc::new(RefCell::new(Vec::new()));
-    let response_sender = DummyResponseSender { responses: responses.clone() };
-    let _ = response_sender.boxed_clone();
-}
 
 #[test]
 fn test_given_a_message_action_when_it_is_executed_then_it_adds_the_name_and_uuid_of_the_context_to_the_message
@@ -50,20 +26,18 @@ fn test_given_a_message_action_when_it_is_executed_then_it_adds_the_name_and_uui
         BaseContextBuilder::new(uuid, conditions).name(name.clone()).build()
     };
     let state = State::new();
-    let responses = Rc::new(RefCell::new(Vec::new()));
     let message_action = {
-        let response_sender = DummyResponseSender { responses: responses.clone() };
         let message = Template::compile("message".to_string())
                           .ok()
                           .expect("Failed to compile a handlebars template");
         let config_action = config::action::message::MessageActionBuilder::new("uuid", message)
                                 .build();
-        MessageAction::new(Box::new(response_sender), config_action)
+        MessageAction::new(config_action)
     };
 
     message_action.on_closed(&state, &base_context, &mut responder);
-    assert_eq!(1, responses.borrow().len());
-    let responses = responses.borrow();
+    assert_eq!(1, responder.0.len());
+    let responses = responder.0;
     if let &Response::Alert(ref response) = responses.get(0).unwrap() {
         assert_eq!(name.as_ref().unwrap(),
                    response.message().get(CONTEXT_NAME).unwrap());
@@ -95,9 +69,7 @@ fn test_given_message_action_when_it_is_executed_then_it_uses_the_messages_to_re
                                          .build())];
         State::with_messages(messages)
     };
-    let responses = Rc::new(RefCell::new(Vec::new()));
     let message_action = {
-        let response_sender = DummyResponseSender { responses: responses.clone() };
         let message = Template::compile("key1={{{messages.[0].values.key1}}} \
                                          key2={{{messages.[1].values.key2}}}"
                                             .to_string())
@@ -110,12 +82,12 @@ fn test_given_message_action_when_it_is_executed_then_it_uses_the_messages_to_re
                                           .ok()
                                           .expect("Failed to compile a handlebars template"))
                                 .build();
-        MessageAction::new(Box::new(response_sender), config_action)
+        MessageAction::new(config_action)
     };
 
     message_action.on_closed(&state, &base_context, &mut responder);
-    assert_eq!(1, responses.borrow().len());
-    let responses = responses.borrow();
+    assert_eq!(1, responder.0.len());
+    let responses = responder.0;
     if let &Response::Alert(ref response) = responses.get(0).unwrap() {
         assert_eq!(name.as_ref().unwrap(),
                    response.message().get(CONTEXT_NAME).unwrap());
