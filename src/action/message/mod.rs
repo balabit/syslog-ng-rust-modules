@@ -99,7 +99,7 @@ impl MessageAction {
                     message: message,
                     inject_mode: self.action.inject_mode.clone(),
                 };
-                self.sender.send_response(Response::Alert(response));
+                responder.send_response(Response::Alert(response));
             }
             Err(error) => {
                 error!("{}", error);
