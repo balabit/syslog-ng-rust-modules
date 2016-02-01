@@ -22,7 +22,7 @@ struct DummyResponseSender {
 }
 
 impl ResponseSender for DummyResponseSender {
-    fn send_response(&self, response: Response) {
+    fn send_response(&mut self, response: Response) {
         self.responses.borrow_mut().push(response);
     }
 

@@ -45,7 +45,7 @@ impl ResponseSender {
 }
 
 impl self::response::ResponseSender for ResponseSender {
-    fn send_response(&self, response: Response) {
+    fn send_response(&mut self, response: Response) {
         let sender = self.sender.borrow_mut();
         let _ = sender.send(response);
     }
