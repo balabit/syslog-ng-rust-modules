@@ -108,7 +108,7 @@ impl MessageAction {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Alert {
     message: Message,
     inject_mode: InjectMode,

@@ -11,7 +11,7 @@ pub mod response;
 pub mod request;
 pub mod reactor;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum Response {
     Exit,
     Alert(Alert),
