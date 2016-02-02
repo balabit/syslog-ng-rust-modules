@@ -6,25 +6,23 @@ use reactor::{EventHandler, SharedData};
 
 pub struct ExitEventHandler {
     condition: Condition,
-    response_handler: Box<ResponseSender>,
     stops: u32,
 }
 
 impl ExitEventHandler {
-    pub fn new(condition: Condition, response_handler: Box<ResponseSender>) -> ExitEventHandler {
+    pub fn new(condition: Condition) -> ExitEventHandler {
         ExitEventHandler {
             condition: condition,
-            response_handler: response_handler,
             stops: 0,
         }
     }
 }
 
 impl<'a> EventHandler<Request, SharedData<'a>> for ExitEventHandler {
-    fn handle_event(&mut self, event: Request, _: &mut SharedData) {
+    fn handle_event(&mut self, event: Request, data: &mut SharedData) {
         if let Request::Exit = event {
             self.stops += 1;
-            self.response_handler.send_response(Response::Exit);
+            data.responder.send_response(Response::Exit);
 
             if self.stops >= 2 {
                 self.condition.activate();

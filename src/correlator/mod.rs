@@ -17,7 +17,6 @@ use context::map::MapContext;
 use dispatcher::request::Request;
 use dispatcher::reactor::RequestReactor;
 use dispatcher::{ResponseSender, ResponseHandle};
-use dispatcher::response;
 use dispatcher::demux::Demultiplexer;
 use dispatcher::handlers;
 pub use self::error::Error;
@@ -88,11 +87,9 @@ impl Correlator {
         let handle = thread::spawn(move || {
             let exit_condition = Condition::new(false);
             let dmux = Demultiplexer::new(rx, exit_condition.clone());
-            let response_sender = Box::new(ResponseSender::new(dispatcher_output_channel_tx)) as Box<response::ResponseSender>;
+            let response_sender = Box::new(ResponseSender::new(dispatcher_output_channel_tx));
 
-            let exit_handler =
-                Box::new(handlers::exit::ExitEventHandler::new(exit_condition,
-                                                               response_sender.boxed_clone()));
+            let exit_handler = Box::new(handlers::exit::ExitEventHandler::new(exit_condition));
             let timer_event_handler = Box::new(handlers::timer::TimerEventHandler::new());
             let message_event_handler = Box::new(handlers::message::MessageEventHandler::new());
 
