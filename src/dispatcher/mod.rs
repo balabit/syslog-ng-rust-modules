@@ -49,8 +49,4 @@ impl self::response::ResponseSender for ResponseSender {
         let sender = self.sender.borrow_mut();
         let _ = sender.send(response);
     }
-
-    fn boxed_clone(&self) -> Box<self::response::ResponseSender> {
-        Box::new(self.clone())
-    }
 }
