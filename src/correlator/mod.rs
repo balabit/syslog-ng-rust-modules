@@ -8,7 +8,8 @@ use std::result::Result;
 use std::time::Duration;
 use std::sync::Arc;
 
-use {config, Message, Response};
+use {Message, Response};
+use config::ContextConfig;
 use condition::Condition;
 use context::base::BaseContextBuilder;
 use context::{Context, ContextMap};
@@ -39,8 +40,8 @@ pub struct Correlator {
     handlers: HashMap<ResponseHandle, Box<EventHandler<Response, mpsc::Sender<Request>>>>,
 }
 
-fn create_context(config_context: config::Context) -> Context {
-    let config::Context{name, uuid, conditions, context_id, actions} = config_context;
+fn create_context(config_context: ContextConfig) -> Context {
+    let ContextConfig{name, uuid, conditions, context_id, actions} = config_context;
 
     let base = BaseContextBuilder::new(uuid, conditions);
     let base = base.name(name);
@@ -53,7 +54,7 @@ fn create_context(config_context: config::Context) -> Context {
     }
 }
 
-fn create_context_map(contexts: Vec<config::Context>) -> ContextMap {
+fn create_context_map(contexts: Vec<ContextConfig>) -> ContextMap {
     let mut context_map = ContextMap::new();
     for i in contexts.into_iter() {
         let context: Context = create_context(i);
@@ -67,13 +68,13 @@ impl Correlator {
         let mut file = try!(File::open(path));
         let mut buffer = String::new();
         try!(file.read_to_string(&mut buffer));
-        let contexts = try!(from_str::<Vec<config::Context>>(&buffer));
+        let contexts = try!(from_str::<Vec<ContextConfig>>(&buffer));
         trace!("Correlator: loading contexts from file; len={}",
                contexts.len());
         Ok(Correlator::new(contexts))
     }
 
-    pub fn new(contexts: Vec<config::Context>) -> Correlator {
+    pub fn new(contexts: Vec<ContextConfig>) -> Correlator {
         let (dispatcher_input_channel, rx) = mpsc::channel();
         let (dispatcher_output_channel_tx, dispatcher_output_channel_rx) = mpsc::channel();
         let _ = Timer::from_chan(Duration::from_millis(TIMER_STEP_MS),

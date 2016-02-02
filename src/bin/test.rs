@@ -4,7 +4,7 @@ extern crate correlation;
 extern crate uuid;
 
 use correlation::Correlator;
-use correlation::config::ContextBuilder;
+use correlation::config::ContextConfigBuilder;
 use correlation::conditions::ConditionsBuilder;
 use correlation::message::MessageBuilder;
 use uuid::Uuid;
@@ -27,9 +27,9 @@ fn main() {
                         .last_closes(true)
                         .build();
     let contexts = vec![
-        ContextBuilder::new(Uuid::new_v4(), condition.clone()).actions(Vec::new()).build(),
-        ContextBuilder::new(Uuid::new_v4(), condition.clone()).actions(Vec::new()).build(),
-        ContextBuilder::new(Uuid::new_v4(), condition.clone()).actions(Vec::new()).build(),
+        ContextConfigBuilder::new(Uuid::new_v4(), condition.clone()).actions(Vec::new()).build(),
+        ContextConfigBuilder::new(Uuid::new_v4(), condition.clone()).actions(Vec::new()).build(),
+        ContextConfigBuilder::new(Uuid::new_v4(), condition.clone()).actions(Vec::new()).build(),
     ];
     let mut correlator = Correlator::new(contexts);
     let _ = correlator.push_message(MessageBuilder::new(&uuid1, "message").build());
