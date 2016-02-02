@@ -11,7 +11,7 @@ use std::sync::Arc;
 use {Message, Response};
 use config::ContextConfig;
 use condition::Condition;
-use context::{Context, ContextMap};
+use context::ContextMap;
 use dispatcher::request::Request;
 use dispatcher::reactor::RequestReactor;
 use dispatcher::{ResponseSender, ResponseHandle};
@@ -37,15 +37,6 @@ pub struct Correlator {
     handlers: HashMap<ResponseHandle, Box<EventHandler<Response, mpsc::Sender<Request>>>>,
 }
 
-fn create_context_map(contexts: Vec<ContextConfig>) -> ContextMap {
-    let mut context_map = ContextMap::new();
-    for i in contexts.into_iter() {
-        let context: Context = i.into();
-        context_map.insert(context);
-    }
-    context_map
-}
-
 impl Correlator {
     pub fn from_path(path: &str) -> Result<Correlator, Error> {
         let mut file = try!(File::open(path));
@@ -58,6 +49,7 @@ impl Correlator {
     }
 
     pub fn new(contexts: Vec<ContextConfig>) -> Correlator {
+        let context_map = ContextMap::from_configs(contexts);
         let (dispatcher_input_channel, rx) = mpsc::channel();
         let (dispatcher_output_channel_tx, dispatcher_output_channel_rx) = mpsc::channel();
         let _ = Timer::from_chan(Duration::from_millis(TIMER_STEP_MS),
@@ -72,7 +64,6 @@ impl Correlator {
             let timer_event_handler = Box::new(handlers::timer::TimerEventHandler::new());
             let message_event_handler = Box::new(handlers::message::MessageEventHandler::new());
 
-            let context_map = create_context_map(contexts);
             let mut reactor = RequestReactor::new(dmux, context_map, response_sender);
             reactor.register_handler(exit_handler);
             reactor.register_handler(timer_event_handler);

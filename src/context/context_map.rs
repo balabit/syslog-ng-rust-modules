@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 
+use config::ContextConfig;
 use context::Context;
 
 pub struct ContextMap {
@@ -13,6 +14,14 @@ impl ContextMap {
             map: HashMap::new(),
             contexts: Vec::new(),
         }
+    }
+
+    pub fn from_configs(configs: Vec<ContextConfig>) -> ContextMap {
+        let mut context_map = ContextMap::new();
+        for i in configs {
+            context_map.insert(i.into());
+        }
+        context_map
     }
 
     pub fn insert(&mut self, context: Context) {
