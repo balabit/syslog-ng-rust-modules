@@ -8,7 +8,7 @@ use std::result::Result;
 use std::time::Duration;
 use std::sync::Arc;
 
-use {action, config, context, Message, Response};
+use {config, context, Message, Response};
 use condition::Condition;
 use context::base::BaseContextBuilder;
 use context::{Context, ContextMap};
@@ -41,15 +41,10 @@ pub struct Correlator {
 
 fn create_context(config_context: config::Context) -> Context {
     let config::Context{name, uuid, conditions, context_id, actions} = config_context;
-    let mut boxed_actions = Vec::new();
 
-    for i in actions.into_iter() {
-        let action = action::from_config(i);
-        boxed_actions.push(action);
-    }
     let base = BaseContextBuilder::new(uuid, conditions);
     let base = base.name(name);
-    let base = base.actions(boxed_actions);
+    let base = base.actions(actions);
     let base = base.build();
     if let Some(context_id) = context_id {
         Context::Map(MapContext::new(base, context_id))
