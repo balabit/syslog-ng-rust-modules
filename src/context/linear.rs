@@ -1,13 +1,12 @@
 use uuid::Uuid;
 use std::sync::Arc;
 
-use conditions::Conditions;
 use message::Message;
 use state::State;
 use timer::TimerEvent;
 use dispatcher::request::Request;
 use dispatcher::response::ResponseSender;
-use context::base::{BaseContext, BaseContextBuilder};
+use context::base::BaseContext;
 
 pub struct LinearContext {
     base: BaseContext,
@@ -16,9 +15,9 @@ pub struct LinearContext {
 
 impl LinearContext {
     #[allow(dead_code)]
-    pub fn new(uuid: Uuid, conditions: Conditions) -> LinearContext {
+    pub fn new(base: BaseContext) -> LinearContext {
         LinearContext {
-            base: BaseContextBuilder::new(uuid, conditions).build(),
+            base: base,
             state: State::new(),
         }
     }

@@ -5,6 +5,7 @@ use std::time::Duration;
 use message::MessageBuilder;
 use timer::TimerEvent;
 use context::LinearContext;
+use context::BaseContextBuilder;
 use conditions::ConditionsBuilder;
 use dispatcher::response::MockResponseSender;
 
@@ -16,10 +17,11 @@ fn test_given_close_condition_with_timeout_when_the_timeout_expires_then_the_con
     let patterns = vec![
         msg_id.clone(),
     ];
-    let mut context = LinearContext::new(Uuid::new_v4(),
-                                         ConditionsBuilder::new(timeout)
-                                             .patterns(patterns)
-                                             .build());
+    let conditions = ConditionsBuilder::new(timeout)
+                                        .patterns(patterns)
+                                        .build();
+    let base = BaseContextBuilder::new(Uuid::new_v4(), conditions).build();
+    let mut context = LinearContext::new(base);
     let msg1 = MessageBuilder::new(&msg_id, "message").build();
     let event = Arc::new(msg1);
     assert_false!(context.is_open());
@@ -43,11 +45,12 @@ fn test_given_close_condition_with_max_size_when_the_max_size_reached_then_the_c
     let patterns = vec![
         msg_id.clone(),
     ];
-    let mut context = LinearContext::new(Uuid::new_v4(),
-                                         ConditionsBuilder::new(timeout)
-                                             .max_size(max_size)
-                                             .patterns(patterns)
-                                             .build());
+    let conditions = ConditionsBuilder::new(timeout)
+                                        .max_size(max_size)
+                                        .patterns(patterns)
+                                        .build();
+    let base = BaseContextBuilder::new(Uuid::new_v4(), conditions).build();
+    let mut context = LinearContext::new(base);
     let msg1 = MessageBuilder::new(&msg_id, "message").build();
     let event = Arc::new(msg1);
     context.on_message(event.clone(), &mut responder);
@@ -68,11 +71,12 @@ fn test_given_close_condition_with_renew_timeout_when_the_timeout_expires_withou
     let patterns = vec![
         msg_id.clone(),
     ];
-    let mut context = LinearContext::new(Uuid::new_v4(),
-                                         ConditionsBuilder::new(timeout)
-                                             .renew_timeout(renew_timeout)
-                                             .patterns(patterns)
-                                             .build());
+    let conditions = ConditionsBuilder::new(timeout)
+                                         .renew_timeout(renew_timeout)
+                                         .patterns(patterns)
+                                         .build();
+    let base = BaseContextBuilder::new(Uuid::new_v4(), conditions).build();
+    let mut context = LinearContext::new(base);
     let msg1 = MessageBuilder::new(&msg_id, "message").build();
     let event = Arc::new(msg1);
     context.on_message(event.clone(), &mut responder);
@@ -95,11 +99,12 @@ fn test_given_close_condition_with_renew_timeout_when_the_timeout_expires_with_r
     let patterns = vec![
         msg_id.clone(),
     ];
-    let mut context = LinearContext::new(Uuid::new_v4(),
-                                         ConditionsBuilder::new(timeout)
-                                             .renew_timeout(renew_timeout)
-                                             .patterns(patterns)
-                                             .build());
+    let conditions = ConditionsBuilder::new(timeout)
+                                         .renew_timeout(renew_timeout)
+                                         .patterns(patterns)
+                                         .build();
+    let base = BaseContextBuilder::new(Uuid::new_v4(), conditions).build();
+    let mut context = LinearContext::new(base);
     let msg1 = MessageBuilder::new(&msg_id, "message").build();
     let event = Arc::new(msg1);
     assert_false!(context.is_open());
