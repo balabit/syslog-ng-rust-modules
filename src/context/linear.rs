@@ -14,7 +14,6 @@ pub struct LinearContext {
 }
 
 impl LinearContext {
-    #[allow(dead_code)]
     pub fn new(base: BaseContext) -> LinearContext {
         LinearContext {
             base: base,
@@ -51,14 +50,5 @@ impl LinearContext {
     #[allow(dead_code)]
     pub fn uuid(&self) -> &Uuid {
         self.base.uuid()
-    }
-}
-
-impl From<BaseContext> for LinearContext {
-    fn from(context: BaseContext) -> LinearContext {
-        LinearContext {
-            base: context,
-            state: State::new(),
-        }
     }
 }

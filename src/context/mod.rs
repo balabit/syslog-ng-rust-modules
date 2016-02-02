@@ -48,7 +48,7 @@ impl From<ContextConfig> for Context {
         if let Some(context_id) = context_id {
             Context::Map(MapContext::new(base, context_id))
         } else {
-            Context::Linear(LinearContext::from(base))
+            Context::Linear(LinearContext::new(base))
         }
     }
 }
