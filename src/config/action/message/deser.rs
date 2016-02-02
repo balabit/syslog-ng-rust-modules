@@ -6,6 +6,7 @@ use handlebars::Template;
 use handlebars::Handlebars;
 use serde::de::{Deserialize, Deserializer, Error, MapVisitor, Visitor};
 use std::collections::BTreeMap;
+use super::MESSAGE;
 
 impl Deserialize for MessageAction {
     fn deserialize<D>(deserializer: &mut D) -> Result<MessageAction, D::Error>
@@ -107,7 +108,7 @@ impl Visitor for MessageActionVisitor {
             }
         };
 
-        let values = match values {
+        let mut values = match values {
             Some(values) => {
                 let mut registry = Handlebars::new();
                 for (key, value) in values.into_iter() {
@@ -120,6 +121,8 @@ impl Visitor for MessageActionVisitor {
         };
 
         try!(visitor.end());
+
+        values.register_template(MESSAGE, message.clone());
 
         Ok(MessageAction {
             uuid: uuid,
