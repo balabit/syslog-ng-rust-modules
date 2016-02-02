@@ -16,7 +16,9 @@ use dispatcher::request::Request;
 use dispatcher::reactor::RequestReactor;
 use dispatcher::{ResponseSender, ResponseHandle};
 use dispatcher::demux::Demultiplexer;
-use dispatcher::handlers;
+use dispatcher::handlers::exit::ExitEventHandler;
+use dispatcher::handlers::timer::TimerEventHandler;
+use dispatcher::handlers::message::MessageEventHandler;
 pub use self::error::Error;
 use reactor::{Event, Reactor, EventHandler};
 use timer::Timer;
@@ -60,9 +62,9 @@ impl Correlator {
             let dmux = Demultiplexer::new(rx, exit_condition.clone());
             let response_sender = Box::new(ResponseSender::new(dispatcher_output_channel_tx));
 
-            let exit_handler = Box::new(handlers::exit::ExitEventHandler::new(exit_condition));
-            let timer_event_handler = Box::new(handlers::timer::TimerEventHandler::new());
-            let message_event_handler = Box::new(handlers::message::MessageEventHandler::new());
+            let exit_handler = Box::new(ExitEventHandler::new(exit_condition));
+            let timer_event_handler = Box::new(TimerEventHandler::new());
+            let message_event_handler = Box::new(MessageEventHandler::new());
 
             let mut reactor = RequestReactor::new(dmux, context_map, response_sender);
             reactor.register_handler(exit_handler);
