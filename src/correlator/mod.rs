@@ -8,7 +8,7 @@ use std::result::Result;
 use std::time::Duration;
 use std::sync::Arc;
 
-use {config, context, Message, Response};
+use {config, Message, Response};
 use condition::Condition;
 use context::base::BaseContextBuilder;
 use context::{Context, ContextMap};
@@ -56,7 +56,7 @@ fn create_context(config_context: config::Context) -> Context {
 fn create_context_map(contexts: Vec<config::Context>) -> ContextMap {
     let mut context_map = ContextMap::new();
     for i in contexts.into_iter() {
-        let context: context::Context = create_context(i);
+        let context: Context = create_context(i);
         context_map.insert(context);
     }
     context_map
