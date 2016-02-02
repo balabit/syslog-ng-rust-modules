@@ -1,5 +1,6 @@
 use dispatcher::request::Request;
 use dispatcher::response::ResponseSender;
+use config::ContextConfig;
 
 pub use self::linear::LinearContext;
 pub use self::map::MapContext;
@@ -18,6 +19,7 @@ pub enum Context {
     Linear(LinearContext),
     Map(MapContext),
 }
+
 impl Context {
     pub fn on_event(&mut self, event: Request, responder: &mut ResponseSender) {
         match *self {
@@ -30,6 +32,23 @@ impl Context {
         match *self {
             Context::Linear(ref context) => context.patterns(),
             Context::Map(ref context) => context.patterns(),
+        }
+    }
+}
+
+impl From<ContextConfig> for Context {
+    fn from(config: ContextConfig) -> Context {
+        let ContextConfig {name, uuid, conditions, context_id, actions} = config;
+
+        let base = BaseContextBuilder::new(uuid, conditions);
+        let base = base.name(name);
+        let base = base.actions(actions);
+        let base = base.build();
+
+        if let Some(context_id) = context_id {
+            Context::Map(MapContext::new(base, context_id))
+        } else {
+            Context::Linear(LinearContext::from(base))
         }
     }
 }

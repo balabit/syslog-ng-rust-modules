@@ -11,10 +11,7 @@ use std::sync::Arc;
 use {Message, Response};
 use config::ContextConfig;
 use condition::Condition;
-use context::base::BaseContextBuilder;
 use context::{Context, ContextMap};
-use context::linear::LinearContext;
-use context::map::MapContext;
 use dispatcher::request::Request;
 use dispatcher::reactor::RequestReactor;
 use dispatcher::{ResponseSender, ResponseHandle};
@@ -40,24 +37,10 @@ pub struct Correlator {
     handlers: HashMap<ResponseHandle, Box<EventHandler<Response, mpsc::Sender<Request>>>>,
 }
 
-fn create_context(config_context: ContextConfig) -> Context {
-    let ContextConfig{name, uuid, conditions, context_id, actions} = config_context;
-
-    let base = BaseContextBuilder::new(uuid, conditions);
-    let base = base.name(name);
-    let base = base.actions(actions);
-    let base = base.build();
-    if let Some(context_id) = context_id {
-        Context::Map(MapContext::new(base, context_id))
-    } else {
-        Context::Linear(LinearContext::from(base))
-    }
-}
-
 fn create_context_map(contexts: Vec<ContextConfig>) -> ContextMap {
     let mut context_map = ContextMap::new();
     for i in contexts.into_iter() {
-        let context: Context = create_context(i);
+        let context: Context = i.into();
         context_map.insert(context);
     }
     context_map
