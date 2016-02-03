@@ -1,9 +1,8 @@
 use std::sync::mpsc::Sender;
-use std::rc::Rc;
-use std::cell::RefCell;
 
 use action::Alert;
 use reactor::Event;
+use self::response::ResponseSender;
 
 pub mod demux;
 pub mod handlers;
@@ -33,20 +32,8 @@ impl Event for Response {
     }
 }
 
-#[derive(Clone)]
-pub struct ResponseSender {
-    sender: Rc<RefCell<Sender<Response>>>,
-}
-
-impl ResponseSender {
-    pub fn new(sender: Sender<Response>) -> ResponseSender {
-        ResponseSender { sender: Rc::new(RefCell::new(sender)) }
-    }
-}
-
-impl self::response::ResponseSender for ResponseSender {
+impl ResponseSender for Sender<Response> {
     fn send_response(&mut self, response: Response) {
-        let sender = self.sender.borrow_mut();
-        let _ = sender.send(response);
+        let _ = self.send(response);
     }
 }

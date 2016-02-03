@@ -13,7 +13,7 @@ use config::ContextConfig;
 use context::ContextMap;
 use dispatcher::request::Request;
 use dispatcher::reactor::RequestReactor;
-use dispatcher::{ResponseSender, ResponseHandle};
+use dispatcher::ResponseHandle;
 use dispatcher::demux::Demultiplexer;
 use dispatcher::handlers::exit::ExitEventHandler;
 use dispatcher::handlers::timer::TimerEventHandler;
@@ -58,7 +58,7 @@ impl Correlator {
 
         let handle = thread::spawn(move || {
             let dmux = Demultiplexer::new(rx);
-            let response_sender = Box::new(ResponseSender::new(dispatcher_output_channel_tx));
+            let response_sender = Box::new(dispatcher_output_channel_tx);
 
             let exit_handler = Box::new(ExitEventHandler::new());
             let timer_event_handler = Box::new(TimerEventHandler::new());
