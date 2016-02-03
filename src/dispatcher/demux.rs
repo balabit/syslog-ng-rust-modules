@@ -5,14 +5,14 @@ use reactor::EventDemultiplexer;
 
 pub struct Demultiplexer<T> {
     channel: Receiver<T>,
-    stops: u32
+    stops: u32,
 }
 
 impl<T> Demultiplexer<T> {
     pub fn new(channel: Receiver<T>) -> Demultiplexer<T> {
         Demultiplexer {
             channel: channel,
-            stops: 0
+            stops: 0,
         }
     }
 }

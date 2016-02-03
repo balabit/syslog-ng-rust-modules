@@ -31,8 +31,7 @@ fn test_given_a_message_action_when_it_is_executed_then_it_adds_the_name_and_uui
         let message = Template::compile("message".to_string())
                           .ok()
                           .expect("Failed to compile a handlebars template");
-        config::action::message::MessageActionBuilder::new("uuid", message)
-                                .build()
+        config::action::message::MessageActionBuilder::new("uuid", message).build()
     };
 
     message_action.on_closed(&state, &base_context, &mut responder);
@@ -76,12 +75,11 @@ fn test_given_message_action_when_it_is_executed_then_it_uses_the_messages_to_re
                           .ok()
                           .expect("Failed to compile a handlebars template");
         config::action::message::MessageActionBuilder::new("uuid", message)
-                                .pair("message_num",
-                                      Template::compile("we have {{context_len}} messages"
-                                                            .to_string())
-                                          .ok()
-                                          .expect("Failed to compile a handlebars template"))
-                                .build()
+            .pair("message_num",
+                  Template::compile("we have {{context_len}} messages".to_string())
+                      .ok()
+                      .expect("Failed to compile a handlebars template"))
+            .build()
     };
 
     message_action.on_closed(&state, &base_context, &mut responder);

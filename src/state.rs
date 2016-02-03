@@ -66,7 +66,10 @@ impl State {
         self.elapsed_time_since_last_message = Duration::from_secs(0);
     }
 
-    pub fn on_timer(&mut self, event: &TimerEvent, context: &BaseContext, responder: &mut ResponseSender) {
+    pub fn on_timer(&mut self,
+                    event: &TimerEvent,
+                    context: &BaseContext,
+                    responder: &mut ResponseSender) {
         if self.is_open() {
             self.update_timers(event);
         }
@@ -75,7 +78,10 @@ impl State {
         }
     }
 
-    pub fn on_message(&mut self, event: Arc<Message>, context: &BaseContext, responder: &mut ResponseSender) {
+    pub fn on_message(&mut self,
+                      event: Arc<Message>,
+                      context: &BaseContext,
+                      responder: &mut ResponseSender) {
         if self.is_open() {
             self.add_message(event);
         } else if context.conditions().is_opening(&event) {

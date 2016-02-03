@@ -18,8 +18,8 @@ fn test_given_close_condition_with_timeout_when_the_timeout_expires_then_the_con
         msg_id.clone(),
     ];
     let conditions = ConditionsBuilder::new(timeout)
-                                        .patterns(patterns)
-                                        .build();
+                         .patterns(patterns)
+                         .build();
     let base = BaseContextBuilder::new(Uuid::new_v4(), conditions).build();
     let mut context = LinearContext::new(base);
     let msg1 = MessageBuilder::new(&msg_id, "message").build();
@@ -46,9 +46,9 @@ fn test_given_close_condition_with_max_size_when_the_max_size_reached_then_the_c
         msg_id.clone(),
     ];
     let conditions = ConditionsBuilder::new(timeout)
-                                        .max_size(max_size)
-                                        .patterns(patterns)
-                                        .build();
+                         .max_size(max_size)
+                         .patterns(patterns)
+                         .build();
     let base = BaseContextBuilder::new(Uuid::new_v4(), conditions).build();
     let mut context = LinearContext::new(base);
     let msg1 = MessageBuilder::new(&msg_id, "message").build();
@@ -72,9 +72,9 @@ fn test_given_close_condition_with_renew_timeout_when_the_timeout_expires_withou
         msg_id.clone(),
     ];
     let conditions = ConditionsBuilder::new(timeout)
-                                         .renew_timeout(renew_timeout)
-                                         .patterns(patterns)
-                                         .build();
+                         .renew_timeout(renew_timeout)
+                         .patterns(patterns)
+                         .build();
     let base = BaseContextBuilder::new(Uuid::new_v4(), conditions).build();
     let mut context = LinearContext::new(base);
     let msg1 = MessageBuilder::new(&msg_id, "message").build();
@@ -100,9 +100,9 @@ fn test_given_close_condition_with_renew_timeout_when_the_timeout_expires_with_r
         msg_id.clone(),
     ];
     let conditions = ConditionsBuilder::new(timeout)
-                                         .renew_timeout(renew_timeout)
-                                         .patterns(patterns)
-                                         .build();
+                         .renew_timeout(renew_timeout)
+                         .patterns(patterns)
+                         .build();
     let base = BaseContextBuilder::new(Uuid::new_v4(), conditions).build();
     let mut context = LinearContext::new(base);
     let msg1 = MessageBuilder::new(&msg_id, "message").build();

@@ -262,7 +262,8 @@ mod test {
 
         let result = from_str::<ContextConfig>(text);
         let _ = result.err()
-                      .expect("Successfully deserialized an invalid ContextConfig (UUID is invalid)");
+                      .expect("Successfully deserialized an invalid ContextConfig (UUID is \
+                               invalid)");
     }
 
     #[test]

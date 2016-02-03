@@ -10,16 +10,19 @@ pub struct RequestReactor {
     handlers: BTreeMap<RequestHandle, Box<for<'a> EventHandler<Request, SharedData<'a>>>>,
     demultiplexer: Demultiplexer<Request>,
     context_map: ContextMap,
-    responder: Box<ResponseSender>
+    responder: Box<ResponseSender>,
 }
 
 impl RequestReactor {
-    pub fn new(demultiplexer: Demultiplexer<Request>, context_map: ContextMap, responder: Box<ResponseSender>) -> RequestReactor {
+    pub fn new(demultiplexer: Demultiplexer<Request>,
+               context_map: ContextMap,
+               responder: Box<ResponseSender>)
+               -> RequestReactor {
         RequestReactor {
             demultiplexer: demultiplexer,
             context_map: context_map,
             handlers: BTreeMap::new(),
-            responder: responder
+            responder: responder,
         }
     }
 }
@@ -37,7 +40,8 @@ impl Reactor for RequestReactor {
             }
         }
     }
-    fn register_handler(&mut self, handler: Box<for<'a> EventHandler<Self::Event, SharedData<'a>>>) {
+    fn register_handler(&mut self,
+                        handler: Box<for<'a> EventHandler<Self::Event, SharedData<'a>>>) {
         self.handlers.insert(handler.handle(), handler);
     }
     fn remove_handler_by_handle(&mut self, handler: &RequestHandle) {

@@ -126,7 +126,8 @@ fn test_given_correlator_when_it_is_built_from_json_then_we_get_the_expected_cor
     let result = from_str::<Vec<ContextConfig>>(JSON_CONFIG);
     let expected_name = "CONTEXT_NAME_1".to_string();
     let expected_uuid = "185e96da-c00e-454b-b4fe-9d0a14a86335".to_string();
-    let mut contexts = result.ok().expect("Failed to deserialize a config::ContextConfig from JSON");
+    let mut contexts = result.ok()
+                             .expect("Failed to deserialize a config::ContextConfig from JSON");
     for i in &contexts {
         assert_eq!(true, i.name.is_some());
     }
