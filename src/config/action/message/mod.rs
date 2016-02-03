@@ -35,12 +35,12 @@ mod builder;
 pub use self::builder::MessageActionBuilder;
 
 pub struct MessageAction {
-    pub uuid: String,
-    pub name: Option<String>,
-    pub message: Template,
-    pub values: Handlebars,
-    pub when: ExecCondition,
-    pub inject_mode: InjectMode,
+    uuid: String,
+    name: Option<String>,
+    message: Template,
+    values: Handlebars,
+    when: ExecCondition,
+    inject_mode: InjectMode,
 }
 
 impl MessageAction {
