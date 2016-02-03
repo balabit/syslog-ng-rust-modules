@@ -10,7 +10,6 @@ use std::sync::Arc;
 
 use {Message, Response};
 use config::ContextConfig;
-use condition::Condition;
 use context::ContextMap;
 use dispatcher::request::Request;
 use dispatcher::reactor::RequestReactor;
@@ -112,14 +111,11 @@ impl Correlator {
     }
 
     fn stop_dispatcher(&mut self) {
-        let exit_condition = Condition::new(false);
-        let exit_handler = Box::new(ExitHandler::new(exit_condition.clone()));
+        let exit_handler = Box::new(ExitHandler::new());
         self.register_handler(exit_handler);
         let _ = self.dispatcher_input_channel.send(Request::Exit);
-        while !exit_condition.is_active() {
-            if let Ok(event) = self.dispatcher_output_channel.recv() {
-                self.handle_event(event);
-            }
+        while let Ok(event) = self.dispatcher_output_channel.recv() {
+            self.handle_event(event);
         }
     }
 }
