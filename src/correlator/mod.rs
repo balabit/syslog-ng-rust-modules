@@ -58,11 +58,10 @@ impl Correlator {
                                  dispatcher_input_channel.clone());
 
         let handle = thread::spawn(move || {
-            let exit_condition = Condition::new(false);
-            let dmux = Demultiplexer::new(rx, exit_condition.clone());
+            let dmux = Demultiplexer::new(rx);
             let response_sender = Box::new(ResponseSender::new(dispatcher_output_channel_tx));
 
-            let exit_handler = Box::new(ExitEventHandler::new(exit_condition));
+            let exit_handler = Box::new(ExitEventHandler::new());
             let timer_event_handler = Box::new(TimerEventHandler::new());
             let message_event_handler = Box::new(MessageEventHandler::new());
 

@@ -2,19 +2,16 @@ use std::sync::mpsc::Receiver;
 
 use dispatcher::request::Request;
 use reactor::EventDemultiplexer;
-use condition::Condition;
 
 pub struct Demultiplexer<T> {
     channel: Receiver<T>,
-    condition: Condition,
     stops: u32
 }
 
 impl<T> Demultiplexer<T> {
-    pub fn new(channel: Receiver<T>, condition: Condition) -> Demultiplexer<T> {
+    pub fn new(channel: Receiver<T>) -> Demultiplexer<T> {
         Demultiplexer {
             channel: channel,
-            condition: condition,
             stops: 0
         }
     }

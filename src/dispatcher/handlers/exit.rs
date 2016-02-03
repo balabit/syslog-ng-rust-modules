@@ -1,18 +1,13 @@
 use dispatcher::response::ResponseSender;
 use dispatcher::Response;
 use dispatcher::request::{Request, RequestHandle};
-use condition::Condition;
 use reactor::{EventHandler, SharedData};
 
-pub struct ExitEventHandler {
-    condition: Condition,
-}
+pub struct ExitEventHandler;
 
 impl ExitEventHandler {
-    pub fn new(condition: Condition) -> ExitEventHandler {
-        ExitEventHandler {
-            condition: condition,
-        }
+    pub fn new() -> ExitEventHandler {
+        ExitEventHandler
     }
 }
 
