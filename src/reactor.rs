@@ -1,6 +1,23 @@
+use dispatcher::response::ResponseSender;
+use context::ContextMap;
+
+pub struct SharedData<'a> {
+    pub responder: &'a mut ResponseSender,
+    pub map: &'a mut ContextMap,
+}
+
+impl<'a> SharedData<'a> {
+    pub fn new(map: &'a mut ContextMap, responder: &'a mut ResponseSender) -> SharedData<'a> {
+        SharedData {
+            map: map,
+            responder: responder,
+        }
+    }
+}
+
 pub trait EventHandler<T: Event, D> {
     fn handle_event(&mut self, event: T, shared_data: &mut D);
-    fn handler(&self) -> T::Handler;
+    fn handle(&self) -> T::Handle;
 }
 
 pub trait EventDemultiplexer {
@@ -8,15 +25,16 @@ pub trait EventDemultiplexer {
     fn select(&mut self) -> Option<Self::Event>;
 }
 
-pub trait Reactor<D> {
+pub trait Reactor {
     type Event: Event;
     fn handle_events(&mut self);
-    fn register_handler(&mut self, handler: Box<EventHandler<Self::Event, D>>);
-    fn remove_handler_by_handler(&mut self,
-                                 handler: &<<Self as Reactor<D>>::Event as Event>::Handler);
+    fn register_handler(&mut self,
+                        handler: Box<for<'a> EventHandler<Self::Event, SharedData<'a>>>);
+    fn remove_handler_by_handle(&mut self,
+                                 handler: &<<Self as Reactor>::Event as Event>::Handle);
 }
 
 pub trait Event {
-    type Handler;
-    fn handler(&self) -> Self::Handler;
+    type Handle;
+    fn handle(&self) -> Self::Handle;
 }

@@ -1,13 +1,13 @@
 use uuid::Uuid;
 
-use action::Action;
+use config::action::ActionType;
 use conditions::Conditions;
 
 pub struct BaseContext {
     name: Option<String>,
     uuid: Uuid,
     conditions: Conditions,
-    actions: Vec<Box<Action>>,
+    actions: Vec<ActionType>,
 }
 
 impl BaseContext {
@@ -23,7 +23,7 @@ impl BaseContext {
         self.name.as_ref()
     }
 
-    pub fn actions(&self) -> &[Box<Action>] {
+    pub fn actions(&self) -> &[ActionType] {
         &self.actions
     }
 }
@@ -32,7 +32,7 @@ pub struct BaseContextBuilder {
     name: Option<String>,
     uuid: Uuid,
     conditions: Conditions,
-    actions: Vec<Box<Action>>,
+    actions: Vec<ActionType>,
 }
 
 impl BaseContextBuilder {
@@ -50,7 +50,7 @@ impl BaseContextBuilder {
         self
     }
 
-    pub fn actions(mut self, actions: Vec<Box<Action>>) -> BaseContextBuilder {
+    pub fn actions(mut self, actions: Vec<ActionType>) -> BaseContextBuilder {
         self.actions = actions;
         self
     }

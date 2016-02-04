@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 
+use config::ContextConfig;
 use context::Context;
 
 pub struct ContextMap {
@@ -13,6 +14,14 @@ impl ContextMap {
             map: HashMap::new(),
             contexts: Vec::new(),
         }
+    }
+
+    pub fn from_configs(configs: Vec<ContextConfig>) -> ContextMap {
+        let mut context_map = ContextMap::new();
+        for i in configs {
+            context_map.insert(i.into());
+        }
+        context_map
     }
 
     pub fn insert(&mut self, context: Context) {
@@ -95,7 +104,7 @@ mod tests {
     use super::*;
 
     use conditions::ConditionsBuilder;
-    use context::{Context, LinearContext};
+    use context::{Context, LinearContext, BaseContextBuilder};
     use uuid::Uuid;
     use std::time::Duration;
 
@@ -119,7 +128,8 @@ mod tests {
                 let patterns = vec!["A".to_string(), "B".to_string()];
                 ConditionsBuilder::new(Duration::from_millis(100)).patterns(patterns).build()
             };
-            LinearContext::new(uuid.clone(), conditions)
+            let base = BaseContextBuilder::new(uuid.clone(), conditions).build();
+            LinearContext::new(base)
         };
         context_map.insert(Context::Linear(context1));
         assert_eq!(context_map.contexts_mut().len(), 1);

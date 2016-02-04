@@ -21,7 +21,6 @@ pub use message::Message;
 pub mod conditions;
 pub mod config;
 pub mod action;
-pub mod condition;
 mod context;
 pub mod correlator;
 pub mod dispatcher;

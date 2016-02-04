@@ -1,40 +1,25 @@
 use std::sync::mpsc;
 
 use Response;
-use message::Message;
-use condition::Condition;
 use dispatcher::request::Request;
-use dispatcher::ResponseHandler;
+use dispatcher::ResponseHandle;
 use reactor::EventHandler;
 
-pub struct ExitHandler {
-    channel: mpsc::Sender<Request<Message>>,
-    exits_received: u32,
-    condition: Condition,
-}
+pub struct ExitHandler;
 
 impl ExitHandler {
-    pub fn new(condition: Condition, channel: mpsc::Sender<Request<Message>>) -> ExitHandler {
-        ExitHandler {
-            channel: channel,
-            exits_received: 0,
-            condition: condition,
-        }
+    pub fn new() -> ExitHandler {
+        ExitHandler
     }
 }
 
-impl EventHandler<Response, mpsc::Sender<Request<Message>>> for ExitHandler {
-    fn handle_event(&mut self, event: Response, _: &mut mpsc::Sender<Request<Message>>) {
+impl EventHandler<Response, mpsc::Sender<Request>> for ExitHandler {
+    fn handle_event(&mut self, event: Response, channel: &mut mpsc::Sender<Request>) {
         if let Response::Exit = event {
-            self.exits_received += 1;
-            let _ = self.channel.send(Request::Exit);
-
-            if self.exits_received >= 1 {
-                self.condition.activate()
-            }
+            let _ = channel.send(Request::Exit);
         }
     }
-    fn handler(&self) -> ResponseHandler {
-        ResponseHandler::Exit
+    fn handle(&self) -> ResponseHandle {
+        ResponseHandle::Exit
     }
 }

@@ -19,12 +19,8 @@ impl MessageBuilder {
         }
     }
 
-    pub fn name(&mut self, name: Option<&str>) -> &mut MessageBuilder {
-        if let Some(name) = name {
-            self.name = Some(name.to_string());
-        } else {
-            self.name = None;
-        }
+    pub fn name<S: Into<String>>(&mut self, name: Option<S>) -> &mut MessageBuilder {
+        self.name = name.map(|name| name.into());
         self
     }
 

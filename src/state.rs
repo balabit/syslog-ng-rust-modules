@@ -1,15 +1,17 @@
-use std::rc::Rc;
+use std::sync::Arc;
 
+use action::Action;
 use Message;
 use timer::TimerEvent;
 use std::time::Duration;
 use context::BaseContext;
+use dispatcher::response::ResponseSender;
 
 #[derive(Debug)]
 pub struct State {
     elapsed_time: Duration,
     elapsed_time_since_last_message: Duration,
-    messages: Vec<Rc<Message>>,
+    messages: Vec<Arc<Message>>,
     opened: bool,
 }
 
@@ -18,7 +20,7 @@ impl State {
         State::with_messages(Vec::new())
     }
 
-    pub fn with_messages(messages: Vec<Rc<Message>>) -> State {
+    pub fn with_messages(messages: Vec<Arc<Message>>) -> State {
         State {
             elapsed_time: Duration::from_secs(0),
             elapsed_time_since_last_message: Duration::from_secs(0),
@@ -31,18 +33,18 @@ impl State {
         self.opened
     }
 
-    fn open(&mut self, context: &BaseContext) {
+    fn open(&mut self, context: &BaseContext, responder: &mut ResponseSender) {
         trace!("Context: opening state; uuid={}", context.uuid());
         for i in context.actions() {
-            i.on_opened(self, context);
+            i.on_opened(self, context, responder);
         }
         self.opened = true;
     }
 
-    fn close(&mut self, context: &BaseContext) {
+    fn close(&mut self, context: &BaseContext, responder: &mut ResponseSender) {
         trace!("Context: closing state; uuid={}", context.uuid());
         for i in context.actions() {
-            i.on_closed(self, context);
+            i.on_closed(self, context, responder);
         }
         self.reset();
     }
@@ -55,34 +57,40 @@ impl State {
         self.elapsed_time_since_last_message
     }
 
-    pub fn messages(&self) -> &[Rc<Message>] {
+    pub fn messages(&self) -> &[Arc<Message>] {
         &self.messages
     }
 
-    fn add_message(&mut self, message: Rc<Message>) {
+    fn add_message(&mut self, message: Arc<Message>) {
         self.messages.push(message);
         self.elapsed_time_since_last_message = Duration::from_secs(0);
     }
 
-    pub fn on_timer(&mut self, event: &TimerEvent, context: &BaseContext) {
+    pub fn on_timer(&mut self,
+                    event: &TimerEvent,
+                    context: &BaseContext,
+                    responder: &mut ResponseSender) {
         if self.is_open() {
             self.update_timers(event);
         }
         if context.conditions().is_closing(self) {
-            self.close(context);
+            self.close(context, responder);
         }
     }
 
-    pub fn on_message(&mut self, event: Rc<Message>, context: &BaseContext) {
+    pub fn on_message(&mut self,
+                      event: Arc<Message>,
+                      context: &BaseContext,
+                      responder: &mut ResponseSender) {
         if self.is_open() {
             self.add_message(event);
         } else if context.conditions().is_opening(&event) {
             self.add_message(event);
-            self.open(context);
+            self.open(context, responder);
         }
 
         if context.conditions().is_closing(self) {
-            self.close(context);
+            self.close(context, responder);
         }
     }
 

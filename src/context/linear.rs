@@ -1,12 +1,12 @@
 use uuid::Uuid;
-use std::rc::Rc;
+use std::sync::Arc;
 
-use conditions::Conditions;
 use message::Message;
 use state::State;
 use timer::TimerEvent;
-use dispatcher::request::{InternalRequest, Request};
-use context::base::{BaseContext, BaseContextBuilder};
+use dispatcher::request::Request;
+use dispatcher::response::ResponseSender;
+use context::base::BaseContext;
 
 pub struct LinearContext {
     base: BaseContext,
@@ -14,29 +14,28 @@ pub struct LinearContext {
 }
 
 impl LinearContext {
-    #[allow(dead_code)]
-    pub fn new(uuid: Uuid, conditions: Conditions) -> LinearContext {
+    pub fn new(base: BaseContext) -> LinearContext {
         LinearContext {
-            base: BaseContextBuilder::new(uuid, conditions).build(),
+            base: base,
             state: State::new(),
         }
     }
 
-    pub fn on_event(&mut self, event: InternalRequest) {
+    pub fn on_event(&mut self, event: Request, responder: &mut ResponseSender) {
         trace!("LinearContext: received event");
         match event {
-            Request::Timer(event) => self.on_timer(&event),
-            Request::Message(message) => self.on_message(message),
+            Request::Timer(event) => self.on_timer(&event, responder),
+            Request::Message(message) => self.on_message(message, responder),
             _ => {}
         }
     }
 
-    pub fn on_timer(&mut self, event: &TimerEvent) {
-        self.state.on_timer(event, &self.base);
+    pub fn on_timer(&mut self, event: &TimerEvent, responder: &mut ResponseSender) {
+        self.state.on_timer(event, &self.base, responder);
     }
 
-    pub fn on_message(&mut self, event: Rc<Message>) {
-        self.state.on_message(event, &self.base);
+    pub fn on_message(&mut self, event: Arc<Message>, responder: &mut ResponseSender) {
+        self.state.on_message(event, &self.base, responder);
     }
 
     #[allow(dead_code)]
@@ -51,14 +50,5 @@ impl LinearContext {
     #[allow(dead_code)]
     pub fn uuid(&self) -> &Uuid {
         self.base.uuid()
-    }
-}
-
-impl From<BaseContext> for LinearContext {
-    fn from(context: BaseContext) -> LinearContext {
-        LinearContext {
-            base: context,
-            state: State::new(),
-        }
     }
 }

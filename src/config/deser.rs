@@ -1,4 +1,4 @@
-use config::Context;
+use config::ContextConfig;
 use serde::de::{Deserialize, Deserializer, MapVisitor, Error, Visitor};
 
 use handlebars::Template;
@@ -6,8 +6,8 @@ use uuid::Uuid;
 
 const FIELDS: &'static [&'static str] = &["name", "uuid", "conditions", "actions"];
 
-impl Deserialize for Context {
-    fn deserialize<D>(deserializer: &mut D) -> Result<Context, D::Error>
+impl Deserialize for ContextConfig {
+    fn deserialize<D>(deserializer: &mut D) -> Result<ContextConfig, D::Error>
         where D: Deserializer
     {
         deserializer.visit_struct("Context", FIELDS, ContextVisitor)
@@ -102,9 +102,9 @@ impl ContextVisitor {
 }
 
 impl Visitor for ContextVisitor {
-    type Value = Context;
+    type Value = ContextConfig;
 
-    fn visit_map<V>(&mut self, mut visitor: V) -> Result<Context, V::Error>
+    fn visit_map<V>(&mut self, mut visitor: V) -> Result<ContextConfig, V::Error>
         where V: MapVisitor
     {
         let mut name = None;
@@ -129,7 +129,7 @@ impl Visitor for ContextVisitor {
 
         try!(visitor.end());
 
-        Ok(Context {
+        Ok(ContextConfig {
             name: name,
             uuid: uuid,
             conditions: conditions.unwrap(),
@@ -144,7 +144,7 @@ mod test {
     use config::action::{ActionType, ExecCondition};
     use config::action::message::MessageActionBuilder;
     use conditions::ConditionsBuilder;
-    use config::Context;
+    use config::ContextConfig;
     use handlebars::Template;
     use serde_json::from_str;
     use uuid::Uuid;
@@ -180,8 +180,7 @@ mod test {
         }
         "#;
 
-        let result = from_str::<Context>(text);
-        println!("{:?}", &result);
+        let result = from_str::<ContextConfig>(text);
         let expected_name = "TEST_NAME".to_string();
         let expected_uuid = Uuid::parse_str("86ca9f93-84fb-4813-b037-6526f7a585a3").ok().unwrap();
         let expected_conditions = ConditionsBuilder::new(Duration::from_millis(100))
@@ -202,30 +201,31 @@ mod test {
                                                                                   message)
                                                             .when(expected_exec_cond)
                                                             .build())];
-        let context = result.ok().expect("Failed to deserialize a valid Context");
+        let context = result.ok().expect("Failed to deserialize a valid ContextConfig");
         assert_eq!(&Some(expected_name), &context.name);
         assert_eq!(&expected_uuid, &context.uuid);
         assert_eq!(&expected_conditions, &context.conditions);
-        assert_eq!(&expected_actions, &context.actions);
+        assert_eq!(&expected_actions.len(), &context.actions.len());
     }
 
     #[test]
     fn test_given_config_context_when_it_does_not_have_uuid_then_it_cannot_be_deserialized() {
         let text = r#"{ "conditions": { "timeout": 100 }}"#;
-        let result = from_str::<Context>(text);
-        println!("{:?}", &result);
-        let _ = result.err().expect("Successfully deserialized a config context without an uuid key");
+        let result = from_str::<ContextConfig>(text);
+        let _ = result.err()
+                      .expect("Successfully deserialized a config context without an uuid key");
     }
 
     #[test]
-    fn test_given_config_context_when_it_contains_an_unknown_key_then_it_cannot_be_deserialized() {
+    fn test_given_config_context_when_it_contains_an_unknown_key_then_it_cannot_be_deserialized
+        () {
         let text = r#"
             {"uuid": "86ca9f93-84fb-4813-b037-6526f7a585a3",
             "conditions": { "timeout": 100},
             "unknown": "unknown" }"#;
-        let result = from_str::<Context>(text);
-        println!("{:?}", &result);
-        let _ = result.err().expect("Successfully deserialized a config context with an unknown key");
+        let result = from_str::<ContextConfig>(text);
+        let _ = result.err()
+                      .expect("Successfully deserialized a config context with an unknown key");
     }
 
     #[test]
@@ -240,11 +240,10 @@ mod test {
         }
         "#;
 
-        let result = from_str::<Context>(text);
-        println!("{:?}", &result);
+        let result = from_str::<ContextConfig>(text);
         let expected_uuid = Uuid::parse_str("86ca9f93-84fb-4813-b037-6526f7a585a3").ok().unwrap();
         let expected_conditions = ConditionsBuilder::new(Duration::from_millis(100)).build();
-        let context = result.ok().expect("Failed to deserialize a valid Context");
+        let context = result.ok().expect("Failed to deserialize a valid ContextConfig");
         assert_eq!(&expected_uuid, &context.uuid);
         assert_eq!(&expected_conditions, &context.conditions);
     }
@@ -261,10 +260,10 @@ mod test {
         }
         "#;
 
-        let result = from_str::<Context>(text);
-        println!("{:?}", &result);
+        let result = from_str::<ContextConfig>(text);
         let _ = result.err()
-                      .expect("Successfully deserialized an invalid Context (UUID is invalid)");
+                      .expect("Successfully deserialized an invalid ContextConfig (UUID is \
+                               invalid)");
     }
 
     #[test]
@@ -279,9 +278,8 @@ mod test {
         }
         "#;
         let expected_context_id = "{{HOST}}{{PROGRAM}}".to_string();
-        let result = from_str::<Context>(text);
-        println!("{:?}", &result);
-        let context = result.ok().expect("Failed to deserialize a valid Context");
+        let result = from_str::<ContextConfig>(text);
+        let context = result.ok().expect("Failed to deserialize a valid ContextConfig");
         assert_eq!(&expected_context_id,
                    &context.context_id.as_ref().unwrap().to_string());
     }

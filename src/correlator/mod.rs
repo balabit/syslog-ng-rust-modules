@@ -6,19 +6,18 @@ use std::sync::mpsc;
 use std::thread;
 use std::result::Result;
 use std::time::Duration;
+use std::sync::Arc;
 
-use {action, config, context, Message, Response};
-use condition::Condition;
-use context::base::BaseContextBuilder;
-use context::{Context, ContextMap};
-use context::linear::LinearContext;
-use context::map::MapContext;
+use {Message, Response};
+use config::ContextConfig;
+use context::ContextMap;
 use dispatcher::request::Request;
 use dispatcher::reactor::RequestReactor;
-use dispatcher::{ResponseSender, ResponseHandler};
-use dispatcher::response;
+use dispatcher::ResponseHandle;
 use dispatcher::demux::Demultiplexer;
-use dispatcher::handlers;
+use dispatcher::handlers::exit::ExitEventHandler;
+use dispatcher::handlers::timer::TimerEventHandler;
+use dispatcher::handlers::message::MessageEventHandler;
 pub use self::error::Error;
 use reactor::{Event, Reactor, EventHandler};
 use timer::Timer;
@@ -33,42 +32,10 @@ mod exit_handler;
 mod test;
 
 pub struct Correlator {
-    dispatcher_input_channel: mpsc::Sender<Request<Message>>,
+    dispatcher_input_channel: mpsc::Sender<Request>,
     dispatcher_output_channel: mpsc::Receiver<Response>,
     dispatcher_thread_handle: thread::JoinHandle<()>,
-    handlers: HashMap<ResponseHandler, Box<EventHandler<Response, mpsc::Sender<Request<Message>>>>>,
-}
-
-fn create_context(config_context: config::Context,
-                  response_sender: Box<response::ResponseSender<Response>>)
-                  -> Context {
-    let config::Context{name, uuid, conditions, context_id, actions} = config_context;
-    let mut boxed_actions = Vec::new();
-
-    for i in actions.into_iter() {
-        let action = action::from_config(i, response_sender.boxed_clone());
-        boxed_actions.push(action);
-    }
-    let base = BaseContextBuilder::new(uuid, conditions);
-    let base = base.name(name);
-    let base = base.actions(boxed_actions);
-    let base = base.build();
-    if let Some(context_id) = context_id {
-        Context::Map(MapContext::new(base, context_id))
-    } else {
-        Context::Linear(LinearContext::from(base))
-    }
-}
-
-fn create_context_map(contexts: Vec<config::Context>,
-                      response_sender: Box<response::ResponseSender<Response>>)
-                      -> ContextMap {
-    let mut context_map = ContextMap::new();
-    for i in contexts.into_iter() {
-        let context: context::Context = create_context(i, response_sender.boxed_clone());
-        context_map.insert(context);
-    }
-    context_map
+    handlers: HashMap<ResponseHandle, Box<EventHandler<Response, mpsc::Sender<Request>>>>,
 }
 
 impl Correlator {
@@ -76,31 +43,28 @@ impl Correlator {
         let mut file = try!(File::open(path));
         let mut buffer = String::new();
         try!(file.read_to_string(&mut buffer));
-        let contexts = try!(from_str::<Vec<config::Context>>(&buffer));
+        let contexts = try!(from_str::<Vec<ContextConfig>>(&buffer));
         trace!("Correlator: loading contexts from file; len={}",
                contexts.len());
         Ok(Correlator::new(contexts))
     }
 
-    pub fn new(contexts: Vec<config::Context>) -> Correlator {
+    pub fn new(contexts: Vec<ContextConfig>) -> Correlator {
+        let context_map = ContextMap::from_configs(contexts);
         let (dispatcher_input_channel, rx) = mpsc::channel();
         let (dispatcher_output_channel_tx, dispatcher_output_channel_rx) = mpsc::channel();
         let _ = Timer::from_chan(Duration::from_millis(TIMER_STEP_MS),
                                  dispatcher_input_channel.clone());
 
         let handle = thread::spawn(move || {
-            let exit_condition = Condition::new(false);
-            let dmux = Demultiplexer::new(rx, exit_condition.clone());
-            let response_sender = Box::new(ResponseSender::new(dispatcher_output_channel_tx)) as Box<response::ResponseSender<Response>>;
+            let dmux = Demultiplexer::new(rx);
+            let response_sender = Box::new(dispatcher_output_channel_tx);
 
-            let exit_handler =
-                Box::new(handlers::exit::ExitEventHandler::new(exit_condition,
-                                                               response_sender.boxed_clone()));
-            let timer_event_handler = Box::new(handlers::timer::TimerEventHandler::new());
-            let message_event_handler = Box::new(handlers::message::MessageEventHandler::new());
+            let exit_handler = Box::new(ExitEventHandler::new());
+            let timer_event_handler = Box::new(TimerEventHandler::new());
+            let message_event_handler = Box::new(MessageEventHandler::new());
 
-            let context_map = create_context_map(contexts, response_sender);
-            let mut reactor = RequestReactor::new(dmux, context_map);
+            let mut reactor = RequestReactor::new(dmux, context_map, response_sender);
             reactor.register_handler(exit_handler);
             reactor.register_handler(timer_event_handler);
             reactor.register_handler(message_event_handler);
@@ -117,19 +81,17 @@ impl Correlator {
     }
 
     pub fn register_handler(&mut self,
-                            handler: Box<EventHandler<Response, mpsc::Sender<Request<Message>>>>) {
-        self.handlers.insert(handler.handler(), handler);
+                            handler: Box<EventHandler<Response, mpsc::Sender<Request>>>) {
+        self.handlers.insert(handler.handle(), handler);
     }
 
-    pub fn push_message(&mut self,
-                        message: Message)
-                        -> Result<(), mpsc::SendError<Request<Message>>> {
+    pub fn push_message(&mut self, message: Message) -> Result<(), mpsc::SendError<Request>> {
         self.handle_events();
-        self.dispatcher_input_channel.send(Request::Message(message))
+        self.dispatcher_input_channel.send(Request::Message(Arc::new(message)))
     }
 
     fn handle_event(&mut self, event: Response) {
-        if let Some(handler) = self.handlers.get_mut(&event.handler()) {
+        if let Some(handler) = self.handlers.get_mut(&event.handle()) {
             handler.handle_event(event, &mut self.dispatcher_input_channel);
         } else {
             trace!("no event handler found for handling a Response");
@@ -149,15 +111,11 @@ impl Correlator {
     }
 
     fn stop_dispatcher(&mut self) {
-        let exit_condition = Condition::new(false);
-        let exit_handler = Box::new(ExitHandler::new(exit_condition.clone(),
-                                                     self.dispatcher_input_channel.clone()));
+        let exit_handler = Box::new(ExitHandler::new());
         self.register_handler(exit_handler);
         let _ = self.dispatcher_input_channel.send(Request::Exit);
-        while !exit_condition.is_active() {
-            if let Ok(event) = self.dispatcher_output_channel.recv() {
-                self.handle_event(event);
-            }
+        while let Ok(event) = self.dispatcher_output_channel.recv() {
+            self.handle_event(event);
         }
     }
 }

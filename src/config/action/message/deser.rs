@@ -1,11 +1,12 @@
 use super::MessageAction;
-use super::MessageActionBuilder;
 use super::InjectMode;
 use config::action::ExecCondition;
 
 use handlebars::Template;
+use handlebars::Handlebars;
 use serde::de::{Deserialize, Deserializer, Error, MapVisitor, Visitor};
 use std::collections::BTreeMap;
+use super::MESSAGE;
 
 impl Deserialize for MessageAction {
     fn deserialize<D>(deserializer: &mut D) -> Result<MessageAction, D::Error>
@@ -107,26 +108,30 @@ impl Visitor for MessageActionVisitor {
             }
         };
 
-        let values = match values {
+        let mut values = match values {
             Some(values) => {
-                let mut converted_values = BTreeMap::new();
+                let mut registry = Handlebars::new();
                 for (key, value) in values.into_iter() {
                     let template = try!(MessageActionVisitor::compile_template::<V>(value, &uuid));
-                    converted_values.insert(key, template);
+                    registry.register_template(&key, template);
                 }
-                converted_values
+                registry
             }
-            None => BTreeMap::new(),
+            None => Handlebars::new(),
         };
 
         try!(visitor.end());
 
-        Ok(MessageActionBuilder::new(uuid, message)
-               .name(name)
-               .values(values)
-               .when(when)
-               .inject_mode(inject_mode)
-               .build())
+        values.register_template(MESSAGE, message.clone());
+
+        Ok(MessageAction {
+            uuid: uuid,
+            message: message,
+            name: name,
+            values: values,
+            when: when,
+            inject_mode: inject_mode,
+        })
     }
 }
 
@@ -162,6 +167,12 @@ mod test {
     use handlebars::Template;
     use serde_json::from_str;
 
+    fn assert_message_action_eq(expected: &MessageAction, actual: &MessageAction) {
+        assert_eq!(expected.uuid(), actual.uuid());
+        assert_eq!(expected.name(), actual.name());
+        assert_eq!(expected.message(), actual.message());
+    }
+
     #[test]
     fn test_given_message_as_a_json_string_when_it_is_deserialized_then_we_get_the_expected_message
         () {
@@ -192,9 +203,8 @@ mod test {
                                    .pair("key2", value2)
                                    .build();
         let result = from_str::<MessageAction>(text);
-        println!("{:?}", &result);
         let message = result.ok().expect("Failed to deserialize a valid MessageAction object");
-        assert_eq!(expected_message, message);
+        assert_message_action_eq(&expected_message, &message);
     }
 
     #[test]
@@ -212,9 +222,8 @@ mod test {
                           .expect("Failed to compile a handlebars template");
         let expected_message = MessageActionBuilder::new("UUID", message).build();
         let result = from_str::<MessageAction>(text);
-        println!("{:?}", &result);
         let message = result.ok().expect("Failed to deserialize a valid MessageAction object");
-        assert_eq!(expected_message, message);
+        assert_message_action_eq(&expected_message, &message);
     }
 
     #[test]
@@ -226,7 +235,6 @@ mod test {
         "#;
 
         let result = from_str::<MessageAction>(text);
-        println!("{:?}", &result);
         let _ = result.err().expect("Successfully deserialized an invalid MessageAction object");
     }
 
@@ -274,8 +282,7 @@ mod test {
                                    .inject_mode(InjectMode::Forward)
                                    .build();
         let result = from_str::<MessageAction>(text);
-        println!("{:?}", &result);
         let message = result.ok().expect("Failed to deserialize a valid MessageAction object");
-        assert_eq!(expected_message, message);
+        assert_message_action_eq(&expected_message, &message);
     }
 }
