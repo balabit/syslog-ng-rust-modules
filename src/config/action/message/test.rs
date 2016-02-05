@@ -4,7 +4,6 @@ use context::base::BaseContextBuilder;
 use super::{CONTEXT_LEN, CONTEXT_NAME, CONTEXT_UUID};
 
 use conditions::ConditionsBuilder;
-use config;
 use dispatcher::Response;
 use dispatcher::response::MockResponseSender;
 use state::State;
@@ -20,7 +19,7 @@ use uuid::Uuid;
 fn test_given_a_message_action_when_it_is_executed_then_it_adds_the_name_and_uuid_of_the_context_to_the_message
     () {
     let mut responder = MockResponseSender::new();
-    let name = Some("name".to_string());
+    let name = Some("name".to_owned());
     let base_context = {
         let conditions = ConditionsBuilder::new(Duration::from_millis(100)).build();
         let uuid = Uuid::new_v4();
@@ -28,16 +27,15 @@ fn test_given_a_message_action_when_it_is_executed_then_it_adds_the_name_and_uui
     };
     let state = State::new();
     let message_action = {
-        let message = Template::compile("message".to_string())
-                          .ok()
+        let message = Template::compile("message".to_owned())
                           .expect("Failed to compile a handlebars template");
-        config::action::message::MessageActionBuilder::new("uuid", message).build()
+        MessageActionBuilder::new("uuid", message).build()
     };
 
     message_action.on_closed(&state, &base_context, &mut responder);
     assert_eq!(1, responder.0.len());
     let responses = responder.0;
-    if let &Response::Alert(ref response) = responses.get(0).unwrap() {
+    if let Response::Alert(ref response) = *responses.get(0).unwrap() {
         assert_eq!(name.as_ref().unwrap(),
                    response.message().get(CONTEXT_NAME).unwrap());
         assert_eq!(&base_context.uuid().to_hyphenated_string(),
@@ -53,7 +51,7 @@ fn test_given_message_action_when_it_is_executed_then_it_uses_the_messages_to_re
     () {
     let mut responder = MockResponseSender::new();
     let _ = env_logger::init();
-    let name = Some("name".to_string());
+    let name = Some("name".to_owned());
     let base_context = {
         let conditions = ConditionsBuilder::new(Duration::from_millis(100)).build();
         let uuid = Uuid::new_v4();
@@ -71,13 +69,11 @@ fn test_given_message_action_when_it_is_executed_then_it_uses_the_messages_to_re
     let message_action = {
         let message = Template::compile("key1={{{messages.[0].values.key1}}} \
                                          key2={{{messages.[1].values.key2}}}"
-                                            .to_string())
-                          .ok()
+                                            .to_owned())
                           .expect("Failed to compile a handlebars template");
-        config::action::message::MessageActionBuilder::new("uuid", message)
+        MessageActionBuilder::new("uuid", message)
             .pair("message_num",
-                  Template::compile("we have {{context_len}} messages".to_string())
-                      .ok()
+                  Template::compile("we have {{context_len}} messages".to_owned())
                       .expect("Failed to compile a handlebars template"))
             .build()
     };
@@ -85,7 +81,7 @@ fn test_given_message_action_when_it_is_executed_then_it_uses_the_messages_to_re
     message_action.on_closed(&state, &base_context, &mut responder);
     assert_eq!(1, responder.0.len());
     let responses = responder.0;
-    if let &Response::Alert(ref response) = responses.get(0).unwrap() {
+    if let Response::Alert(ref response) = *responses.get(0).unwrap() {
         assert_eq!(name.as_ref().unwrap(),
                    response.message().get(CONTEXT_NAME).unwrap());
         assert_eq!(&base_context.uuid().to_hyphenated_string(),

@@ -129,8 +129,8 @@ mod test {
     #[test]
     fn test_given_condition_when_an_opening_message_is_received_then_the_state_becomes_opened() {
         let timeout = Duration::from_millis(100);
-        let msg_id1 = "11eaf6f8-0640-460f-aee2-a72d2f2ab258".to_string();
-        let msg_id2 = "21eaf6f8-0640-460f-aee2-a72d2f2ab258".to_string();
+        let msg_id1 = "11eaf6f8-0640-460f-aee2-a72d2f2ab258".to_owned();
+        let msg_id2 = "21eaf6f8-0640-460f-aee2-a72d2f2ab258".to_owned();
         let patterns = vec![
             msg_id1.clone(),
         ];
@@ -148,8 +148,8 @@ mod test {
     fn test_given_condition_when_a_closing_message_is_received_then_the_state_becomes_closed() {
         let mut responder = MockResponseSender::new();
         let timeout = Duration::from_millis(100);
-        let msg_id1 = "11eaf6f8-0640-460f-aee2-a72d2f2ab258".to_string();
-        let msg_id2 = "21eaf6f8-0640-460f-aee2-a72d2f2ab258".to_string();
+        let msg_id1 = "11eaf6f8-0640-460f-aee2-a72d2f2ab258".to_owned();
+        let msg_id2 = "21eaf6f8-0640-460f-aee2-a72d2f2ab258".to_owned();
         let patterns = vec![
             msg_id1.clone(),
             msg_id2.clone(),
@@ -180,7 +180,7 @@ mod test {
 
         let conditions = from_str(json);
         println!("{:?}", &conditions);
-        let conditions: Conditions = conditions.ok().expect("Failed to deserialize a Conditions \
+        let conditions: Conditions = conditions.expect("Failed to deserialize a Conditions \
                                                              struct with only a timeout field");
         assert_eq!(conditions.timeout, Duration::from_millis(100));
     }
@@ -203,14 +203,13 @@ mod test {
         "#;
 
         let expected_patterns = vec![
-                "1f78c9f1-cd33-4f83-bbcd-9d59f73094d5".to_string(),
-                "2f78c9f1-cd33-4f83-bbcd-9d59f73094d5".to_string(),
-                "PATTERN_NAME".to_string(),
+                "1f78c9f1-cd33-4f83-bbcd-9d59f73094d5".to_owned(),
+                "2f78c9f1-cd33-4f83-bbcd-9d59f73094d5".to_owned(),
+                "PATTERN_NAME".to_owned(),
         ];
         let conditions = from_str(json);
         println!("{:?}", &conditions);
-        let conditions: Conditions = conditions.ok()
-                                               .expect("Failed to deserialize a Conditions struct");
+        let conditions: Conditions = conditions.expect("Failed to deserialize a Conditions struct");
         assert_eq!(conditions.timeout, Duration::from_millis(100));
         assert_eq!(conditions.renew_timeout, Some(Duration::from_millis(50)));
         assert_eq!(conditions.first_opens, true);
@@ -222,7 +221,7 @@ mod test {
     #[test]
     fn test_given_condition_when_there_are_no_patterns_then_any_message_can_open_the_context() {
         let timeout = Duration::from_millis(100);
-        let msg_id = "11eaf6f8-0640-460f-aee2-a72d2f2ab258".to_string();
+        let msg_id = "11eaf6f8-0640-460f-aee2-a72d2f2ab258".to_owned();
         let condition = ConditionsBuilder::new(timeout).build();
         let msg = MessageBuilder::new(&msg_id, "message").build();
         assert_true!(condition.is_opening(&msg));
@@ -233,12 +232,12 @@ mod test {
         () {
         let timeout = Duration::from_millis(100);
         let patterns = vec![
-                "p1".to_string(),
-                "p2".to_string(),
-                "p3".to_string(),
+                "p1".to_owned(),
+                "p2".to_owned(),
+                "p3".to_owned(),
         ];
-        let uuid = "e4f3f8b2-3135-4916-a5ea-621a754dab0d".to_string();
-        let msg_id = "p1".to_string();
+        let uuid = "e4f3f8b2-3135-4916-a5ea-621a754dab0d".to_owned();
+        let msg_id = "p1".to_owned();
         let condition = ConditionsBuilder::new(timeout)
                             .patterns(patterns)
                             .first_opens(true)
@@ -252,11 +251,11 @@ mod test {
         () {
         let mut responder = MockResponseSender::new();
         let timeout = Duration::from_millis(100);
-        let patterns = vec!["p1".to_string(), "p2".to_string()];
-        let p1_uuid = "e4f3f8b2-3135-4916-a5ea-621a754dab0d".to_string();
-        let p2_uuid = "f4f3f8b2-3135-4916-a5ea-621a754dab0d".to_string();
-        let p1 = "p1".to_string();
-        let p2 = "p2".to_string();
+        let patterns = vec!["p1".to_owned(), "p2".to_owned()];
+        let p1_uuid = "e4f3f8b2-3135-4916-a5ea-621a754dab0d".to_owned();
+        let p2_uuid = "f4f3f8b2-3135-4916-a5ea-621a754dab0d".to_owned();
+        let p1 = "p1".to_owned();
+        let p2 = "p2".to_owned();
         let mut state = State::new();
         let conditions = ConditionsBuilder::new(timeout)
                              .patterns(patterns)

@@ -108,10 +108,10 @@ mod tests {
     use uuid::Uuid;
     use std::time::Duration;
 
-    fn assert_conext_map_contains_uuid(context_map: &mut ContextMap, uuid: &Uuid, key: &String) {
+    fn assert_context_map_contains_uuid(context_map: &mut ContextMap, uuid: &Uuid, key: &str) {
         let mut iter = context_map.contexts_iter_mut(key);
         let context = iter.next().expect("Failed to get back an inserted context");
-        if let &mut Context::Linear(ref context) = context {
+        if let Context::Linear(ref context) = *context {
             assert_eq!(uuid, context.uuid());
         } else {
             unreachable!();
@@ -125,7 +125,7 @@ mod tests {
         let uuid = Uuid::new_v4();
         let context1 = {
             let conditions = {
-                let patterns = vec!["A".to_string(), "B".to_string()];
+                let patterns = vec!["A".to_owned(), "B".to_owned()];
                 ConditionsBuilder::new(Duration::from_millis(100)).patterns(patterns).build()
             };
             let base = BaseContextBuilder::new(uuid.clone(), conditions).build();
@@ -133,7 +133,7 @@ mod tests {
         };
         context_map.insert(Context::Linear(context1));
         assert_eq!(context_map.contexts_mut().len(), 1);
-        assert_conext_map_contains_uuid(&mut context_map, &uuid, &"A".to_string());
-        assert_conext_map_contains_uuid(&mut context_map, &uuid, &"B".to_string());
+        assert_context_map_contains_uuid(&mut context_map, &uuid, "A");
+        assert_context_map_contains_uuid(&mut context_map, &uuid, "B");
     }
 }

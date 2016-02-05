@@ -15,9 +15,9 @@ fn test_given_map_context_when_messages_have_the_same_kvpairs_then_they_go_to_th
     let delta = Duration::from_millis(10);
     let timeout = Duration::from_millis(30);
     let event = TimerEvent(delta);
-    let msg_id1 = "11eaf6f8-0640-460f-aee2-a72d2f2ab258".to_string();
-    let msg_id2 = "21eaf6f8-0640-460f-aee2-a72d2f2ab258".to_string();
-    let msg_id3 = "31eaf6f8-0640-460f-aee2-a72d2f2ab258".to_string();
+    let msg_id1 = "11eaf6f8-0640-460f-aee2-a72d2f2ab258".to_owned();
+    let msg_id2 = "21eaf6f8-0640-460f-aee2-a72d2f2ab258".to_owned();
+    let msg_id3 = "31eaf6f8-0640-460f-aee2-a72d2f2ab258".to_owned();
     let mut context = {
         let base_context = {
             let patterns = vec![
@@ -29,7 +29,7 @@ fn test_given_map_context_when_messages_have_the_same_kvpairs_then_they_go_to_th
             let conditions = ConditionsBuilder::new(timeout).patterns(patterns).build();
             BaseContextBuilder::new(uuid, conditions).build()
         };
-        let context_id = Template::compile("{{HOST}}{{PROGRAM}}{{PID}}".to_string()).unwrap();
+        let context_id = Template::compile("{{HOST}}{{PROGRAM}}{{PID}}".to_owned()).unwrap();
         MapContext::new(base_context, context_id)
     };
     let msg1 = MessageBuilder::new(&msg_id1, "message")

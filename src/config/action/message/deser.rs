@@ -188,14 +188,11 @@ mod test {
         }
         "#;
 
-        let message = Template::compile("message".to_string())
-                          .ok()
+        let message = Template::compile("message".to_owned())
                           .expect("Failed to compile a handlebars template");
-        let value1 = Template::compile("value1".to_string())
-                         .ok()
+        let value1 = Template::compile("value1".to_owned())
                          .expect("Failed to compile a handlebars template");
-        let value2 = Template::compile("value2".to_string())
-                         .ok()
+        let value2 = Template::compile("value2".to_owned())
                          .expect("Failed to compile a handlebars template");
         let expected_message = MessageActionBuilder::new("UUID", message)
                                    .name(Some("NAME"))
@@ -203,7 +200,7 @@ mod test {
                                    .pair("key2", value2)
                                    .build();
         let result = from_str::<MessageAction>(text);
-        let message = result.ok().expect("Failed to deserialize a valid MessageAction object");
+        let message = result.expect("Failed to deserialize a valid MessageAction object");
         assert_message_action_eq(&expected_message, &message);
     }
 
@@ -217,12 +214,11 @@ mod test {
         }
         "#;
 
-        let message = Template::compile("message".to_string())
-                          .ok()
+        let message = Template::compile("message".to_owned())
                           .expect("Failed to compile a handlebars template");
         let expected_message = MessageActionBuilder::new("UUID", message).build();
         let result = from_str::<MessageAction>(text);
-        let message = result.ok().expect("Failed to deserialize a valid MessageAction object");
+        let message = result.expect("Failed to deserialize a valid MessageAction object");
         assert_message_action_eq(&expected_message, &message);
     }
 
@@ -250,7 +246,7 @@ mod test {
 
         let result = from_str::<Vec<InjectMode>>(text);
         println!("{:?}", &result);
-        let array = result.ok().expect("Failed to deserialize a valid array of inject modes");
+        let array = result.expect("Failed to deserialize a valid array of inject modes");
         assert_eq!(&expected, &array);
     }
 
@@ -275,14 +271,13 @@ mod test {
         }
         "#;
 
-        let message = Template::compile("message".to_string())
-                          .ok()
+        let message = Template::compile("message".to_owned())
                           .expect("Failed to compile a handlebars template");
         let expected_message = MessageActionBuilder::new("UUID", message)
                                    .inject_mode(InjectMode::Forward)
                                    .build();
         let result = from_str::<MessageAction>(text);
-        let message = result.ok().expect("Failed to deserialize a valid MessageAction object");
+        let message = result.expect("Failed to deserialize a valid MessageAction object");
         assert_message_action_eq(&expected_message, &message);
     }
 }

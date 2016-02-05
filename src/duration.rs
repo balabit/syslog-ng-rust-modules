@@ -50,8 +50,7 @@ mod tests {
     fn test_given_valid_duration_when_it_is_deserialized_then_we_get_the_right_result() {
         let result = serde_json::from_str::<SerializableDuration>("100");
         println!("{:?}", &result);
-        let duration = result.ok()
-                             .expect("Failed to deserialize a valid SerializableDuration value");
+        let duration = result.expect("Failed to deserialize a valid SerializableDuration value");
         assert_eq!(Duration::from_millis(100), duration.0);
     }
 
