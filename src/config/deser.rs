@@ -60,15 +60,15 @@ impl ContextVisitor {
                 match Uuid::parse_str(&value) {
                     Ok(uuid) => Ok(uuid),
                     Err(err) => {
-                        return Err(Error::syntax(&format!("Failed to parse field 'uuid': \
+                        Err(Error::syntax(&format!("Failed to parse field 'uuid': \
                                                            uuid={} error={}",
                                                           value,
-                                                          err)));
+                                                          err)))
                     }
                 }
             }
             None => {
-                return Err(Error::missing_field("uuid"));
+                Err(Error::missing_field("uuid"))
             }
         }
     }
@@ -95,7 +95,7 @@ impl ContextVisitor {
                                       error={}",
                                      uuid,
                                      err);
-                return Err(Error::syntax(&errmsg));
+                Err(Error::syntax(&errmsg))
             }
         }
     }
@@ -125,7 +125,7 @@ impl Visitor for ContextVisitor {
 
         let uuid = try!(ContextVisitor::parse_uuid::<V>(uuid));
         let context_id = try!(ContextVisitor::deser_context_id::<V>(context_id, &uuid));
-        let actions = actions.unwrap_or(Vec::new());
+        let actions = actions.unwrap_or_default();
 
         try!(visitor.end());
 

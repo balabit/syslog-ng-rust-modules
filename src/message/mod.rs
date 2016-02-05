@@ -37,7 +37,7 @@ impl Message {
     }
 
     pub fn insert(&mut self, key: &str, value: &str) {
-        self.values.insert(key.to_string(), value.to_string());
+        self.values.insert(key.to_owned(), value.to_owned());
     }
 
     pub fn ids(&self) -> IdIterator {

@@ -25,8 +25,6 @@ const MESSAGE: &'static str = "MESSAGE";
 use handlebars::Template;
 use handlebars::Handlebars;
 
-
-use super::ActionType;
 use super::ExecCondition;
 
 mod deser;
@@ -60,7 +58,7 @@ impl MessageAction {
         &self.inject_mode
     }
 
-    fn render_value(&self, key: &String, template_context: &Context) -> Result<String, Error> {
+    fn render_value(&self, key: &str, template_context: &Context) -> Result<String, Error> {
         let mut writer = Vec::new();
         {
             try!(self.values.renderw(key, &template_context, &mut writer));
@@ -73,7 +71,7 @@ impl MessageAction {
         let mut rendered_values = BTreeMap::new();
         for (key, _) in self.values.get_templates() {
             let rendered_value = try!(self.render_value(key, &template_context));
-            rendered_values.insert(key.to_string(), rendered_value);
+            rendered_values.insert(key.to_owned(), rendered_value);
         }
         Ok(rendered_values)
     }
@@ -102,16 +100,16 @@ impl MessageAction {
     fn extend_with_context_information(values: &mut BTreeMap<String, String>,
                                        state: &State,
                                        context: &BaseContext) {
-        values.insert(CONTEXT_UUID.to_string(),
+        values.insert(CONTEXT_UUID.to_owned(),
                       context.uuid().to_hyphenated_string());
-        values.insert(CONTEXT_LEN.to_string(), state.messages().len().to_string());
+        values.insert(CONTEXT_LEN.to_owned(), state.messages().len().to_string());
         if let Some(name) = context.name() {
-            values.insert(CONTEXT_NAME.to_string(), name.to_string());
+            values.insert(CONTEXT_NAME.to_owned(), name.to_owned());
         }
     }
 
-    fn execute(&self, _state: &State, _context: &BaseContext, responder: &mut ResponseSender) {
-        match self.render_message(_state, _context) {
+    fn execute(&self, state: &State, context: &BaseContext, responder: &mut ResponseSender) {
+        match self.render_message(state, context) {
             Ok(message) => {
                 let response = Alert {
                     message: message,
@@ -158,17 +156,17 @@ impl Alert {
 }
 
 impl Action for MessageAction {
-    fn on_opened(&self, _state: &State, _context: &BaseContext, responder: &mut ResponseSender) {
+    fn on_opened(&self, state: &State, context: &BaseContext, responder: &mut ResponseSender) {
         if self.when.on_opened {
             trace!("MessageAction: on_opened()");
-            self.execute(_state, _context, responder);
+            self.execute(state, context, responder);
         }
     }
 
-    fn on_closed(&self, _state: &State, _context: &BaseContext, responder: &mut ResponseSender) {
+    fn on_closed(&self, state: &State, context: &BaseContext, responder: &mut ResponseSender) {
         if self.when.on_closed {
             trace!("MessageAction: on_closed()");
-            self.execute(_state, _context, responder);
+            self.execute(state, context, responder);
         }
     }
 }

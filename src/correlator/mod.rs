@@ -53,7 +53,7 @@ impl Correlator {
         let context_map = ContextMap::from_configs(contexts);
         let (dispatcher_input_channel, rx) = mpsc::channel();
         let (dispatcher_output_channel_tx, dispatcher_output_channel_rx) = mpsc::channel();
-        let _ = Timer::from_chan(Duration::from_millis(TIMER_STEP_MS),
+        Timer::from_chan(Duration::from_millis(TIMER_STEP_MS),
                                  dispatcher_input_channel.clone());
 
         let handle = thread::spawn(move || {

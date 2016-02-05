@@ -12,7 +12,7 @@ pub struct MessageBuilder {
 impl MessageBuilder {
     pub fn new<S: Into<String>>(uuid: &str, message: S) -> MessageBuilder {
         MessageBuilder {
-            uuid: uuid.to_string(),
+            uuid: uuid.to_owned(),
             name: None,
             message: message.into(),
             values: BTreeMap::new(),
@@ -30,7 +30,7 @@ impl MessageBuilder {
     }
 
     pub fn pair(&mut self, key: &str, value: &str) -> &mut MessageBuilder {
-        self.values.insert(key.to_string(), value.to_string());
+        self.values.insert(key.to_owned(), value.to_owned());
         self
     }
 

@@ -54,7 +54,7 @@ impl ContextMap {
                                             new_index: usize,
                                             patterns: &[String]) {
         for i in patterns {
-            map.entry(i.clone()).or_insert(Vec::new()).push(new_index);
+            map.entry(i.clone()).or_insert_with(Vec::new).push(new_index);
         }
     }
 
@@ -62,7 +62,7 @@ impl ContextMap {
         &mut self.contexts
     }
 
-    pub fn contexts_iter_mut(&mut self, key: &String) -> Iterator {
+    pub fn contexts_iter_mut(&mut self, key: &str) -> Iterator {
         let ids = self.map.get(key);
         Iterator {
             ids: ids,

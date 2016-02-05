@@ -347,7 +347,7 @@ mod deser {
                         "last_closes" => Ok(Field::LastCloses),
                         "max_size" => Ok(Field::MaxSize),
                         "patterns" => Ok(Field::Patterns),
-                        name @ _ => Err(Error::syntax(&format!("Unexpected field: {}", name))),
+                        _ => Err(Error::syntax(&format!("Unexpected field: {}", value))),
                     }
                 }
             }
@@ -397,7 +397,7 @@ mod deser {
                 first_opens: first_opens,
                 last_closes: last_closes,
                 max_size: max_size,
-                patterns: patterns.unwrap_or(Vec::new()),
+                patterns: patterns.unwrap_or_default(),
             })
         }
     }

@@ -56,16 +56,16 @@ impl Deserialize for Field {
 struct MessageActionVisitor;
 
 impl MessageActionVisitor {
-    fn compile_template<V>(template_string: String, uuid: &String) -> Result<Template, V::Error>
+    fn compile_template<V>(template_string: String, uuid: &str) -> Result<Template, V::Error>
         where V: MapVisitor
     {
         match Template::compile(template_string) {
             Ok(message) => Ok(message),
             Err(error) => {
-                return Err(Error::syntax(&format!("Invalid handlebars template in 'message' \
+                Err(Error::syntax(&format!("Invalid handlebars template in 'message' \
                                                    field: uuid={}, error={}",
-                                                  &uuid,
-                                                  error)));
+                                                  uuid,
+                                                  error)))
             }
         }
     }
