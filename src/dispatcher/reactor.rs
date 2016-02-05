@@ -6,6 +6,7 @@ use dispatcher::request::{RequestHandle, Request};
 use reactor::{Event, EventDemultiplexer, EventHandler, Reactor, SharedData};
 use dispatcher::response::ResponseSender;
 
+#[allow(type_complexity)]
 pub struct RequestReactor {
     handlers: BTreeMap<RequestHandle, Box<for<'a> EventHandler<Request, SharedData<'a>>>>,
     demultiplexer: Demultiplexer<Request>,
