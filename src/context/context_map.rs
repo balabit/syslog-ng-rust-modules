@@ -74,7 +74,7 @@ impl ContextMap {
 
 pub trait StreamingIterator {
     type Item;
-    fn next<'a>(&'a mut self) -> Option<&'a mut Self::Item>;
+    fn next(&mut self) -> Option<&mut Self::Item>;
 }
 
 pub struct Iterator<'a> {
