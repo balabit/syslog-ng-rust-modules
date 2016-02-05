@@ -60,16 +60,14 @@ impl ContextVisitor {
                 match Uuid::parse_str(&value) {
                     Ok(uuid) => Ok(uuid),
                     Err(err) => {
-                        Err(Error::syntax(&format!("Failed to parse field 'uuid': \
-                                                           uuid={} error={}",
-                                                          value,
-                                                          err)))
+                        Err(Error::syntax(&format!("Failed to parse field 'uuid': uuid={} \
+                                                    error={}",
+                                                   value,
+                                                   err)))
                     }
                 }
             }
-            None => {
-                Err(Error::missing_field("uuid"))
-            }
+            None => Err(Error::missing_field("uuid")),
         }
     }
 

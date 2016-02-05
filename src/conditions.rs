@@ -181,7 +181,7 @@ mod test {
         let conditions = from_str(json);
         println!("{:?}", &conditions);
         let conditions: Conditions = conditions.expect("Failed to deserialize a Conditions \
-                                                             struct with only a timeout field");
+                                                        struct with only a timeout field");
         assert_eq!(conditions.timeout, Duration::from_millis(100));
     }
 

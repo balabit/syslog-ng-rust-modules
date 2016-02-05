@@ -54,7 +54,7 @@ impl Correlator {
         let (dispatcher_input_channel, rx) = mpsc::channel();
         let (dispatcher_output_channel_tx, dispatcher_output_channel_rx) = mpsc::channel();
         Timer::from_chan(Duration::from_millis(TIMER_STEP_MS),
-                                 dispatcher_input_channel.clone());
+                         dispatcher_input_channel.clone());
 
         let handle = thread::spawn(move || {
             let dmux = Demultiplexer::new(rx);

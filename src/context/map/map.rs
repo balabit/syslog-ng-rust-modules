@@ -73,7 +73,8 @@ impl MapContext {
             let state = self.map.entry(id).or_insert_with(State::new);
             state.on_message(event, &self.base, responder);
         } else {
-            error!("Failed to render the context-id: {:?}", self.context_id.get_template(&CONTEXT_ID.to_owned()));
+            error!("Failed to render the context-id: {:?}",
+                   self.context_id.get_template(&CONTEXT_ID.to_owned()));
         }
     }
 

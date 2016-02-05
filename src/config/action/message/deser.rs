@@ -62,10 +62,10 @@ impl MessageActionVisitor {
         match Template::compile(template_string) {
             Ok(message) => Ok(message),
             Err(error) => {
-                Err(Error::syntax(&format!("Invalid handlebars template in 'message' \
-                                                   field: uuid={}, error={}",
-                                                  uuid,
-                                                  error)))
+                Err(Error::syntax(&format!("Invalid handlebars template in 'message' field: \
+                                            uuid={}, error={}",
+                                           uuid,
+                                           error)))
             }
         }
     }
