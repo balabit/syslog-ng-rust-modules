@@ -60,16 +60,14 @@ impl ContextVisitor {
                 match Uuid::parse_str(&value) {
                     Ok(uuid) => Ok(uuid),
                     Err(err) => {
-                        return Err(Error::syntax(&format!("Failed to parse field 'uuid': \
-                                                           uuid={} error={}",
-                                                          value,
-                                                          err)));
+                        Err(Error::syntax(&format!("Failed to parse field 'uuid': uuid={} \
+                                                    error={}",
+                                                   value,
+                                                   err)))
                     }
                 }
             }
-            None => {
-                return Err(Error::missing_field("uuid"));
-            }
+            None => Err(Error::missing_field("uuid")),
         }
     }
 
@@ -95,7 +93,7 @@ impl ContextVisitor {
                                       error={}",
                                      uuid,
                                      err);
-                return Err(Error::syntax(&errmsg));
+                Err(Error::syntax(&errmsg))
             }
         }
     }
@@ -125,7 +123,7 @@ impl Visitor for ContextVisitor {
 
         let uuid = try!(ContextVisitor::parse_uuid::<V>(uuid));
         let context_id = try!(ContextVisitor::deser_context_id::<V>(context_id, &uuid));
-        let actions = actions.unwrap_or(Vec::new());
+        let actions = actions.unwrap_or_default();
 
         try!(visitor.end());
 
@@ -181,17 +179,16 @@ mod test {
         "#;
 
         let result = from_str::<ContextConfig>(text);
-        let expected_name = "TEST_NAME".to_string();
+        let expected_name = "TEST_NAME".to_owned();
         let expected_uuid = Uuid::parse_str("86ca9f93-84fb-4813-b037-6526f7a585a3").ok().unwrap();
         let expected_conditions = ConditionsBuilder::new(Duration::from_millis(100))
                                       .first_opens(true)
-                                      .patterns(vec!["PATTERN_NAME1".to_string(),
-                                                     "PATTERN_NAME2".to_string(),
+                                      .patterns(vec!["PATTERN_NAME1".to_owned(),
+                                                     "PATTERN_NAME2".to_owned(),
                                                      "f13dafee-cd14-4dda-995c-6ed476a21de3"
-                                                         .to_string()])
+                                                         .to_owned()])
                                       .build();
-        let message = Template::compile("message".to_string())
-                          .ok()
+        let message = Template::compile("message".to_owned())
                           .expect("Failed to compile a handlebars template");
         let expected_exec_cond = ExecCondition {
             on_opened: false,
@@ -201,7 +198,7 @@ mod test {
                                                                                   message)
                                                             .when(expected_exec_cond)
                                                             .build())];
-        let context = result.ok().expect("Failed to deserialize a valid ContextConfig");
+        let context = result.expect("Failed to deserialize a valid ContextConfig");
         assert_eq!(&Some(expected_name), &context.name);
         assert_eq!(&expected_uuid, &context.uuid);
         assert_eq!(&expected_conditions, &context.conditions);
@@ -243,7 +240,7 @@ mod test {
         let result = from_str::<ContextConfig>(text);
         let expected_uuid = Uuid::parse_str("86ca9f93-84fb-4813-b037-6526f7a585a3").ok().unwrap();
         let expected_conditions = ConditionsBuilder::new(Duration::from_millis(100)).build();
-        let context = result.ok().expect("Failed to deserialize a valid ContextConfig");
+        let context = result.expect("Failed to deserialize a valid ContextConfig");
         assert_eq!(&expected_uuid, &context.uuid);
         assert_eq!(&expected_conditions, &context.conditions);
     }
@@ -277,9 +274,9 @@ mod test {
             }
         }
         "#;
-        let expected_context_id = "{{HOST}}{{PROGRAM}}".to_string();
+        let expected_context_id = "{{HOST}}{{PROGRAM}}".to_owned();
         let result = from_str::<ContextConfig>(text);
-        let context = result.ok().expect("Failed to deserialize a valid ContextConfig");
+        let context = result.expect("Failed to deserialize a valid ContextConfig");
         assert_eq!(&expected_context_id,
                    &context.context_id.as_ref().unwrap().to_string());
     }

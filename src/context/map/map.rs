@@ -38,7 +38,7 @@ impl MapContext {
     }
 
     pub fn on_timer(&mut self, event: &TimerEvent, responder: &mut ResponseSender) {
-        for (_, mut state) in self.map.iter_mut() {
+        for (_, mut state) in &mut self.map {
             state.on_timer(event, &self.base, responder);
         }
         self.remove_closed_states();
@@ -69,16 +69,17 @@ impl MapContext {
     }
 
     fn update_state(&mut self, event: Arc<Message>, responder: &mut ResponseSender) {
-        let id = self.context_id
-                     .render(CONTEXT_ID, event.values())
-                     .ok()
-                     .expect("Failed to render the compiled Handlebars template");
-        let state = self.map.entry(id).or_insert(State::new());
-        state.on_message(event, &self.base, responder);
+        if let Ok(id) = self.context_id.render(CONTEXT_ID, event.values()) {
+            let state = self.map.entry(id).or_insert_with(State::new);
+            state.on_message(event, &self.base, responder);
+        } else {
+            error!("Failed to render the context-id: {:?}",
+                   self.context_id.get_template(&CONTEXT_ID.to_owned()));
+        }
     }
 
     #[allow(dead_code)]
-    pub fn is_open(&mut self) -> bool {
+    pub fn is_open(&self) -> bool {
         !self.map.is_empty()
     }
 
