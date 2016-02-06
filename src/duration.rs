@@ -46,12 +46,21 @@ mod tests {
     use serde_json;
     use std::time::Duration;
 
-    #[test]
-    fn test_given_valid_duration_when_it_is_deserialized_then_we_get_the_right_result() {
-        let result = serde_json::from_str::<SerializableDuration>("100");
+    fn assert_serialized_value_eq(input: &str, expected: Duration) {
+        let result = serde_json::from_str::<SerializableDuration>(input);
         println!("{:?}", &result);
         let duration = result.expect("Failed to deserialize a valid SerializableDuration value");
-        assert_eq!(Duration::from_millis(100), duration.0);
+        assert_eq!(expected, duration.0);
+    }
+
+    #[test]
+    fn test_given_valid_duration_when_it_is_deserialized_then_we_get_the_right_result() {
+        assert_serialized_value_eq("100", Duration::from_millis(100));
+    }
+
+    #[test]
+    fn test_given_valid_duration_as_str_when_it_is_deserialized_then_we_get_the_right_result() {
+        assert_serialized_value_eq(r#""100""#, Duration::from_millis(100));
     }
 
     #[test]
