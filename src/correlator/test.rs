@@ -2,6 +2,7 @@ use config::{ContextConfigBuilder, ContextConfig};
 use config::action::message::MessageActionBuilder;
 use conditions::ConditionsBuilder;
 use Correlator;
+use context::ContextMap;
 use message::MessageBuilder;
 
 
@@ -109,7 +110,7 @@ fn test_given_manually_built_correlator_when_it_closes_a_context_then_the_action
     ];
     let responses = Rc::new(RefCell::new(Vec::new()));
     let message_event_handler = Box::new(MessageEventHandler { responses: responses.clone() });
-    let mut correlator = Correlator::new(contexts);
+    let mut correlator = Correlator::new(ContextMap::from_configs(contexts));
     correlator.register_handler(message_event_handler);
     let _ = correlator.push_message(MessageBuilder::new(&uuid1, "message").build());
     thread::sleep(Duration::from_millis(20));
@@ -144,7 +145,7 @@ fn test_given_correlator_when_it_is_built_from_json_then_it_produces_the_expecte
     let contexts = result.expect("Failed to deserialize a config::ContextConfig from JSON");
     let responses = Rc::new(RefCell::new(Vec::new()));
     let message_event_handler = Box::new(MessageEventHandler { responses: responses.clone() });
-    let mut correlator = Correlator::new(contexts);
+    let mut correlator = Correlator::new(ContextMap::from_configs(contexts));
     correlator.register_handler(message_event_handler);
     let _ = correlator.push_message(MessageBuilder::new(&uuid1, "message")
                                         .name(Some("p1"))

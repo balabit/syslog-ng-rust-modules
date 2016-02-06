@@ -46,11 +46,10 @@ impl Correlator {
         let contexts = try!(from_str::<Vec<ContextConfig>>(&buffer));
         trace!("Correlator: loading contexts from file; len={}",
                contexts.len());
-        Ok(Correlator::new(contexts))
+        Ok(Correlator::new(ContextMap::from_configs(contexts)))
     }
 
-    pub fn new(contexts: Vec<ContextConfig>) -> Correlator {
-        let context_map = ContextMap::from_configs(contexts);
+    pub fn new(context_map: ContextMap) -> Correlator {
         let (dispatcher_input_channel, rx) = mpsc::channel();
         let (dispatcher_output_channel_tx, dispatcher_output_channel_rx) = mpsc::channel();
         Timer::from_chan(Duration::from_millis(TIMER_STEP_MS),
