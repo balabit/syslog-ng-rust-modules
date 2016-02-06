@@ -34,7 +34,7 @@ mod test;
 pub struct Correlator {
     dispatcher_input_channel: mpsc::Sender<Request>,
     dispatcher_output_channel: mpsc::Receiver<Response>,
-    dispatcher_thread_handle: thread::JoinHandle<()>,
+    dispatcher_thread_handle: thread::JoinHandle<ContextMap>,
     handlers: HashMap<ResponseHandle, Box<EventHandler<Response, mpsc::Sender<Request>>>>,
 }
 
@@ -46,11 +46,10 @@ impl Correlator {
         let contexts = try!(from_str::<Vec<ContextConfig>>(&buffer));
         trace!("Correlator: loading contexts from file; len={}",
                contexts.len());
-        Ok(Correlator::new(contexts))
+        Ok(Correlator::new(ContextMap::from_configs(contexts)))
     }
 
-    pub fn new(contexts: Vec<ContextConfig>) -> Correlator {
-        let context_map = ContextMap::from_configs(contexts);
+    pub fn new(context_map: ContextMap) -> Correlator {
         let (dispatcher_input_channel, rx) = mpsc::channel();
         let (dispatcher_output_channel_tx, dispatcher_output_channel_rx) = mpsc::channel();
         Timer::from_chan(Duration::from_millis(TIMER_STEP_MS),
@@ -70,6 +69,7 @@ impl Correlator {
             reactor.register_handler(message_event_handler);
             reactor.handle_events();
             trace!("Correlator: dispatcher thread exited");
+            reactor.context_map
         });
 
         Correlator {
@@ -104,7 +104,7 @@ impl Correlator {
         }
     }
 
-    pub fn stop(mut self) -> thread::Result<()> {
+    pub fn stop(mut self) -> thread::Result<ContextMap> {
         self.handle_events();
         self.stop_dispatcher();
         self.dispatcher_thread_handle.join()
