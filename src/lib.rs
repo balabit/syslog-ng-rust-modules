@@ -21,6 +21,7 @@ pub use correlator::Correlator;
 pub use config::action::ActionType;
 pub use dispatcher::Response;
 pub use message::Message;
+pub use context::ContextMap;
 
 pub mod conditions;
 pub mod config;
