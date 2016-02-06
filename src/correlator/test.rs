@@ -1,10 +1,9 @@
 use config::{ContextConfigBuilder, ContextConfig};
 use config::action::message::MessageActionBuilder;
 use conditions::ConditionsBuilder;
-use Correlator;
+use correlator::Correlator;
 use context::ContextMap;
 use message::MessageBuilder;
-
 
 use handlebars::Template;
 use uuid::Uuid;
@@ -14,7 +13,7 @@ use std::cell::RefCell;
 use std::thread;
 use std::time::Duration;
 
-use test_utils::correlator::MessageEventHandler;
+use test_utils::MessageEventHandler;
 
 const JSON_CONFIG: &'static str = r#"
       [

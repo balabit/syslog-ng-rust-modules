@@ -124,7 +124,7 @@ mod test {
     use context::BaseContextBuilder;
     use uuid::Uuid;
     use std::time::Duration;
-    use dispatcher::response::MockResponseSender;
+    use test_utils::MockResponseSender;
 
     #[test]
     fn test_given_condition_when_an_opening_message_is_received_then_the_state_becomes_opened() {

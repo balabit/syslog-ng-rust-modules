@@ -1,7 +1,6 @@
-use correlation::CorrelatorFactory;
-use correlation::correlator::Error;
-use correlation::message::MessageBuilder;
-use correlation::test_utils::correlator::MessageEventHandler;
+use correlation::correlator::{CorrelatorFactory, Error};
+use correlation::MessageBuilder;
+use correlation::test_utils::MessageEventHandler;
 
 use env_logger;
 

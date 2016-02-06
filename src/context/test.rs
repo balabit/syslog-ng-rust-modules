@@ -7,7 +7,7 @@ use timer::TimerEvent;
 use context::LinearContext;
 use context::BaseContextBuilder;
 use conditions::ConditionsBuilder;
-use dispatcher::response::MockResponseSender;
+use test_utils::MockResponseSender;
 
 #[test]
 fn test_given_close_condition_with_timeout_when_the_timeout_expires_then_the_condition_is_met() {

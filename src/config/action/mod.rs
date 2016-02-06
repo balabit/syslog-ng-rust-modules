@@ -2,14 +2,13 @@ use action::Action;
 use state::State;
 use context::BaseContext;
 use dispatcher::response::ResponseSender;
-
-pub use self::message::MessageAction;
+use self::message::MessageAction;
 
 pub mod message;
 mod deser;
 
 pub enum ActionType {
-    Message(self::message::MessageAction),
+    Message(MessageAction),
 }
 
 impl Action for ActionType {
