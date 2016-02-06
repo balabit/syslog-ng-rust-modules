@@ -25,8 +25,8 @@ use self::exit_handler::ExitHandler;
 
 const TIMER_STEP_MS: u64 = 100;
 
-pub mod error;
-pub mod factory;
+mod error;
+mod factory;
 mod exit_handler;
 #[cfg(test)]
 mod test;

@@ -6,7 +6,7 @@ extern crate uuid;
 use correlation::Correlator;
 use correlation::config::ContextConfigBuilder;
 use correlation::conditions::ConditionsBuilder;
-use correlation::message::MessageBuilder;
+use correlation::MessageBuilder;
 use correlation::ContextMap;
 use uuid::Uuid;
 use std::thread;
