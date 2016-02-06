@@ -59,15 +59,12 @@ impl MessageActionVisitor {
     fn compile_template<V>(template_string: String, uuid: &str) -> Result<Template, V::Error>
         where V: MapVisitor
     {
-        match Template::compile(template_string) {
-            Ok(message) => Ok(message),
-            Err(error) => {
-                Err(Error::syntax(&format!("Invalid handlebars template in 'message' field: \
-                                            uuid={}, error={}",
-                                           uuid,
-                                           error)))
-            }
-        }
+        Template::compile(template_string).map_err(|error| {
+            Error::syntax(&format!("Invalid handlebars template in 'message' field: \
+                                        uuid={}, error={}",
+                                       uuid,
+                                       error))
+        })
     }
 }
 
