@@ -3,8 +3,6 @@ use std::str::FromStr;
 use std::error::Error;
 use serde::de;
 
-use num::FromPrimitive;
-
 #[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Debug)]
 pub struct SerializableDuration(pub Duration);
 
@@ -16,10 +14,7 @@ impl de::Visitor for Visitor {
     fn visit_u64<E>(&mut self, v: u64) -> Result<SerializableDuration, E>
         where E: de::Error
     {
-        match FromPrimitive::from_u64(v) {
-            Some(v) => Ok(SerializableDuration(Duration::from_millis(v))),
-            None => Err(E::type_mismatch(de::Type::U64)),
-        }
+        Ok(SerializableDuration(Duration::from_millis(v)))
     }
 
     fn visit_str<E>(&mut self, s: &str) -> Result<SerializableDuration, E>

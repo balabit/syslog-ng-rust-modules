@@ -16,7 +16,6 @@ handlebars = "0.10"
 rustc-serialize = "0.3"
 log = "0.3"
 env_logger = "0.3.1"
-num = "0.1"
 clippy = {version = "*", optional = true}
 
 [features]
