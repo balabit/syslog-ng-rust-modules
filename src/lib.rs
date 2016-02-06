@@ -17,6 +17,7 @@ extern crate num;
 #[macro_use]
 mod macros;
 
+pub use conditions::{Conditions, ConditionsBuilder};
 pub use correlator::Correlator;
 pub use correlator::CorrelatorFactory;
 pub use config::action::ActionType;
@@ -25,10 +26,10 @@ pub use message::{Message, MessageBuilder};
 pub use context::ContextMap;
 pub use reactor::{EventHandler, SharedData};
 
-pub mod conditions;
 pub mod config;
 pub mod correlator;
 pub mod test_utils;
+mod conditions;
 mod action;
 mod message;
 mod context;
