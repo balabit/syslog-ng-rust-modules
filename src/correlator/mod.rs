@@ -1,12 +1,10 @@
-use serde_json::from_str;
+use serde_json;
 use std::collections::HashMap;
-use std::io::Read;
-use std::fs::File;
 use std::sync::mpsc;
 use std::thread;
-use std::result::Result;
 use std::time::Duration;
 use std::sync::Arc;
+use std::str::FromStr;
 
 use {Message, Response};
 use config::ContextConfig;
@@ -19,6 +17,7 @@ use dispatcher::handlers::exit::ExitEventHandler;
 use dispatcher::handlers::timer::TimerEventHandler;
 use dispatcher::handlers::message::MessageEventHandler;
 pub use self::error::Error;
+pub use self::factory::CorrelatorFactory;
 use reactor::{Event, Reactor, EventHandler};
 use timer::Timer;
 
@@ -27,6 +26,7 @@ use self::exit_handler::ExitHandler;
 const TIMER_STEP_MS: u64 = 100;
 
 pub mod error;
+pub mod factory;
 mod exit_handler;
 #[cfg(test)]
 mod test;
@@ -39,16 +39,6 @@ pub struct Correlator {
 }
 
 impl Correlator {
-    pub fn from_path(path: &str) -> Result<Correlator, Error> {
-        let mut file = try!(File::open(path));
-        let mut buffer = String::new();
-        try!(file.read_to_string(&mut buffer));
-        let contexts = try!(from_str::<Vec<ContextConfig>>(&buffer));
-        trace!("Correlator: loading contexts from file; len={}",
-               contexts.len());
-        Ok(Correlator::new(ContextMap::from_configs(contexts)))
-    }
-
     pub fn new(context_map: ContextMap) -> Correlator {
         let (dispatcher_input_channel, rx) = mpsc::channel();
         let (dispatcher_output_channel_tx, dispatcher_output_channel_rx) = mpsc::channel();
@@ -117,5 +107,13 @@ impl Correlator {
         while let Ok(event) = self.dispatcher_output_channel.recv() {
             self.handle_event(event);
         }
+    }
+}
+
+impl FromStr for Correlator {
+    type Err = Error;
+    fn from_str(buffer: &str) -> Result<Self, Self::Err> {
+        let contexts = try!(serde_json::from_str::<Vec<ContextConfig>>(buffer));
+        Ok(Correlator::new(ContextMap::from_configs(contexts)))
     }
 }
