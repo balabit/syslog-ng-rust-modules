@@ -10,7 +10,7 @@ use dispatcher::response::ResponseSender;
 pub struct RequestReactor {
     handlers: BTreeMap<RequestHandle, Box<for<'a> EventHandler<Request, SharedData<'a>>>>,
     demultiplexer: Demultiplexer<Request>,
-    context_map: ContextMap,
+    pub context_map: ContextMap,
     responder: Box<ResponseSender>,
 }
 
