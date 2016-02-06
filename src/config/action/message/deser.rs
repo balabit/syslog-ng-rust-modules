@@ -284,4 +284,11 @@ mod test {
         let result = from_str::<MessageAction>(text);
         let _ = result.err().unwrap();
     }
+
+    #[test]
+    fn test_given_message_with_invalid_message_template_when_it_is_deserialized_then_an_error_is_returned() {
+        let text = r#"{ "uuid": "INVALID_MSG", "message": "{invalid}}" }"#;
+        let result = from_str::<MessageAction>(text);
+        let _ = result.err().unwrap();
+    }
 }
