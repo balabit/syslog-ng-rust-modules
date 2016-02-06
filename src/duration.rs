@@ -69,4 +69,11 @@ mod tests {
         println!("{:?}", &result);
         assert_eq!(true, result.is_err());
     }
+
+    #[test]
+    fn test_given_a_word_starting_with_numbers_when_it_is_deserialized_then_we_get_error() {
+        let result = serde_json::from_str::<SerializableDuration>(r#""42word""#);
+        println!("{:?}", &result);
+        assert_eq!(true, result.is_err());
+    }
 }
