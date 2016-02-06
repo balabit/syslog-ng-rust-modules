@@ -280,4 +280,11 @@ mod test {
         let message = result.expect("Failed to deserialize a valid MessageAction object");
         assert_message_action_eq(&expected_message, &message);
     }
+
+    #[test]
+    fn test_given_message_is_deserialized_when_it_contains_an_unexpected_field_then_an_error_is_returned() {
+        let text = r#"{ "unexpected": "UUID" }"#;
+        let result = from_str::<MessageAction>(text);
+        let _ = result.err().unwrap();
+    }
 }
