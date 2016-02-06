@@ -4,15 +4,20 @@ use dispatcher::Response;
 use dispatcher::response::ResponseSender;
 use message::{Message, MessageBuilder};
 
-use handlebars::Context;
 use std::borrow::Borrow;
 use std::collections::BTreeMap;
 use state::State;
 use self::error::Error;
 use self::renderer_context::RendererContext;
+use super::ExecCondition;
+use handlebars::{Handlebars, Context, Template};
+
+pub use self::builder::MessageActionBuilder;
 
 mod error;
 mod renderer_context;
+mod deser;
+mod builder;
 #[cfg(test)]
 mod test;
 
@@ -21,16 +26,6 @@ pub const CONTEXT_NAME: &'static str = "context_name";
 pub const CONTEXT_LEN: &'static str = "context_len";
 pub const MESSAGES: &'static str = "messages";
 const MESSAGE: &'static str = "MESSAGE";
-
-use handlebars::Template;
-use handlebars::Handlebars;
-
-use super::ExecCondition;
-
-mod deser;
-mod builder;
-
-pub use self::builder::MessageActionBuilder;
 
 pub struct MessageAction {
     uuid: String,
