@@ -291,4 +291,11 @@ mod test {
         let result = from_str::<MessageAction>(text);
         let _ = result.err().unwrap();
     }
+
+    #[test]
+    fn test_given_message_without_message_field_when_it_is_deserialized_then_an_error_is_returned() {
+        let text = r#"{ "uuid": "missing_msg" }"#;
+        let result = from_str::<MessageAction>(text);
+        let _ = result.err().unwrap();
+    }
 }
