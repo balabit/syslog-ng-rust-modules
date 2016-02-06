@@ -16,14 +16,14 @@ use dispatcher::demux::Demultiplexer;
 use dispatcher::handlers::exit::ExitEventHandler;
 use dispatcher::handlers::timer::TimerEventHandler;
 use dispatcher::handlers::message::MessageEventHandler;
-pub use self::error::Error;
-pub use self::factory::CorrelatorFactory;
+use self::exit_handler::ExitHandler;
 use reactor::{Event, Reactor, EventHandler};
 use timer::Timer;
 
-use self::exit_handler::ExitHandler;
-
 const TIMER_STEP_MS: u64 = 100;
+
+pub use self::error::Error;
+pub use self::factory::CorrelatorFactory;
 
 mod error;
 mod factory;

@@ -1,5 +1,4 @@
-use correlation::CorrelatorFactory;
-use correlation::correlator::Error;
+use correlation::correlator::{CorrelatorFactory, Error};
 use correlation::MessageBuilder;
 use correlation::test_utils::MessageEventHandler;
 

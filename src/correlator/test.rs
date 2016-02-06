@@ -1,10 +1,9 @@
 use config::{ContextConfigBuilder, ContextConfig};
 use config::action::message::MessageActionBuilder;
 use conditions::ConditionsBuilder;
-use Correlator;
+use correlator::Correlator;
 use context::ContextMap;
 use message::MessageBuilder;
-
 
 use handlebars::Template;
 use uuid::Uuid;

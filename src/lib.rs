@@ -18,8 +18,6 @@ extern crate num;
 mod macros;
 
 pub use conditions::{Conditions, ConditionsBuilder};
-pub use correlator::Correlator;
-pub use correlator::CorrelatorFactory;
 pub use config::action::ActionType;
 pub use dispatcher::Response;
 pub use message::{Message, MessageBuilder};

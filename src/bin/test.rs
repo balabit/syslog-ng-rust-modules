@@ -3,9 +3,9 @@ extern crate maplit;
 extern crate correlation;
 extern crate uuid;
 
-use correlation::Correlator;
+use correlation::correlator::Correlator;
 use correlation::config::ContextConfigBuilder;
-use correlation::conditions::ConditionsBuilder;
+use correlation::ConditionsBuilder;
 use correlation::MessageBuilder;
 use correlation::ContextMap;
 use uuid::Uuid;
