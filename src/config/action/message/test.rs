@@ -5,7 +5,7 @@ use super::{CONTEXT_LEN, CONTEXT_NAME, CONTEXT_UUID};
 
 use conditions::ConditionsBuilder;
 use dispatcher::Response;
-use dispatcher::response::MockResponseSender;
+use test_utils::MockResponseSender;
 use state::State;
 use action::Action;
 

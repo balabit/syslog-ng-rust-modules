@@ -14,7 +14,7 @@ use std::cell::RefCell;
 use std::thread;
 use std::time::Duration;
 
-use test_utils::correlator::MessageEventHandler;
+use test_utils::MessageEventHandler;
 
 const JSON_CONFIG: &'static str = r#"
       [

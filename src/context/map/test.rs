@@ -2,7 +2,7 @@ use conditions::ConditionsBuilder;
 use context::{BaseContextBuilder, MapContext};
 use timer::TimerEvent;
 use message::MessageBuilder;
-use dispatcher::response::MockResponseSender;
+use test_utils::MockResponseSender;
 
 use handlebars::Template;
 use uuid::Uuid;
