@@ -94,3 +94,29 @@ fn test_given_message_action_when_it_is_executed_then_it_uses_the_messages_to_re
         unreachable!();
     }
 }
+
+#[test]
+fn test_given_message_action_with_templated_values_when_a_render_error_occurres_then_it_does_not_cause_panic() {
+    let _ = env_logger::init();
+    let mut responder = MockResponseSender::new();
+    let name = Some("name".to_owned());
+    let base_context = {
+        let conditions = ConditionsBuilder::new(Duration::from_millis(100)).build();
+        let uuid = Uuid::new_v4();
+        BaseContextBuilder::new(uuid, conditions).name(name.clone()).build()
+    };
+    let state = {
+        let messages = vec![Arc::new(MessageBuilder::new("uuid1", "message1")
+                                         .pair("key1", "value1")
+                                         .build())];
+        State::with_messages(messages)
+    };
+    let message_action = {
+        // this will produce the RenderError
+        let message = Template::compile("{{lookup 1}}".to_owned())
+                          .expect("Failed to compile a handlebars template");
+        MessageActionBuilder::new("uuid", message).build()
+    };
+
+    message_action.on_closed(&state, &base_context, &mut responder);
+}

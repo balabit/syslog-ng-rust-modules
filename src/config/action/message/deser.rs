@@ -59,15 +59,12 @@ impl MessageActionVisitor {
     fn compile_template<V>(template_string: String, uuid: &str) -> Result<Template, V::Error>
         where V: MapVisitor
     {
-        match Template::compile(template_string) {
-            Ok(message) => Ok(message),
-            Err(error) => {
-                Err(Error::syntax(&format!("Invalid handlebars template in 'message' field: \
-                                            uuid={}, error={}",
-                                           uuid,
-                                           error)))
-            }
-        }
+        Template::compile(template_string).map_err(|error| {
+            Error::syntax(&format!("Invalid handlebars template in 'message' field: \
+                                        uuid={}, error={}",
+                                       uuid,
+                                       error))
+        })
     }
 }
 
@@ -279,5 +276,26 @@ mod test {
         let result = from_str::<MessageAction>(text);
         let message = result.expect("Failed to deserialize a valid MessageAction object");
         assert_message_action_eq(&expected_message, &message);
+    }
+
+    #[test]
+    fn test_given_message_is_deserialized_when_it_contains_an_unexpected_field_then_an_error_is_returned() {
+        let text = r#"{ "unexpected": "UUID" }"#;
+        let result = from_str::<MessageAction>(text);
+        let _ = result.err().unwrap();
+    }
+
+    #[test]
+    fn test_given_message_with_invalid_message_template_when_it_is_deserialized_then_an_error_is_returned() {
+        let text = r#"{ "uuid": "INVALID_MSG", "message": "{invalid}}" }"#;
+        let result = from_str::<MessageAction>(text);
+        let _ = result.err().unwrap();
+    }
+
+    #[test]
+    fn test_given_message_without_message_field_when_it_is_deserialized_then_an_error_is_returned() {
+        let text = r#"{ "uuid": "missing_msg" }"#;
+        let result = from_str::<MessageAction>(text);
+        let _ = result.err().unwrap();
     }
 }

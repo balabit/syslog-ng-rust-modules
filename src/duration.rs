@@ -3,8 +3,6 @@ use std::str::FromStr;
 use std::error::Error;
 use serde::de;
 
-use num::FromPrimitive;
-
 #[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Debug)]
 pub struct SerializableDuration(pub Duration);
 
@@ -16,10 +14,7 @@ impl de::Visitor for Visitor {
     fn visit_u64<E>(&mut self, v: u64) -> Result<SerializableDuration, E>
         where E: de::Error
     {
-        match FromPrimitive::from_u64(v) {
-            Some(v) => Ok(SerializableDuration(Duration::from_millis(v))),
-            None => Err(E::type_mismatch(de::Type::U64)),
-        }
+        Ok(SerializableDuration(Duration::from_millis(v)))
     }
 
     fn visit_str<E>(&mut self, s: &str) -> Result<SerializableDuration, E>
@@ -46,17 +41,33 @@ mod tests {
     use serde_json;
     use std::time::Duration;
 
-    #[test]
-    fn test_given_valid_duration_when_it_is_deserialized_then_we_get_the_right_result() {
-        let result = serde_json::from_str::<SerializableDuration>("100");
+    fn assert_serialized_value_eq(input: &str, expected: Duration) {
+        let result = serde_json::from_str::<SerializableDuration>(input);
         println!("{:?}", &result);
         let duration = result.expect("Failed to deserialize a valid SerializableDuration value");
-        assert_eq!(Duration::from_millis(100), duration.0);
+        assert_eq!(expected, duration.0);
+    }
+
+    #[test]
+    fn test_given_valid_duration_when_it_is_deserialized_then_we_get_the_right_result() {
+        assert_serialized_value_eq("100", Duration::from_millis(100));
+    }
+
+    #[test]
+    fn test_given_valid_duration_as_str_when_it_is_deserialized_then_we_get_the_right_result() {
+        assert_serialized_value_eq(r#""100""#, Duration::from_millis(100));
     }
 
     #[test]
     fn test_given_invalid_duration_when_it_is_deserialized_then_we_get_error() {
         let result = serde_json::from_str::<SerializableDuration>("word");
+        println!("{:?}", &result);
+        assert_eq!(true, result.is_err());
+    }
+
+    #[test]
+    fn test_given_a_word_starting_with_numbers_when_it_is_deserialized_then_we_get_error() {
+        let result = serde_json::from_str::<SerializableDuration>(r#""42word""#);
         println!("{:?}", &result);
         assert_eq!(true, result.is_err());
     }

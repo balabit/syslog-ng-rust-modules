@@ -12,7 +12,6 @@ extern crate rustc_serialize;
 extern crate handlebars;
 #[macro_use]
 extern crate log;
-extern crate num;
 
 #[macro_use]
 mod macros;
