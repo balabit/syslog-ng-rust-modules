@@ -1,5 +1,7 @@
 # correlation
 
+[![Coverage Status](https://coveralls.io/repos/github/ihrwein/correlation/badge.svg?branch=master)](https://coveralls.io/github/ihrwein/correlation?branch=master)
+
 A library for grouping events based on predefined rules.
 
 ## Details
