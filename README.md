@@ -6,38 +6,43 @@ A library for grouping events based on predefined rules.
 
 ## Details
 
-This library is able to group events based on their unique identifier or other
+This library can group events based on their unique identifier or other
 properties. Every event has a unique identifier and several key-value pairs.
 You can turn your raw logs into events by parsing them. This library has a
-"brother" library which does exactly this: parses raw messages based on
-patterns. syslog-ng can use this parsing library, you can find more information
-here: https://github.com/ihrwein/actiondb-parser
+"brother" library (https://github.com/ihrwein/actiondb-parser) which does exactly that: it parses raw messages based on
+patterns, and converts them into key-value pairs.
 
-The correlation-parser module for syslog-ng is work in progress.
+You can use these libraries in syslog-ng (https://syslog-ng/org) to parse and correlate your log messages.
+
+Note that both libraries are work in progress.
+
+## Compilation
+
+Just use this lib in your `Cargo.toml`.
 
 ## Use cases
 
-Before diving into the configuration, let's see some use cases which you can
-accomplish by using this library:
+Before diving into the configuration, let's see some use cases about what you can
+accomplish with this library:
 
 1. Message deduplication/suppression (any type, not just consecutive ones)
 1. Generating alerts when some events occurred
 1. Event transformation: receiving one type of event, generating a new one
-1. [YOUR use case here, I'd like to hear it!]
+1. [YOUR use case here: if you do something interesting with this library, let me know about it!]
 
 ## Contribution
 
 If you find this library interesting and also want to try out the Rust systems
-programming language, you are in a good place! Your contribution is very
-appreciated and welcomed! Every issue is mentored and has a difficulty level
+programming language, you are in a good place! Your contribution is greatly
+appreciated and welcome! Every issue is mentored and has a difficulty level
 assigned. If you don't find anything worth of your attention, please hit me up
-(Cargo.toml has my mail address) and we will find something interesting
-(threading, etc.).
+(Cargo.toml has my mail address) and we will find an interesting task for you
+(for example, threading).
 
 ### Configuration file format
 
-The configuration file is a JSON file and basically an array of "context"
-definitions.  The following (overly complex, contains all possible
+The configuration file is a JSON file, basically it is an array of "context"
+definitions. The following (overly complex, contains all possible
 configuration options) JSON document is an example of this configuration
 format:
 
@@ -47,8 +52,6 @@ format:
         "name": "MAIL_READ",
         "uuid": "f7ee6a32-03a6-40d9-bd87-f48d1b4cd563",
         "conditions": {
-            "timeout": 3600000,
-            "renew_timeout": 100,
             "patterns": [
                 "LOGIN",
                 "MAIL_READ",
@@ -56,6 +59,8 @@ format:
             ],
             "first_opens": true,
             "last_closes": true,
+            "timeout": 3600000,
+            "renew_timeout": 100,
             "max_size": 5
         },
         "context_id": "{{user_name}}",
@@ -78,27 +83,27 @@ format:
     }
 ]
 ```
-A "context" defines what kind of events and how should be grouped. You can
-execute actions on the grouped events when some conditions are met. The only
-supported action type is generating an artificial message.
+A "context" is a group of messages that belong together based on some property (for example, they are sent by the same application on the same host). You can
+execute actions on the grouped events when some conditions are met. Currently the only
+supported action type is generating an artificial log message.
 
 The following fields can be used in a context definition:
+
 * `name`: string, optional. The human readable name of the context (e.g. `SSH_LOGIN`).
 * `uuid`: UUID, required. The unique identifier of the context definition.
 * `conditions`: required. Defines how this context can be opened or closed:
- * `timeout`: after `timeout` milisecs of opening the context it has to be closed.
- * `renew_timeout`: if `renew_timeout` milisecs elapses without receiving a new event the context has to be closed.
- * `patterns`: the context is interested in this list of event identifiers/names. If it's empty or not present, the
+ * `patterns`: The context is interested in this list of event identifiers/names. If it's empty or not present, the
  context is subscribed to all events.
- * `first_opens`: only the first element of `patterns` can open the context_id
- * `last_closes`: the last element of `patterns` can also close the context
- * `max_size`: the maximal number of events this context can store.
-* `context_id`: a Handlebars template which can be used to group events based on their key-value pairs. Every key-value
+ * `first_opens`: If `true`, the context is opened only when the first element of `patterns` list is received (that is, a message defines the beginning of the context, for example, a login message)
+ * `last_closes`: If `true`, the last element of `patterns` closes the context (for example, if a logout message is received that matches the context)
+ * `timeout`: After opening the context, it is automatically closed after `timeout` milliseconds.
+ * `renew_timeout`: The context is closed if `renew_timeout` milliseconds elapses without receiving a new event to the context.
+ * `max_size`: The maximal number of events this context can store.
+* `context_id`: A Handlebars template which can be used to group events based on their key-value pairs. Every key-value
 pair of an event can be used.
-If two rendered template is the same for two events, they are grouped into the same context (of couse,
-  an event can belong to several contexts in the same time).
-* `actions`: an array of several actions which can be run on the opening or the closing
-of the context.
+If two rendered template is the same for two events, they are grouped into the same context (of course,
+  an event can belong to several contexts at the same time).
+* `actions`: An array of several actions which are executed when the context is opened or closed.
 
 | Name                     | Optional | Value type                   | Default value |
 |--------------------------|----------|------------------------------|---------------|
@@ -118,17 +123,18 @@ There is one action type defined currently: `message`.
 ##### Message
 
 The `message` action's definition is as follows:
-* `uuid`: the unique identifier of the event which is generated,
-* `name`: the human readable name of the event which is generated,
-* `message`: a Handlebars template, represents the contents of the message (like the message portion of a raw syslog)
-* `values`: key-value pairs. The values are Handlebars templates.
-* `inject_mode`: represents how the generated message should be injected into the application. It has three distinct values:
- * `log`: the message should be logged (via standard `syslog()` call, through log4j, etc.)
- * `forward`: the message should be forwarded to the next processing pipeline element,
- * `loopback`: the message should be looped back to the correlator engine for multi-layer correlation.
-* `when`: defines when the action should be executed
- * `on_opened`: when the context is being closed,
- * `on_closed`: when the context is being opened.
+
+* `uuid`: The unique identifier of the message which is generated,
+* `name`: The human readable name of the message which is generated,
+* `message`: A Handlebars template that represents the contents of the message (like the message portion of a raw syslog)
+* `values`: Key-value pairs. The values are Handlebars templates.
+* `inject_mode`: Represents how the generated message should be injected into the application. It has three distinct values:
+ * `log`: Log the message (via standard `syslog()` call, through log4j, etc.)
+ * `forward`: Forward the message to the next processing pipeline element.
+ * `loopback`: Send the message back to the correlator engine for multi-layer correlation.
+* `when`: Defines when the action should be executed
+ * `on_opened`: When the context is opened
+ * `on_closed`: When the context is closed.
 
 
  | Name           | Optional | Value type                               | Default value |
@@ -141,19 +147,20 @@ The `message` action's definition is as follows:
  | when.on_opened | yes      | bool                                     | false         |
  | when.on_closed | yes      | bool                                     | true          |
 
-The templatable values has read only access to the state of the context during
-rendering. The following variables can be used during rendering:
+The templatable values has read-only access to the state of the context when the message is rendered/
+The following variables can be used in the message:
 
-* `messages`: the array of events captured by this context,
-* `context_name`: the name of the generating context (if any)
-* `context_uuid`: the uuid of the generating context
-* `context_len`: the number of captured events.
+* `messages`: The array of events stored in the context
+* `context_name`: The name of the generating context (if any)
+* `context_uuid`: The uuid of the generating context
+* `context_len`: The number of captured events.
 
 A message is represented by a JSON object with the following keys:
-* `uuid`: the uuid of the message,
-* `name`: the optional name of the message,
-* `message`: the message portion,
-* `values`: the key-value pairs stored in the message.
+
+* `uuid`: The uuid of the message
+* `name`: The optional name of the message
+* `message`: The message portion
+* `values`: The key-value pairs stored in the message
 
 The following Handlebars library is used:
 https://github.com/sunng87/handlebars-rust. You can use all the syntax it
@@ -175,5 +182,5 @@ at your option.
 ### Contribution
 
 Unless you explicitly state otherwise, any contribution intentionally submitted
-for inclusion in the work by you, as defined in the Apache-2.0 license, shall be dual licensed as above, without any
+for inclusion in the Work by You, as defined in the Apache-2.0 license, shall be dual licensed as above, without any
 additional terms or conditions.
