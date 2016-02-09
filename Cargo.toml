@@ -2,6 +2,11 @@
 name = "correlation"
 version = "0.2.1"
 authors = ["Tibor Benke <ihrwein@gmail.com>"]
+homepage = "https://github.com/ihrwein/correlation"
+repository = "https://github.com/ihrwein/correlation"
+keywords = ["logging", "event processing"]
+description = "A library for grouping events based on predefined rules."
+license = "MIT/Apache-2.0"
 
 [[bin]]
 name = "test"
