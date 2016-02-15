@@ -28,6 +28,7 @@ enum Field {
     Conditions,
     ContextId,
     Actions,
+    Patterns,
 }
 
 impl Deserialize for Field {
@@ -48,6 +49,7 @@ impl Deserialize for Field {
                     "conditions" => Ok(Field::Conditions),
                     "context_id" => Ok(Field::ContextId),
                     "actions" => Ok(Field::Actions),
+                    "patterns" => Ok(Field::Patterns),
                     _ => Err(Error::syntax(&format!("Unexpected field: {}", value))),
                 }
             }
@@ -118,6 +120,7 @@ impl Visitor for ContextVisitor {
         let mut conditions = None;
         let mut context_id: Option<String> = None;
         let mut actions = None;
+        let mut patterns = None;
 
         while let Some(field) = try!(visitor.visit_key()) {
             match field {
@@ -126,6 +129,7 @@ impl Visitor for ContextVisitor {
                 Field::Conditions => conditions = Some(try!(visitor.visit_value())),
                 Field::ContextId => context_id = Some(try!(visitor.visit_value())),
                 Field::Actions => actions = Some(try!(visitor.visit_value())),
+                Field::Patterns => patterns = Some(try!(visitor.visit_value())),
             }
         }
 
@@ -141,6 +145,7 @@ impl Visitor for ContextVisitor {
             conditions: conditions.unwrap(),
             context_id: context_id,
             actions: actions,
+            patterns: patterns.unwrap_or_default()
         })
     }
 }
