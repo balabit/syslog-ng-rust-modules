@@ -20,7 +20,6 @@ pub struct Conditions {
     pub first_opens: bool,
     pub last_closes: bool,
     pub max_size: Option<usize>,
-    pub patterns: Vec<String>,
 }
 
 impl Conditions {
@@ -31,7 +30,6 @@ impl Conditions {
             first_opens: FIRST_OPENS_DEFAULT,
             last_closes: LAST_CLOSES_DEFAULT,
             max_size: None,
-            patterns: Vec::new(),
         }
     }
 
@@ -107,11 +105,6 @@ impl ConditionsBuilder {
     }
     pub fn max_size(&mut self, max_size: usize) -> &mut ConditionsBuilder {
         self.conditions.max_size = Some(max_size);
-        self
-    }
-
-    pub fn patterns(&mut self, patterns: Vec<String>) -> &mut ConditionsBuilder {
-        self.conditions.patterns = patterns;
         self
     }
 
