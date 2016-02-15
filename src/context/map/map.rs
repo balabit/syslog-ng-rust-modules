@@ -92,6 +92,6 @@ impl MapContext {
     }
 
     pub fn patterns(&self) -> &[String] {
-        &self.base.conditions().patterns
+        &self.base.patterns
     }
 }
