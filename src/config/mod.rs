@@ -21,6 +21,7 @@ pub struct ContextConfig {
     pub conditions: Conditions,
     pub context_id: Option<Template>,
     pub actions: Vec<ActionType>,
+    pub patterns: Vec<String>
 }
 
 pub struct ContextConfigBuilder {
@@ -29,6 +30,7 @@ pub struct ContextConfigBuilder {
     conditions: Conditions,
     context_id: Option<Template>,
     actions: Vec<ActionType>,
+    patterns: Vec<String>
 }
 
 impl ContextConfigBuilder {
@@ -39,6 +41,7 @@ impl ContextConfigBuilder {
             conditions: conditions,
             context_id: None,
             actions: Vec::new(),
+            patterns: Vec::new()
         }
     }
 
@@ -64,6 +67,7 @@ impl ContextConfigBuilder {
             conditions: self.conditions,
             context_id: self.context_id,
             actions: self.actions,
+            patterns: self.patterns
         }
     }
 }
