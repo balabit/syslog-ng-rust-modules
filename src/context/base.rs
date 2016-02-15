@@ -16,6 +16,7 @@ pub struct BaseContext {
     uuid: Uuid,
     conditions: Conditions,
     actions: Vec<ActionType>,
+    patterns: Vec<String>,
 }
 
 impl BaseContext {
@@ -41,6 +42,7 @@ pub struct BaseContextBuilder {
     uuid: Uuid,
     conditions: Conditions,
     actions: Vec<ActionType>,
+    patterns: Vec<String>
 }
 
 impl BaseContextBuilder {
@@ -50,6 +52,7 @@ impl BaseContextBuilder {
             uuid: uuid,
             conditions: conditions,
             actions: Vec::new(),
+            patterns: Vec::new()
         }
     }
 
@@ -63,13 +66,18 @@ impl BaseContextBuilder {
         self
     }
 
+    pub fn patterns(mut self, patterns: Vec<String>) -> BaseContextBuilder {
+        self.patterns = patterns;
+        self
+    }
     pub fn build(self) -> BaseContext {
-        let BaseContextBuilder {name, uuid, conditions, actions} = self;
+        let BaseContextBuilder {name, uuid, conditions, actions, patterns} = self;
         BaseContext {
             name: name,
             uuid: uuid,
             conditions: conditions,
             actions: actions,
+            patterns: patterns
         }
     }
 }
