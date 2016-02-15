@@ -52,7 +52,7 @@ impl LinearContext {
     }
 
     pub fn patterns(&self) -> &[String] {
-        &self.base.conditions().patterns
+        &self.base.patterns
     }
 
     #[allow(dead_code)]
