@@ -39,11 +39,11 @@ impl LinearContext {
     }
 
     pub fn on_timer(&mut self, event: &TimerEvent, responder: &mut ResponseSender) {
-        self.state.on_timer(event, &self.base, responder);
+        self.base.on_timer(event, &mut self.state, responder);
     }
 
     pub fn on_message(&mut self, event: Arc<Message>, responder: &mut ResponseSender) {
-        self.state.on_message(event, &self.base, responder);
+        self.base.on_message(event, &mut self.state, responder);
     }
 
     #[allow(dead_code)]

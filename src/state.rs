@@ -8,12 +8,9 @@
 
 use std::sync::Arc;
 
-use action::Action;
 use Message;
 use timer::TimerEvent;
 use std::time::Duration;
-use context::BaseContext;
-use dispatcher::response::ResponseSender;
 
 #[derive(Debug)]
 pub struct State {
@@ -41,19 +38,11 @@ impl State {
         self.opened
     }
 
-    fn open(&mut self, context: &BaseContext, responder: &mut ResponseSender) {
-        trace!("Context: opening state; uuid={}", context.uuid());
-        for i in context.actions() {
-            i.on_opened(self, context, responder);
-        }
+    pub fn open(&mut self) {
         self.opened = true;
     }
 
-    fn close(&mut self, context: &BaseContext, responder: &mut ResponseSender) {
-        trace!("Context: closing state; uuid={}", context.uuid());
-        for i in context.actions() {
-            i.on_closed(self, context, responder);
-        }
+    pub fn close(&mut self) {
         self.reset();
     }
 
@@ -69,37 +58,9 @@ impl State {
         &self.messages
     }
 
-    fn add_message(&mut self, message: Arc<Message>) {
+    pub fn add_message(&mut self, message: Arc<Message>) {
         self.messages.push(message);
         self.elapsed_time_since_last_message = Duration::from_secs(0);
-    }
-
-    pub fn on_timer(&mut self,
-                    event: &TimerEvent,
-                    context: &BaseContext,
-                    responder: &mut ResponseSender) {
-        if self.is_open() {
-            self.update_timers(event);
-        }
-        if context.conditions().is_closing(self) {
-            self.close(context, responder);
-        }
-    }
-
-    pub fn on_message(&mut self,
-                      event: Arc<Message>,
-                      context: &BaseContext,
-                      responder: &mut ResponseSender) {
-        if self.is_open() {
-            self.add_message(event);
-        } else if context.conditions().is_opening(&event) {
-            self.add_message(event);
-            self.open(context, responder);
-        }
-
-        if context.conditions().is_closing(self) {
-            self.close(context, responder);
-        }
     }
 
     pub fn update_timers(&mut self, event: &TimerEvent) {

@@ -6,17 +6,24 @@
 // option. All files in the project carrying such notice may not be copied,
 // modified, or distributed except according to those terms.
 
+use std::sync::Arc;
+
 use uuid::Uuid;
 
 use config::action::ActionType;
 use conditions::Conditions;
+use state::State;
+use dispatcher::response::ResponseSender;
+use action::Action;
+use message::Message;
+use timer::TimerEvent;
 
 pub struct BaseContext {
     name: Option<String>,
     uuid: Uuid,
     conditions: Conditions,
     actions: Vec<ActionType>,
-    patterns: Vec<String>,
+    pub patterns: Vec<String>,
 }
 
 impl BaseContext {
@@ -34,6 +41,50 @@ impl BaseContext {
 
     pub fn actions(&self) -> &[ActionType] {
         &self.actions
+    }
+
+    pub fn on_timer(&self,
+                    event: &TimerEvent,
+                    state: &mut State,
+                    responder: &mut ResponseSender) {
+        if state.is_open() {
+            state.update_timers(event);
+        }
+        if self.conditions().is_closing(state) {
+            self.close(state, responder);
+        }
+    }
+
+    pub fn on_message(&self,
+                      event: Arc<Message>,
+                      state: &mut State,
+                      responder: &mut ResponseSender) {
+        if state.is_open() {
+            state.add_message(event);
+        } else if self.conditions().is_opening(&event) {
+            state.add_message(event);
+            self.open(state, responder);
+        }
+
+        if self.conditions().is_closing(state) {
+            self.close(state, responder);
+        }
+    }
+
+    fn open(&self, state: &mut State, responder: &mut ResponseSender) {
+        trace!("Context: opening state; uuid={}", self.uuid());
+        for i in self.actions() {
+            i.on_opened(state, self, responder);
+        }
+        state.open();
+    }
+
+    fn close(&self, state: &mut State, responder: &mut ResponseSender) {
+        trace!("Context: closing state; uuid={}", self.uuid());
+        for i in self.actions() {
+            i.on_closed(state, self, responder);
+        }
+        state.close();
     }
 }
 
