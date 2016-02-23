@@ -34,8 +34,8 @@ fn test_given_map_context_when_messages_have_the_same_kvpairs_then_they_go_to_th
                 msg_id3.clone(),
             ];
             let uuid = Uuid::new_v4();
-            let conditions = ConditionsBuilder::new(timeout).patterns(patterns).build();
-            BaseContextBuilder::new(uuid, conditions).build()
+            let conditions = ConditionsBuilder::new(timeout).build();
+            BaseContextBuilder::new(uuid, conditions).patterns(patterns).build()
         };
         let context_id = Template::compile("{{HOST}}{{PROGRAM}}{{PID}}".to_owned()).unwrap();
         MapContext::new(base_context, context_id)

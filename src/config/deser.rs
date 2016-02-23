@@ -169,13 +169,13 @@ mod test {
             "uuid": "86ca9f93-84fb-4813-b037-6526f7a585a3",
             "conditions": {
                 "timeout": 100,
-                "first_opens": true,
-                "patterns": [
-                    "PATTERN_NAME1",
-                    "PATTERN_NAME2",
-                    "f13dafee-cd14-4dda-995c-6ed476a21de3"
-                ]
+                "first_opens": true
             },
+            "patterns": [
+                "PATTERN_NAME1",
+                "PATTERN_NAME2",
+                "f13dafee-cd14-4dda-995c-6ed476a21de3"
+            ],
             "actions": [
                 {
                     "message": {
@@ -196,10 +196,6 @@ mod test {
         let expected_uuid = Uuid::parse_str("86ca9f93-84fb-4813-b037-6526f7a585a3").ok().unwrap();
         let expected_conditions = ConditionsBuilder::new(Duration::from_millis(100))
                                       .first_opens(true)
-                                      .patterns(vec!["PATTERN_NAME1".to_owned(),
-                                                     "PATTERN_NAME2".to_owned(),
-                                                     "f13dafee-cd14-4dda-995c-6ed476a21de3"
-                                                         .to_owned()])
                                       .build();
         let message = Template::compile("message".to_owned())
                           .expect("Failed to compile a handlebars template");
