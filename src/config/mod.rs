@@ -60,6 +60,11 @@ impl ContextConfigBuilder {
         self
     }
 
+    pub fn patterns(mut self, patterns: Vec<String>) -> ContextConfigBuilder {
+        self.patterns = patterns;
+        self
+    }
+
     pub fn build(self) -> ContextConfig {
         ContextConfig {
             name: self.name,
