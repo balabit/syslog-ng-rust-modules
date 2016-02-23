@@ -50,6 +50,7 @@ impl From<ContextConfig> for Context {
 
         let base = BaseContextBuilder::new(uuid, conditions);
         let base = base.name(name);
+        let base = base.patterns(patterns);
         let base = base.actions(actions);
         let base = base.build();
 
