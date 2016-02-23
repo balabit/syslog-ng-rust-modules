@@ -32,52 +32,6 @@ impl Conditions {
             max_size: None,
         }
     }
-
-    pub fn is_opening(&self, message: &Message) -> bool {
-        if self.first_opens {
-            self.patterns.first().iter().any(|first| message.ids().any(|id| &id == first))
-        } else {
-            true
-        }
-    }
-
-    pub fn is_closing(&self, state: &State) -> bool {
-        trace!("Conditions: shoud we close this context?");
-        state.is_open() && self.is_closing_condition_met(state)
-    }
-
-    fn is_closing_condition_met(&self, state: &State) -> bool {
-        self.is_max_size_reached(state) || self.is_closing_message(state) ||
-        self.is_any_timer_expired(state)
-    }
-
-    fn is_max_size_reached(&self, state: &State) -> bool {
-        self.max_size.map_or(false, |max_size| state.messages().len() >= max_size)
-    }
-
-    fn is_closing_message(&self, state: &State) -> bool {
-        if self.last_closes {
-            state.messages().last().iter().any(|last_message| {
-                self.patterns.last().iter().any(|last| last_message.ids().any(|id| &id == last))
-            })
-        } else {
-            false
-        }
-    }
-
-    fn is_any_timer_expired(&self, state: &State) -> bool {
-        self.is_timeout_expired(state) || self.is_renew_timeout_expired(state)
-    }
-
-    fn is_timeout_expired(&self, state: &State) -> bool {
-        state.elapsed_time() >= self.timeout
-    }
-
-    fn is_renew_timeout_expired(&self, state: &State) -> bool {
-        self.renew_timeout.map_or(false, |renew_timeout| {
-            state.elapsed_time_since_last_message() >= renew_timeout
-        })
-    }
 }
 
 pub struct ConditionsBuilder {
