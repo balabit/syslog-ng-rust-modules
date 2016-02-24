@@ -45,6 +45,7 @@ impl MapContext {
         }
     }
 
+    #[allow(for_kv_map)]
     pub fn on_timer(&mut self, event: &TimerEvent, responder: &mut ResponseSender) {
         for (_, mut state) in &mut self.map {
             self.base.on_timer(event, &mut state, responder);
