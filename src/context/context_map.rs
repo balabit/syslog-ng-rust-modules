@@ -136,7 +136,7 @@ mod tests {
                 ConditionsBuilder::new(Duration::from_millis(100)).build()
             };
             let patterns = vec!["A".to_owned(), "B".to_owned()];
-            let base = BaseContextBuilder::new(uuid.clone(), conditions).patterns(patterns).build();
+            let base = BaseContextBuilder::new(uuid.to_owned(), conditions).patterns(patterns).build();
             LinearContext::new(base)
         };
         context_map.insert(Context::Linear(context1));
