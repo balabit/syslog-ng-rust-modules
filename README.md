@@ -51,12 +51,12 @@ format:
     {
         "name": "MAIL_READ",
         "uuid": "f7ee6a32-03a6-40d9-bd87-f48d1b4cd563",
+        "patterns": [
+          "LOGIN",
+          "MAIL_READ",
+          "LOGOUT"
+        ],
         "conditions": {
-            "patterns": [
-                "LOGIN",
-                "MAIL_READ",
-                "LOGOUT"
-            ],
             "first_opens": true,
             "last_closes": true,
             "timeout": 3600000,
@@ -91,9 +91,9 @@ The following fields can be used in a context definition:
 
 * `name`: string, optional. The human readable name of the context (e.g. `SSH_LOGIN`).
 * `uuid`: UUID, required. The unique identifier of the context definition.
+* `patterns`: The context is interested in this list of event identifiers/names. If it's empty or not present, the
+context is subscribed to all events.
 * `conditions`: required. Defines how this context can be opened or closed:
- * `patterns`: The context is interested in this list of event identifiers/names. If it's empty or not present, the
- context is subscribed to all events.
  * `first_opens`: If `true`, the context is opened only when the first element of `patterns` list is received (that is, a message defines the beginning of the context, for example, a login message)
  * `last_closes`: If `true`, the last element of `patterns` closes the context (for example, if a logout message is received that matches the context)
  * `timeout`: After opening the context, it is automatically closed after `timeout` milliseconds.
@@ -109,9 +109,9 @@ If two rendered template is the same for two events, they are grouped into the s
 |--------------------------|----------|------------------------------|---------------|
 | name                     | yes      | string                       |               |
 | uuid                     | no       | UUID                         |               |
+| patterns                 | yes      | array                        |               |
 | conditions.timeout       | no       | int [ms]                     |               |
 | conditions.renew_timeout | yes      | int [ms]                     |               |
-| conditions.patterns      | yes      | array                        |               |
 | conditions.first_opens   | yes      | bool                         | false         |
 | conditions.last_closes   | yes      | bool                         | true          |
 | conditions.max_size      | yes      | int                          |               |
