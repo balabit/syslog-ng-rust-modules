@@ -63,6 +63,8 @@ impl serde::de::Deserialize for ExecCondition {
     fn deserialize<D>(deserializer: &mut D) -> Result<ExecCondition, D::Error>
         where D: serde::de::Deserializer
     {
+        // the have the same On prefix
+        #[allow(enum_variant_names)]
         enum Field {
             OnOpened,
             OnClosed,

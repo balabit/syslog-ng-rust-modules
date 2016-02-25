@@ -28,6 +28,7 @@ enum Field {
     Conditions,
     ContextId,
     Actions,
+    Patterns,
 }
 
 impl Deserialize for Field {
@@ -48,6 +49,7 @@ impl Deserialize for Field {
                     "conditions" => Ok(Field::Conditions),
                     "context_id" => Ok(Field::ContextId),
                     "actions" => Ok(Field::Actions),
+                    "patterns" => Ok(Field::Patterns),
                     _ => Err(Error::syntax(&format!("Unexpected field: {}", value))),
                 }
             }
@@ -118,6 +120,7 @@ impl Visitor for ContextVisitor {
         let mut conditions = None;
         let mut context_id: Option<String> = None;
         let mut actions = None;
+        let mut patterns = None;
 
         while let Some(field) = try!(visitor.visit_key()) {
             match field {
@@ -126,6 +129,7 @@ impl Visitor for ContextVisitor {
                 Field::Conditions => conditions = Some(try!(visitor.visit_value())),
                 Field::ContextId => context_id = Some(try!(visitor.visit_value())),
                 Field::Actions => actions = Some(try!(visitor.visit_value())),
+                Field::Patterns => patterns = Some(try!(visitor.visit_value())),
             }
         }
 
@@ -141,6 +145,7 @@ impl Visitor for ContextVisitor {
             conditions: conditions.unwrap(),
             context_id: context_id,
             actions: actions,
+            patterns: patterns.unwrap_or_default()
         })
     }
 }
@@ -164,13 +169,13 @@ mod test {
             "uuid": "86ca9f93-84fb-4813-b037-6526f7a585a3",
             "conditions": {
                 "timeout": 100,
-                "first_opens": true,
-                "patterns": [
-                    "PATTERN_NAME1",
-                    "PATTERN_NAME2",
-                    "f13dafee-cd14-4dda-995c-6ed476a21de3"
-                ]
+                "first_opens": true
             },
+            "patterns": [
+                "PATTERN_NAME1",
+                "PATTERN_NAME2",
+                "f13dafee-cd14-4dda-995c-6ed476a21de3"
+            ],
             "actions": [
                 {
                     "message": {
@@ -191,10 +196,6 @@ mod test {
         let expected_uuid = Uuid::parse_str("86ca9f93-84fb-4813-b037-6526f7a585a3").ok().unwrap();
         let expected_conditions = ConditionsBuilder::new(Duration::from_millis(100))
                                       .first_opens(true)
-                                      .patterns(vec!["PATTERN_NAME1".to_owned(),
-                                                     "PATTERN_NAME2".to_owned(),
-                                                     "f13dafee-cd14-4dda-995c-6ed476a21de3"
-                                                         .to_owned()])
                                       .build();
         let message = Template::compile("message".to_owned())
                           .expect("Failed to compile a handlebars template");

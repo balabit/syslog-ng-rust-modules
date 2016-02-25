@@ -46,10 +46,11 @@ impl Context {
 
 impl From<ContextConfig> for Context {
     fn from(config: ContextConfig) -> Context {
-        let ContextConfig {name, uuid, conditions, context_id, actions} = config;
+        let ContextConfig {name, uuid, conditions, context_id, actions, patterns} = config;
 
         let base = BaseContextBuilder::new(uuid, conditions);
         let base = base.name(name);
+        let base = base.patterns(patterns);
         let base = base.actions(actions);
         let base = base.build();
 

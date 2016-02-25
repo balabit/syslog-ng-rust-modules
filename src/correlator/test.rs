@@ -28,13 +28,13 @@ const JSON_CONFIG: &'static str = r#"
         {
           "name": "CONTEXT_NAME_1",
           "uuid": "185e96da-c00e-454b-b4fe-9d0a14a86335",
+          "patterns": [
+            "p1",
+            "p2",
+            "p3"
+          ],
           "conditions": {
             "timeout": 100,
-            "patterns": [
-              "p1",
-              "p2",
-              "p3"
-            ],
             "first_opens": true
           },
           "actions": [
@@ -75,11 +75,11 @@ const JSON_CONFIG: &'static str = r#"
         {
           "name": "CONTEXT_NAME_3",
           "uuid": "385e96da-c00e-454b-b4fe-9d0a14a86335",
+          "patterns": [
+            "p1"
+          ],
           "conditions": {
-            "timeout": 100,
-            "patterns": [
-              "p1"
-            ]
+            "timeout": 100
           },
           "actions": [
             {
@@ -104,16 +104,15 @@ fn test_given_manually_built_correlator_when_it_closes_a_context_then_the_action
         uuid3.clone(),
     ];
     let condition = ConditionsBuilder::new(Duration::from_millis(100))
-                        .patterns(patterns)
                         .first_opens(true)
                         .last_closes(true)
                         .build();
     let message = Template::compile("message".to_owned())
                       .expect("Failed to compile a handlebars template");
     let contexts = vec![
-        ContextConfigBuilder::new(Uuid::new_v4(), condition.clone()).actions(vec![MessageActionBuilder::new("uuid", message.clone()).build().into()]).build(),
-        ContextConfigBuilder::new(Uuid::new_v4(), condition.clone()).actions(vec![MessageActionBuilder::new("uuid", message.clone()).build().into()]).build(),
-        ContextConfigBuilder::new(Uuid::new_v4(), condition.clone()).actions(vec![MessageActionBuilder::new("uuid", message).build().into()]).build(),
+        ContextConfigBuilder::new(Uuid::new_v4(), condition.clone()).patterns(patterns.clone()).actions(vec![MessageActionBuilder::new("uuid", message.clone()).build().into()]).build(),
+        ContextConfigBuilder::new(Uuid::new_v4(), condition.clone()).patterns(patterns.clone()).actions(vec![MessageActionBuilder::new("uuid", message.clone()).build().into()]).build(),
+        ContextConfigBuilder::new(Uuid::new_v4(), condition.clone()).patterns(patterns.clone()).actions(vec![MessageActionBuilder::new("uuid", message).build().into()]).build(),
     ];
     let responses = Rc::new(RefCell::new(Vec::new()));
     let message_event_handler = Box::new(MessageEventHandler { responses: responses.clone() });

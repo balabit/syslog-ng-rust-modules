@@ -31,14 +31,13 @@ fn main() {
         uuid3.clone(),
     ];
     let condition = ConditionsBuilder::new(Duration::from_millis(100))
-                        .patterns(patterns)
                         .first_opens(true)
                         .last_closes(true)
                         .build();
     let contexts = vec![
-        ContextConfigBuilder::new(Uuid::new_v4(), condition.clone()).actions(Vec::new()).build(),
-        ContextConfigBuilder::new(Uuid::new_v4(), condition.clone()).actions(Vec::new()).build(),
-        ContextConfigBuilder::new(Uuid::new_v4(), condition.clone()).actions(Vec::new()).build(),
+        ContextConfigBuilder::new(Uuid::new_v4(), condition.clone()).patterns(patterns.clone()).actions(Vec::new()).build(),
+        ContextConfigBuilder::new(Uuid::new_v4(), condition.clone()).patterns(patterns.clone()).actions(Vec::new()).build(),
+        ContextConfigBuilder::new(Uuid::new_v4(), condition.clone()).patterns(patterns.clone()).actions(Vec::new()).build(),
     ];
     let mut correlator = Correlator::new(ContextMap::from_configs(contexts));
     let _ = correlator.push_message(MessageBuilder::new(&uuid1, "message").build());

@@ -45,9 +45,10 @@ impl MapContext {
         }
     }
 
+    #[allow(for_kv_map)]
     pub fn on_timer(&mut self, event: &TimerEvent, responder: &mut ResponseSender) {
         for (_, mut state) in &mut self.map {
-            state.on_timer(event, &self.base, responder);
+            self.base.on_timer(event, &mut state, responder);
         }
         self.remove_closed_states();
     }
@@ -78,8 +79,8 @@ impl MapContext {
 
     fn update_state(&mut self, event: Arc<Message>, responder: &mut ResponseSender) {
         if let Ok(id) = self.context_id.render(CONTEXT_ID, event.values()) {
-            let state = self.map.entry(id).or_insert_with(State::new);
-            state.on_message(event, &self.base, responder);
+            let mut state = self.map.entry(id).or_insert_with(State::new);
+            self.base.on_message(event, &mut state, responder);
         } else {
             error!("Failed to render the context-id: {:?}",
                    self.context_id.get_template(&CONTEXT_ID.to_owned()));
@@ -92,6 +93,6 @@ impl MapContext {
     }
 
     pub fn patterns(&self) -> &[String] {
-        &self.base.conditions().patterns
+        &self.base.patterns
     }
 }

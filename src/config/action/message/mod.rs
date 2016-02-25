@@ -72,7 +72,7 @@ impl MessageAction {
 
     fn render_values(&self, template_context: &Context) -> Result<BTreeMap<String, String>, Error> {
         let mut rendered_values = BTreeMap::new();
-        for (key, _) in self.values.get_templates() {
+        for key in self.values.get_templates().keys() {
             let rendered_value = try!(self.render_value(key, &template_context));
             rendered_values.insert(key.to_owned(), rendered_value);
         }

@@ -2,13 +2,13 @@
     {
         "name": "MAIL_READ",
         "uuid": "f7ee6a32-03a6-40d9-bd87-f48d1b4cd563",
+        "patterns": [
+          "LOGIN",
+          "MAIL_READ",
+          "LOGOUT"
+        ],
         "conditions": {
             "timeout": 3600000,
-            "patterns": [
-                "LOGIN",
-                "MAIL_READ",
-                "LOGOUT"
-            ],
             "first_opens": true,
             "last_closes": true
         },
