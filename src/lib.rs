@@ -6,13 +6,14 @@ extern crate serde;
 extern crate syslog_ng_common;
 extern crate correlation;
 
-use correlation::dispatcher::ResponseHandler;
 use correlation::dispatcher::request::Request;
+use correlation::dispatcher::ResponseHandle;
+use correlation::ContextMap;
 use correlation::{Message, Response};
 use correlation::reactor::EventHandler;
-use correlation::Correlator;
-use correlation::config::Context;
-use correlation::message::MessageBuilder;
+use correlation::correlator::Correlator;
+use correlation::config::ContextConfig;
+use correlation::MessageBuilder;
 use serde_json::from_str;
 use std::borrow::Borrow;
 use std::clone::Clone;
@@ -45,20 +46,19 @@ impl From<serde_json::error::Error> for Error {
 
 struct MessageSender;
 
-impl EventHandler<Response, mpsc::Sender<Request<Message>>> for MessageSender {
-    fn handle_event(&mut self, event: Response, _: &mut mpsc::Sender<Request<Message>>) {
-        if let Response::Message(msg) = event {
+impl EventHandler<Response, mpsc::Sender<Request>> for MessageSender {
+    fn handle_event(&mut self, event: Response, _: &mut mpsc::Sender<Request>) {
+        if let Response::Alert(msg) = event {
             debug!("{}", msg.message().message());
         }
     }
-    fn handler(&self) -> ResponseHandler {
-        ResponseHandler::Message
+    fn handle(&self) -> ResponseHandle {
+        ResponseHandle::Alert
     }
 }
 
-#[derive(Clone)]
 pub struct CorrelationParserBuilder {
-    contexts: Option<Vec<Context>>,
+    contexts: Option<Vec<ContextConfig>>,
     formatter: MessageFormatter
 }
 
@@ -74,11 +74,11 @@ impl CorrelationParserBuilder {
         }
     }
 
-    fn load_contexts(&mut self, path: &str) -> Result<Vec<Context>, Error> {
+    fn load_contexts(&mut self, path: &str) -> Result<Vec<ContextConfig>, Error> {
         let mut file = try!(File::open(path));
         let mut buffer = String::new();
         try!(file.read_to_string(&mut buffer));
-        match from_str::<Vec<Context>>(&buffer) {
+        match from_str::<Vec<ContextConfig>>(&buffer) {
             Ok(contexts) => Ok(contexts),
             Err(error) => {
                 error!("CorrelationParser: failed to load correlation contexts from file: {}", &error);
@@ -118,14 +118,15 @@ impl ParserBuilder for CorrelationParserBuilder {
 }
 
 pub struct CorrelationParser {
-    contexts: Vec<Context>,
+    contexts: Vec<ContextConfig>,
     correlator: Correlator,
     formatter: MessageFormatter
 }
 
 impl CorrelationParser {
-    pub fn new(contexts: Vec<Context>, formatter: MessageFormatter) -> CorrelationParser {
-        let mut correlator = Correlator::new(contexts.clone());
+    pub fn new(contexts: Vec<ContextConfig>, formatter: MessageFormatter) -> CorrelationParser {
+        let map = ContextMap::from_configs(contexts);
+        let mut correlator = Correlator::new(map);
         correlator.register_handler(Box::new(MessageSender));
 
         CorrelationParser {
