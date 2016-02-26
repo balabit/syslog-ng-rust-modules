@@ -12,7 +12,6 @@ use LogParser;
 pub use proxies::parser::{OptionError, Parser, ParserBuilder};
 
 #[repr(C)]
-#[derive(Clone)]
 pub struct ParserProxy<B>
     where B: ParserBuilder
 {
@@ -64,5 +63,12 @@ impl<B> ParserProxy<B> where B: ParserBuilder
                           .as_mut()
                           .expect("Failed to get a builder on a new parser proxy instance");
         builder.parent(parent);
+    }
+}
+
+impl<B> Clone for ParserProxy<B> where B: ParserBuilder {
+    fn clone(&self) -> ParserProxy<B> {
+        // it makes no sense to clone() the builder
+        ParserProxy {parser: self.parser.clone(), builder: None}
     }
 }
