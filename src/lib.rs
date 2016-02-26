@@ -6,23 +6,16 @@ extern crate serde;
 extern crate syslog_ng_common;
 extern crate correlation;
 
-use correlation::dispatcher::request::Request;
-use correlation::dispatcher::ResponseHandle;
-use correlation::ContextMap;
-use correlation::{Message, Response};
-use correlation::reactor::EventHandler;
+use correlation::{Response, Request, EventHandler, ContextMap, ResponseHandle, MessageBuilder};
 use correlation::correlator::Correlator;
 use correlation::config::ContextConfig;
-use correlation::MessageBuilder;
 use serde_json::from_str;
 use std::borrow::Borrow;
-use std::clone::Clone;
-use std::io::Read;
-use std::io;
+use std::io::{self, Read};
 use std::fs::File;
-use std::sync::mpsc;
+use std::sync::{mpsc, Arc, Mutex};
 use syslog_ng_common::{MessageFormatter, LogMessage};
-use syslog_ng_common::proxies::parser::{Parser, ParserBuilder, OptionError};
+use syslog_ng_common::{Parser, ParserBuilder, OptionError};
 
 pub mod options;
 
@@ -117,9 +110,9 @@ impl ParserBuilder for CorrelationParserBuilder {
     }
 }
 
+#[derive(Clone)]
 pub struct CorrelationParser {
-    contexts: Vec<ContextConfig>,
-    correlator: Correlator,
+    correlator: Arc<Mutex<Correlator>>,
     formatter: MessageFormatter
 }
 
@@ -130,9 +123,8 @@ impl CorrelationParser {
         correlator.register_handler(Box::new(MessageSender));
 
         CorrelationParser {
-            correlator: correlator,
+            correlator: Arc::new(Mutex::new(correlator)),
             formatter: formatter,
-            contexts: contexts
         }
     }
 }
@@ -151,19 +143,21 @@ impl Parser for CorrelationParser {
             };
             MessageBuilder::new(&uuid, message).values(values.clone()).name(name).build()
         };
-        match self.correlator.push_message(message) {
-            Ok(_) => true,
+        match self.correlator.lock() {
+            Ok(mut guard) => {
+                match guard.push_message(message) {
+                    Ok(_) => true,
+                    Err(err) => {
+                        error!("{}", err);
+                        false
+                    }
+                }
+            },
             Err(err) => {
                 error!("{}", err);
                 false
             }
         }
-    }
-}
-
-impl Clone for CorrelationParser {
-    fn clone(&self) -> CorrelationParser {
-        CorrelationParser::new(self.contexts.clone(), self.formatter.clone())
     }
 }
 
