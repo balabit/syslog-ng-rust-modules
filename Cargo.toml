@@ -2,6 +2,7 @@
 name = "correlation-parser"
 version = "0.1.0"
 authors = ["Tibor Benke <ihrwein@gmail.com>"]
+build = "build.rs"
 
 [lib]
 crate_type = ["dylib"]
