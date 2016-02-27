@@ -103,10 +103,13 @@ impl ParserBuilder for CorrelationParserBuilder {
         };
     }
     fn build(self) -> Result<Self::Parser, OptionError> {
-        debug!("Building Rust parser");
+        debug!("Building CorrelationParser");
         let CorrelationParserBuilder {contexts, formatter} = self;
         let contexts = try!(contexts.ok_or(OptionError::missing_required_option(options::CONTEXTS_FILE)));
-        Ok(CorrelationParser::new(contexts, formatter))
+        let map = ContextMap::from_configs(contexts);
+        let mut correlator = Correlator::new(map);
+        correlator.register_handler(Box::new(MessageSender));
+        Ok(CorrelationParser::new(correlator, formatter))
     }
 }
 
@@ -117,11 +120,7 @@ pub struct CorrelationParser {
 }
 
 impl CorrelationParser {
-    pub fn new(contexts: Vec<ContextConfig>, formatter: MessageFormatter) -> CorrelationParser {
-        let map = ContextMap::from_configs(contexts);
-        let mut correlator = Correlator::new(map);
-        correlator.register_handler(Box::new(MessageSender));
-
+    pub fn new(correlator: Correlator, formatter: MessageFormatter) -> CorrelationParser {
         CorrelationParser {
             correlator: Arc::new(Mutex::new(correlator)),
             formatter: formatter,
