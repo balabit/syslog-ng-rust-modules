@@ -28,6 +28,7 @@ pub type LogMessageTagsForeachFunc = extern "C" fn(// msg:
 #[link(name = "syslog-ng")]
 extern "C" {
     pub fn log_msg_unref(m: *mut LogMessage) -> ();
+    pub fn log_msg_ref(m: *mut LogMessage) -> *mut LogMessage;
     pub fn log_msg_get_value_handle(value_name: *const c_char) -> NVHandle;
     pub fn __log_msg_get_value(m: *const LogMessage,
                                handle: NVHandle,
