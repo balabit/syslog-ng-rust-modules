@@ -136,13 +136,17 @@ impl Parser for CorrelationParser {
             //let tags = msg.tags();
             let values = msg.values();
             debug!("values: {:?}", &values);
-            let uuid = values.get(".classifier.uuid").expect("Message doesn't have a required '.classifier.uuid' key");
-            let name = match values.get(".classifier.class") {
-                Some(name) => Some(name.borrow()),
-                None => None
-            };
-            MessageBuilder::new(&uuid, message).values(values.clone()).name(name).build()
+            if let Some(uuid) = values.get(".classifier.uuid") {
+                let name = match values.get(".classifier.class") {
+                    Some(name) => Some(name.borrow()),
+                    None => None
+                };
+                MessageBuilder::new(&uuid, message).values(values.clone()).name(name).build()
+            } else {
+                return false;
+            }
         };
+
         match self.correlator.lock() {
             Ok(mut guard) => {
                 match guard.push_message(message) {
