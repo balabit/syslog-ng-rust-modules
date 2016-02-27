@@ -37,7 +37,8 @@ impl LogMessage {
     }
 
     pub fn wrap_raw(raw: *mut ::sys::LogMessage) -> LogMessage {
-        LogMessage(raw)
+        let referenced = unsafe {logmsg::log_msg_ref(raw)};
+        LogMessage(referenced)
     }
 
     unsafe fn c_char_to_str<'a>(value: *const c_char, len: ssize_t) -> &'a str {
