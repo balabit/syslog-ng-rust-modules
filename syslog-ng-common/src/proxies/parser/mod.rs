@@ -15,7 +15,7 @@ mod proxy;
 pub use self::option_error::OptionError;
 pub use self::proxy::ParserProxy;
 
-pub trait ParserBuilder: Clone {
+pub trait ParserBuilder {
     type Parser: Parser;
     fn new() -> Self;
     fn option(&mut self, name: String, value: String);
