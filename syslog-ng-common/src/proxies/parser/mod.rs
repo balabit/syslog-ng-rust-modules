@@ -18,7 +18,7 @@ pub use self::proxy::ParserProxy;
 pub trait ParserBuilder {
     type Parser: Parser;
     fn new() -> Self;
-    fn option(&mut self, name: String, value: String);
+    fn option(&mut self, _name: String, _value: String) {}
     fn parent(&mut self, _: LogParser) {}
     fn build(self) -> Result<Self::Parser, OptionError>;
 }
