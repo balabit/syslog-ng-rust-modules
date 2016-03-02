@@ -19,7 +19,7 @@ fn bench_parse(b: &mut Bencher) {
     };
 
     let loggen_regex = Regex::new(LOGGEN_EXPR).unwrap();
-    let mut parser = RegexParser {regex: loggen_regex};
+    let mut parser = RegexParser { regex: loggen_regex };
     let mut logmsg = LogMessage::new();
     let input = "seq: 0000000000, thread: 0000, runid: 1456947132, stamp: 2016-03-02T20:32:12 PAD";
     b.iter(|| parser.parse(&mut logmsg, input));

@@ -27,13 +27,17 @@ mod tests {
     #[test]
     fn test_syslog_regex_accepts_valid_syslog_message() {
         let re = Regex::new(LOGGEN_EXPR).unwrap();
-        assert_eq!(true, re.is_match("seq: 0000000000, thread: 0000, runid: 1456947132, stamp: 2016-03-02T20:32:12 PAD"));
+        assert_eq!(true,
+                   re.is_match("seq: 0000000000, thread: 0000, runid: 1456947132, stamp: \
+                                2016-03-02T20:32:12 PAD"));
     }
 
     #[test]
     fn test_syslog_regex_parses_syslog_message() {
         let re = Regex::new(LOGGEN_EXPR).unwrap();
-        let caps = re.captures("seq: 0000000000, thread: 0000, runid: 1456947132, stamp: 2016-03-02T20:32:12 PAD").unwrap();
+        let caps = re.captures("seq: 0000000000, thread: 0000, runid: 1456947132, stamp: \
+                                2016-03-02T20:32:12 PAD")
+                     .unwrap();
         assert_eq!("0000000000", caps.name("seq").unwrap());
         assert_eq!("0000", caps.name("thread").unwrap());
         assert_eq!("1456947132", caps.name("runid").unwrap());
@@ -48,9 +52,10 @@ mod tests {
         };
 
         let loggen_regex = Regex::new(LOGGEN_EXPR).unwrap();
-        let mut parser = RegexParser {regex: loggen_regex};
+        let mut parser = RegexParser { regex: loggen_regex };
         let mut logmsg = LogMessage::new();
-        let input = "seq: 0000000000, thread: 0000, runid: 1456947132, stamp: 2016-03-02T20:32:12 PAD";
+        let input = "seq: 0000000000, thread: 0000, runid: 1456947132, stamp: 2016-03-02T20:32:12 \
+                     PAD";
         parser.parse(&mut logmsg, input);
         assert_eq!("0000000000", logmsg.get("seq"));
         assert_eq!("0000", logmsg.get("thread"));
@@ -62,17 +67,17 @@ mod tests {
 
 #[derive(Clone)]
 pub struct RegexParser {
-    pub regex: Regex
+    pub regex: Regex,
 }
 
 pub struct RegexParserBuilder {
-    regex: Option<Regex>
+    regex: Option<Regex>,
 }
 
 impl ParserBuilder for RegexParserBuilder {
     type Parser = RegexParser;
     fn new() -> Self {
-        RegexParserBuilder {regex: None}
+        RegexParserBuilder { regex: None }
     }
     fn option(&mut self, name: String, value: String) {
         if name == REGEX_OPTION {
@@ -88,7 +93,7 @@ impl ParserBuilder for RegexParserBuilder {
     fn build(self) -> Result<Self::Parser, OptionError> {
         debug!("Building Regex parser");
         if let Some(regex) = self.regex {
-            Ok(RegexParser{regex: regex})
+            Ok(RegexParser { regex: regex })
         } else {
             Err(OptionError::missing_required_option(REGEX_OPTION))
         }
