@@ -41,7 +41,7 @@ mod tests {
 
 #[derive(Clone)]
 pub struct RegexParser {
-    regex: Regex
+    pub regex: Regex
 }
 
 pub struct RegexParserBuilder {
