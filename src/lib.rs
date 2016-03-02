@@ -14,7 +14,10 @@ const REGEX_OPTION: &'static str = "regex";
 #[cfg(test)]
 mod tests {
     use regex::Regex;
-    use super::_LOGGEN_EXPR;
+    use super::*;
+
+    use syslog_ng_common::sys::logmsg::log_msg_registry_init;
+    use syslog_ng_common::{LogMessage, Parser};
 
     #[test]
     fn test_loggen_regex_can_be_compiled() {
@@ -36,6 +39,24 @@ mod tests {
         assert_eq!("1456947132", caps.name("runid").unwrap());
         assert_eq!("2016-03-02T20:32:12", caps.name("stamp").unwrap());
         assert_eq!("PAD", caps.name("padding").unwrap());
+    }
+
+    #[test]
+    fn test_parse() {
+        unsafe {
+            log_msg_registry_init();
+        };
+
+        let loggen_regex = Regex::new(LOGGEN_EXPR).unwrap();
+        let mut parser = RegexParser {regex: loggen_regex};
+        let mut logmsg = LogMessage::new();
+        let input = "seq: 0000000000, thread: 0000, runid: 1456947132, stamp: 2016-03-02T20:32:12 PAD";
+        parser.parse(&mut logmsg, input);
+        assert_eq!("0000000000", logmsg.get("seq"));
+        assert_eq!("0000", logmsg.get("thread"));
+        assert_eq!("1456947132", logmsg.get("runid"));
+        assert_eq!("2016-03-02T20:32:12", logmsg.get("stamp"));
+        assert_eq!("PAD", logmsg.get("padding"));
     }
 }
 
