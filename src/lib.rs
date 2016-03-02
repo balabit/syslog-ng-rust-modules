@@ -9,6 +9,7 @@ use regex::Regex;
 
 // Example: "seq: 0000000000, thread: 0000, runid: 1456947132, stamp: 2016-03-02T20:32:12 PAD"
 const _LOGGEN_EXPR: &'static str = r"seq: (?P<seq>\d+), thread: (?P<thread>\d+), runid: (?P<runid>\d+), stamp: (?P<stamp>[^ ]+) (?P<padding>.*$)";
+const REGEX_OPTION: &'static str = "regex";
 
 #[test]
 fn test_loggen_regex_can_be_compiled() {
@@ -37,18 +38,33 @@ pub struct RegexParser {
     regex: Regex
 }
 
-pub struct RegexParserBuilder;
+pub struct RegexParserBuilder {
+    regex: Option<Regex>
+}
 
 impl ParserBuilder for RegexParserBuilder {
     type Parser = RegexParser;
     fn new() -> Self {
-        RegexParserBuilder
+        RegexParserBuilder {regex: None}
+    }
+    fn option(&mut self, name: String, value: String) {
+        if name == REGEX_OPTION {
+            debug!("Trying to compile regular expression: '{}'", &value);
+            match Regex::new(&value) {
+                Ok(regex) => self.regex = Some(regex),
+                Err(err) => {
+                    error!("{}", err);
+                }
+            }
+        }
     }
     fn build(self) -> Result<Self::Parser, OptionError> {
         debug!("Building Regex parser");
-        Ok(RegexParser {
-            regex: Regex::new(LOGGEN_EXPR).unwrap()
-        })
+        if let Some(regex) = self.regex {
+            Ok(RegexParser{regex: regex})
+        } else {
+            Err(OptionError::missing_required_option(REGEX_OPTION))
+        }
     }
 }
 
