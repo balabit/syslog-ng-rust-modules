@@ -84,9 +84,7 @@ impl ParserBuilder for RegexParserBuilder {
             debug!("Trying to compile regular expression: '{}'", &value);
             match Regex::new(&value) {
                 Ok(regex) => self.regex = Some(regex),
-                Err(err) => {
-                    error!("{}", err);
-                }
+                Err(err) => error!("{}", err)
             }
         }
     }
