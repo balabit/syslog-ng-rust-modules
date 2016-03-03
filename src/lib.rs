@@ -9,7 +9,7 @@ use regex::Regex;
 
 // Example: "seq: 0000000000, thread: 0000, runid: 1456947132, stamp: 2016-03-02T20:32:12 PAD"
 pub const LOGGEN_EXPR: &'static str = r"seq: (?P<seq>\d+), thread: (?P<thread>\d+), runid: (?P<runid>\d+), stamp: (?P<stamp>[^ ]+) (?P<padding>.*$)";
-const REGEX_OPTION: &'static str = "regex";
+pub const REGEX_OPTION: &'static str = "regex";
 
 #[cfg(test)]
 mod tests {
