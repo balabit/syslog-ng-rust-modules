@@ -17,7 +17,7 @@ mod tests {
     use super::*;
 
     use syslog_ng_common::sys::logmsg::log_msg_registry_init;
-    use syslog_ng_common::{LogMessage, Parser};
+    use syslog_ng_common::{LogMessage, Parser, ParserBuilder, OptionError};
 
     #[test]
     fn test_loggen_regex_can_be_compiled() {
@@ -62,6 +62,20 @@ mod tests {
         assert_eq!("1456947132", logmsg.get("runid"));
         assert_eq!("2016-03-02T20:32:12", logmsg.get("stamp"));
         assert_eq!("PAD", logmsg.get("padding"));
+    }
+
+    #[test]
+    fn test_parser_can_be_built_with_valid_regex() {
+        let mut builder = RegexParserBuilder::new();
+        builder.option(REGEX_OPTION.to_string(), "[abc]d".to_string());
+        let _ = builder.build().unwrap();
+    }
+
+    #[test]
+    fn test_parser_cannot_be_built_with_invalid_regex() {
+        let mut builder = RegexParserBuilder::new();
+        builder.option(REGEX_OPTION.to_string(), "[abcd".to_string());
+        assert_eq!(Some(OptionError::missing_required_option(REGEX_OPTION)), builder.build().err());
     }
 }
 
