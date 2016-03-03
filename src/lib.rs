@@ -46,7 +46,7 @@ mod tests {
     }
 
     #[test]
-    fn test_parse() {
+    fn test_parse_inserts_parsed_named_captures_into_the_logmsg() {
         unsafe {
             log_msg_registry_init();
         };
