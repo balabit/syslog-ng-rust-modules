@@ -65,8 +65,7 @@ impl LogMessage {
     pub fn insert<K: Into<NVHandle>>(&mut self, key: K, value: &str) {
         let handle = key.into();
         unsafe {
-            let c_value = CString::new(value).unwrap();
-            logmsg::log_msg_set_value(self.0, handle.0, c_value.as_ptr(), value.len() as isize);
+            logmsg::log_msg_set_value(self.0, handle.0, value.as_ptr() as *const i8, value.len() as isize);
         }
     }
 
