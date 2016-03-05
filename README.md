@@ -48,6 +48,19 @@ https://github.com/ihrwein/regex-parser
 
 ## If you want to try it out ...
 
+1. you have to compile and install the development version of syslog-ng. You can find
+more instructions [here](https://github.com/balabit/syslog-ng#installation-from-source).
+1. append the directory of `libsyslog-ng.so` to your `LD_LIBRARY_PATH` environment variable
+1. clone the source code of [regex-parser](https://github.com/ihrwein/regex-parser)
+1. (optional) build and run the unit tests with `cargo test`
+1. (optional, you will need a nightly compiler) run the benchmark with `cargo bench`
+1. create a release build with `cargo build --release`
+1. copy the module to `$prefix/lib/syslog-ng` (where `$prefix` is the installation directory of syslog-ng)
+
+```
+cp target/release/libregex_parser.so <install prefix>lib/syslog-ng/
+```
+
 Here is a simple `syslog-ng.conf` which can utilize this parser:
 
 ```
@@ -75,7 +88,7 @@ log {
 };
 ```
 
-You can use syslog-ng's bundled `loggen` command to generate a sample log
+Start syslo-ng in foreground mode (`syslog-ng -F`), then use the `loggen` command to generate a sample log message
 
 ```
 $ loggen -S -n 10 127.0.0.1 1514
