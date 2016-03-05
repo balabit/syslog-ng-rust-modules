@@ -1,6 +1,6 @@
 # Filling the parse() method
 
-My previous post described how to build a very simple parser plugin for
+My [previous post](https://syslog-ng.org/syslog-ng-and-rust/) described how to build a very simple parser plugin for
 syslog-ng in Rust.  I brought a more realistic example this time: a regular
 expression based [parser plugin](https://github.com/ihrwein/regex-parser).
 It's so real that is is decently covered with unit tests and it has even a
@@ -45,6 +45,8 @@ result from `5,583 ns` to `4,717 ns` (parsing of `loggen's` output message).
 
 You can find the code of the regex parser here:
 https://github.com/ihrwein/regex-parser
+
+## If you want to try it out ...
 
 Here is a simple `syslog-ng.conf` which can utilize this parser:
 
