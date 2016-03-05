@@ -46,7 +46,15 @@ result from `5,583 ns` to `4,717 ns` (parsing of `loggen's` output message).
 You can find the code of the regex parser here:
 https://github.com/ihrwein/regex-parser
 
+## What does this parser do?
+
+This parser takes a regular expression as a configuration parameter and matches
+log messages against this expression. If a message successfully matches,
+the parser extracts the named captures and inserts them into the log message.
+
 ## If you want to try it out ...
+
+Just follow these steps to get it working:
 
 1. you have to compile and install the development version of syslog-ng. You can find
 more instructions [here](https://github.com/balabit/syslog-ng#installation-from-source).
