@@ -8,6 +8,7 @@ benchmark.
 
 For those who didn't read my last post, here are the most important steps to
 get a working parser plugin in Rust:
+
 1. create a lib crate
 1. add dependencies
 1. set the crate type
