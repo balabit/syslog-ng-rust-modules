@@ -14,7 +14,7 @@ extern crate actiondb;
 
 use std::borrow::Borrow;
 
-use actiondb::matcher::{Matcher, PatternLoader, MatcherSuite, MatcherFactory};
+use actiondb::matcher::{Matcher, PatternLoader, MatcherSuite};
 use syslog_ng_common::{Parser, ParserBuilder, OptionError, LogParser, LogMessage, MessageFormatter};
 
 mod msgfilller;
@@ -84,8 +84,8 @@ impl<MS> ParserBuilder for ActiondbParserBuilder<MS> where MS: MatcherSuite + Cl
 }
 
 pub struct ActiondbParser<M> where M: Matcher + Clone {
-    matcher: M,
-    formatter: MessageFormatter,
+    pub matcher: M,
+    pub formatter: MessageFormatter,
 }
 
 impl<M> Parser for ActiondbParser<M> where M: Matcher + Clone {
