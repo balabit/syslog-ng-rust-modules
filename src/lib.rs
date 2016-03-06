@@ -14,7 +14,7 @@ extern crate actiondb;
 
 use std::borrow::Borrow;
 
-use actiondb::matcher::{Matcher, PatternLoader, MatcherSuite, MatcherFactory};
+use actiondb::matcher::{Matcher, PatternLoader, MatcherSuite};
 use syslog_ng_common::{Parser, ParserBuilder, OptionError, LogParser, LogMessage, MessageFormatter};
 
 mod msgfilller;
