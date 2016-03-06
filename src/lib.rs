@@ -84,8 +84,8 @@ impl<MS> ParserBuilder for ActiondbParserBuilder<MS> where MS: MatcherSuite + Cl
 }
 
 pub struct ActiondbParser<M> where M: Matcher + Clone {
-    matcher: M,
-    formatter: MessageFormatter,
+    pub matcher: M,
+    pub formatter: MessageFormatter,
 }
 
 impl<M> Parser for ActiondbParser<M> where M: Matcher + Clone {
