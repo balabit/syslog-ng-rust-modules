@@ -57,10 +57,10 @@ impl MapContext {
         self.map
             .iter()
             .filter_map(|(id, state)| {
-                if !state.is_open() {
-                    Some(id.clone())
-                } else {
+                if state.is_open() {
                     None
+                } else {
+                    Some(id.clone())
                 }
             })
             .collect::<Vec<String>>()
