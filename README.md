@@ -1,7 +1,7 @@
 # Filling the parse() method
 
 My [previous post](https://syslog-ng.org/syslog-ng-and-rust/) described how to build a very simple parser plugin for
-syslog-ng in Rust.  I brought a more realistic example this time: a regular
+syslog-ng in Rust. I brought a more realistic example this time: a regular
 expression based [parser plugin](https://github.com/ihrwein/regex-parser).
 It's so real that is is decently covered with unit tests and it has even a
 benchmark.
@@ -19,15 +19,15 @@ get a working parser plugin in Rust:
 If you are content with your work, you have to copy the library where syslog-ng
 can find it.
 
-That's enough for introduction, this time I'd like to concentrate on `Paser's`
+That's enough for introduction, this time I'd like to concentrate on `Parser's`
 `parse()` method.
 
-It makes no sense to parse a log message but not to store the parsed
+It makes no sense to parse a log message without storing the parsed
 information.
 
-syslog-ng represents log messages in a map like data structure. For example,
+syslog-ng represents log messages in a map-like data structure. For example,
 the `HOST` key represents the origin of the message, the `PROGRAM` key the name
-of the program.  The `parse()` method takes a mutable reference to this map so
+of the program. The `parse()` method takes a mutable reference to this map so
 it can add new values to it.
 
 It's interesting to know that the values can be accessed via two method:
@@ -39,9 +39,9 @@ Either you have a string or a handle, you can use the `get()` method to get a
 value, it's generic over the concrete implementation.
 
 The `insert()` method can be used to add values to the map. If you use handles
-for the insertion, actually you can put data into the map without heap allocation.
+for the insertion, you can put data into the map without heap allocation.
 When I made this optimization available for Rust, I was able to reduce the benchmark
-result from `5,583 ns` to `4,717 ns` (parsing of `loggen's` output message).
+result from `5,583 ns` to `4,717 ns` (parsing `loggen's` output message).
 
 You can find the code of the regex parser here:
 https://github.com/ihrwein/regex-parser
@@ -50,26 +50,30 @@ https://github.com/ihrwein/regex-parser
 
 This parser takes a regular expression as a configuration parameter and matches
 log messages against this expression. If a message successfully matches,
-the parser extracts the named captures and inserts them into the log message.
+the parser extracts the named captures and inserts them into the data map of the log message.
+You can use the names of the captures like any other name-value pair of syslog-ng, and use them
+in filters, templates, and so on.
 
 ## If you want to try it out ...
 
 Just follow these steps to get it working:
 
-1. you have to compile and install the development version of syslog-ng. You can find
+1. Compile and install the development version of syslog-ng. You can find
 more instructions [here](https://github.com/balabit/syslog-ng#installation-from-source).
-1. append the directory of `libsyslog-ng.so` to your `LD_LIBRARY_PATH` environment variable
-1. clone the source code of [regex-parser](https://github.com/ihrwein/regex-parser)
-1. (optional) build and run the unit tests with `cargo test`
-1. (optional, you will need a nightly compiler) run the benchmark with `cargo bench`
-1. create a release build with `cargo build --release`
-1. copy the module to `$prefix/lib/syslog-ng` (where `$prefix` is the installation directory of syslog-ng)
+1. Append the directory of `libsyslog-ng.so` to your `LD_LIBRARY_PATH` environment variable
+1. Clone the source code of [regex-parser](https://github.com/ihrwein/regex-parser)
+1. (Optional) Build and run the unit tests with `cargo test`
+1. (Optional, you will need a nightly compiler) Run the benchmark with `cargo bench`
+1. Create a release build with `cargo build --release`
+1. Copy the module to `$prefix/lib/syslog-ng` (where `$prefix` is the installation directory of syslog-ng)
 
 ```
 cp target/release/libregex_parser.so <install prefix>lib/syslog-ng/
 ```
 
-Here is a simple `syslog-ng.conf` which can utilize this parser:
+Here is a simple `syslog-ng.conf` that uses this parser.
+The strings before the colons will be the names of the matches
+extracted into name-value pairs (for example, `seq`, or `runid`).
 
 ```
 @version: 3.8
