@@ -3,7 +3,7 @@
 My [previous post](https://syslog-ng.org/syslog-ng-and-rust/) described how to build a very simple parser plugin for
 syslog-ng in Rust. I brought a more realistic example this time: a regular
 expression based [parser plugin](https://github.com/ihrwein/regex-parser).
-It's so real that is is decently covered with unit tests and it has even a
+It's so real that it is decently covered with unit tests and it has even a
 benchmark.
 
 For those who didn't read my last post, here are the most important steps to
