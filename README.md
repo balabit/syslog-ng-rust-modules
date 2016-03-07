@@ -100,10 +100,24 @@ log {
 };
 ```
 
-Start syslog-ng in foreground mode (`syslog-ng -F`), then use the `loggen` command to generate a sample log message
+Start syslog-ng in foreground mode (`syslog-ng -F`), then use the `loggen` command to generate a sample log message,
+like `seq: 0000000000, thread: 0000, runid: 1456947132, stamp: 2016-03-02T20:32:12 PAD`:
 
 ```
 $ loggen -S -n 10 127.0.0.1 1514
+```
+
+Syslog-ng's output should be something like this:
+
+```
+[2016-03-07T19:03:43.029114] Trying to compile regular expression: 'seq: (?P<seq>\d+), thread: (?P<thread>\d+), runid: (?P<runid>\d+), stamp: (?P<stamp>[^ ]+) (?P<padding>.*$)';
+[2016-03-07T19:03:43.030100] Compiling #unnamed sequence [log] at [/home/tibi/install/syslog-ng/etc/syslog-ng.conf:17:5]
+...
+[2016-03-07T19:03:43.030180]       Compiling #unnamed single [log] at [/home/tibi/install/syslog-ng/etc/syslog-ng.conf:41:9]
+[2016-03-07T19:03:43.030429] Building Regex parser;
+[2016-03-07T19:03:43.030571] Running application hooks; hook='1'
+[2016-03-07T19:03:43.030584] Running application hooks; hook='3'
+[2016-03-07T19:03:43.030614] syslog-ng starting up; version='3.8.0alpha0'
 ```
 
 GSoC advertisement: if you are a student and want to contribute to syslog-ng in
