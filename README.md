@@ -96,7 +96,7 @@ log {
 };
 ```
 
-Start syslo-ng in foreground mode (`syslog-ng -F`), then use the `loggen` command to generate a sample log message
+Start syslog-ng in foreground mode (`syslog-ng -F`), then use the `loggen` command to generate a sample log message
 
 ```
 $ loggen -S -n 10 127.0.0.1 1514
