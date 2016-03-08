@@ -6,7 +6,6 @@
 // option. All files in the project carrying such notice may not be copied,
 // modified, or distributed except according to those terms.
 
-use handlebars::{Handlebars, Template};
 use std::collections::BTreeMap;
 use std::sync::Arc;
 
@@ -17,22 +16,20 @@ use context::base::BaseContext;
 use dispatcher::request::Request;
 use dispatcher::response::ResponseSender;
 
-const CONTEXT_ID: &'static str = ".context.id";
+pub type ContextKey = Vec<(String, String)>;
 
 pub struct MapContext {
     base: BaseContext,
-    map: BTreeMap<String, State>,
-    context_id: Handlebars,
+    map: BTreeMap<ContextKey, State>,
+    context_id: Vec<String>,
 }
 
 impl MapContext {
-    pub fn new(base: BaseContext, context_id: Template) -> MapContext {
-        let mut handlebars = Handlebars::new();
-        handlebars.register_template(CONTEXT_ID, context_id);
+    pub fn new(base: BaseContext, context_id: Vec<String>) -> MapContext {
         MapContext {
             base: base,
             map: BTreeMap::new(),
-            context_id: handlebars,
+            context_id: context_id,
         }
     }
 
@@ -53,7 +50,7 @@ impl MapContext {
         self.remove_closed_states();
     }
 
-    fn get_closed_state_ids(&self) -> Vec<String> {
+    fn get_closed_state_ids(&self) -> Vec<ContextKey> {
         self.map
             .iter()
             .filter_map(|(id, state)| {
@@ -63,7 +60,7 @@ impl MapContext {
                     Some(id.clone())
                 }
             })
-            .collect::<Vec<String>>()
+            .collect::<Vec<ContextKey>>()
     }
 
     fn remove_closed_states(&mut self) {
@@ -78,13 +75,11 @@ impl MapContext {
     }
 
     fn update_state(&mut self, event: Arc<Message>, responder: &mut ResponseSender) {
-        if let Ok(id) = self.context_id.render(CONTEXT_ID, event.values()) {
-            let mut state = self.map.entry(id).or_insert_with(State::new);
-            self.base.on_message(event, &mut state, responder);
-        } else {
-            error!("Failed to render the context-id: {:?}",
-                   self.context_id.get_template(&CONTEXT_ID.to_owned()));
-        }
+        let key: ContextKey = self.context_id.iter().map(|key| {
+                (key.to_owned(), event.get(&key).map_or_else(|| "".to_owned(), |value| value.to_owned()))
+            }).collect();
+        let mut state = self.map.entry(key).or_insert_with(State::new);
+        self.base.on_message(event, &mut state, responder);
     }
 
     #[allow(dead_code)]
