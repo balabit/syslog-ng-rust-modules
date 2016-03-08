@@ -63,7 +63,7 @@ format:
             "renew_timeout": 100,
             "max_size": 5
         },
-        "context_id": "{{user_name}}",
+        "context_id": ["user_name"],
         "actions": [
             {
                 "message": {
@@ -99,10 +99,8 @@ context is subscribed to all events.
  * `timeout`: After opening the context, it is automatically closed after `timeout` milliseconds.
  * `renew_timeout`: The context is closed if `renew_timeout` milliseconds elapses without receiving a new event to the context.
  * `max_size`: The maximal number of events this context can store.
-* `context_id`: A Handlebars template which can be used to group events based on their key-value pairs. Every key-value
-pair of an event can be used.
-If two rendered template is the same for two events, they are grouped into the same context (of course,
-  an event can belong to several contexts at the same time).
+* `context_id`: An array of strings. The messages will be grouped based on these keys: if two messages have the same values in the keys they will be grouped into this context.
+ (of course, an event can belong to several contexts at the same time).
 * `actions`: An array of several actions which are executed when the context is opened or closed.
 
 | Name                     | Optional | Value type                   | Default value |
@@ -115,7 +113,7 @@ If two rendered template is the same for two events, they are grouped into the s
 | conditions.first_opens   | yes      | bool                         | false         |
 | conditions.last_closes   | yes      | bool                         | true          |
 | conditions.max_size      | yes      | int                          |               |
-| context_id               | yes      | string [Handlebars template] |               |
+| context_id               | yes      | array of strings             |               |
 | actions                  | yes      | array                        |               | |
 
 #### Actions
