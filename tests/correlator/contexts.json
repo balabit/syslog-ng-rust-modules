@@ -12,7 +12,7 @@
             "first_opens": true,
             "last_closes": true
         },
-        "context_id": "{{user_name}}",
+        "context_id": ["user_name"],
         "actions": [
             {
                 "message": {

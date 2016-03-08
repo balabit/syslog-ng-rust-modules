@@ -248,31 +248,16 @@ mod test {
         let text = r#"
         {
             "uuid": "86ca9f93-84fb-4813-b037-6526f7a585a3",
-            "context_id": "{{HOST}}{{PROGRAM}}",
+            "context_id": ["HOST", "PROGRAM"],
             "conditions": {
                 "timeout": 100
             }
         }
         "#;
-        let expected_context_id = "{{HOST}}{{PROGRAM}}".to_owned();
+        let expected_context_id = vec!["HOST".to_owned(), "PROGRAM".to_owned()];
         let result = from_str::<ContextConfig>(text);
         let context = result.expect("Failed to deserialize a valid ContextConfig");
         assert_eq!(&expected_context_id,
-                   &context.context_id.as_ref().unwrap().to_string());
-    }
-
-    #[test]
-    fn test_given_config_context_when_the_context_id_is_invalid_template_then_the_config_cannot_be_deserialized() {
-        let text = r#"
-        {
-            "uuid": "86ca9f93-84fb-4813-b037-6526f7a585a3",
-            "context_id": "{invalid}}",
-            "conditions": {
-                "timeout": 100
-            }
-        }"#;
-
-        let result = from_str::<ContextConfig>(text);
-        let _ = result.err().unwrap();
+                   context.context_id.as_ref().unwrap());
     }
 }
