@@ -1,0 +1,17 @@
+[package]
+name = "syslog-ng-rust-modules"
+version = "0.1.0"
+authors = ["Tibor Benke <ihrwein@gmail.com>"]
+
+[dependencies.actiondb-parser]
+path = "actiondb-parser"
+optional = true
+
+[dependencies.regex-parser]
+path = "regex-parser"
+optional = true
+
+[features]
+default = []
+regex = ["regex-parser"]
+actiondb = ["actiondb-parser"]
