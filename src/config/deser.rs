@@ -9,7 +9,6 @@
 use config::ContextConfig;
 use serde::de::{Deserialize, Deserializer, MapVisitor, Error, Visitor};
 
-use handlebars::Template;
 use uuid::Uuid;
 
 const FIELDS: &'static [&'static str] = &["name", "uuid", "conditions", "actions"];
@@ -80,33 +79,6 @@ impl ContextVisitor {
             None => Err(Error::missing_field("uuid")),
         }
     }
-
-    fn deser_context_id<V>(context_id: Option<String>,
-                           uuid: &Uuid)
-                           -> Result<Option<Template>, V::Error>
-        where V: MapVisitor
-    {
-        if let Some(context_id) = context_id {
-            ContextVisitor::parse_context_id::<V>(context_id, uuid)
-        } else {
-            Ok(None)
-        }
-    }
-
-    fn parse_context_id<V>(context_id: String, uuid: &Uuid) -> Result<Option<Template>, V::Error>
-        where V: MapVisitor
-    {
-        match Template::compile(context_id) {
-            Ok(context_id) => Ok(Some(context_id)),
-            Err(err) => {
-                let errmsg = format!("Invalid handlebars template in 'context_id' field: uuid={} \
-                                      error={}",
-                                     uuid,
-                                     err);
-                Err(Error::syntax(&errmsg))
-            }
-        }
-    }
 }
 
 impl Visitor for ContextVisitor {
@@ -118,7 +90,7 @@ impl Visitor for ContextVisitor {
         let mut name = None;
         let mut uuid: Option<String> = None;
         let mut conditions = None;
-        let mut context_id: Option<String> = None;
+        let mut context_id: Option<Vec<String>> = None;
         let mut actions = None;
         let mut patterns = None;
 
@@ -134,7 +106,6 @@ impl Visitor for ContextVisitor {
         }
 
         let uuid = try!(ContextVisitor::parse_uuid::<V>(uuid));
-        let context_id = try!(ContextVisitor::deser_context_id::<V>(context_id, &uuid));
         let actions = actions.unwrap_or_default();
 
         try!(visitor.end());
