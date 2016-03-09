@@ -9,7 +9,6 @@
 use config::ContextConfig;
 use serde::de::{Deserialize, Deserializer, MapVisitor, Error, Visitor};
 
-use handlebars::Template;
 use uuid::Uuid;
 
 const FIELDS: &'static [&'static str] = &["name", "uuid", "conditions", "actions"];
@@ -80,33 +79,6 @@ impl ContextVisitor {
             None => Err(Error::missing_field("uuid")),
         }
     }
-
-    fn deser_context_id<V>(context_id: Option<String>,
-                           uuid: &Uuid)
-                           -> Result<Option<Template>, V::Error>
-        where V: MapVisitor
-    {
-        if let Some(context_id) = context_id {
-            ContextVisitor::parse_context_id::<V>(context_id, uuid)
-        } else {
-            Ok(None)
-        }
-    }
-
-    fn parse_context_id<V>(context_id: String, uuid: &Uuid) -> Result<Option<Template>, V::Error>
-        where V: MapVisitor
-    {
-        match Template::compile(context_id) {
-            Ok(context_id) => Ok(Some(context_id)),
-            Err(err) => {
-                let errmsg = format!("Invalid handlebars template in 'context_id' field: uuid={} \
-                                      error={}",
-                                     uuid,
-                                     err);
-                Err(Error::syntax(&errmsg))
-            }
-        }
-    }
 }
 
 impl Visitor for ContextVisitor {
@@ -118,7 +90,7 @@ impl Visitor for ContextVisitor {
         let mut name = None;
         let mut uuid: Option<String> = None;
         let mut conditions = None;
-        let mut context_id: Option<String> = None;
+        let mut context_id: Option<Vec<String>> = None;
         let mut actions = None;
         let mut patterns = None;
 
@@ -134,7 +106,6 @@ impl Visitor for ContextVisitor {
         }
 
         let uuid = try!(ContextVisitor::parse_uuid::<V>(uuid));
-        let context_id = try!(ContextVisitor::deser_context_id::<V>(context_id, &uuid));
         let actions = actions.unwrap_or_default();
 
         try!(visitor.end());
@@ -277,31 +248,16 @@ mod test {
         let text = r#"
         {
             "uuid": "86ca9f93-84fb-4813-b037-6526f7a585a3",
-            "context_id": "{{HOST}}{{PROGRAM}}",
+            "context_id": ["HOST", "PROGRAM"],
             "conditions": {
                 "timeout": 100
             }
         }
         "#;
-        let expected_context_id = "{{HOST}}{{PROGRAM}}".to_owned();
+        let expected_context_id = vec!["HOST".to_owned(), "PROGRAM".to_owned()];
         let result = from_str::<ContextConfig>(text);
         let context = result.expect("Failed to deserialize a valid ContextConfig");
         assert_eq!(&expected_context_id,
-                   &context.context_id.as_ref().unwrap().to_string());
-    }
-
-    #[test]
-    fn test_given_config_context_when_the_context_id_is_invalid_template_then_the_config_cannot_be_deserialized() {
-        let text = r#"
-        {
-            "uuid": "86ca9f93-84fb-4813-b037-6526f7a585a3",
-            "context_id": "{invalid}}",
-            "conditions": {
-                "timeout": 100
-            }
-        }"#;
-
-        let result = from_str::<ContextConfig>(text);
-        let _ = result.err().unwrap();
+                   context.context_id.as_ref().unwrap());
     }
 }

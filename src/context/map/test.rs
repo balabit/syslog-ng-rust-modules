@@ -12,7 +12,6 @@ use timer::TimerEvent;
 use message::MessageBuilder;
 use test_utils::MockResponseSender;
 
-use handlebars::Template;
 use uuid::Uuid;
 use std::sync::Arc;
 use std::time::Duration;
@@ -37,8 +36,8 @@ fn test_given_map_context_when_messages_have_the_same_kvpairs_then_they_go_to_th
             let conditions = ConditionsBuilder::new(timeout).build();
             BaseContextBuilder::new(uuid, conditions).patterns(patterns).build()
         };
-        let context_id = Template::compile("{{HOST}}{{PROGRAM}}{{PID}}".to_owned()).unwrap();
-        MapContext::new(base_context, context_id)
+        let context_key = ["HOST", "PROGRAM", "PID"].iter().map(|x| (*x).to_owned()).collect::<Vec<String>>();
+        MapContext::new(base_context, context_key)
     };
     let msg1 = MessageBuilder::new(&msg_id1, "message")
                    .pair("HOST", "host")

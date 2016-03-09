@@ -6,7 +6,6 @@
 // option. All files in the project carrying such notice may not be copied,
 // modified, or distributed except according to those terms.
 
-use handlebars::Template;
 use uuid::Uuid;
 
 use config::action::ActionType;
@@ -19,7 +18,7 @@ pub struct ContextConfig {
     pub name: Option<String>,
     pub uuid: Uuid,
     pub conditions: Conditions,
-    pub context_id: Option<Template>,
+    pub context_id: Option<Vec<String>>,
     pub actions: Vec<ActionType>,
     pub patterns: Vec<String>
 }
@@ -28,7 +27,7 @@ pub struct ContextConfigBuilder {
     name: Option<String>,
     uuid: Uuid,
     conditions: Conditions,
-    context_id: Option<Template>,
+    context_id: Option<Vec<String>>,
     actions: Vec<ActionType>,
     patterns: Vec<String>
 }
@@ -45,7 +44,7 @@ impl ContextConfigBuilder {
         }
     }
 
-    pub fn context_id(mut self, context_id: Option<Template>) -> ContextConfigBuilder {
+    pub fn context_id(mut self, context_id: Option<Vec<String>>) -> ContextConfigBuilder {
         self.context_id = context_id;
         self
     }
