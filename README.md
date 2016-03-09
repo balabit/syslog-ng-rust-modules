@@ -1,4 +1,4 @@
-# Filling the parse() method
+# Filling the parse() method in syslog-ng’s Rust bindings
 
 My [previous post](https://syslog-ng.org/syslog-ng-and-rust/) described how to build a very simple parser plugin for
 syslog-ng in Rust. I brought a more realistic example this time: a regular
