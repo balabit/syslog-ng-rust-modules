@@ -45,10 +45,10 @@ fn test_given_a_message_action_when_it_is_executed_then_it_adds_the_name_and_uui
     let responses = responder.0;
     if let Response::Alert(ref response) = *responses.get(0).unwrap() {
         assert_eq!(name.as_ref().unwrap(),
-                   response.message().get(CONTEXT_NAME).unwrap());
+                   response.message.get(CONTEXT_NAME).unwrap());
         assert_eq!(&base_context.uuid().to_hyphenated_string(),
-                   response.message().get(CONTEXT_UUID).unwrap());
-        assert_eq!("0", response.message().get(CONTEXT_LEN).unwrap());
+                   response.message.get(CONTEXT_UUID).unwrap());
+        assert_eq!("0", response.message.get(CONTEXT_LEN).unwrap());
     } else {
         unreachable!();
     }
@@ -91,10 +91,10 @@ fn test_given_message_action_when_it_is_executed_then_it_uses_the_messages_to_re
     let responses = responder.0;
     if let Response::Alert(ref response) = *responses.get(0).unwrap() {
         assert_eq!(name.as_ref().unwrap(),
-                   response.message().get(CONTEXT_NAME).unwrap());
+                   response.message.get(CONTEXT_NAME).unwrap());
         assert_eq!(&base_context.uuid().to_hyphenated_string(),
-                   response.message().get(CONTEXT_UUID).unwrap());
-        let message = response.message();
+                   response.message.get(CONTEXT_UUID).unwrap());
+        let message = &response.message;
         assert_eq!("we have 2 messages",
                    message.get("message_num").expect("Failed to get an inserted key from a map"));
         assert_eq!("key1=value1 key2=value2", message.message());

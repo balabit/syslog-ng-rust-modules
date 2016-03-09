@@ -148,14 +148,8 @@ impl Default for InjectMode {
 
 #[derive(Debug, Clone)]
 pub struct Alert {
-    message: Message,
-    inject_mode: InjectMode,
-}
-
-impl Alert {
-    pub fn message(&self) -> &Message {
-        &self.message
-    }
+    pub message: Message,
+    pub inject_mode: InjectMode,
 }
 
 impl Action for MessageAction {
