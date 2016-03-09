@@ -7,6 +7,7 @@ extern crate syslog_ng_common;
 extern crate correlation;
 
 use correlation::{Response, Request, EventHandler, ContextMap, ResponseHandle, MessageBuilder};
+use correlation::config::action::message::InjectMode;
 use correlation::correlator::Correlator;
 use correlation::config::ContextConfig;
 use serde_json::from_str;
@@ -40,9 +41,19 @@ impl From<serde_json::error::Error> for Error {
 struct MessageSender;
 
 impl EventHandler<Response, mpsc::Sender<Request>> for MessageSender {
-    fn handle_event(&mut self, event: Response, _: &mut mpsc::Sender<Request>) {
+    fn handle_event(&mut self, event: Response, reactor_input_channel: &mut mpsc::Sender<Request>) {
         if let Response::Alert(msg) = event {
-            debug!("{}", msg.message().message());
+            match msg.inject_mode {
+                InjectMode::Log => {
+                    debug!("{}", msg.message.message());
+                },
+                InjectMode::Forward => {},
+                InjectMode::Loopback => {
+                    if let Err(err) = reactor_input_channel.send(Request::Message(Arc::new(msg.message))) {
+                        error!("{}", err);
+                    }
+                },
+            }
         }
     }
     fn handle(&self) -> ResponseHandle {
