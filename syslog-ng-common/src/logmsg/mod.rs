@@ -27,6 +27,8 @@ impl Drop for LogMessage {
     }
 }
 
+unsafe impl Send for LogMessage {}
+
 impl LogMessage {
     pub fn new() -> LogMessage {
         unsafe {
