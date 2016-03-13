@@ -14,7 +14,7 @@ use cpython::{Python, PyDict, NoArgs, PyClone, PyObject, PyResult, PyModule, PyE
 use cpython::ObjectProtocol; //for call method
 use cpython::exc::TypeError;
 
-use py_logmsg::PyLogMessage;
+pub use py_logmsg::PyLogMessage;
 
 pub mod options {
     pub const MODULE: &'static str = "module";
@@ -134,15 +134,29 @@ impl ParserBuilder for PythonParserBuilder {
     }
 }
 
+impl PythonParser {
+    pub fn call_parse<'p>(&mut self, py: Python<'p>, logmsg: PyLogMessage, message: &str) -> PyResult<PyObject> {
+        debug!("Trying to call parse() method on Python parser");
+        self.parser.call_method(py, "parse", (logmsg, message), None)
+    }
+}
+
 impl Parser for PythonParser {
     fn parse(&mut self, logmsg: &mut LogMessage, input: &str) -> bool {
         let gil = Python::acquire_gil();
         let py = gil.python();
-        let pylogmsg = PyLogMessage::new(py, logmsg.clone()).unwrap();
-        debug!("Trying to call parse() method on Python parser");
-        let result = self.parser.call_method(py, "parse", (pylogmsg, input), None).unwrap();
-        debug!("Trying to check the result of parse()");
-        result.extract::<bool>(py).unwrap()
+        match PyLogMessage::new(py, logmsg.clone()) {
+            Ok(pylogmsg) => {
+                let result = self.call_parse(py, pylogmsg, input).unwrap();
+                debug!("Trying to check the result of parse()");
+                result.extract::<bool>(py).unwrap()
+            },
+            // I didn't find a way to test this case :-(
+            Err(error) => {
+                error!("Failed to create PyLogMessage: {:?}", error);
+                false
+            }
+        }
     }
 }
 

@@ -26,3 +26,9 @@ class InitMethodReturnsNotNone:
         return True
 
 class ParserWithoutInitMethod: pass
+
+class ParserClassWithGoodParseMethod:
+    def parse(self, logmsg, input):
+        return True
+
+class ParserWithoutParseMethod: pass
