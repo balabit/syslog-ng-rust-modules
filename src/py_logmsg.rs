@@ -18,14 +18,14 @@ fn setitem(py: Python, slf: &PyRustObject<LogMessage>, key: &str, value: &str) -
 pub struct PyLogMessage(PyRustObject<LogMessage>);
 
 impl PyLogMessage {
-    pub fn new<'p>(py: Python<'p>, logmsg: LogMessage) -> PyLogMessage {
+    pub fn new<'p>(py: Python<'p>, logmsg: LogMessage) -> PyResult<PyLogMessage> {
         let mut b = TypeBuilder::<LogMessage>::new(py, "PyLogMessage");
         b.add("__getitem__", py_method!(getitem(arg: &str)));
         b.add("__setitem__", py_method!(setitem(key: &str, value: &str)));
         trace!("Trying to finish construction PyLogMessage");
-        let built_type = b.finish().unwrap();
+        let built_type = try!(b.finish());
         let instance = built_type.create_instance(py, logmsg, ());
-        PyLogMessage(instance)
+        Ok(PyLogMessage(instance))
     }
 }
 

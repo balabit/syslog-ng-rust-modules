@@ -138,7 +138,7 @@ impl Parser for PythonParser {
     fn parse(&mut self, logmsg: &mut LogMessage, input: &str) -> bool {
         let gil = Python::acquire_gil();
         let py = gil.python();
-        let pylogmsg = PyLogMessage::new(py, logmsg.clone());
+        let pylogmsg = PyLogMessage::new(py, logmsg.clone()).unwrap();
         debug!("Trying to call parse() method on Python parser");
         let result = self.parser.call_method(py, "parse", (pylogmsg, input), None).unwrap();
         debug!("Trying to check the result of parse()");
