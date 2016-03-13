@@ -61,26 +61,28 @@ impl ParserBuilder for PythonParserBuilder {
 
         match (self.module, self.class) {
             (Some(ref module_name), Some(ref class_name)) => {
+                debug!("Trying to load Python module, module='{}'", module_name);
                 let module = py.import(module_name).unwrap();
+                debug!("Trying to load Python class, class='{}'", class_name);
                 let class = module.get(py, class_name).unwrap();
+                debug!("Trying to instantiate Python parser");
                 let parser_instance = class.call(py, NoArgs, None).unwrap();
+                debug!("Instantiating the options dict");
                 let options = PyDict::new(py);
                 for (k, v) in self.options_map {
+                    debug!("Adding values to the options dict, key='{}', value='{}'", &k, &v);
                     options.set_item(py, k, v).unwrap();
                 }
-
-                match parser_instance.call_method(py, "init", (&options, ), None) {
-                    Ok(init_result) => {
-                        let as_bool = init_result.cast_into::<PyBool>(py).unwrap();
-                        if as_bool.is_true() {
-                            Ok(PythonParser {parser: parser_instance})
-                        } else {
-                            Err(OptionError::missing_required_option("asdas"))
-                        }
-                    },
-                    Err(err) => {
-                        Err(OptionError::missing_required_option(format!("{:?}", err)))
-                    }
+                debug!("Trying to call init() on the Python parser instance");
+                let init_result = parser_instance.call_method(py, "init", (&options, ), None).unwrap();
+                debug!("Trying to check the resulf ot init()");
+                let as_bool = init_result.cast_into::<PyBool>(py).unwrap();
+                if as_bool.is_true() {
+                    debug!("Python parser successfully initialized, class='{}'", &class_name);
+                    Ok(PythonParser {parser: parser_instance})
+                } else {
+                    error!("Failed to initialize Python parser, class='{}'", &class_name);
+                    Err(OptionError::missing_required_option("asdas"))
                 }
             },
             (ref module, ref class) => {
@@ -96,8 +98,9 @@ impl Parser for PythonParser {
         let gil = Python::acquire_gil();
         let py = gil.python();
         let pylogmsg = PyLogMessage::new(py, logmsg.clone());
-        println!("parse()");
+        debug!("Trying to call parse() method on Python parser");
         let result = self.parser.call_method(py, "parse", (pylogmsg, input), None).unwrap();
+        debug!("Trying to check the result of parse()");
         result.extract::<bool>(py).unwrap()
     }
 }

@@ -22,6 +22,7 @@ impl PyLogMessage {
         let mut b = TypeBuilder::<LogMessage>::new(py, "PyLogMessage");
         b.add("__getitem__", py_method!(getitem(arg: &str)));
         b.add("__setitem__", py_method!(setitem(key: &str, value: &str)));
+        trace!("Trying to finish construction PyLogMessage");
         let built_type = b.finish().unwrap();
         let instance = built_type.create_instance(py, logmsg, ());
         PyLogMessage(instance)
