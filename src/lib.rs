@@ -135,7 +135,7 @@ impl ParserBuilder for PythonParserBuilder {
 }
 
 impl PythonParser {
-    pub fn call_parse<'p>(&mut self, py: Python<'p>, logmsg: PyLogMessage, message: &str) -> PyResult<PyObject> {
+    pub fn process_parsing<'p>(&mut self, py: Python<'p>, logmsg: PyLogMessage, message: &str) -> PyResult<PyObject> {
         debug!("Trying to call parse() method on Python parser");
         self.parser.call_method(py, "parse", (logmsg, message), None)
     }
@@ -151,7 +151,7 @@ impl Parser for PythonParser {
         let py = gil.python();
         match PyLogMessage::new(py, logmsg.clone()) {
             Ok(pylogmsg) => {
-                let result = self.call_parse(py, pylogmsg, input).unwrap();
+                let result = self.process_parsing(py, pylogmsg, input).unwrap();
                 PythonParser::process_parse_result(py, result).unwrap()
             },
             // I didn't find a way to test this case :-(

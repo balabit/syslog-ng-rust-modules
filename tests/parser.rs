@@ -18,7 +18,7 @@ fn call_parse<'p>(py: Python<'p>, module_name: &str, class_name: &str) -> PyResu
     let mut parser = builder.build().unwrap();
     let logmsg = LogMessage::new();
     let pylogmsg = PyLogMessage::new(py, logmsg).unwrap();
-    parser.call_parse(py, pylogmsg, "input message to be parsed")
+    parser.process_parsing(py, pylogmsg, "input message to be parsed")
 }
 
 #[test]
