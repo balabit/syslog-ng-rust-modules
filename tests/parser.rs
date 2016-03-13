@@ -70,3 +70,12 @@ fn test_unsucessful_parse() {
     let mut logmsg = LogMessage::new();
     assert_eq!(false, parser.parse(&mut logmsg, "input message to be parsed"));
 }
+
+#[test]
+fn test_parse_method_raises_an_exception() {
+    let _ = env_logger::init();
+    env::set_var("PYTHONPATH", env::current_dir().unwrap());
+    let mut parser = build_parser(TEST_MODULE_NAME, "ExceptionIsRaisedInParseMethod");
+    let mut logmsg = LogMessage::new();
+    assert_eq!(false, parser.parse(&mut logmsg, "input message to be parsed"));
+}

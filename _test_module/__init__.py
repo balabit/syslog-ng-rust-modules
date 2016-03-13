@@ -44,3 +44,13 @@ class ParseReturnsTrue:
 class ParseReturnsFalse:
     def parse(self, logmsg, input):
         return False
+
+class ExceptionIsRaisedInParseMethod:
+    def parse(self, logmsg, input):
+        raise TypeError("text")
+        return False
+
+class ExceptionIsRaisedInInitMethod:
+    def init(self, options):
+        raise TypeError("text")
+        return True

@@ -140,6 +140,15 @@ fn test_parser_cannot_be_built_if_there_is_an_error() {
 }
 
 #[test]
+fn test_exception_is_raised_in_init_method() {
+    env::set_var("PYTHONPATH", env::current_dir().unwrap());
+    let mut builder = PythonParserBuilder::new();
+    builder.option(options::MODULE.to_owned(), "_test_module".to_owned());
+    builder.option(options::CLASS.to_owned(), "ExceptionIsRaisedInInitMethod".to_owned());
+    let _ = builder.build().err().unwrap();
+}
+
+#[test]
 fn test_parser_parses_the_message() {
     unsafe {
         log_msg_registry_init();
