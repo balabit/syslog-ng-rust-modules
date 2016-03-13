@@ -11,7 +11,7 @@ use std::collections::HashMap;
 use std::borrow::Borrow;
 
 use syslog_ng_common::{LogMessage, Parser, ParserBuilder, OptionError};
-use cpython::{Python, PyDict, NoArgs, PyBool, PyClone, PyObject};
+use cpython::{Python, PyDict, NoArgs, PyBool, PyClone, PyObject, PyResult, PyModule};
 use cpython::ObjectProtocol; //for call method
 
 use py_logmsg::PyLogMessage;
@@ -39,6 +39,17 @@ pub struct PythonParserBuilder {
     options_map: HashMap<String, String>
 }
 
+impl PythonParserBuilder {
+    pub fn load_module<'p>(py: Python<'p>, module_name: &str) -> PyResult<PyModule> {
+        debug!("Trying to load Python module, module='{}'", module_name);
+        py.import(module_name)
+    }
+    pub fn load_class<'p>(py: Python<'p>, module: &PyModule,  class_name: &str) -> PyResult<PyObject> {
+        debug!("Trying to load Python class, class='{}'", class_name);
+        module.get(py, class_name)
+    }
+}
+
 impl ParserBuilder for PythonParserBuilder {
     type Parser = PythonParser;
     fn new() -> Self {
@@ -61,10 +72,8 @@ impl ParserBuilder for PythonParserBuilder {
 
         match (self.module, self.class) {
             (Some(ref module_name), Some(ref class_name)) => {
-                debug!("Trying to load Python module, module='{}'", module_name);
-                let module = py.import(module_name).unwrap();
-                debug!("Trying to load Python class, class='{}'", class_name);
-                let class = module.get(py, class_name).unwrap();
+                let module = Self::load_module(py, module_name).unwrap();
+                let class = Self::load_class(py, &module, class_name).unwrap();
                 debug!("Trying to instantiate Python parser");
                 let parser_instance = class.call(py, NoArgs, None).unwrap();
                 debug!("Instantiating the options dict");

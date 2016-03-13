@@ -8,3 +8,7 @@ class ParserForImport:
         logmsg["foo"] = "bar"
         print(logmsg["foo"])
         return True
+
+# Keep this class commented out
+# class NonExistingParser: pass
+class ExistingParser: pass
