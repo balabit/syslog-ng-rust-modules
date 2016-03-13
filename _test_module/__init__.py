@@ -12,3 +12,7 @@ class ParserForImport:
 # Keep this class commented out
 # class NonExistingParser: pass
 class ExistingParser: pass
+
+class CallableClass: pass
+
+NotCallableObject = int()

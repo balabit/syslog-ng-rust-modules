@@ -50,6 +50,28 @@ fn test_non_exising_class_cannot_be_imported() {
 }
 
 #[test]
+fn test_parser_class_is_callable() {
+    let _ = env_logger::init();
+    env::set_var("PYTHONPATH", env::current_dir().unwrap());
+    let gil = Python::acquire_gil();
+    let py = gil.python();
+    let module = PythonParserBuilder::load_module(py, TEST_MODULE_NAME).unwrap();
+    let class = PythonParserBuilder::load_class(py, &module, "CallableClass").unwrap();
+    let _ = PythonParserBuilder::instantiate_class(py, &class).unwrap();
+}
+
+#[test]
+fn test_not_callable_object_cannot_be_instantiated() {
+    let _ = env_logger::init();
+    env::set_var("PYTHONPATH", env::current_dir().unwrap());
+    let gil = Python::acquire_gil();
+    let py = gil.python();
+    let module = PythonParserBuilder::load_module(py, TEST_MODULE_NAME).unwrap();
+    let class = PythonParserBuilder::load_class(py, &module, "NotCallableObject").unwrap();
+    let _ = PythonParserBuilder::instantiate_class(py, &class).err().unwrap();
+}
+
+#[test]
 fn test_parser_module_ca_be_imported() {
     env::set_var("PYTHONPATH", env::current_dir().unwrap());
     let mut builder = PythonParserBuilder::new();

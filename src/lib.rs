@@ -39,6 +39,7 @@ pub struct PythonParserBuilder {
 }
 
 impl PythonParserBuilder {
+    // Although these functions are very small ones, they are very useful for testing
     pub fn load_module<'p>(py: Python<'p>, module_name: &str) -> PyResult<PyModule> {
         debug!("Trying to load Python module, module='{}'", module_name);
         py.import(module_name)
@@ -46,6 +47,10 @@ impl PythonParserBuilder {
     pub fn load_class<'p>(py: Python<'p>, module: &PyModule,  class_name: &str) -> PyResult<PyObject> {
         debug!("Trying to load Python class, class='{}'", class_name);
         module.get(py, class_name)
+    }
+    pub fn instantiate_class<'p>(py: Python<'p>, class: &PyObject) -> PyResult<PyObject> {
+        debug!("Trying to instantiate Python parser");
+        class.call(py, NoArgs, None)
     }
 }
 
@@ -73,8 +78,7 @@ impl ParserBuilder for PythonParserBuilder {
             (Some(ref module_name), Some(ref class_name)) => {
                 let module = Self::load_module(py, module_name).unwrap();
                 let class = Self::load_class(py, &module, class_name).unwrap();
-                debug!("Trying to instantiate Python parser");
-                let parser_instance = class.call(py, NoArgs, None).unwrap();
+                let parser_instance = Self::instantiate_class(py, &class).unwrap();
                 debug!("Instantiating the options dict");
                 let options = PyDict::new(py);
                 for (k, v) in self.options {
