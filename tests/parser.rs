@@ -1,5 +1,6 @@
 extern crate python_parser;
 extern crate syslog_ng_common;
+extern crate env_logger;
 
 use std::env;
 use python_parser::{PythonParserBuilder, options};
