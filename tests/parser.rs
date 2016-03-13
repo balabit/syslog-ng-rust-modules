@@ -4,26 +4,14 @@ extern crate cpython;
 extern crate env_logger;
 
 use std::env;
-use python_parser::{PythonParserBuilder, options, PythonParser, PyLogMessage};
+use python_parser::{PythonParser, PyLogMessage};
+use python_parser::utils::*;
 use syslog_ng_common::{ParserBuilder, LogMessage, Parser};
 use syslog_ng_common::sys::logmsg::log_msg_registry_init;
 use cpython::{Python, PyResult, PyObject};
 
 const TEST_MODULE_NAME: &'static str = "_test_module";
 
-fn build_parser_with_options(module_name: &str, class_name: &str, options: &[(&str, &str)]) -> PythonParser {
-    let mut builder = PythonParserBuilder::new();
-    builder.option(options::MODULE.to_owned(), module_name.to_owned());
-    builder.option(options::CLASS.to_owned(), class_name.to_owned());
-    for &(k, v) in options {
-        builder.option(k.to_owned(), v.to_owned());
-    }
-    builder.build().unwrap()
-}
-
-fn build_parser(module_name: &str, class_name: &str) -> PythonParser {
-    build_parser_with_options(module_name, class_name, &[])
-}
 
 fn call_parse<'p>(py: Python<'p>, module_name: &str, class_name: &str) -> PyResult<PyObject> {
     let mut parser = build_parser(module_name, class_name);

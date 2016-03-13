@@ -6,6 +6,7 @@ extern crate log;
 extern crate cpython;
 
 pub mod py_logmsg;
+pub mod utils;
 
 use std::borrow::Borrow;
 
