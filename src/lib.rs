@@ -143,6 +143,10 @@ impl PythonParser {
         debug!("Trying to check the result of parse()");
         result.extract::<bool>(py)
     }
+    pub fn call_parse<'p>(&mut self, py: Python<'p>, logmsg: PyLogMessage, input: &str) -> PyResult<bool> {
+        let result = try!(self.process_parsing(py, logmsg, input));
+        PythonParser::process_parse_result(py, result)
+    }
 }
 
 impl Parser for PythonParser {
@@ -151,8 +155,13 @@ impl Parser for PythonParser {
         let py = gil.python();
         match PyLogMessage::new(py, logmsg.clone()) {
             Ok(pylogmsg) => {
-                let result = self.process_parsing(py, pylogmsg, input).unwrap();
-                PythonParser::process_parse_result(py, result).unwrap()
+                match self.call_parse(py, pylogmsg, input) {
+                    Ok(result) => result,
+                    Err(error) => {
+                        error!("Failed to extract return value of parse() method: {:?}", error);
+                        false
+                    }
+                }
             },
             // I didn't find a way to test this case :-(
             Err(error) => {

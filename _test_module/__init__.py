@@ -36,3 +36,11 @@ class ParserWithoutParseMethod: pass
 class ParseMethodReturnsNotBoolean:
     def parse(self, logmsg, input):
         return None
+
+class ParseReturnsTrue:
+    def parse(self, logmsg, input):
+        return True
+
+class ParseReturnsFalse:
+    def parse(self, logmsg, input):
+        return False
