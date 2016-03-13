@@ -7,7 +7,6 @@ extern crate cpython;
 
 pub mod py_logmsg;
 
-use std::collections::HashMap;
 use std::borrow::Borrow;
 
 use syslog_ng_common::{LogMessage, Parser, ParserBuilder, OptionError};
@@ -36,7 +35,7 @@ impl Clone for PythonParser {
 pub struct PythonParserBuilder {
     module: Option<String>,
     class: Option<String>,
-    options_map: HashMap<String, String>
+    options: Vec<(String, String)>
 }
 
 impl PythonParserBuilder {
@@ -56,14 +55,14 @@ impl ParserBuilder for PythonParserBuilder {
         PythonParserBuilder {
             module: None,
             class: None,
-            options_map: HashMap::new()
+            options: Vec::new()
         }
     }
     fn option(&mut self, name: String, value: String) {
         match name.borrow() {
             options::MODULE => { self.module = Some(value); },
             options::CLASS => { self.class = Some(value); },
-            _ => { self.options_map.insert(name, value); }
+            _ => { self.options.push((name, value)); }
         }
     }
     fn build(self) -> Result<Self::Parser, OptionError> {
@@ -78,7 +77,7 @@ impl ParserBuilder for PythonParserBuilder {
                 let parser_instance = class.call(py, NoArgs, None).unwrap();
                 debug!("Instantiating the options dict");
                 let options = PyDict::new(py);
-                for (k, v) in self.options_map {
+                for (k, v) in self.options {
                     debug!("Adding values to the options dict, key='{}', value='{}'", &k, &v);
                     options.set_item(py, k, v).unwrap();
                 }
