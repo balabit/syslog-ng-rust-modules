@@ -10,8 +10,9 @@ pub mod py_logmsg;
 use std::borrow::Borrow;
 
 use syslog_ng_common::{LogMessage, Parser, ParserBuilder, OptionError};
-use cpython::{Python, PyDict, NoArgs, PyBool, PyClone, PyObject, PyResult, PyModule};
+use cpython::{Python, PyDict, NoArgs, PyClone, PyObject, PyResult, PyModule, PyErr, PyString};
 use cpython::ObjectProtocol; //for call method
+use cpython::exc::TypeError;
 
 use py_logmsg::PyLogMessage;
 
@@ -52,6 +53,32 @@ impl PythonParserBuilder {
         debug!("Trying to instantiate Python parser");
         class.call(py, NoArgs, None)
     }
+    pub fn create_options_dict<'p>(py: Python<'p>, init_options: &[(String, String)]) -> PyResult<PyDict> {
+        debug!("Instantiating the options dict");
+        let options = PyDict::new(py);
+        for &(ref k, ref v) in init_options {
+            debug!("Adding values to the options dict, key='{}', value='{}'", k, v);
+            try!(options.set_item(py, k, v));
+        }
+        Ok(options)
+    }
+    fn call_init<'p>(py: Python<'p>, instance: &PyObject, options: PyDict) -> PyResult<()> {
+        let init_result = try!(instance.call_method(py, "init", (&options, ), None));
+        if init_result == Python::None(py) {
+            Ok(())
+        } else {
+            let errmsg = PyString::new(py, "The init() method mustn't return any value");
+            Err(PyErr::new::<TypeError, PyString>(py, errmsg))
+        }
+    }
+    pub fn initialize_instance<'p>(py: Python<'p>, instance: &PyObject, options: PyDict) -> PyResult<()> {
+        debug!("Trying to call init() on the Python parser instance");
+        if try!(instance.hasattr(py, "init")) {
+            Self::call_init(py, instance, options)
+        } else {
+            Ok(())
+        }
+    }
 }
 
 impl ParserBuilder for PythonParserBuilder {
@@ -79,23 +106,10 @@ impl ParserBuilder for PythonParserBuilder {
                 let module = Self::load_module(py, module_name).unwrap();
                 let class = Self::load_class(py, &module, class_name).unwrap();
                 let parser_instance = Self::instantiate_class(py, &class).unwrap();
-                debug!("Instantiating the options dict");
-                let options = PyDict::new(py);
-                for (k, v) in self.options {
-                    debug!("Adding values to the options dict, key='{}', value='{}'", &k, &v);
-                    options.set_item(py, k, v).unwrap();
-                }
-                debug!("Trying to call init() on the Python parser instance");
-                let init_result = parser_instance.call_method(py, "init", (&options, ), None).unwrap();
-                debug!("Trying to check the resulf ot init()");
-                let as_bool = init_result.cast_into::<PyBool>(py).unwrap();
-                if as_bool.is_true() {
-                    debug!("Python parser successfully initialized, class='{}'", &class_name);
-                    Ok(PythonParser {parser: parser_instance})
-                } else {
-                    error!("Failed to initialize Python parser, class='{}'", &class_name);
-                    Err(OptionError::missing_required_option("asdas"))
-                }
+                let options = Self::create_options_dict(py, &self.options).unwrap();
+                let _ = Self::initialize_instance(py, &parser_instance, options).unwrap();
+                debug!("Python parser successfully initialized, class='{}'", &class_name);
+                Ok(PythonParser {parser: parser_instance})
             },
             (ref module, ref class) => {
                 error!("Missing parameters in Python parser: module={:?}, class={:?}", module, class);

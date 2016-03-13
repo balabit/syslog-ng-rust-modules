@@ -7,7 +7,7 @@ use std::env;
 use python_parser::{PythonParserBuilder, options};
 use syslog_ng_common::{ParserBuilder, Parser, LogMessage};
 use syslog_ng_common::sys::logmsg::log_msg_registry_init;
-use cpython::Python;
+use cpython::{Python, PyDict};
 
 const TEST_MODULE_NAME: &'static str = "_test_module";
 
@@ -69,6 +69,42 @@ fn test_not_callable_object_cannot_be_instantiated() {
     let module = PythonParserBuilder::load_module(py, TEST_MODULE_NAME).unwrap();
     let class = PythonParserBuilder::load_class(py, &module, "NotCallableObject").unwrap();
     let _ = PythonParserBuilder::instantiate_class(py, &class).err().unwrap();
+}
+
+#[test]
+fn test_init_is_called_if_it_exists() {
+    let _ = env_logger::init();
+    env::set_var("PYTHONPATH", env::current_dir().unwrap());
+    let gil = Python::acquire_gil();
+    let py = gil.python();
+    let module = PythonParserBuilder::load_module(py, TEST_MODULE_NAME).unwrap();
+    let class = PythonParserBuilder::load_class(py, &module, "ClassWithInitMethod").unwrap();
+    let instance = PythonParserBuilder::instantiate_class(py, &class).unwrap();
+    let _ = PythonParserBuilder::initialize_instance(py, &instance, PyDict::new(py)).unwrap();
+}
+
+#[test]
+fn test_parser_may_not_have_init_method() {
+    let _ = env_logger::init();
+    env::set_var("PYTHONPATH", env::current_dir().unwrap());
+    let gil = Python::acquire_gil();
+    let py = gil.python();
+    let module = PythonParserBuilder::load_module(py, TEST_MODULE_NAME).unwrap();
+    let class = PythonParserBuilder::load_class(py, &module, "InitMethodReturnsNotNone").unwrap();
+    let instance = PythonParserBuilder::instantiate_class(py, &class).unwrap();
+    let _ = PythonParserBuilder::initialize_instance(py, &instance, PyDict::new(py)).err().unwrap();
+}
+
+#[test]
+fn test_init_must_return_nothing() {
+    let _ = env_logger::init();
+    env::set_var("PYTHONPATH", env::current_dir().unwrap());
+    let gil = Python::acquire_gil();
+    let py = gil.python();
+    let module = PythonParserBuilder::load_module(py, TEST_MODULE_NAME).unwrap();
+    let class = PythonParserBuilder::load_class(py, &module, "ParserWithoutInitMethod").unwrap();
+    let instance = PythonParserBuilder::instantiate_class(py, &class).unwrap();
+    let _ = PythonParserBuilder::initialize_instance(py, &instance, PyDict::new(py)).unwrap();
 }
 
 #[test]
