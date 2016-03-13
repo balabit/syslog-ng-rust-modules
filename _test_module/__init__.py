@@ -32,3 +32,7 @@ class ParserClassWithGoodParseMethod:
         return True
 
 class ParserWithoutParseMethod: pass
+
+class ParseMethodReturnsNotBoolean:
+    def parse(self, logmsg, input):
+        return None

@@ -139,6 +139,10 @@ impl PythonParser {
         debug!("Trying to call parse() method on Python parser");
         self.parser.call_method(py, "parse", (logmsg, message), None)
     }
+    pub fn process_parse_result<'p>(py: Python<'p>, result: PyObject) -> PyResult<bool> {
+        debug!("Trying to check the result of parse()");
+        result.extract::<bool>(py)
+    }
 }
 
 impl Parser for PythonParser {
@@ -148,8 +152,7 @@ impl Parser for PythonParser {
         match PyLogMessage::new(py, logmsg.clone()) {
             Ok(pylogmsg) => {
                 let result = self.call_parse(py, pylogmsg, input).unwrap();
-                debug!("Trying to check the result of parse()");
-                result.extract::<bool>(py).unwrap()
+                PythonParser::process_parse_result(py, result).unwrap()
             },
             // I didn't find a way to test this case :-(
             Err(error) => {

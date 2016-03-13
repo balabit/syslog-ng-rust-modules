@@ -36,5 +36,16 @@ fn test_error_is_returned_if_there_is_no_parse_method() {
     env::set_var("PYTHONPATH", env::current_dir().unwrap());
     let gil = Python::acquire_gil();
     let py = gil.python();
-    let _ = call_parse(py, TEST_MODULE_NAME, "ParserWithoutParseMethod").err().unwrap();
+    let result = call_parse(py, TEST_MODULE_NAME, "ParseMethodReturnsNotBoolean").unwrap();
+    let _ = PythonParser::process_parse_result(py, result).err().unwrap();
+}
+
+#[test]
+fn test_parse_method_which_returns_boolean_does_not_raise_errors() {
+    let _ = env_logger::init();
+    env::set_var("PYTHONPATH", env::current_dir().unwrap());
+    let gil = Python::acquire_gil();
+    let py = gil.python();
+    let result = call_parse(py, TEST_MODULE_NAME, "ParserClassWithGoodParseMethod").unwrap();
+    let _ = PythonParser::process_parse_result(py, result).unwrap();
 }
