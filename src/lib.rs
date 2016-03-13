@@ -79,6 +79,18 @@ impl PythonParserBuilder {
             Ok(())
         }
     }
+    pub fn initialize_class<'p>(py: Python<'p>, class: &PyObject, options: &[(String, String)]) -> PyResult<PyObject> {
+        let parser_instance = try!(Self::instantiate_class(py, &class));
+        let options = try!(Self::create_options_dict(py, options));
+        let _ = try!(Self::initialize_instance(py, &parser_instance, options));
+        Ok(parser_instance)
+    }
+
+    pub fn load_and_init_class<'p>(py: Python<'p>, module_name: &str, class_name: &str, options: &[(String, String)]) -> PyResult<PyObject> {
+        let module = try!(Self::load_module(py, module_name));
+        let class = try!(Self::load_class(py, &module, class_name));
+        Self::initialize_class(py, &class, options)
+    }
 }
 
 impl ParserBuilder for PythonParserBuilder {
@@ -103,11 +115,7 @@ impl ParserBuilder for PythonParserBuilder {
 
         match (self.module, self.class) {
             (Some(ref module_name), Some(ref class_name)) => {
-                let module = Self::load_module(py, module_name).unwrap();
-                let class = Self::load_class(py, &module, class_name).unwrap();
-                let parser_instance = Self::instantiate_class(py, &class).unwrap();
-                let options = Self::create_options_dict(py, &self.options).unwrap();
-                let _ = Self::initialize_instance(py, &parser_instance, options).unwrap();
+                let parser_instance = PythonParserBuilder::load_and_init_class(py, module_name, class_name, &self.options).unwrap();
                 debug!("Python parser successfully initialized, class='{}'", &class_name);
                 Ok(PythonParser {parser: parser_instance})
             },
