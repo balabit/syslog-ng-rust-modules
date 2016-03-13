@@ -115,9 +115,16 @@ impl ParserBuilder for PythonParserBuilder {
 
         match (self.module, self.class) {
             (Some(ref module_name), Some(ref class_name)) => {
-                let parser_instance = PythonParserBuilder::load_and_init_class(py, module_name, class_name, &self.options).unwrap();
-                debug!("Python parser successfully initialized, class='{}'", &class_name);
-                Ok(PythonParser {parser: parser_instance})
+                match PythonParserBuilder::load_and_init_class(py, module_name, class_name, &self.options) {
+                    Ok(parser_instance) => {
+                        debug!("Python parser successfully initialized, class='{}'", &class_name);
+                        Ok(PythonParser {parser: parser_instance})
+                    },
+                    Err(error) => {
+                        error!("Failed to create Python parser, class='{}'", class_name);
+                        Err(OptionError::verbatim_error(format!("{:?}", error)))
+                    }
+                }
             },
             (ref module, ref class) => {
                 error!("Missing parameters in Python parser: module={:?}, class={:?}", module, class);
