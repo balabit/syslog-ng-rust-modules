@@ -14,6 +14,7 @@ pub enum OptionError {
         value: String,
         expected_value: String,
     },
+    VerbatimError(String)
 }
 
 impl OptionError {
@@ -30,6 +31,9 @@ impl OptionError {
             value: value.into(),
             expected_value: expected_value.into(),
         }
+    }
+    pub fn verbatim_error(error_msg: String) -> OptionError {
+        OptionError::VerbatimError(error_msg)
     }
 }
 
@@ -49,7 +53,8 @@ impl Display for OptionError {
                                                  option_name,
                                                  value,
                                                  expected_value))
-            }
+            },
+            OptionError::VerbatimError(ref error_msg) => formatter.write_str(error_msg)
         }
     }
 }
@@ -59,6 +64,7 @@ impl ::std::error::Error for OptionError {
         match *self {
             OptionError::MissingRequiredOption(_) => "At least one required option is missing.",
             OptionError::InvalidValue{..} => "Invalid value in option.",
+            OptionError::VerbatimError(..) => "Invalid value in option.",
         }
     }
 
@@ -66,6 +72,7 @@ impl ::std::error::Error for OptionError {
         match *self {
             OptionError::MissingRequiredOption(_) => None,
             OptionError::InvalidValue{..} => None,
+            OptionError::VerbatimError(..) => None,
         }
     }
 }
