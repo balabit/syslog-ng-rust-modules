@@ -29,6 +29,12 @@ impl Drop for LogMessage {
 
 unsafe impl Send for LogMessage {}
 
+impl Clone for LogMessage {
+    fn clone(&self) -> LogMessage {
+        LogMessage::wrap_raw(self.0)
+    }
+}
+
 impl LogMessage {
     pub fn new() -> LogMessage {
         unsafe {
