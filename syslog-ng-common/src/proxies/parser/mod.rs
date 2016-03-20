@@ -31,7 +31,7 @@ macro_rules! parser_plugin {
     ($name:ty) => {
 
 pub mod _parser_plugin {
-    use $crate::{c_int, c_char, ssize_t};
+    use $crate::{c_int, c_char};
     use $crate::LogMessage;
     use $crate::LogParser;
     use $crate::init_logger;
@@ -64,7 +64,7 @@ pub mod _parser_plugin {
     }
 
     #[no_mangle]
-    pub extern fn native_parser_proxy_process(this: &mut ParserProxy<$name>, parent: *mut $crate::sys::LogParser, msg: *mut $crate::sys::LogMessage, input: *const c_char, _: ssize_t) -> c_int {
+    pub extern fn native_parser_proxy_process(this: &mut ParserProxy<$name>, parent: *mut $crate::sys::LogParser, msg: *mut $crate::sys::LogMessage, input: *const c_char) -> c_int {
         let input = unsafe { CStr::from_ptr(input).to_str() };
         let mut parent = LogParser::wrap_raw(parent);
         let mut msg = LogMessage::wrap_raw(msg);
