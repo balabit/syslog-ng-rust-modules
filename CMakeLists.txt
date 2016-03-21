@@ -7,3 +7,5 @@ find_package(Rust)
 find_package(Cargo)
 
 include(UseRust)
+
+add_subdirectory(dummy-lib)
