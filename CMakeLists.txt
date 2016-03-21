@@ -5,3 +5,5 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/Modules")
 
 find_package(Rust)
 find_package(Cargo)
+
+include(UseRust)

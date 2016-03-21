@@ -1,0 +1,10 @@
+if (CMAKE_BUILD_TYPE STREQUAL "Release")
+  set(CARGO_BUILD ${CARGO_EXECUTABLE} build --release)
+  set(TARGET_DIR "target/release")
+else()
+  set(CARGO_BUILD ${CARGO_EXECUTABLE} build)
+  set(TARGET_DIR "target/debug")
+endif()
+
+function(add_lib_crate __CRATE_NAME)
+endfunction()
