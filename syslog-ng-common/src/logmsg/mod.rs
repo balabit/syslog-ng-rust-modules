@@ -49,6 +49,12 @@ impl LogMessage {
         LogMessage(referenced)
     }
 
+    pub fn into_raw(self) -> *mut ::sys::LogMessage {
+        // self will be destroyed by the end of this functions so we need to
+        // increment the refcount
+        unsafe {logmsg::log_msg_ref(self.0)}
+    }
+
     unsafe fn c_char_to_str<'a>(value: *const c_char, len: ssize_t) -> &'a str {
         let slce = from_raw_parts(value, len as usize);
         str::from_utf8(mem::transmute(slce)).unwrap()
