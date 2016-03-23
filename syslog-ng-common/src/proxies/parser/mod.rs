@@ -7,7 +7,7 @@
 // modified, or distributed except according to those terms.
 
 use LogMessage;
-use LogParser;
+use Pipe;
 
 mod option_error;
 mod proxy;
@@ -15,16 +15,15 @@ mod proxy;
 pub use self::option_error::OptionError;
 pub use self::proxy::ParserProxy;
 
-pub trait ParserBuilder {
-    type Parser: Parser;
+pub trait ParserBuilder<P: Pipe> {
+    type Parser: Parser<P>;
     fn new() -> Self;
     fn option(&mut self, _name: String, _value: String) {}
-    fn parent(&mut self, _: LogParser) {}
     fn build(self) -> Result<Self::Parser, OptionError>;
 }
 
-pub trait Parser: Clone {
-    fn parse(&mut self, msg: &mut LogMessage, input: &str) -> bool;
+pub trait Parser<P: Pipe>: Clone {
+    fn parse(&mut self, pipe: &mut P, msg: &mut LogMessage, input: &str) -> bool;
 }
 
 #[macro_export]
@@ -65,11 +64,12 @@ pub mod _parser_plugin {
     }
 
     #[no_mangle]
-    pub extern fn native_parser_proxy_process(this: &mut ParserProxy<$name>, msg: *mut $crate::sys::LogMessage, input: *const c_char, _: ssize_t) -> c_int {
+    pub extern fn native_parser_proxy_process(this: &mut ParserProxy<$name>, parent: *mut $crate::sys::LogParser, msg: *mut $crate::sys::LogMessage, input: *const c_char, _: ssize_t) -> c_int {
         let input = unsafe { CStr::from_ptr(input).to_str() };
+        let mut parent = LogParser::wrap_raw(parent);
         let mut msg = LogMessage::wrap_raw(msg);
         let result = match input {
-            Ok(input) => this.process(&mut msg, input),
+            Ok(input) => this.process(&mut parent, &mut msg, input),
             Err(err) => {
                 error!("{}", err);
                 false
@@ -83,12 +83,9 @@ pub mod _parser_plugin {
     }
 
     #[no_mangle]
-    pub extern fn native_parser_proxy_new(parent: *mut $crate::sys::LogParser) -> Box<ParserProxy<$name>> {
+    pub extern fn native_parser_proxy_new() -> Box<ParserProxy<$name>> {
         init_logger();
-        let mut proxy = ParserProxy::new();
-        let parent = LogParser::wrap_raw(parent);
-        proxy.parent(parent);
-        Box::new(proxy)
+        Box::new(ParserProxy::new())
     }
 
     #[no_mangle]

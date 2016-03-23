@@ -13,13 +13,13 @@ pub use proxies::parser::{OptionError, Parser, ParserBuilder};
 
 #[repr(C)]
 pub struct ParserProxy<B>
-    where B: ParserBuilder
+    where B: ParserBuilder<LogParser>
 {
     pub parser: Option<B::Parser>,
     pub builder: Option<B>,
 }
 
-impl<B> ParserProxy<B> where B: ParserBuilder
+impl<B> ParserProxy<B> where B: ParserBuilder<LogParser>
 {
     pub fn new() -> ParserProxy<B> {
         ParserProxy {
@@ -51,22 +51,15 @@ impl<B> ParserProxy<B> where B: ParserBuilder
         builder.option(name, value);
     }
 
-    pub fn process(&mut self, msg: &mut LogMessage, input: &str) -> bool {
+    pub fn process(&mut self, parent: &mut LogParser, msg: &mut LogMessage, input: &str) -> bool {
         self.parser
             .as_mut()
             .expect("Called process on a non-existing Rust parser")
-            .parse(msg, input)
-    }
-
-    pub fn parent(&mut self, parent: LogParser) {
-        let builder = self.builder
-                          .as_mut()
-                          .expect("Failed to get a builder on a new parser proxy instance");
-        builder.parent(parent);
+            .parse(parent, msg, input)
     }
 }
 
-impl<B> Clone for ParserProxy<B> where B: ParserBuilder {
+impl<B> Clone for ParserProxy<B> where B: ParserBuilder<LogParser> {
     fn clone(&self) -> ParserProxy<B> {
         // it makes no sense to clone() the builder
         ParserProxy {parser: self.parser.clone(), builder: None}
