@@ -11,31 +11,37 @@ extern crate syslog_ng_common;
 #[macro_use]
 extern crate log;
 
-#[derive(Clone)]
-pub struct DummyParser;
+use std::marker::PhantomData;
 
-#[derive(Clone)]
-pub struct DummyParserBuilder;
+pub struct DummyParser<P: Pipe>(PhantomData<P>);
+
+impl<P: Pipe> Clone for DummyParser<P> {
+    fn clone(&self) -> DummyParser<P> {
+        DummyParser(self.0.clone())
+    }
+}
+
+pub struct DummyParserBuilder<P: Pipe>(PhantomData<P>);
 
 use syslog_ng_common::LogMessage;
-use syslog_ng_common::{Parser, ParserBuilder, OptionError};
+use syslog_ng_common::{Parser, ParserBuilder, OptionError, Pipe};
 
-impl ParserBuilder for DummyParserBuilder {
-    type Parser = DummyParser;
+impl<P: Pipe> ParserBuilder<P> for DummyParserBuilder<P> {
+    type Parser = DummyParser<P>;
     fn new() -> Self {
-        DummyParserBuilder
+        DummyParserBuilder(PhantomData)
     }
     fn option(&mut self, name: String, value: String) {
         debug!("Setting option: {}={}", name, value);
     }
     fn build(self) -> Result<Self::Parser, OptionError> {
         debug!("Building Rust parser");
-        Ok(DummyParser)
+        Ok(DummyParser(PhantomData))
     }
 }
 
-impl Parser for DummyParser {
-    fn parse(&mut self, message: &mut LogMessage, input: &str) -> bool {
+impl<P: Pipe> Parser<P> for DummyParser<P> {
+    fn parse(&mut self, _: &mut P, message: &mut LogMessage, input: &str) -> bool {
         debug!("Processing input in Rust Parser: {}", input);
         message.insert("input", input);
         true
@@ -43,9 +49,15 @@ impl Parser for DummyParser {
 }
 
 // this verifies that the macro can be expanded
-parser_plugin!(DummyParserBuilder);
+parser_plugin!(DummyParserBuilder<LogParser>);
 
 use syslog_ng_common::sys::logmsg::log_msg_registry_init;
+
+struct DummyPipe;
+
+impl Pipe for DummyPipe {
+    fn forward(&mut self, _: LogMessage) {}
+}
 
 #[test]
 fn test_given_parser_implementation_when_it_receives_a_message_then_it_adds_a_specific_key_value_pair_to_it
@@ -57,11 +69,12 @@ fn test_given_parser_implementation_when_it_receives_a_message_then_it_adds_a_sp
         // around it.
         log_msg_registry_init();
     };
-    let builder = DummyParserBuilder::new();
+    let builder = DummyParserBuilder::<DummyPipe>::new();
     let mut parser = builder.build().ok().expect("Failed to build DummyParser");
     let mut msg = LogMessage::new();
     let input = "The quick brown ...";
-    let result = parser.parse(&mut msg, input);
+    let mut pipe = DummyPipe;
+    let result = parser.parse(&mut pipe, &mut msg, input);
     assert!(result);
     assert_eq!(msg.get("input"), input);
 }
