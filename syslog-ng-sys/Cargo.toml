@@ -1,6 +1,6 @@
 [package]
 name = "syslog-ng-sys"
-version = "0.2.2"
+version = "0.2.3"
 authors = ["Tibor Benke <ihrwein@gmail.com>"]
 build = "build.rs"
 links = "syslog-ng"
