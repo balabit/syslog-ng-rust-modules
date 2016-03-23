@@ -15,9 +15,11 @@ pub mod logmsg;
 pub mod cfg;
 pub mod messages;
 pub mod logparser;
+pub mod logpipe;
 
 pub use types::*;
 pub use logmsg::*;
 pub use cfg::*;
 pub use messages::*;
 pub use logparser::LogParser;
+pub use logpipe::{LogPathOptions, LogPipe};
