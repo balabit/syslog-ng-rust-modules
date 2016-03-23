@@ -7,11 +7,21 @@
 // modified, or distributed except according to those terms.
 
 use syslog_ng_sys;
+use Pipe;
+use LogPipe;
+use LogMessage;
 
 pub struct LogParser(*mut syslog_ng_sys::LogParser);
 
 impl LogParser {
     pub fn wrap_raw(raw: *mut syslog_ng_sys::LogParser) -> LogParser {
         LogParser(raw)
+    }
+}
+
+impl Pipe for LogParser {
+    fn forward(&mut self, msg: LogMessage) {
+        let mut logpipe = LogPipe(self.0 as *mut syslog_ng_sys::LogPipe);
+        logpipe.forward(msg)
     }
 }
