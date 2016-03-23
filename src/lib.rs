@@ -9,8 +9,9 @@ pub mod py_logmsg;
 pub mod utils;
 
 use std::borrow::Borrow;
+use std::marker::PhantomData;
 
-use syslog_ng_common::{LogMessage, Parser, ParserBuilder, OptionError};
+use syslog_ng_common::{LogMessage, Parser, ParserBuilder, OptionError, Pipe};
 use cpython::{Python, PyDict, NoArgs, PyClone, PyObject, PyResult, PyModule, PyErr, PyString};
 use cpython::ObjectProtocol; //for call method
 use cpython::exc::TypeError;
@@ -22,25 +23,27 @@ pub mod options {
     pub const CLASS: &'static str = "class";
 }
 
-pub struct PythonParser {
-    parser: PyObject
+pub struct PythonParser<P: Pipe> {
+    parser: PyObject,
+    _marker: PhantomData<P>
 }
 
-impl Clone for PythonParser {
+impl<P: Pipe> Clone for PythonParser<P> {
     fn clone(&self) -> Self {
         let gil = Python::acquire_gil();
         let py = gil.python(); // obtain `Python` token
-        PythonParser {parser: self.parser.clone_ref(py)}
+        PythonParser {parser: self.parser.clone_ref(py), _marker: PhantomData}
     }
 }
 
-pub struct PythonParserBuilder {
+pub struct PythonParserBuilder<P: Pipe> {
     module: Option<String>,
     class: Option<String>,
-    options: Vec<(String, String)>
+    options: Vec<(String, String)>,
+    _marker: PhantomData<P>
 }
 
-impl PythonParserBuilder {
+impl<P: Pipe> PythonParserBuilder<P> {
     // Although these functions are very small ones, they are very useful for testing
     pub fn load_module<'p>(py: Python<'p>, module_name: &str) -> PyResult<PyModule> {
         debug!("Trying to load Python module, module='{}'", module_name);
@@ -94,13 +97,14 @@ impl PythonParserBuilder {
     }
 }
 
-impl ParserBuilder for PythonParserBuilder {
-    type Parser = PythonParser;
+impl<P: Pipe> ParserBuilder<P> for PythonParserBuilder<P> {
+    type Parser = PythonParser<P>;
     fn new() -> Self {
         PythonParserBuilder {
             module: None,
             class: None,
-            options: Vec::new()
+            options: Vec::new(),
+            _marker: PhantomData
         }
     }
     fn option(&mut self, name: String, value: String) {
@@ -116,10 +120,10 @@ impl ParserBuilder for PythonParserBuilder {
 
         match (self.module, self.class) {
             (Some(ref module_name), Some(ref class_name)) => {
-                match PythonParserBuilder::load_and_init_class(py, module_name, class_name, &self.options) {
+                match PythonParserBuilder::<P>::load_and_init_class(py, module_name, class_name, &self.options) {
                     Ok(parser_instance) => {
                         debug!("Python parser successfully initialized, class='{}'", &class_name);
-                        Ok(PythonParser {parser: parser_instance})
+                        Ok(PythonParser {parser: parser_instance, _marker: PhantomData})
                     },
                     Err(error) => {
                         error!("Failed to create Python parser, class='{}'", class_name);
@@ -135,7 +139,7 @@ impl ParserBuilder for PythonParserBuilder {
     }
 }
 
-impl PythonParser {
+impl<P: Pipe> PythonParser<P> {
     pub fn process_parsing<'p>(&mut self, py: Python<'p>, logmsg: PyLogMessage, message: &str) -> PyResult<PyObject> {
         debug!("Trying to call parse() method on Python parser");
         self.parser.call_method(py, "parse", (logmsg, message), None)
@@ -146,12 +150,12 @@ impl PythonParser {
     }
     pub fn call_parse<'p>(&mut self, py: Python<'p>, logmsg: PyLogMessage, input: &str) -> PyResult<bool> {
         let result = try!(self.process_parsing(py, logmsg, input));
-        PythonParser::process_parse_result(py, result)
+        PythonParser::<P>::process_parse_result(py, result)
     }
 }
 
-impl Parser for PythonParser {
-    fn parse(&mut self, logmsg: &mut LogMessage, input: &str) -> bool {
+impl<P: Pipe> Parser<P> for PythonParser<P> {
+    fn parse(&mut self, _: &mut P, logmsg: &mut LogMessage, input: &str) -> bool {
         let gil = Python::acquire_gil();
         let py = gil.python();
         match PyLogMessage::new(py, logmsg.clone()) {
@@ -173,4 +177,4 @@ impl Parser for PythonParser {
     }
 }
 
-parser_plugin!(PythonParserBuilder);
+parser_plugin!(PythonParserBuilder<LogParser>);

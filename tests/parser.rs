@@ -7,6 +7,7 @@ use std::env;
 use python_parser::{PythonParser, PyLogMessage};
 use python_parser::utils::*;
 use syslog_ng_common::{ParserBuilder, LogMessage, Parser};
+use syslog_ng_common::mock::MockPipe;
 use syslog_ng_common::sys::logmsg::log_msg_registry_init;
 use cpython::{Python, PyResult, PyObject};
 
@@ -36,7 +37,7 @@ fn test_error_is_returned_if_there_is_no_parse_method() {
     let gil = Python::acquire_gil();
     let py = gil.python();
     let result = call_parse(py, TEST_MODULE_NAME, "ParseMethodReturnsNotBoolean").unwrap();
-    let _ = PythonParser::process_parse_result(py, result).err().unwrap();
+    let _ = PythonParser::<MockPipe>::process_parse_result(py, result).err().unwrap();
 }
 
 #[test]
@@ -46,7 +47,7 @@ fn test_parse_method_which_returns_boolean_does_not_raise_errors() {
     let gil = Python::acquire_gil();
     let py = gil.python();
     let result = call_parse(py, TEST_MODULE_NAME, "ParserClassWithGoodParseMethod").unwrap();
-    let _ = PythonParser::process_parse_result(py, result).unwrap();
+    let _ = PythonParser::<MockPipe>::process_parse_result(py, result).unwrap();
 }
 
 #[test]
@@ -55,7 +56,8 @@ fn test_successful_parse() {
     env::set_var("PYTHONPATH", env::current_dir().unwrap());
     let mut parser = build_parser(TEST_MODULE_NAME, "ParseReturnsTrue");
     let mut logmsg = LogMessage::new();
-    assert_eq!(true, parser.parse(&mut logmsg, "input message to be parsed"));
+    let mut pipe = MockPipe::new();
+    assert_eq!(true, parser.parse(&mut pipe, &mut logmsg, "input message to be parsed"));
 }
 
 #[test]
@@ -64,7 +66,8 @@ fn test_unsucessful_parse() {
     env::set_var("PYTHONPATH", env::current_dir().unwrap());
     let mut parser = build_parser(TEST_MODULE_NAME, "ParseReturnsFalse");
     let mut logmsg = LogMessage::new();
-    assert_eq!(false, parser.parse(&mut logmsg, "input message to be parsed"));
+    let mut pipe = MockPipe::new();
+    assert_eq!(false, parser.parse(&mut pipe, &mut logmsg, "input message to be parsed"));
 }
 
 #[test]
@@ -73,7 +76,8 @@ fn test_parse_method_raises_an_exception() {
     env::set_var("PYTHONPATH", env::current_dir().unwrap());
     let mut parser = build_parser(TEST_MODULE_NAME, "ExceptionIsRaisedInParseMethod");
     let mut logmsg = LogMessage::new();
-    assert_eq!(false, parser.parse(&mut logmsg, "input message to be parsed"));
+    let mut pipe = MockPipe::new();
+    assert_eq!(false, parser.parse(&mut pipe, &mut logmsg, "input message to be parsed"));
 }
 
 #[test]
@@ -87,7 +91,8 @@ fn test_regex_parser() {
     let message = "seq: 0000000000, thread: 0000, runid: 1456947132, stamp: 2016-03-02T20:32:12 PAD";
     let mut parser = build_parser_with_options("_test_module.regex", "RegexParser", &options);
     let mut logmsg = LogMessage::new();
-    assert_eq!(true, parser.parse(&mut logmsg, message));
+    let mut pipe = MockPipe::new();
+    assert_eq!(true, parser.parse(&mut pipe, &mut logmsg, message));
     assert_eq!("0000000000", logmsg.get("seq"));
     assert_eq!("0000", logmsg.get("thread"));
     assert_eq!("1456947132", logmsg.get("runid"));
