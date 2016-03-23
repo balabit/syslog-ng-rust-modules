@@ -1,3 +1,1 @@
-add_custom_target(BuildLibDummyLib ALL ${CARGO_BUILD} WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
-
-set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES ${CMAKE_CURRENT_SOURCE_DIR}/target)
+add_lib_crate(dummy-lib)
