@@ -12,3 +12,4 @@ pkg_check_modules (SYSLOG_NG REQUIRED syslog-ng)
 include(UseRust)
 
 add_subdirectory(dummy-lib)
+add_subdirectory(python-parser)
