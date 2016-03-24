@@ -13,3 +13,4 @@ include(UseRust)
 
 add_subdirectory(dummy-lib)
 add_subdirectory(python-parser)
+add_subdirectory(regex-parser)
