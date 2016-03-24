@@ -24,6 +24,7 @@ cmake -DCMAKE_INSTALL_PREFIX=/home/btibi/install/syslog-ng ..
 ```
 
  `CMAKE_INSTALL_PREFIX` should point to the directory, where syslog-ng was installed.
+ You can also use CMake's graphical configurator (`cmake-gui`).
 1. Build the project:
 ```
 make
@@ -33,7 +34,6 @@ make
 make install
 ```
 
-
 ### python-parser
 
 Check [README](python-parser/README.md) for more detailed information.
@@ -41,6 +41,7 @@ Check [README](python-parser/README.md) for more detailed information.
 #### Requirements
 
 * `python-3.4` development library
+* `ENABLE_PYTHON_PARSER` CMake flag should be set to ON
 
 #### Additional CMake flags
 
