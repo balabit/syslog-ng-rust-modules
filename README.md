@@ -50,3 +50,11 @@ Check [README](python-parser/README.md) for more detailed information.
  ```
 cmake -DPYTHON_LIBRARY=/usr/lib/x86_64-linux-gnu/libpython3.4m.so -DCMAKE_INSTALL_PREFIX=/home/btibi/install/syslog-ng ..
 ```
+
+### regex-parser
+
+Check [README](regex-parser/README.md) for more detailed information.
+
+#### Requirements
+
+* `ENABLE_REGEX_PARSER` CMake flag should be set to ON
