@@ -7,7 +7,7 @@ find_package(Rust REQUIRED)
 find_package(Cargo REQUIRED)
 find_package(PkgConfig REQUIRED)
 
-pkg_check_modules(syslog-ng REQUIRED QUIET)
+pkg_check_modules (SYSLOG_NG REQUIRED syslog-ng)
 
 include(UseRust)
 
