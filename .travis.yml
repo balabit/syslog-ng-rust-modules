@@ -32,8 +32,6 @@ install:
     libesmtp-dev
     libgeoip-dev
     libhiredis-dev
-    sqlite3
-    libdbd-sqlite3
     libriemann-client-dev
     openjdk-7-jdk
     gradle-2.2.1
