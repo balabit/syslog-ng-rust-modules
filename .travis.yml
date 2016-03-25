@@ -29,6 +29,7 @@ addons:
     - openjdk-7-jdk
     - autoconf-archive
     - cmake
+    - python3
 
 # run builds for all the trains (and more)
 matrix:
