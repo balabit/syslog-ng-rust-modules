@@ -19,7 +19,7 @@ crate_type = ["rlib", "dylib"]
 
 [dependencies]
 log = "0.3"
-actiondb = "^0.6.1"
+actiondb = "0.7"
 syslog-ng-common = "0.7"
 clap = "2.1"
 
