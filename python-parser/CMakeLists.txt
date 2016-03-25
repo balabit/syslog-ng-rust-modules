@@ -9,5 +9,5 @@ endif()
 if (ENABLE_PYTHON_PARSER)
   add_cargo_lib_target(python-parser)
 
-  install(FILES ${PYTHON_PARSER_PATH} DESTINATION lib/syslog-ng)
+  install(FILES ${PYTHON_PARSER_PATH} DESTINATION ${SYSLOG_NG_MODULEDIR})
 endif()
