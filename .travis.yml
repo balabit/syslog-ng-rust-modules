@@ -18,7 +18,6 @@ addons:
     - libevtlog-dev
     - libnet1-dev
     - libglib2.0-dev
-    - libdbi0-dev
     - libssl-dev
     - libjson0-dev
     - libwrap0-dev
@@ -30,7 +29,6 @@ addons:
     - openjdk-7-jdk
     - autoconf-archive
     - cmake
-    - libpython3.4-dev
 
 # run builds for all the trains (and more)
 matrix:
