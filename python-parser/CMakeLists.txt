@@ -10,4 +10,5 @@ if (ENABLE_PYTHON_PARSER)
   add_cargo_lib_target(python-parser)
 
   install(FILES ${PYTHON_PARSER_PATH} DESTINATION ${SYSLOG_NG_MODULEDIR})
+  install(DIRECTORY scl/ DESTINATION ${SYSLOG_NG_SCLDIR})
 endif()
