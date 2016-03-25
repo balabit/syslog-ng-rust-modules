@@ -59,3 +59,12 @@ Check [README](regex-parser/README.md) for more detailed information.
 #### Requirements
 
 * `ENABLE_REGEX_PARSER` CMake flag should be set to ON
+
+### actiondb-parser
+
+Check [actiondb-parser](actiondb-parser/README.md) and
+[actiondb](https://github.com/ihrwein/actiondb/blob/master/README.md) for more detailed information.
+
+#### Requirements
+
+* `ENABLE_ACTIONDB_PARSER` CMake flag should be set to ON
