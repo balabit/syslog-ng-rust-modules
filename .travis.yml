@@ -1,0 +1,68 @@
+language: rust
+sudo: false
+distro: trusty
+
+addons:
+  apt:
+    sources:
+    - llvm-toolchain-precise-3.8
+    packages:
+    - clang-3.8
+env:
+- PKG_CONFIG_PATH=$HOME/install/syslog-ng/lib/pkgconfig
+
+install:
+  - sudo apt-get update -qq
+  - >
+    sudo apt-get install -qq
+    pkg-config
+    flex
+    bison
+    xsltproc
+    docbook-xsl
+    libevtlog-dev
+    libnet1-dev
+    libglib2.0-dev
+    libdbi0-dev
+    libssl-dev
+    libjson0-dev
+    libwrap0-dev
+    libpcre3-dev
+    libcap-dev
+    libesmtp-dev
+    libgeoip-dev
+    libhiredis-dev
+    sqlite3
+    libdbd-sqlite3
+    libriemann-client-dev
+    openjdk-7-jdk
+    gradle-2.2.1
+    autoconf-archive
+    cmake
+    libpython3.4-dev
+  - sudo pip install -r requirements.txt
+
+# run builds for all the trains (and more)
+matrix:
+  include:
+    - rust: nightly
+      env: TRAVIS_CARGO_NIGHTLY_FEATURE=nightly
+    - rust: beta
+    - rust: stable
+
+before_script:
+  - ./autogen.sh
+  - unset PYTHON_CFLAGS # HACK
+  - ./configure --with-ivykis=internal --prefix=$HOME/install/syslog-ng
+  - make -j install
+script:
+  - >
+  cmake -DPYTHON_LIBRARY=/usr/lib/x86_64-linux-gnu/libpython3.4m.so
+  -DCMAKE_INSTALL_PREFIX=$HOME/install/syslog-ng ..
+notifications:
+  webhooks:
+      urls:
+        - https://webhooks.gitter.im/e/1c6e3a6f10348748585a
+      on_success: always  # options: [always|never|change] default: always
+      on_failure: always  # options: [always|never|change] default: always
+      on_start: true     # default: false
