@@ -27,9 +27,7 @@ addons:
     - libesmtp-dev
     - libgeoip-dev
     - libhiredis-dev
-    - libriemann-client-dev
     - openjdk-7-jdk
-    - gradle-2.2.1
     - autoconf-archive
     - cmake
     - libpython3.4-dev
