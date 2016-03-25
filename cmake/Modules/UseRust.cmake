@@ -6,7 +6,7 @@ else()
   set(TARGET_DIR "target/debug")
 endif()
 
-function(add_lib_crate CRATE_NAME)
+function(add_cargo_lib_target CRATE_NAME)
   string(REPLACE "-" "_" NORMALIZED_CRATE_NAME ${CRATE_NAME})
   set(LIBNAME "lib${NORMALIZED_CRATE_NAME}.so")
   add_custom_target(${CRATE_NAME} ALL ${CARGO_BUILD} WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})

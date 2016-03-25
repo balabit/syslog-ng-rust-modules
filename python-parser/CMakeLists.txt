@@ -7,7 +7,7 @@ else()
 endif()
 
 if (ENABLE_PYTHON_PARSER)
-  add_lib_crate(python-parser)
+  add_cargo_lib_target(python-parser)
 
   install(FILES ${PYTHON_PARSER_LIB_TARGET} DESTINATION lib/syslog-ng)
 endif()
