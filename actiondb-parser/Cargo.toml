@@ -10,6 +10,10 @@ keywords = ["log", "parser"]
 description = "A parser module for syslog-ng based on ActionDB"
 license = "MIT/Apache-2.0"
 
+[[bin]]
+name = "adbtool"
+path = "src/bin/adbtool.rs"
+
 [lib]
 crate_type = ["rlib", "dylib"]
 
@@ -17,6 +21,7 @@ crate_type = ["rlib", "dylib"]
 log = "0.3"
 actiondb = "^0.6.1"
 syslog-ng-common = "0.7"
+clap = "2.1"
 
 [build-dependencies]
 syslog-ng-build = "0.2"
