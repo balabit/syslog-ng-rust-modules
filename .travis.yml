@@ -55,8 +55,8 @@ before_script:
   - make -j install
 script:
   - >
-  cmake -DPYTHON_LIBRARY=/usr/lib/x86_64-linux-gnu/libpython3.4m.so
-  -DCMAKE_INSTALL_PREFIX=$HOME/install/syslog-ng ..
+    cmake -DPYTHON_LIBRARY=/usr/lib/x86_64-linux-gnu/libpython3.4m.so
+    -DCMAKE_INSTALL_PREFIX=$HOME/install/syslog-ng ..
 notifications:
   webhooks:
       urls:
