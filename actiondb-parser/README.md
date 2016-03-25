@@ -48,6 +48,15 @@ into the shared library. Check the required libraries with `ldd`. I suppose stil
 
 For the exact configuration file format, check ActionDB's readme file: https://github.com/ihrwein/actiondb/blob/master/README.md
 
+## adbtool
+
+`adbtool` is a tool which can be used for the following purposes:
+* validate patterns,
+* parse text files.
+
+It support the `validate` and `parse` subcommands. For more information check
+it's `--help` option.
+
 ## License
 
 Licensed under either of
