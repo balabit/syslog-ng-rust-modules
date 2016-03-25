@@ -2,12 +2,6 @@ language: rust
 sudo: false
 distro: trusty
 
-addons:
-  apt:
-    sources:
-    - llvm-toolchain-trusty-3.7
-    packages:
-    - clang-3.7
 env:
 - PKG_CONFIG_PATH=$HOME/install/syslog-ng/lib/pkgconfig
 
