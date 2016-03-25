@@ -48,8 +48,6 @@ before_script:
   - cd ../syslog-ng-rust-modules
   - mkdir build
   - cd build
-  - >
-    cmake -DPYTHON_LIBRARY=/usr/lib/x86_64-linux-gnu/libpython3.4m.so
-    -DCMAKE_INSTALL_PREFIX=$HOME/install/syslog-ng ..
+  - cmake -DCMAKE_INSTALL_PREFIX=$HOME/install/syslog-ng ..
 script:
   - make install
