@@ -3,9 +3,10 @@
 ## Requirements
 
 * `cmake` (at least 2.8)
-* `rustc`
+* `rustc` (at least 1.5)
 * `cargo`
 * `syslog-ng` (at least 3.8)
+* a C compiler
 
 ## Building
 
@@ -23,8 +24,8 @@ cd build
 cmake -DCMAKE_INSTALL_PREFIX=/home/btibi/install/syslog-ng ..
 ```
 
- `CMAKE_INSTALL_PREFIX` should point to the directory, where syslog-ng was installed.
- You can also use CMake's graphical configurator (`cmake-gui`).
+ You can also use CMake's graphical configurator (`cmake-gui`). `CMAKE_INSTALL_PREFIX` should point to the directory, where syslog-ng was installed.
+ The default build type is `Debug`, you can build a highly optimized version with the `-DCMAKE_BUILD_TYPE=Release` flag.
 1. Build the project:
 ```
 make
