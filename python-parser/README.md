@@ -2,7 +2,7 @@
 
 For a real world tested example, check the `_test_module/regex.py` file.
 
-A Python parser is Python class which implements two methods:
+A Python parser is a Python class which implements two methods:
 * `init(self, options)`: (optional) After the parser instance was created, this method
   is called on it. The `options` variable is a dictionary with key-value pairs
 * `parse(self, logmsg, message)`: (mandatory) This method is called upon receiving
@@ -37,23 +37,10 @@ If an exception is thrown during `init()` is is considered an initialization err
 ```
 @version: 3.8
 
-block parser regex(
-    regex("")
-)
-{
-    regex-rs(
-        option("regex", `regex`)
-    );
-};
-
 source s_localhost {
     network(
-        ip(
-            127.0.0.1
-        ),
-        port(
-            1514
-        ),
+        ip(127.0.0.1),
+        port(1514),
         transport("tcp")
     );
 };
@@ -63,9 +50,9 @@ log {
         s_localhost
     );
     parser {
-        python-rs(
-            option("module", "_test_module.regex")
-            option("class", "RegexParser")
+        python(
+            module("_test_module.regex")
+            class("RegexParser")
             option("regex", "seq: (?P<seq>\\d+), thread: (?P<thread>\\d+), runid: (?P<runid>\\d+), stamp: (?P<stamp>[^ ]+) (?P<padding>.*$)")
         );
     };
@@ -81,15 +68,4 @@ the `PYTHONPATH` environment variable:
 
 ```
 PYTHONPATH=/home/tibi/workspace/python-parser sbin/syslog-ng -Fevd
-```
-
-## Compilation
-
-You need a nightly Rust compiler.
-Make sure, pkg-config is able to find syslog-ng and `libsyslog-ng.so` is in your
-library path.
-
-```
-cargo build --release
-cp target/release/libpython_parser.so <syslog-ng install prefix>/lib/syslog-ng/
 ```
