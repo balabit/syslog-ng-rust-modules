@@ -15,7 +15,7 @@ extern crate actiondb;
 use std::borrow::Borrow;
 
 use actiondb::matcher::{Matcher, PatternLoader, MatcherSuite};
-use syslog_ng_common::{Parser, ParserBuilder, OptionError, LogParser, LogMessage, MessageFormatter};
+use syslog_ng_common::{Parser, ParserBuilder, OptionError, LogMessage, MessageFormatter, Pipe};
 
 mod msgfilller;
 mod keys;
@@ -44,7 +44,7 @@ impl<MS> ActiondbParserBuilder<MS> where MS: MatcherSuite, MS::Matcher: Clone {
     }
 }
 
-impl<MS> ParserBuilder for ActiondbParserBuilder<MS> where MS: MatcherSuite + Clone, MS::Matcher: Clone {
+impl<MS, P> ParserBuilder<P> for ActiondbParserBuilder<MS> where P: Pipe, MS: MatcherSuite + Clone, MS::Matcher: Clone {
     type Parser = ActiondbParser<MS::Matcher>;
     fn new() -> Self {
         ActiondbParserBuilder {
@@ -70,7 +70,6 @@ impl<MS> ParserBuilder for ActiondbParserBuilder<MS> where MS: MatcherSuite + Cl
         };
 
     }
-    fn parent(&mut self, _: LogParser) {}
     fn build(self) -> Result<Self::Parser, OptionError> {
         let ActiondbParserBuilder {matcher, formatter} = self;
         debug!("ActiondbParser: building");
@@ -88,8 +87,8 @@ pub struct ActiondbParser<M> where M: Matcher + Clone {
     pub formatter: MessageFormatter,
 }
 
-impl<M> Parser for ActiondbParser<M> where M: Matcher + Clone {
-    fn parse(&mut self, msg: &mut LogMessage, input: &str) -> bool {
+impl<M, P> Parser<P> for ActiondbParser<M> where P: Pipe, M: Matcher + Clone {
+    fn parse(&mut self, _: &mut P, msg: &mut LogMessage, input: &str) -> bool {
         if let Some(result) = self.matcher.parse(input) {
             MessageFiller::fill_logmsg(&mut self.formatter, msg, &result);
             true
