@@ -8,7 +8,7 @@
           "LOGOUT"
         ],
         "conditions": {
-            "timeout": 3600000,
+            "timeout": "3600000",
             "first_opens": true,
             "last_closes": true
         },

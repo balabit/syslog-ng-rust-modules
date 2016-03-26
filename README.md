@@ -108,8 +108,8 @@ context is subscribed to all events.
 | name                     | yes      | string                       |               |
 | uuid                     | no       | UUID                         |               |
 | patterns                 | yes      | array                        |               |
-| conditions.timeout       | no       | int [ms]                     |               |
-| conditions.renew_timeout | yes      | int [ms]                     |               |
+| conditions.timeout       | no       | string [ms]                  |               |
+| conditions.renew_timeout | yes      | string [ms]                  |               |
 | conditions.first_opens   | yes      | bool                         | false         |
 | conditions.last_closes   | yes      | bool                         | true          |
 | conditions.max_size      | yes      | int                          |               |
