@@ -64,3 +64,22 @@ fn test_given_correlator_factory_when_it_reads_an_invalid_config_then_it_returns
         unreachable!();
     }
 }
+
+#[test]
+fn test_given_yaml_context_file_when_it_is_read_by_the_correlator_factory_then_the_contexts_are_deserialized() {
+    let _ = env_logger::init();
+    let contexts_file = "tests/correlator/contexts.yaml";
+    let result = CorrelatorFactory::load_file(contexts_file).unwrap();
+    assert_eq!(1, result.len());
+}
+
+#[test]
+fn test_name() {
+    let _ = env_logger::init();
+    let contexts_file = "tests/correlator/invalid.yaml";
+    let result = CorrelatorFactory::load_file(contexts_file);
+    if let Error::SerdeYaml(_) = result.err().unwrap() {
+    } else {
+        unreachable!();
+    }
+}
