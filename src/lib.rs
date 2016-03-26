@@ -24,6 +24,7 @@ extern crate log;
 #[macro_use]
 mod macros;
 
+pub use action::Alert;
 pub use conditions::{Conditions, ConditionsBuilder};
 pub use config::action::ActionType;
 pub use dispatcher::{Response, ResponseHandle};

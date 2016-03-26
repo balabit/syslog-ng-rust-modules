@@ -88,10 +88,10 @@ impl MessageAction {
 
         let mut rendered_values = try!(self.render_values(&template_context));
         MessageAction::extend_with_context_information(&mut rendered_values, state, context);
-        let message = rendered_values.remove(MESSAGE)
-                                     .expect(&format!("There is no '{}' key in the renderer \
+        let message = rendered_values.get(MESSAGE)
+                                     .expect(&format!("There is no '{}' key in the rendered \
                                                        key-value pairs",
-                                                      MESSAGE));
+                                                      MESSAGE)).clone();
         let name = self.name.as_ref().map(|name| name.borrow());
         let message = MessageBuilder::new(&self.uuid, message)
                           .name(name)

@@ -12,16 +12,15 @@ use conditions::ConditionsBuilder;
 use correlator::Correlator;
 use context::ContextMap;
 use message::MessageBuilder;
+use action::Alert;
 
 use handlebars::Template;
 use uuid::Uuid;
 use serde_json::from_str;
-use std::rc::Rc;
-use std::cell::RefCell;
 use std::thread;
 use std::time::Duration;
 
-use test_utils::MessageEventHandler;
+use test_utils::MockAlertHandler;
 
 const JSON_CONFIG: &'static str = r#"
       [
@@ -114,17 +113,20 @@ fn test_given_manually_built_correlator_when_it_closes_a_context_then_the_action
         ContextConfigBuilder::new(Uuid::new_v4(), condition.clone()).patterns(patterns.clone()).actions(vec![MessageActionBuilder::new("uuid", message.clone()).build().into()]).build(),
         ContextConfigBuilder::new(Uuid::new_v4(), condition.clone()).patterns(patterns.clone()).actions(vec![MessageActionBuilder::new("uuid", message).build().into()]).build(),
     ];
-    let responses = Rc::new(RefCell::new(Vec::new()));
-    let message_event_handler = Box::new(MessageEventHandler { responses: responses.clone() });
-    let mut correlator = Correlator::new(ContextMap::from_configs(contexts));
-    correlator.register_handler(message_event_handler);
+    let mut responses = Vec::new();
+    let alert_handler = Box::new(MockAlertHandler);
+    let mut correlator: Correlator<Vec<Alert>> = Correlator::new(ContextMap::from_configs(contexts));
+    correlator.set_alert_handler(Some(alert_handler));
+    correlator.handle_events(&mut responses);
     let _ = correlator.push_message(MessageBuilder::new(&uuid1, "message").build());
     thread::sleep(Duration::from_millis(20));
+    correlator.handle_events(&mut responses);
     let _ = correlator.push_message(MessageBuilder::new(&uuid2, "message").build());
     thread::sleep(Duration::from_millis(80));
+    correlator.handle_events(&mut responses);
     let _ = correlator.push_message(MessageBuilder::new(&uuid3, "message").build());
-    let _ = correlator.stop();
-    assert_eq!(3, responses.borrow().len());
+    let _ = correlator.stop(&mut responses);
+    assert_eq!(3, responses.len());
 }
 
 #[test]
@@ -149,34 +151,41 @@ fn test_given_correlator_when_it_is_built_from_json_then_it_produces_the_expecte
     let uuid3 = "3b47ba91-d867-4a8c-9553-a5dfd6ea1274".to_owned();
     let result = from_str::<Vec<ContextConfig>>(JSON_CONFIG);
     let contexts = result.expect("Failed to deserialize a config::ContextConfig from JSON");
-    let responses = Rc::new(RefCell::new(Vec::new()));
-    let message_event_handler = Box::new(MessageEventHandler { responses: responses.clone() });
-    let mut correlator = Correlator::new(ContextMap::from_configs(contexts));
-    correlator.register_handler(message_event_handler);
+    let mut responses = Vec::new();
+    let alert_handler = Box::new(MockAlertHandler);
+    let mut correlator: Correlator<Vec<Alert>> = Correlator::new(ContextMap::from_configs(contexts));
+    correlator.set_alert_handler(Some(alert_handler));
+    correlator.handle_events(&mut responses);
     let _ = correlator.push_message(MessageBuilder::new(&uuid1, "message")
                                         .name(Some("p1"))
                                         .build());
     thread::sleep(Duration::from_millis(20));
+    correlator.handle_events(&mut responses);
     let _ = correlator.push_message(MessageBuilder::new(&uuid2, "message")
                                         .name(Some("p2"))
                                         .build());
+    correlator.handle_events(&mut responses);
     let _ = correlator.push_message(MessageBuilder::new(&uuid3, "message")
                                         .name(Some("p3"))
                                         .build());
+    correlator.handle_events(&mut responses);
     let _ = correlator.push_message(MessageBuilder::new(&uuid3, "message")
                                         .name(Some("p3"))
                                         .build());
+    correlator.handle_events(&mut responses);
     let _ = correlator.push_message(MessageBuilder::new(&uuid3, "message")
                                         .name(Some("p3"))
                                         .build());
+    correlator.handle_events(&mut responses);
     let _ = correlator.push_message(MessageBuilder::new(&uuid3, "message")
                                         .name(Some("p3"))
                                         .build());
+    correlator.handle_events(&mut responses);
     let _ = correlator.push_message(MessageBuilder::new(&uuid3, "message")
                                         .name(Some("p3"))
                                         .build());
     thread::sleep(Duration::from_millis(200));
-    let _ = correlator.stop();
-    println!("{:?}", &responses.borrow());
-    assert_eq!(5, responses.borrow().len());
+    let _ = correlator.stop(&mut responses);
+    println!("{:?}", &responses);
+    assert_eq!(5, responses.len());
 }

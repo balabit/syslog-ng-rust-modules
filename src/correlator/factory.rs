@@ -9,19 +9,23 @@
 use std::io::Read;
 use std::fs::File;
 use std::path::Path;
-use std::str::FromStr;
 
+use serde_json;
+
+use config::ContextConfig;
+use ContextMap;
 use super::Correlator;
 use super::Error;
 
 pub struct CorrelatorFactory;
 
 impl CorrelatorFactory {
-    pub fn from_path<P: AsRef<Path>>(path: P) -> Result<Correlator, Error> {
+    pub fn from_path<T, P: AsRef<Path>>(path: P) -> Result<Correlator<T>, Error> {
         trace!("Trying to load contexts from file; path={}", path.as_ref().display());
         let mut file = try!(File::open(path));
         let mut buffer = String::new();
         try!(file.read_to_string(&mut buffer));
-        Correlator::from_str(&buffer)
+        let contexts = try!(serde_json::from_str::<Vec<ContextConfig>>(&buffer));
+        Ok(Correlator::new(ContextMap::from_configs(contexts)))
     }
 }

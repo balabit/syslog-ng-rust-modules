@@ -6,28 +6,16 @@
 // option. All files in the project carrying such notice may not be copied,
 // modified, or distributed except according to those terms.
 
-use dispatcher::ResponseHandle;
-use Response;
+use std::sync::mpsc::Sender;
 
-use std::rc::Rc;
-use std::cell::RefCell;
-use std::sync::mpsc;
 use dispatcher::request::Request;
-
-use reactor::EventHandler;
 use action::Alert;
+use correlator::AlertHandler;
 
-pub struct MessageEventHandler {
-    pub responses: Rc<RefCell<Vec<Alert>>>,
-}
+pub struct MockAlertHandler;
 
-impl EventHandler<Response, mpsc::Sender<Request>> for MessageEventHandler {
-    fn handle_event(&mut self, event: Response, _: &mut mpsc::Sender<Request>) {
-        if let Response::Alert(event) = event {
-            self.responses.borrow_mut().push(event);
-        }
-    }
-    fn handle(&self) -> ResponseHandle {
-        ResponseHandle::Alert
+impl AlertHandler<Vec<Alert>> for MockAlertHandler {
+    fn on_alert(&mut self, alert: Alert, _: &mut Sender<Request>, extra_data: &mut Vec<Alert>) {
+        extra_data.push(alert);
     }
 }

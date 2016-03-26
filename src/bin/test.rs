@@ -39,11 +39,12 @@ fn main() {
         ContextConfigBuilder::new(Uuid::new_v4(), condition.clone()).patterns(patterns.clone()).actions(Vec::new()).build(),
         ContextConfigBuilder::new(Uuid::new_v4(), condition.clone()).patterns(patterns.clone()).actions(Vec::new()).build(),
     ];
-    let mut correlator = Correlator::new(ContextMap::from_configs(contexts));
+    let mut external_handler_data = ();
+    let mut correlator: Correlator<()> = Correlator::new(ContextMap::from_configs(contexts));
     let _ = correlator.push_message(MessageBuilder::new(&uuid1, "message").build());
     thread::sleep(Duration::from_millis(20));
     let _ = correlator.push_message(MessageBuilder::new(&uuid2, "message").build());
     thread::sleep(Duration::from_millis(80));
     let _ = correlator.push_message(MessageBuilder::new(&uuid3, "message").build());
-    let _ = correlator.stop();
+    let _ = correlator.stop(&mut external_handler_data);
 }
