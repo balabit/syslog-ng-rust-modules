@@ -55,9 +55,9 @@ impl<T> Correlator<T> {
             let dmux = Demultiplexer::new(rx);
             let response_sender = Box::new(dispatcher_output_channel_tx);
 
-            let exit_handler = Box::new(ExitEventHandler::new());
-            let timer_event_handler = Box::new(TimerEventHandler::new());
-            let message_event_handler = Box::new(MessageEventHandler::new());
+            let exit_handler = Box::new(ExitEventHandler::default());
+            let timer_event_handler = Box::new(TimerEventHandler::default());
+            let message_event_handler = Box::new(MessageEventHandler::default());
 
             let mut reactor = RequestReactor::new(dmux, context_map, response_sender);
             reactor.register_handler(exit_handler);

@@ -18,7 +18,7 @@ use std::time::Duration;
 
 #[test]
 fn test_given_map_context_when_messages_have_the_same_kvpairs_then_they_go_to_the_same_context() {
-    let mut responder = MockResponseSender::new();
+    let mut responder = MockResponseSender::default();
     let delta = Duration::from_millis(10);
     let timeout = Duration::from_millis(30);
     let event = TimerEvent(delta);

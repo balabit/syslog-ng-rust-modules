@@ -11,13 +11,8 @@ use dispatcher::Response;
 use dispatcher::request::{Request, RequestHandle};
 use reactor::{EventHandler, SharedData};
 
+#[derive(Default)]
 pub struct ExitEventHandler;
-
-impl ExitEventHandler {
-    pub fn new() -> ExitEventHandler {
-        ExitEventHandler
-    }
-}
 
 impl<'a> EventHandler<Request, SharedData<'a>> for ExitEventHandler {
     fn handle_event(&mut self, event: Request, data: &mut SharedData) {

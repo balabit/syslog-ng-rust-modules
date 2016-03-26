@@ -26,7 +26,7 @@ use uuid::Uuid;
 #[test]
 fn test_given_a_message_action_when_it_is_executed_then_it_adds_the_name_and_uuid_of_the_context_to_the_message
     () {
-    let mut responder = MockResponseSender::new();
+    let mut responder = MockResponseSender::default();
     let name = Some("name".to_owned());
     let base_context = {
         let conditions = ConditionsBuilder::new(Duration::from_millis(100)).build();
@@ -57,7 +57,7 @@ fn test_given_a_message_action_when_it_is_executed_then_it_adds_the_name_and_uui
 #[test]
 fn test_given_message_action_when_it_is_executed_then_it_uses_the_messages_to_render_the_message_and_additonal_templated_values
     () {
-    let mut responder = MockResponseSender::new();
+    let mut responder = MockResponseSender::default();
     let _ = env_logger::init();
     let name = Some("name".to_owned());
     let base_context = {
@@ -106,7 +106,7 @@ fn test_given_message_action_when_it_is_executed_then_it_uses_the_messages_to_re
 #[test]
 fn test_given_message_action_with_templated_values_when_a_render_error_occurres_then_it_does_not_cause_panic() {
     let _ = env_logger::init();
-    let mut responder = MockResponseSender::new();
+    let mut responder = MockResponseSender::default();
     let name = Some("name".to_owned());
     let base_context = {
         let conditions = ConditionsBuilder::new(Duration::from_millis(100)).build();

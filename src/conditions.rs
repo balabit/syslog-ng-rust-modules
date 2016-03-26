@@ -99,7 +99,7 @@ mod test {
 
     #[test]
     fn test_given_condition_when_a_closing_message_is_received_then_the_state_becomes_closed() {
-        let mut responder = MockResponseSender::new();
+        let mut responder = MockResponseSender::default();
         let timeout = Duration::from_millis(100);
         let msg_id1 = "11eaf6f8-0640-460f-aee2-a72d2f2ab258".to_owned();
         let msg_id2 = "21eaf6f8-0640-460f-aee2-a72d2f2ab258".to_owned();
@@ -191,7 +191,7 @@ mod test {
     #[test]
     fn test_given_conditions_when_last_closes_is_set_and_the_message_has_a_name_then_we_check_that_name
         () {
-        let mut responder = MockResponseSender::new();
+        let mut responder = MockResponseSender::default();
         let timeout = Duration::from_millis(100);
         let patterns = vec!["p1".to_owned(), "p2".to_owned()];
         let p1_uuid = "e4f3f8b2-3135-4916-a5ea-621a754dab0d".to_owned();
@@ -215,7 +215,7 @@ mod test {
     #[test]
     fn test_given_condition_when_first_opens_is_set_but_there_are_no_patterns_then_we_do_not_panic
         () {
-        let mut responder = MockResponseSender::new();
+        let mut responder = MockResponseSender::default();
         let msg = MessageBuilder::new("e4f3f8b2-3135-4916-a5ea-621a754dab0d", "message")
                       .name(Some("p1"))
                       .build();
@@ -230,7 +230,7 @@ mod test {
     #[test]
     fn test_given_condition_when_last_closes_is_set_but_there_are_no_patterns_then_we_do_not_panic
         () {
-        let mut responder = MockResponseSender::new();
+        let mut responder = MockResponseSender::default();
         let msg = MessageBuilder::new("e4f3f8b2-3135-4916-a5ea-621a754dab0d", "message")
                       .name(Some("p1"))
                       .build();
