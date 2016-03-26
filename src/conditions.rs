@@ -253,7 +253,7 @@ mod deser {
         fn deserialize<D>(deserializer: &mut D) -> Result<Conditions, D::Error>
             where D: Deserializer
         {
-            deserializer.visit_struct("Conditions", &[], ConditionsVisitor)
+            deserializer.deserialize_struct("Conditions", &[], ConditionsVisitor)
         }
     }
 
@@ -283,12 +283,12 @@ mod deser {
                         "first_opens" => Ok(Field::FirstOpens),
                         "last_closes" => Ok(Field::LastCloses),
                         "max_size" => Ok(Field::MaxSize),
-                        _ => Err(Error::syntax(&format!("Unexpected field: {}", value))),
+                        _ => Err(E::custom(format!("Unexpected field: {}", value))),
                     }
                 }
             }
 
-            deserializer.visit(FieldVisitor)
+            deserializer.deserialize(FieldVisitor)
         }
     }
 

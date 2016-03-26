@@ -20,7 +20,7 @@ impl Deserialize for MessageAction {
     fn deserialize<D>(deserializer: &mut D) -> Result<MessageAction, D::Error>
         where D: Deserializer
     {
-        deserializer.visit_struct("MessageAction", &[], MessageActionVisitor)
+        deserializer.deserialize_struct("MessageAction", &[], MessageActionVisitor)
     }
 }
 
@@ -52,12 +52,12 @@ impl Deserialize for Field {
                     "message" => Ok(Field::Message),
                     "when" => Ok(Field::When),
                     "inject_mode" => Ok(Field::InjectMode),
-                    _ => Err(Error::syntax(&format!("Unexpected field: {}", value))),
+                    _ => Err(Error::custom(format!("Unexpected field: {}", value))),
                 }
             }
         }
 
-        deserializer.visit(FieldVisitor)
+        deserializer.deserialize(FieldVisitor)
     }
 }
 
@@ -68,7 +68,7 @@ impl MessageActionVisitor {
         where V: MapVisitor
     {
         Template::compile(template_string).map_err(|error| {
-            Error::syntax(&format!("Invalid handlebars template in 'message' field: \
+            Error::custom(format!("Invalid handlebars template in 'message' field: \
                                         uuid={}, error={}",
                                        uuid,
                                        error))
@@ -156,12 +156,12 @@ impl Deserialize for InjectMode {
                     "log" => Ok(InjectMode::Log),
                     "loopback" => Ok(InjectMode::Loopback),
                     "forward" => Ok(InjectMode::Forward),
-                    _ => Err(Error::syntax(&format!("Unexpected field: {}", value))),
+                    _ => Err(E::custom(format!("Unexpected field: {}", value))),
                 }
             }
         }
 
-        deserializer.visit(FieldVisitor)
+        deserializer.deserialize(FieldVisitor)
     }
 }
 
