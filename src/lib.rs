@@ -16,6 +16,7 @@ extern crate env_logger;
 extern crate uuid;
 extern crate serde;
 extern crate serde_json;
+extern crate serde_yaml;
 extern crate rustc_serialize;
 extern crate handlebars;
 #[macro_use]
