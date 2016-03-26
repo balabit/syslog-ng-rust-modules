@@ -11,6 +11,7 @@ use std::fs::File;
 use std::path::Path;
 
 use serde_json;
+use serde_yaml;
 
 use config::ContextConfig;
 use ContextMap;
@@ -21,11 +22,38 @@ pub struct CorrelatorFactory;
 
 impl CorrelatorFactory {
     pub fn from_path<T, P: AsRef<Path>>(path: P) -> Result<Correlator<T>, Error> {
+        let contexts = try!(CorrelatorFactory::load_file(path));
+        Ok(Correlator::new(ContextMap::from_configs(contexts)))
+    }
+
+    pub fn load_file<P: AsRef<Path>>(path: P) -> Result<Vec<ContextConfig>, Error> {
+        match path.as_ref().extension() {
+            Some(extension) => {
+                match try!(extension.to_str().ok_or(Error::NotUtf8FileName)) {
+                    "json" => {
+                        let content = try!(CorrelatorFactory::read(&path));
+                        serde_json::from_str::<Vec<ContextConfig>>(&content).map_err(Error::SerdeJson)
+                    },
+                    "yaml" | "yml" | "YAML" | "YML" => {
+                        let content = try!(CorrelatorFactory::read(&path));
+                        serde_yaml::from_str::<Vec<ContextConfig>>(&content).map_err(Error::SerdeYaml)
+                    },
+                    _ => Err(Error::UnsupportedFileExtension),
+                }
+            },
+            None => {
+                Err(Error::UnsupportedFileExtension)
+            }
+        }
+
+    }
+
+    fn read<P: AsRef<Path>>(path: P) -> Result<String, Error> {
         trace!("Trying to load contexts from file; path={}", path.as_ref().display());
         let mut file = try!(File::open(path));
         let mut buffer = String::new();
         try!(file.read_to_string(&mut buffer));
-        let contexts = try!(serde_json::from_str::<Vec<ContextConfig>>(&buffer));
-        Ok(Correlator::new(ContextMap::from_configs(contexts)))
+        Ok(buffer)
     }
+
 }
