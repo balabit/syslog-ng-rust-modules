@@ -71,7 +71,7 @@ format:
                     "name": "MAIL_READ",
                     "message": "message",
                     "values": {
-                        "MESSAGE": "user logged in, read mails then logged out"
+                        "key1": "user logged in, read mails then logged out"
                     },
                     "when": {
                       "on_opened": false,
@@ -124,8 +124,8 @@ The `message` action's definition is as follows:
 
 * `uuid`: The unique identifier of the message which is generated,
 * `name`: The human readable name of the message which is generated,
-* `message`: A Handlebars template that represents the contents of the message (like the message portion of a raw syslog)
-* `values`: Key-value pairs. The values are Handlebars templates.
+* `message`: A string that represents the contents of the message (like the message portion of a raw syslog)
+* `values`: Key-value (string-string) pairs.
 * `inject_mode`: Represents how the generated message should be injected into the application. It has three distinct values:
  * `log`: Log the message (via standard `syslog()` call, through log4j, etc.)
  * `forward`: Forward the message to the next processing pipeline element.
@@ -139,36 +139,16 @@ The `message` action's definition is as follows:
  |----------------|----------|------------------------------------------|---------------|
  | uuid           | no       | UUID                                     |               |
  | name           | yes      | string                                   |               |
- | message        | no       | string [Handlebars template]             |               |
- | values         | yes      | object (values are Handlebars templates) |               |
+ | message        | no       | string                                   |               |
+ | values         | yes      | object                                   |               |
  | inject_mode    | yes      | enum (log,forward,loopback)              | log           |
  | when.on_opened | yes      | bool                                     | false         |
  | when.on_closed | yes      | bool                                     | true          |
-
-The templatable values has read-only access to the state of the context when the message is rendered/
-The following variables can be used in the message:
-
-* `messages`: The array of events stored in the context
-* `context_name`: The name of the generating context (if any)
-* `context_uuid`: The uuid of the generating context
-* `context_len`: The number of captured events.
-
-A message is represented by a JSON object with the following keys:
 
 * `uuid`: The uuid of the message
 * `name`: The optional name of the message
 * `message`: The message portion
 * `values`: The key-value pairs stored in the message
-
-The following Handlebars library is used:
-https://github.com/sunng87/handlebars-rust. You can use all the syntax it
-supports.
-
-Examples:
-```
-key1={{{messages.[0].values.key1}}}
-we have {{context_len}} messages
-```
 
 ## License
 
