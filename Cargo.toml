@@ -9,8 +9,6 @@ crate_type = ["dylib", "rlib"]
 
 [dependencies]
 log = "0.3"
-serde = "0.6"
-serde_json = "0.6"
 env_logger = "0.3"
 
 [dependencies.correlation]

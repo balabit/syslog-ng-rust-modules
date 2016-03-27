@@ -1,20 +1,15 @@
 #[macro_use]
 extern crate log;
-extern crate serde_json;
-extern crate serde;
 #[macro_use]
 extern crate syslog_ng_common;
 extern crate correlation;
 
 use correlation::{Request, ContextMap, MessageBuilder, Alert};
 use correlation::config::action::message::InjectMode;
-use correlation::correlator::{Correlator, AlertHandler};
+use correlation::correlator::{Correlator, AlertHandler, CorrelatorFactory};
 use correlation::config::ContextConfig;
-use serde_json::from_str;
 use std::borrow::Borrow;
 use std::marker::PhantomData;
-use std::io::{self, Read};
-use std::fs::File;
 use std::sync::{mpsc, Arc, Mutex};
 use syslog_ng_common::{MessageFormatter, LogMessage};
 use syslog_ng_common::{Parser, ParserBuilder, OptionError, Pipe};
@@ -23,24 +18,6 @@ pub mod options;
 
 pub const CLASSIFIER_UUID: &'static str = ".classifier.uuid";
 pub const CLASSIFIER_CLASS: &'static str = ".classifier.class";
-
-#[derive(Debug)]
-enum Error {
-    Io(io::Error),
-    SerdeJson(serde_json::error::Error)
-}
-
-impl From<io::Error> for Error {
-    fn from(error: io::Error) -> Error {
-        Error::Io(error)
-    }
-}
-
-impl From<serde_json::error::Error> for Error {
-    fn from(error: serde_json::error::Error) -> Error {
-        Error::SerdeJson(error)
-    }
-}
 
 struct MessageSender;
 
@@ -77,25 +54,12 @@ pub struct CorrelationParserBuilder<P: Pipe> {
 
 impl<P: Pipe> CorrelationParserBuilder<P> {
     pub fn set_file(&mut self, path: &str) {
-        match self.load_contexts(path) {
+        match CorrelatorFactory::load_file(path) {
             Ok(contexts) => {
                 self.contexts = Some(contexts);
             },
             Err(err) => {
                 error!("CorrelationParser: failed to set config file: {:?}", &err);
-            }
-        }
-    }
-
-    fn load_contexts(&mut self, path: &str) -> Result<Vec<ContextConfig>, Error> {
-        let mut file = try!(File::open(path));
-        let mut buffer = String::new();
-        try!(file.read_to_string(&mut buffer));
-        match from_str::<Vec<ContextConfig>>(&buffer) {
-            Ok(contexts) => Ok(contexts),
-            Err(error) => {
-                error!("CorrelationParser: failed to load correlation contexts from file: {}", &error);
-                Err(Error::from(error))
             }
         }
     }
