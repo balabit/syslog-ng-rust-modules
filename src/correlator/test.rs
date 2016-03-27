@@ -14,7 +14,6 @@ use context::ContextMap;
 use message::MessageBuilder;
 use action::Alert;
 
-use handlebars::Template;
 use uuid::Uuid;
 use serde_json::from_str;
 use std::thread;
@@ -106,7 +105,6 @@ fn test_given_manually_built_correlator_when_it_closes_a_context_then_the_action
                         .first_opens(true)
                         .last_closes(true)
                         .build();
-    let message = "message";
     let contexts = vec![
         ContextConfigBuilder::new(Uuid::new_v4(), condition.clone()).patterns(patterns.clone()).actions(vec![MessageActionBuilder::new("uuid", "message").build().into()]).build(),
         ContextConfigBuilder::new(Uuid::new_v4(), condition.clone()).patterns(patterns.clone()).actions(vec![MessageActionBuilder::new("uuid", "message").build().into()]).build(),
