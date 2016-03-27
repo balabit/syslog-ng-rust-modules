@@ -106,12 +106,11 @@ fn test_given_manually_built_correlator_when_it_closes_a_context_then_the_action
                         .first_opens(true)
                         .last_closes(true)
                         .build();
-    let message = Template::compile("message".to_owned())
-                      .expect("Failed to compile a handlebars template");
+    let message = "message";
     let contexts = vec![
-        ContextConfigBuilder::new(Uuid::new_v4(), condition.clone()).patterns(patterns.clone()).actions(vec![MessageActionBuilder::new("uuid", message.clone()).build().into()]).build(),
-        ContextConfigBuilder::new(Uuid::new_v4(), condition.clone()).patterns(patterns.clone()).actions(vec![MessageActionBuilder::new("uuid", message.clone()).build().into()]).build(),
-        ContextConfigBuilder::new(Uuid::new_v4(), condition.clone()).patterns(patterns.clone()).actions(vec![MessageActionBuilder::new("uuid", message).build().into()]).build(),
+        ContextConfigBuilder::new(Uuid::new_v4(), condition.clone()).patterns(patterns.clone()).actions(vec![MessageActionBuilder::new("uuid", "message").build().into()]).build(),
+        ContextConfigBuilder::new(Uuid::new_v4(), condition.clone()).patterns(patterns.clone()).actions(vec![MessageActionBuilder::new("uuid", "message").build().into()]).build(),
+        ContextConfigBuilder::new(Uuid::new_v4(), condition.clone()).patterns(patterns.clone()).actions(vec![MessageActionBuilder::new("uuid", "message").build().into()]).build(),
     ];
     let mut responses = Vec::new();
     let alert_handler = Box::new(MockAlertHandler);

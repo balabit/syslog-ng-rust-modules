@@ -18,7 +18,7 @@ use state::State;
 use self::error::Error;
 use self::renderer_context::RendererContext;
 use super::ExecCondition;
-use handlebars::{Handlebars, Context, Template};
+use handlebars::{Handlebars, Context};
 
 pub use self::builder::MessageActionBuilder;
 
@@ -38,7 +38,7 @@ const MESSAGE: &'static str = "MESSAGE";
 pub struct MessageAction {
     uuid: String,
     name: Option<String>,
-    message: Template,
+    message: String,
     values: Handlebars,
     when: ExecCondition,
     inject_mode: InjectMode,
@@ -51,7 +51,7 @@ impl MessageAction {
     pub fn name(&self) -> Option<&String> {
         self.name.as_ref()
     }
-    pub fn message(&self) -> &Template {
+    pub fn message(&self) -> &String {
         &self.message
     }
     pub fn values(&self) -> &Handlebars {

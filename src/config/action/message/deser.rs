@@ -14,7 +14,6 @@ use handlebars::Template;
 use handlebars::Handlebars;
 use serde::de::{Deserialize, Deserializer, Error, MapVisitor, Visitor};
 use std::collections::BTreeMap;
-use super::MESSAGE;
 
 impl Deserialize for MessageAction {
     fn deserialize<D>(deserializer: &mut D) -> Result<MessageAction, D::Error>
@@ -106,14 +105,14 @@ impl Visitor for MessageActionVisitor {
         };
 
         let message = match message {
-            Some(message) => try!(MessageActionVisitor::compile_template::<V>(message, &uuid)),
+            Some(message) => message,
             None => {
                 error!("Missing 'message' field: uuid={}", &uuid);
                 return visitor.missing_field("message");
             }
         };
 
-        let mut values = match values {
+        let values = match values {
             Some(values) => {
                 let mut registry = Handlebars::new();
                 for (key, value) in values.into_iter() {
@@ -126,8 +125,6 @@ impl Visitor for MessageActionVisitor {
         };
 
         try!(visitor.end());
-
-        values.register_template(MESSAGE, message.clone());
 
         Ok(MessageAction {
             uuid: uuid,
@@ -193,13 +190,11 @@ mod test {
         }
         "#;
 
-        let message = Template::compile("message".to_owned())
-                          .expect("Failed to compile a handlebars template");
         let value1 = Template::compile("value1".to_owned())
                          .expect("Failed to compile a handlebars template");
         let value2 = Template::compile("value2".to_owned())
                          .expect("Failed to compile a handlebars template");
-        let expected_message = MessageActionBuilder::new("UUID", message)
+        let expected_message = MessageActionBuilder::new("UUID", "message")
                                    .name(Some("NAME"))
                                    .pair("key1", value1)
                                    .pair("key2", value2)
@@ -219,9 +214,7 @@ mod test {
         }
         "#;
 
-        let message = Template::compile("message".to_owned())
-                          .expect("Failed to compile a handlebars template");
-        let expected_message = MessageActionBuilder::new("UUID", message).build();
+        let expected_message = MessageActionBuilder::new("UUID", "message").build();
         let result = from_str::<MessageAction>(text);
         let message = result.expect("Failed to deserialize a valid MessageAction object");
         assert_message_action_eq(&expected_message, &message);
@@ -276,9 +269,7 @@ mod test {
         }
         "#;
 
-        let message = Template::compile("message".to_owned())
-                          .expect("Failed to compile a handlebars template");
-        let expected_message = MessageActionBuilder::new("UUID", message)
+        let expected_message = MessageActionBuilder::new("UUID", "message")
                                    .inject_mode(InjectMode::Forward)
                                    .build();
         let result = from_str::<MessageAction>(text);

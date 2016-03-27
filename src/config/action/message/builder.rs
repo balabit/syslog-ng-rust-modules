@@ -10,26 +10,24 @@ use handlebars::Template;
 use handlebars::Handlebars;
 use super::MessageAction;
 use super::InjectMode;
-use super::MESSAGE;
 use config::action::ExecCondition;
 
 pub struct MessageActionBuilder {
     uuid: String,
     name: Option<String>,
-    message: Template,
+    message: String,
     values: Handlebars,
     when: ExecCondition,
     inject_mode: InjectMode,
 }
 
 impl MessageActionBuilder {
-    pub fn new<S: Into<String>>(uuid: S, message: Template) -> MessageActionBuilder {
-        let mut values = Handlebars::new();
-        values.register_template(MESSAGE, message.clone());
+    pub fn new<S: Into<String>>(uuid: S, message: S) -> MessageActionBuilder {
+        let values = Handlebars::new();
         MessageActionBuilder {
             uuid: uuid.into(),
             name: None,
-            message: message,
+            message: message.into(),
             values: values,
             when: ExecCondition::new(),
             inject_mode: Default::default(),
@@ -48,7 +46,6 @@ impl MessageActionBuilder {
 
     pub fn values(mut self, values: Handlebars) -> MessageActionBuilder {
         self.values = values;
-        self.values.register_template(MESSAGE, self.message.clone());
         self
     }
 

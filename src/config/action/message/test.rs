@@ -34,11 +34,7 @@ fn test_given_a_message_action_when_it_is_executed_then_it_adds_the_name_and_uui
         BaseContextBuilder::new(uuid, conditions).name(name.clone()).build()
     };
     let state = State::new();
-    let message_action = {
-        let message = Template::compile("message".to_owned())
-                          .expect("Failed to compile a handlebars template");
-        MessageActionBuilder::new("uuid", message).build()
-    };
+    let message_action = MessageActionBuilder::new("uuid", "message").build();
 
     message_action.on_closed(&state, &base_context, &mut responder);
     assert_eq!(1, responder.0.len());
@@ -75,10 +71,8 @@ fn test_given_message_action_when_it_is_executed_then_it_uses_the_messages_to_re
         State::with_messages(messages)
     };
     let message_action = {
-        let message = Template::compile("key1={{{messages.[0].values.key1}}} \
-                                         key2={{{messages.[1].values.key2}}}"
-                                            .to_owned())
-                          .expect("Failed to compile a handlebars template");
+        let message = "key1={{{messages.[0].values.key1}}} \
+                                         key2={{{messages.[1].values.key2}}}";
         MessageActionBuilder::new("uuid", message)
             .pair("message_num",
                   Template::compile("we have {{context_len}} messages".to_owned())
@@ -119,12 +113,7 @@ fn test_given_message_action_with_templated_values_when_a_render_error_occurres_
                                          .build())];
         State::with_messages(messages)
     };
-    let message_action = {
-        // this will produce the RenderError
-        let message = Template::compile("{{lookup 1}}".to_owned())
-                          .expect("Failed to compile a handlebars template");
-        MessageActionBuilder::new("uuid", message).build()
-    };
-
+    // this will produce the RenderError
+    let message_action =  MessageActionBuilder::new("uuid", "{{lookup 1}}").build();
     message_action.on_closed(&state, &base_context, &mut responder);
 }
