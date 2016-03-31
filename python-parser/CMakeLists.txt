@@ -1,5 +1,4 @@
-set(Python_ADDITIONAL_VERSIONS "3.4")
-find_package(PythonLibs 3.4)
+pkg_check_modules(PYTHONLIBS python3>=3.4)
 
 if (PYTHONLIBS_FOUND)
     option(ENABLE_PYTHON_PARSER "Enable python-parser module" ON)
@@ -8,6 +7,7 @@ else()
 endif()
 
 if (ENABLE_PYTHON_PARSER)
+  pkg_check_modules(PYTHONLIBS python3>=3.4 REQUIRED)
   add_cargo_lib_target(python-parser)
 
   install(FILES ${PYTHON_PARSER_PATH} DESTINATION ${SYSLOG_NG_MODULEDIR})
