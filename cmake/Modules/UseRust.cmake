@@ -1,8 +1,8 @@
 if (CMAKE_BUILD_TYPE STREQUAL "Release")
-  set(CARGO_BUILD ${CARGO_EXECUTABLE} build --release)
+  set(CARGO_BUILD ${CARGO_EXECUTABLE} build --release --verbose)
   set(TARGET_DIR "target/release")
 else()
-  set(CARGO_BUILD ${CARGO_EXECUTABLE} build)
+  set(CARGO_BUILD ${CARGO_EXECUTABLE} build --verbose)
   set(TARGET_DIR "target/debug")
 endif()
 
