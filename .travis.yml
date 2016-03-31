@@ -41,7 +41,6 @@ before_script:
   - git clone https://github.com/balabit/syslog-ng.git
   - cd syslog-ng
   - ./autogen.sh
-  - unset PYTHON_CFLAGS # HACK
   - ./configure --with-ivykis=internal --prefix=$HOME/install/syslog-ng --disable-python
   - make -j install
   - cd ../syslog-ng-rust-modules
