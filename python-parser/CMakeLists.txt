@@ -1,3 +1,4 @@
+set(Python_ADDITIONAL_VERSIONS "3.4")
 find_package(PythonLibs 3.4)
 
 if (PYTHONLIBS_FOUND)
