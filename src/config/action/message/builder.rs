@@ -6,33 +6,30 @@
 // option. All files in the project carrying such notice may not be copied,
 // modified, or distributed except according to those terms.
 
-use handlebars::Template;
-use handlebars::Handlebars;
 use super::MessageAction;
 use super::InjectMode;
-use super::MESSAGE;
 use config::action::ExecCondition;
+
+use std::collections::BTreeMap;
 
 pub struct MessageActionBuilder {
     uuid: String,
     name: Option<String>,
-    message: Template,
-    values: Handlebars,
+    message: String,
+    values: BTreeMap<String, String>,
     when: ExecCondition,
     inject_mode: InjectMode,
 }
 
 impl MessageActionBuilder {
-    pub fn new<S: Into<String>>(uuid: S, message: Template) -> MessageActionBuilder {
-        let mut values = Handlebars::new();
-        values.register_template(MESSAGE, message.clone());
+    pub fn new<S: Into<String>>(uuid: S, message: S) -> MessageActionBuilder {
         MessageActionBuilder {
             uuid: uuid.into(),
             name: None,
-            message: message,
-            values: values,
-            when: ExecCondition::new(),
-            inject_mode: Default::default(),
+            message: message.into(),
+            values: BTreeMap::default(),
+            when: ExecCondition::default(),
+            inject_mode: InjectMode::default(),
         }
     }
 
@@ -46,14 +43,13 @@ impl MessageActionBuilder {
         self
     }
 
-    pub fn values(mut self, values: Handlebars) -> MessageActionBuilder {
+    pub fn values(mut self, values: BTreeMap<String, String>) -> MessageActionBuilder {
         self.values = values;
-        self.values.register_template(MESSAGE, self.message.clone());
         self
     }
 
-    pub fn pair<S: AsRef<str>>(mut self, key: S, value: Template) -> MessageActionBuilder {
-        self.values.register_template(key.as_ref(), value);
+    pub fn pair<S: Into<String>>(mut self, key: S, value: S) -> MessageActionBuilder {
+        self.values.insert(key.into(), value.into());
         self
     }
 

@@ -16,17 +16,19 @@ extern crate env_logger;
 extern crate uuid;
 extern crate serde;
 extern crate serde_json;
+extern crate serde_yaml;
 extern crate rustc_serialize;
-extern crate handlebars;
 #[macro_use]
 extern crate log;
 
 #[macro_use]
 mod macros;
 
+pub use action::Alert;
 pub use conditions::{Conditions, ConditionsBuilder};
 pub use config::action::ActionType;
-pub use dispatcher::Response;
+pub use dispatcher::{Response, ResponseHandle};
+pub use dispatcher::request::Request;
 pub use message::{Message, MessageBuilder};
 pub use context::ContextMap;
 pub use reactor::{EventHandler, SharedData};

@@ -32,7 +32,7 @@ impl serde::de::Deserialize for ActionType {
                     }
                 }
 
-                deserializer.visit(FieldVisitor)
+                deserializer.deserialize(FieldVisitor)
             }
         }
 
@@ -55,7 +55,7 @@ impl serde::de::Deserialize for ActionType {
 
         const VARIANTS: &'static [&'static str] = &["message"];
 
-        deserializer.visit_enum("ActionType", VARIANTS, Visitor)
+        deserializer.deserialize_enum("ActionType", VARIANTS, Visitor)
     }
 }
 
@@ -86,14 +86,14 @@ impl serde::de::Deserialize for ExecCondition {
                             "on_opened" => Ok(Field::OnOpened),
                             "on_closed" => Ok(Field::OnClosed),
                             _ => {
-                                Err(serde::de::Error::syntax(&format!("Unexpected field: {}",
+                                Err(E::custom(format!("Unexpected field: {}",
                                                                       value)))
                             }
                         }
                     }
                 }
 
-                deserializer.visit(FieldVisitor)
+                deserializer.deserialize(FieldVisitor)
             }
         }
 
@@ -119,6 +119,6 @@ impl serde::de::Deserialize for ExecCondition {
                 Ok(condition)
             }
         }
-        deserializer.visit_struct("ExecCondition", &[], ExecConditionVisitor)
+        deserializer.deserialize_struct("ExecCondition", &[], ExecConditionVisitor)
     }
 }

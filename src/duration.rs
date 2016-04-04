@@ -30,7 +30,7 @@ impl de::Visitor for Visitor {
     {
         match FromStr::from_str(s) {
             Ok(value) => Ok(SerializableDuration(Duration::from_millis(value))),
-            Err(error) => Err(E::syntax(error.description())),
+            Err(error) => Err(E::custom(error.description())),
         }
     }
 }
@@ -39,7 +39,7 @@ impl de::Deserialize for SerializableDuration {
     fn deserialize<D>(deserializer: &mut D) -> Result<SerializableDuration, D::Error>
         where D: de::Deserializer
     {
-        deserializer.visit_str(Visitor)
+        deserializer.deserialize_str(Visitor)
     }
 }
 

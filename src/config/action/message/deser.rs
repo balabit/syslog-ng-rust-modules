@@ -10,17 +10,14 @@ use super::MessageAction;
 use super::InjectMode;
 use config::action::ExecCondition;
 
-use handlebars::Template;
-use handlebars::Handlebars;
 use serde::de::{Deserialize, Deserializer, Error, MapVisitor, Visitor};
 use std::collections::BTreeMap;
-use super::MESSAGE;
 
 impl Deserialize for MessageAction {
     fn deserialize<D>(deserializer: &mut D) -> Result<MessageAction, D::Error>
         where D: Deserializer
     {
-        deserializer.visit_struct("MessageAction", &[], MessageActionVisitor)
+        deserializer.deserialize_struct("MessageAction", &[], MessageActionVisitor)
     }
 }
 
@@ -52,29 +49,16 @@ impl Deserialize for Field {
                     "message" => Ok(Field::Message),
                     "when" => Ok(Field::When),
                     "inject_mode" => Ok(Field::InjectMode),
-                    _ => Err(Error::syntax(&format!("Unexpected field: {}", value))),
+                    _ => Err(Error::custom(format!("Unexpected field: {}", value))),
                 }
             }
         }
 
-        deserializer.visit(FieldVisitor)
+        deserializer.deserialize(FieldVisitor)
     }
 }
 
 struct MessageActionVisitor;
-
-impl MessageActionVisitor {
-    fn compile_template<V>(template_string: String, uuid: &str) -> Result<Template, V::Error>
-        where V: MapVisitor
-    {
-        Template::compile(template_string).map_err(|error| {
-            Error::syntax(&format!("Invalid handlebars template in 'message' field: \
-                                        uuid={}, error={}",
-                                       uuid,
-                                       error))
-        })
-    }
-}
 
 impl Visitor for MessageActionVisitor {
     type Value = MessageAction;
@@ -106,34 +90,20 @@ impl Visitor for MessageActionVisitor {
         };
 
         let message = match message {
-            Some(message) => try!(MessageActionVisitor::compile_template::<V>(message, &uuid)),
+            Some(message) => message,
             None => {
                 error!("Missing 'message' field: uuid={}", &uuid);
                 return visitor.missing_field("message");
             }
         };
 
-        let mut values = match values {
-            Some(values) => {
-                let mut registry = Handlebars::new();
-                for (key, value) in values.into_iter() {
-                    let template = try!(MessageActionVisitor::compile_template::<V>(value, &uuid));
-                    registry.register_template(&key, template);
-                }
-                registry
-            }
-            None => Handlebars::new(),
-        };
-
         try!(visitor.end());
-
-        values.register_template(MESSAGE, message.clone());
 
         Ok(MessageAction {
             uuid: uuid,
             message: message,
             name: name,
-            values: values,
+            values: values.unwrap_or_default(),
             when: when,
             inject_mode: inject_mode,
         })
@@ -156,12 +126,12 @@ impl Deserialize for InjectMode {
                     "log" => Ok(InjectMode::Log),
                     "loopback" => Ok(InjectMode::Loopback),
                     "forward" => Ok(InjectMode::Forward),
-                    _ => Err(Error::syntax(&format!("Unexpected field: {}", value))),
+                    _ => Err(E::custom(format!("Unexpected field: {}", value))),
                 }
             }
         }
 
-        deserializer.visit(FieldVisitor)
+        deserializer.deserialize(FieldVisitor)
     }
 }
 
@@ -169,7 +139,6 @@ impl Deserialize for InjectMode {
 mod test {
     use config::action::message::{MessageActionBuilder, MessageAction, InjectMode};
 
-    use handlebars::Template;
     use serde_json::from_str;
 
     fn assert_message_action_eq(expected: &MessageAction, actual: &MessageAction) {
@@ -193,16 +162,10 @@ mod test {
         }
         "#;
 
-        let message = Template::compile("message".to_owned())
-                          .expect("Failed to compile a handlebars template");
-        let value1 = Template::compile("value1".to_owned())
-                         .expect("Failed to compile a handlebars template");
-        let value2 = Template::compile("value2".to_owned())
-                         .expect("Failed to compile a handlebars template");
-        let expected_message = MessageActionBuilder::new("UUID", message)
+        let expected_message = MessageActionBuilder::new("UUID", "message")
                                    .name(Some("NAME"))
-                                   .pair("key1", value1)
-                                   .pair("key2", value2)
+                                   .pair("key1", "value1")
+                                   .pair("key2", "value2")
                                    .build();
         let result = from_str::<MessageAction>(text);
         let message = result.expect("Failed to deserialize a valid MessageAction object");
@@ -219,9 +182,7 @@ mod test {
         }
         "#;
 
-        let message = Template::compile("message".to_owned())
-                          .expect("Failed to compile a handlebars template");
-        let expected_message = MessageActionBuilder::new("UUID", message).build();
+        let expected_message = MessageActionBuilder::new("UUID", "message").build();
         let result = from_str::<MessageAction>(text);
         let message = result.expect("Failed to deserialize a valid MessageAction object");
         assert_message_action_eq(&expected_message, &message);
@@ -276,9 +237,7 @@ mod test {
         }
         "#;
 
-        let message = Template::compile("message".to_owned())
-                          .expect("Failed to compile a handlebars template");
-        let expected_message = MessageActionBuilder::new("UUID", message)
+        let expected_message = MessageActionBuilder::new("UUID", "message")
                                    .inject_mode(InjectMode::Forward)
                                    .build();
         let result = from_str::<MessageAction>(text);
@@ -289,13 +248,6 @@ mod test {
     #[test]
     fn test_given_message_is_deserialized_when_it_contains_an_unexpected_field_then_an_error_is_returned() {
         let text = r#"{ "unexpected": "UUID" }"#;
-        let result = from_str::<MessageAction>(text);
-        let _ = result.err().unwrap();
-    }
-
-    #[test]
-    fn test_given_message_with_invalid_message_template_when_it_is_deserialized_then_an_error_is_returned() {
-        let text = r#"{ "uuid": "INVALID_MSG", "message": "{invalid}}" }"#;
         let result = from_str::<MessageAction>(text);
         let _ = result.err().unwrap();
     }

@@ -17,7 +17,7 @@ impl Deserialize for ContextConfig {
     fn deserialize<D>(deserializer: &mut D) -> Result<ContextConfig, D::Error>
         where D: Deserializer
     {
-        deserializer.visit_struct("Context", FIELDS, ContextVisitor)
+        deserializer.deserialize_struct("Context", FIELDS, ContextVisitor)
     }
 }
 
@@ -49,12 +49,12 @@ impl Deserialize for Field {
                     "context_id" => Ok(Field::ContextId),
                     "actions" => Ok(Field::Actions),
                     "patterns" => Ok(Field::Patterns),
-                    _ => Err(Error::syntax(&format!("Unexpected field: {}", value))),
+                    _ => Err(Error::custom(format!("Unexpected field: {}", value))),
                 }
             }
         }
 
-        deserializer.visit(FieldVisitor)
+        deserializer.deserialize(FieldVisitor)
     }
 }
 
@@ -69,7 +69,7 @@ impl ContextVisitor {
                 match Uuid::parse_str(&value) {
                     Ok(uuid) => Ok(uuid),
                     Err(err) => {
-                        Err(Error::syntax(&format!("Failed to parse field 'uuid': uuid={} \
+                        Err(Error::custom(format!("Failed to parse field 'uuid': uuid={} \
                                                     error={}",
                                                    value,
                                                    err)))
@@ -127,7 +127,6 @@ mod test {
     use config::action::message::MessageActionBuilder;
     use conditions::ConditionsBuilder;
     use config::ContextConfig;
-    use handlebars::Template;
     use serde_json::from_str;
     use uuid::Uuid;
     use std::time::Duration;
@@ -168,14 +167,12 @@ mod test {
         let expected_conditions = ConditionsBuilder::new(Duration::from_millis(100))
                                       .first_opens(true)
                                       .build();
-        let message = Template::compile("message".to_owned())
-                          .expect("Failed to compile a handlebars template");
         let expected_exec_cond = ExecCondition {
             on_opened: false,
             on_closed: true,
         };
         let expected_actions = vec![ActionType::Message(MessageActionBuilder::new("uuid1",
-                                                                                  message)
+                                                                                  "message")
                                                             .when(expected_exec_cond)
                                                             .build())];
         let context = result.expect("Failed to deserialize a valid ContextConfig");

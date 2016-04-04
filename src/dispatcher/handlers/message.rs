@@ -10,13 +10,8 @@ use dispatcher::request::{Request, RequestHandle};
 use context::context_map::StreamingIterator;
 use reactor::{EventHandler, SharedData};
 
+#[derive(Default)]
 pub struct MessageEventHandler;
-
-impl MessageEventHandler {
-    pub fn new() -> MessageEventHandler {
-        MessageEventHandler
-    }
-}
 
 impl<'a> EventHandler<Request, SharedData<'a>> for MessageEventHandler {
     fn handle_event(&mut self, event: Request, data: &mut SharedData) {

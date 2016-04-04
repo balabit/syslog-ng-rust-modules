@@ -11,6 +11,7 @@ use std::collections::HashMap;
 use config::ContextConfig;
 use context::Context;
 
+#[derive(Default)]
 pub struct ContextMap {
     map: HashMap<String, Vec<usize>>,
     contexts: Vec<Context>,
@@ -18,10 +19,7 @@ pub struct ContextMap {
 
 impl ContextMap {
     pub fn new() -> ContextMap {
-        ContextMap {
-            map: HashMap::new(),
-            contexts: Vec::new(),
-        }
+        ContextMap::default()
     }
 
     pub fn from_configs(configs: Vec<ContextConfig>) -> ContextMap {

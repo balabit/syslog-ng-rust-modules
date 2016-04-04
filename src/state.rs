@@ -20,9 +20,15 @@ pub struct State {
     opened: bool,
 }
 
+impl Default for State {
+    fn default() -> State {
+        State::with_messages(Vec::new())
+    }
+}
+
 impl State {
     pub fn new() -> State {
-        State::with_messages(Vec::new())
+        State::default()
     }
 
     pub fn with_messages(messages: Vec<Arc<Message>>) -> State {

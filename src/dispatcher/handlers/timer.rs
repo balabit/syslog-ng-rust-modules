@@ -9,13 +9,8 @@
 use dispatcher::request::{Request, RequestHandle};
 use reactor::{EventHandler, SharedData};
 
+#[derive(Default)]
 pub struct TimerEventHandler;
-
-impl TimerEventHandler {
-    pub fn new() -> TimerEventHandler {
-        TimerEventHandler
-    }
-}
 
 impl<'a> EventHandler<Request, SharedData<'a>> for TimerEventHandler {
     fn handle_event(&mut self, event: Request, data: &mut SharedData) {
