@@ -38,5 +38,5 @@ fn test_alert_is_forwarded() {
     for i in alert.values() {
         println!("{:?}", i);
     }
-    assert_eq!("Number of generated logs: 2", alert.get("MESSAGE"));
+    assert_eq!("artificial test message", alert.get("MESSAGE"));
 }

@@ -14,7 +14,7 @@
                   "uuid": "4bbd15c4-ec44-47a2-ada3-f7fe3ff81222",
                   "inject_mode": "forward",
                   "name": "GEN_LOGS",
-                  "message": "Number of generated logs: {{context_len}}"
+                  "message": "artificial test message"
               }
             }
         ]

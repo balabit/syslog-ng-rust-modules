@@ -34,6 +34,7 @@ impl<P> AlertHandler<P> for MessageSender where P: Pipe {
                 for (k, v) in message.values().iter() {
                     logmsg.insert(k.borrow(), v.borrow());
                 }
+                logmsg.insert("MESSAGE", message.message());
                 parent.forward(logmsg);
             },
             InjectMode::Loopback => {
