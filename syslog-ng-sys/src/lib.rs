@@ -9,6 +9,7 @@
 extern crate libc;
 #[macro_use]
 extern crate log;
+extern crate glib_sys;
 
 pub mod types;
 pub mod logmsg;
