@@ -12,7 +12,7 @@ log = "0.3"
 env_logger = "0.3"
 
 [dependencies.correlation]
-path = "../correlation"
+path = "correlation"
 
 [dependencies.syslog-ng-common]
 path = "../syslog-ng-rs/syslog-ng-common/"
