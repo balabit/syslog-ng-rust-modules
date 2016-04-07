@@ -24,6 +24,7 @@ pub mod sys;
 mod logparser;
 mod logpipe;
 pub mod mock;
+pub mod logtemplate;
 
 pub use syslog_ng_sys::{c_int, c_char, ssize_t};
 pub use logparser::LogParser;
