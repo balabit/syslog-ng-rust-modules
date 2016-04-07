@@ -17,11 +17,13 @@ use config::ContextConfig;
 use ContextMap;
 use super::Correlator;
 use super::Error;
+use Event;
 
 pub struct CorrelatorFactory;
 
 impl CorrelatorFactory {
-    pub fn from_path<T, P: AsRef<Path>>(path: P) -> Result<Correlator<T>, Error> {
+    pub fn from_path<T, P, E>(path: P) -> Result<Correlator<T, E>, Error> 
+        where P: AsRef<Path>, E: Event {
         let contexts = try!(CorrelatorFactory::load_file(path));
         Ok(Correlator::new(ContextMap::from_configs(contexts)))
     }

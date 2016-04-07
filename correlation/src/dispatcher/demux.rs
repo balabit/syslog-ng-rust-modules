@@ -10,6 +10,7 @@ use std::sync::mpsc::Receiver;
 
 use dispatcher::request::Request;
 use reactor::EventDemultiplexer;
+use Event;
 
 pub struct Demultiplexer<T> {
     channel: Receiver<T>,
@@ -25,8 +26,8 @@ impl<T> Demultiplexer<T> {
     }
 }
 
-impl EventDemultiplexer for Demultiplexer<Request> {
-    type Event = Request;
+impl<E: Event> EventDemultiplexer for Demultiplexer<Request<E>> {
+    type Event = Request<E>;
     fn select(&mut self) -> Option<Self::Event> {
         let data = self.channel.recv().ok();
 

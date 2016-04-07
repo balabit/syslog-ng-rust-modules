@@ -8,13 +8,14 @@
 
 use std::sync::Arc;
 
-use message::Message;
 use reactor;
 use timer::TimerEvent;
+use Event;
+
 
 #[derive(Clone, Debug)]
-pub enum Request {
-    Message(Arc<Message>),
+pub enum Request<E: Event> {
+    Message(Arc<E>),
     Timer(TimerEvent),
     Exit,
 }
@@ -26,7 +27,7 @@ pub enum RequestHandle {
     Exit,
 }
 
-impl reactor::Event for Request {
+impl<E: Event> reactor::Event for Request<E> {
     type Handle = RequestHandle;
     fn handle(&self) -> Self::Handle {
         match *self {

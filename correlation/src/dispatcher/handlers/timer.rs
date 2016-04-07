@@ -8,12 +8,13 @@
 
 use dispatcher::request::{Request, RequestHandle};
 use reactor::{EventHandler, SharedData};
+use Event;
 
 #[derive(Default)]
 pub struct TimerEventHandler;
 
-impl<'a> EventHandler<Request, SharedData<'a>> for TimerEventHandler {
-    fn handle_event(&mut self, event: Request, data: &mut SharedData) {
+impl<'a, E: Event> EventHandler<Request<E>, SharedData<'a, E>> for TimerEventHandler {
+    fn handle_event(&mut self, event: Request<E>, data: &mut SharedData<E>) {
         for i in data.map.contexts_mut() {
             i.on_event(event.clone(), data.responder);
         }

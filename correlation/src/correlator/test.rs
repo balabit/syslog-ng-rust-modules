@@ -13,6 +13,7 @@ use correlator::Correlator;
 use context::ContextMap;
 use message::MessageBuilder;
 use action::Alert;
+use Message;
 
 use uuid::Uuid;
 use serde_json::from_str;
@@ -112,7 +113,7 @@ fn test_given_manually_built_correlator_when_it_closes_a_context_then_the_action
     ];
     let mut responses = Vec::new();
     let alert_handler = Box::new(MockAlertHandler);
-    let mut correlator: Correlator<Vec<Alert>> = Correlator::new(ContextMap::from_configs(contexts));
+    let mut correlator: Correlator<Vec<Alert>, Message> = Correlator::new(ContextMap::from_configs(contexts));
     correlator.set_alert_handler(Some(alert_handler));
     correlator.handle_events(&mut responses);
     let _ = correlator.push_message(MessageBuilder::new(&uuid1, "message").build());
@@ -150,7 +151,7 @@ fn test_given_correlator_when_it_is_built_from_json_then_it_produces_the_expecte
     let contexts = result.expect("Failed to deserialize a config::ContextConfig from JSON");
     let mut responses = Vec::new();
     let alert_handler = Box::new(MockAlertHandler);
-    let mut correlator: Correlator<Vec<Alert>> = Correlator::new(ContextMap::from_configs(contexts));
+    let mut correlator: Correlator<Vec<Alert>, Message> = Correlator::new(ContextMap::from_configs(contexts));
     correlator.set_alert_handler(Some(alert_handler));
     correlator.handle_events(&mut responses);
     let _ = correlator.push_message(MessageBuilder::new(&uuid1, "message")

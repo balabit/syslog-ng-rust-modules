@@ -8,7 +8,7 @@
 
 use correlation::Alert;
 use correlation::correlator::{Correlator, CorrelatorFactory, Error};
-use correlation::MessageBuilder;
+use correlation::{MessageBuilder, Message};
 use correlation::test_utils::MockAlertHandler;
 
 use env_logger;
@@ -19,7 +19,7 @@ fn test_given_correlator_when_messages_are_received_then_they_are_grouped_into_a
     let _ = env_logger::init();
     let contexts_file = "tests/correlator/contexts.json";
     let mut responses = Vec::new();
-    let mut correlator: Correlator<Vec<Alert>> = CorrelatorFactory::from_path(contexts_file)
+    let mut correlator: Correlator<Vec<Alert>, Message> = CorrelatorFactory::from_path(contexts_file)
                              .ok()
                              .expect("Failed to load contexts from a valid contexts_file");
     let login_message = MessageBuilder::new("6d2cba0c-e241-464a-89c3-8035cac8f73e", "message")
@@ -47,7 +47,7 @@ fn test_given_correlator_when_messages_are_received_then_they_are_grouped_into_a
 fn test_given_correlator_factory_when_the_config_file_does_not_exist_then_it_returns_io_error() {
     let _ = env_logger::init();
     let contexts_file = "not_existing_file.json";
-    let result: Result<Correlator<()>, Error> = CorrelatorFactory::from_path(contexts_file);
+    let result: Result<Correlator<(), Message>, Error> = CorrelatorFactory::from_path(contexts_file);
     if let Error::Io(_) = result.err().unwrap() {
     } else {
         unreachable!();
@@ -58,7 +58,7 @@ fn test_given_correlator_factory_when_the_config_file_does_not_exist_then_it_ret
 fn test_given_correlator_factory_when_it_reads_an_invalid_config_then_it_returns_deser_error() {
     let _ = env_logger::init();
     let contexts_file = "tests/correlator/invalid.json";
-    let result: Result<Correlator<()>, _> = CorrelatorFactory::from_path(contexts_file);
+    let result: Result<Correlator<(), Message>, _> = CorrelatorFactory::from_path(contexts_file);
     if let Error::SerdeJson(_) = result.err().unwrap() {
     } else {
         unreachable!();

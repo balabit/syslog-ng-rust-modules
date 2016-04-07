@@ -13,20 +13,21 @@ use dispatcher::demux::Demultiplexer;
 use dispatcher::request::{RequestHandle, Request};
 use reactor::{Event, EventDemultiplexer, EventHandler, Reactor, SharedData};
 use dispatcher::response::ResponseSender;
+use Event as MsgEvent;
 
 #[allow(type_complexity)]
-pub struct RequestReactor {
-    handlers: BTreeMap<RequestHandle, Box<for<'a> EventHandler<Request, SharedData<'a>>>>,
-    demultiplexer: Demultiplexer<Request>,
-    pub context_map: ContextMap,
+pub struct RequestReactor<E: MsgEvent> {
+    handlers: BTreeMap<RequestHandle, Box<for<'a> EventHandler<Request<E>, SharedData<'a, E>>>>,
+    demultiplexer: Demultiplexer<Request<E>>,
+    pub context_map: ContextMap<E>,
     responder: Box<ResponseSender>,
 }
 
-impl RequestReactor {
-    pub fn new(demultiplexer: Demultiplexer<Request>,
-               context_map: ContextMap,
+impl<E: MsgEvent> RequestReactor<E> {
+    pub fn new(demultiplexer: Demultiplexer<Request<E>>,
+               context_map: ContextMap<E>,
                responder: Box<ResponseSender>)
-               -> RequestReactor {
+               -> RequestReactor<E> {
         RequestReactor {
             demultiplexer: demultiplexer,
             context_map: context_map,
@@ -36,8 +37,8 @@ impl RequestReactor {
     }
 }
 
-impl Reactor for RequestReactor {
-    type Event = Request;
+impl<E: MsgEvent> Reactor<E> for RequestReactor<E> {
+    type Event = Request<E>;
     fn handle_events(&mut self) {
         let mut shared_data = SharedData::new(&mut self.context_map, &mut *self.responder);
         while let Some(request) = self.demultiplexer.select() {
@@ -50,7 +51,7 @@ impl Reactor for RequestReactor {
         }
     }
     fn register_handler(&mut self,
-                        handler: Box<for<'a> EventHandler<Self::Event, SharedData<'a>>>) {
+                        handler: Box<for<'a> EventHandler<Self::Event, SharedData<'a, E>>>) {
         self.handlers.insert(handler.handle(), handler);
     }
     fn remove_handler_by_handle(&mut self, handler: &RequestHandle) {

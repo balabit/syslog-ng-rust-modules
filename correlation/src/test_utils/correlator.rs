@@ -11,11 +11,12 @@ use std::sync::mpsc::Sender;
 use dispatcher::request::Request;
 use action::Alert;
 use correlator::AlertHandler;
+use Event;
 
 pub struct MockAlertHandler;
 
-impl AlertHandler<Vec<Alert>> for MockAlertHandler {
-    fn on_alert(&mut self, alert: Alert, _: &mut Sender<Request>, extra_data: &mut Vec<Alert>) {
+impl<E: Event> AlertHandler<Vec<Alert>, E> for MockAlertHandler {
+    fn on_alert(&mut self, alert: Alert, _: &mut Sender<Request<E>>, extra_data: &mut Vec<Alert>) {
         extra_data.push(alert);
     }
 }

@@ -15,8 +15,8 @@ use conditions::Conditions;
 use state::State;
 use dispatcher::response::ResponseSender;
 use action::Action;
-use message::Message;
 use timer::TimerEvent;
+use Event;
 
 pub struct BaseContext {
     name: Option<String>,
@@ -39,55 +39,55 @@ impl BaseContext {
         &self.actions
     }
 
-    pub fn is_opening(&self, message: &Message) -> bool {
+    pub fn is_opening<E: Event>(&self, message: &E) -> bool {
         if self.conditions.first_opens {
-            self.patterns.first().iter().any(|first| message.ids().any(|id| &id == first))
+            self.patterns.first().iter().any(|first| message.ids().into_iter().any(|id| &id == first))
         } else {
             true
         }
     }
 
-    pub fn is_closing(&self, state: &State) -> bool {
+    pub fn is_closing<E: Event>(&self, state: &State<E>) -> bool {
         trace!("Conditions: shoud we close this context?");
         state.is_open() && self.is_closing_condition_met(state)
     }
 
-    fn is_closing_condition_met(&self, state: &State) -> bool {
+    fn is_closing_condition_met<E: Event>(&self, state: &State<E>) -> bool {
         self.is_max_size_reached(state) || self.is_closing_message(state) ||
         self.is_any_timer_expired(state)
     }
 
-    fn is_max_size_reached(&self, state: &State) -> bool {
+    fn is_max_size_reached<E: Event>(&self, state: &State<E>) -> bool {
         self.conditions.max_size.map_or(false, |max_size| state.messages().len() >= max_size)
     }
 
-    fn is_closing_message(&self, state: &State) -> bool {
+    fn is_closing_message<E: Event>(&self, state: &State<E>) -> bool {
         if self.conditions.last_closes {
             state.messages().last().iter().any(|last_message| {
-                self.patterns.last().iter().any(|last| last_message.ids().any(|id| &id == last))
+                self.patterns.last().iter().any(|last| last_message.ids().into_iter().any(|id| &id == last))
             })
         } else {
             false
         }
     }
 
-    fn is_any_timer_expired(&self, state: &State) -> bool {
+    fn is_any_timer_expired<E: Event>(&self, state: &State<E>) -> bool {
         self.is_timeout_expired(state) || self.is_renew_timeout_expired(state)
     }
 
-    fn is_timeout_expired(&self, state: &State) -> bool {
+    fn is_timeout_expired<E: Event>(&self, state: &State<E>) -> bool {
         state.elapsed_time() >= self.conditions.timeout
     }
 
-    fn is_renew_timeout_expired(&self, state: &State) -> bool {
+    fn is_renew_timeout_expired<E: Event>(&self, state: &State<E>) -> bool {
         self.conditions.renew_timeout.map_or(false, |renew_timeout| {
             state.elapsed_time_since_last_message() >= renew_timeout
         })
     }
 
-    pub fn on_timer(&self,
+    pub fn on_timer<E: Event>(&self,
                     event: &TimerEvent,
-                    state: &mut State,
+                    state: &mut State<E>,
                     responder: &mut ResponseSender) {
         if state.is_open() {
             state.update_timers(event);
@@ -97,13 +97,13 @@ impl BaseContext {
         }
     }
 
-    pub fn on_message(&self,
-                      event: Arc<Message>,
-                      state: &mut State,
+    pub fn on_message<E: Event>(&self,
+                      event: Arc<E>,
+                      state: &mut State<E>,
                       responder: &mut ResponseSender) {
         if state.is_open() {
             state.add_message(event);
-        } else if self.is_opening(&event) {
+        } else if self.is_opening(&*event) {
             state.add_message(event);
             self.open(state, responder);
         }
@@ -113,7 +113,7 @@ impl BaseContext {
         }
     }
 
-    fn open(&self, state: &mut State, responder: &mut ResponseSender) {
+    fn open<E: Event>(&self, state: &mut State<E>, responder: &mut ResponseSender) {
         trace!("Context: opening state; uuid={}", self.uuid());
         for i in self.actions() {
             i.on_opened(state, self, responder);
@@ -121,7 +121,7 @@ impl BaseContext {
         state.open();
     }
 
-    fn close(&self, state: &mut State, responder: &mut ResponseSender) {
+    fn close<E: Event>(&self, state: &mut State<E>, responder: &mut ResponseSender) {
         trace!("Context: closing state; uuid={}", self.uuid());
         for i in self.actions() {
             i.on_closed(state, self, responder);

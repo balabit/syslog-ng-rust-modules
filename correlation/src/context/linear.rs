@@ -9,27 +9,27 @@
 use uuid::Uuid;
 use std::sync::Arc;
 
-use message::Message;
 use state::State;
 use timer::TimerEvent;
 use dispatcher::request::Request;
 use dispatcher::response::ResponseSender;
 use context::base::BaseContext;
+use Event;
 
-pub struct LinearContext {
+pub struct LinearContext<E: Event> {
     base: BaseContext,
-    state: State,
+    state: State<E>,
 }
 
-impl LinearContext {
-    pub fn new(base: BaseContext) -> LinearContext {
+impl<E: Event> LinearContext<E> {
+    pub fn new(base: BaseContext) -> LinearContext<E> {
         LinearContext {
             base: base,
             state: State::new(),
         }
     }
 
-    pub fn on_event(&mut self, event: Request, responder: &mut ResponseSender) {
+    pub fn on_event(&mut self, event: Request<E>, responder: &mut ResponseSender) {
         trace!("LinearContext: received event");
         match event {
             Request::Timer(event) => self.on_timer(&event, responder),
@@ -42,7 +42,7 @@ impl LinearContext {
         self.base.on_timer(event, &mut self.state, responder);
     }
 
-    pub fn on_message(&mut self, event: Arc<Message>, responder: &mut ResponseSender) {
+    pub fn on_message(&mut self, event: Arc<E>, responder: &mut ResponseSender) {
         self.base.on_message(event, &mut self.state, responder);
     }
 

@@ -14,7 +14,7 @@ extern crate uuid;
 use correlation::correlator::Correlator;
 use correlation::config::ContextConfigBuilder;
 use correlation::ConditionsBuilder;
-use correlation::MessageBuilder;
+use correlation::{MessageBuilder, Message};
 use correlation::ContextMap;
 use uuid::Uuid;
 use std::thread;
@@ -40,7 +40,7 @@ fn main() {
         ContextConfigBuilder::new(Uuid::new_v4(), condition.clone()).patterns(patterns.clone()).actions(Vec::new()).build(),
     ];
     let mut external_handler_data = ();
-    let mut correlator: Correlator<()> = Correlator::new(ContextMap::from_configs(contexts));
+    let mut correlator: Correlator<(), Message> = Correlator::new(ContextMap::from_configs(contexts));
     let _ = correlator.push_message(MessageBuilder::new(&uuid1, "message").build());
     thread::sleep(Duration::from_millis(20));
     let _ = correlator.push_message(MessageBuilder::new(&uuid2, "message").build());

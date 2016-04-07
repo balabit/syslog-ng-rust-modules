@@ -9,12 +9,13 @@
 use dispatcher::request::{Request, RequestHandle};
 use context::context_map::StreamingIterator;
 use reactor::{EventHandler, SharedData};
+use Event;
 
 #[derive(Default)]
 pub struct MessageEventHandler;
 
-impl<'a> EventHandler<Request, SharedData<'a>> for MessageEventHandler {
-    fn handle_event(&mut self, event: Request, data: &mut SharedData) {
+impl<'a, E: Event> EventHandler<Request<E>, SharedData<'a, E>> for MessageEventHandler {
+    fn handle_event(&mut self, event: Request<E>, data: &mut SharedData<E>) {
         trace!("MessageEventHandler: handle_event()");
         if let Request::Message(event) = event {
             for i in event.ids() {

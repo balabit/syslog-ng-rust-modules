@@ -9,6 +9,7 @@
 use std::sync::mpsc;
 use std::thread;
 use std::time::Duration;
+use Event;
 
 use dispatcher::request::Request;
 
@@ -25,7 +26,7 @@ impl TimerEvent {
 pub struct Timer;
 
 impl Timer {
-    pub fn from_chan(duration: Duration, tx: mpsc::Sender<Request>) {
+    pub fn from_chan<E: 'static + Event>(duration: Duration, tx: mpsc::Sender<Request<E>>) {
         thread::spawn(move || {
             while let Ok(_) = tx.send(Request::Timer(TimerEvent(duration))) {
                 thread::sleep(duration);

@@ -9,23 +9,23 @@
 use std::collections::BTreeMap;
 use std::sync::Arc;
 
-use message::Message;
 use state::State;
 use timer::TimerEvent;
 use context::base::BaseContext;
 use dispatcher::request::Request;
 use dispatcher::response::ResponseSender;
+use Event;
 
 pub type ContextKey = Vec<(String, String)>;
 
-pub struct MapContext {
+pub struct MapContext<E: Event> {
     base: BaseContext,
-    map: BTreeMap<ContextKey, State>,
+    map: BTreeMap<ContextKey, State<E>>,
     context_id: Vec<String>,
 }
 
-impl MapContext {
-    pub fn new(base: BaseContext, context_id: Vec<String>) -> MapContext {
+impl<E: Event> MapContext<E> {
+    pub fn new(base: BaseContext, context_id: Vec<String>) -> MapContext<E> {
         MapContext {
             base: base,
             map: BTreeMap::new(),
@@ -33,7 +33,7 @@ impl MapContext {
         }
     }
 
-    pub fn on_event(&mut self, event: Request, responder: &mut ResponseSender) {
+    pub fn on_event(&mut self, event: Request<E>, responder: &mut ResponseSender) {
         trace!("MapContext: received event");
         match event {
             Request::Timer(event) => self.on_timer(&event, responder),
@@ -69,12 +69,12 @@ impl MapContext {
         }
     }
 
-    pub fn on_message(&mut self, event: Arc<Message>, responder: &mut ResponseSender) {
+    pub fn on_message(&mut self, event: Arc<E>, responder: &mut ResponseSender) {
         self.update_state(event, responder);
         self.remove_closed_states();
     }
 
-    fn update_state(&mut self, event: Arc<Message>, responder: &mut ResponseSender) {
+    fn update_state(&mut self, event: Arc<E>, responder: &mut ResponseSender) {
         let key: ContextKey = self.context_id.iter().map(|key| {
                 (key.to_owned(), event.get(&key).map_or_else(|| "".to_owned(), |value| value.to_owned()))
             }).collect();

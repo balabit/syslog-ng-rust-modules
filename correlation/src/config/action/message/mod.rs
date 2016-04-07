@@ -11,6 +11,7 @@ use context::base::BaseContext;
 use dispatcher::Response;
 use dispatcher::response::ResponseSender;
 use message::{Message, MessageBuilder};
+use Event;
 
 use std::collections::BTreeMap;
 use state::State;
@@ -54,7 +55,7 @@ impl MessageAction {
         &self.inject_mode
     }
 
-    fn execute(&self, _state: &State, _context: &BaseContext, responder: &mut ResponseSender) {
+    fn execute<E: Event>(&self, _state: &State<E>, _context: &BaseContext, responder: &mut ResponseSender) {
         let message = MessageBuilder::new(&self.uuid, self.message.clone())
                                     .name(self.name.clone())
                                     .values(self.values.clone())
@@ -92,15 +93,15 @@ pub struct Alert {
     pub inject_mode: InjectMode,
 }
 
-impl Action for MessageAction {
-    fn on_opened(&self, state: &State, context: &BaseContext, responder: &mut ResponseSender) {
+impl<E: Event> Action<E> for MessageAction {
+    fn on_opened(&self, state: &State<E>, context: &BaseContext, responder: &mut ResponseSender) {
         if self.when.on_opened {
             trace!("MessageAction: on_opened()");
             self.execute(state, context, responder);
         }
     }
 
-    fn on_closed(&self, state: &State, context: &BaseContext, responder: &mut ResponseSender) {
+    fn on_closed(&self, state: &State<E>, context: &BaseContext, responder: &mut ResponseSender) {
         if self.when.on_closed {
             trace!("MessageAction: on_closed()");
             self.execute(state, context, responder);
