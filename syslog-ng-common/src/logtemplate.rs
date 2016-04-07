@@ -6,10 +6,12 @@ use LogMessage;
 use GlobalConfig;
 
 use std::ffi::{CString, CStr};
+use std::marker::PhantomData;
 
-pub struct LogTemplate{
+pub struct LogTemplate<'cfg> {
     pub wrapped: *mut sys::LogTemplate,
-    buffer: *mut glib_sys::GString
+    buffer: *mut glib_sys::GString,
+    _marker: PhantomData<&'cfg GlobalConfig>
 }
 
 pub struct LogTemplateOptions(pub *mut sys::LogTemplateOptions);
@@ -19,14 +21,15 @@ pub enum LogTimeZone {
     Send = 1,
 }
 
-impl LogTemplate {
-    pub fn new(cfg: &GlobalConfig) -> LogTemplate {
+impl<'cfg> LogTemplate<'cfg> {
+    fn new(cfg: &'cfg GlobalConfig) -> LogTemplate {
         LogTemplate {
             wrapped: unsafe { sys::log_template_new(cfg.0, ::std::ptr::null()) },
-            buffer: unsafe { glib_sys::g_string_sized_new(128) }
+            buffer: unsafe { glib_sys::g_string_sized_new(128) },
+            _marker: PhantomData
         }
     }
-    pub fn compile(cfg: &GlobalConfig, content: &str) -> Result<LogTemplate, Error> {
+    pub fn compile(cfg: &'cfg GlobalConfig, content: &str) -> Result<LogTemplate<'cfg>, Error> {
         let template = LogTemplate::new(&cfg);
 
         let content = CString::new(content).unwrap();
@@ -54,7 +57,7 @@ impl LogTemplate {
     }
 }
 
-impl Drop for LogTemplate {
+impl<'cfg> Drop for LogTemplate<'cfg> {
     fn drop(&mut self) {
         unsafe { sys::log_template_unref(self.wrapped) };
     }
@@ -92,7 +95,6 @@ mod tests {
             log_msg_registry_init();
             log_template_global_init();
         }
-
         let cfg = GlobalConfig::new(0x0308);
         let template = LogTemplate::compile(&cfg, "${kittens}").ok().unwrap();
         let mut msg = LogMessage::new();
