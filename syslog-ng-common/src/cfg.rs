@@ -9,7 +9,7 @@
 use syslog_ng_sys::cfg;
 use std::ffi::CStr;
 
-pub struct GlobalConfig(*const cfg::GlobalConfig);
+pub struct GlobalConfig(pub *mut cfg::GlobalConfig);
 
 impl GlobalConfig {
     pub fn get_user_version(&self) -> (u8, u8) {
