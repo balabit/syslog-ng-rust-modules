@@ -12,6 +12,11 @@ use std::ffi::CStr;
 pub struct GlobalConfig(pub *mut cfg::GlobalConfig);
 
 impl GlobalConfig {
+    pub fn new(version: i32) -> GlobalConfig {
+        let cfg = unsafe { cfg::cfg_new(version) };
+        GlobalConfig(cfg)
+    }
+
     pub fn get_user_version(&self) -> (u8, u8) {
         let mut version = unsafe { cfg::cfg_get_user_version(self.0) };
 
