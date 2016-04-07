@@ -58,6 +58,40 @@ pub struct EventIds<'a> {
     name: Option<&'a str>
 }
 
+impl<'a> IntoIterator for EventIds<'a> {
+    type Item = &'a str;
+    type IntoIter = EventIdsIterator<'a>;
+
+    fn into_iter(self) -> EventIdsIterator<'a> {
+        EventIdsIterator {
+            ids: self,
+            state: 0
+        }
+    }
+}
+
+pub struct EventIdsIterator<'ids> {
+    ids: EventIds<'ids>,
+    state: u8,
+}
+
+impl<'a> Iterator for EventIdsIterator<'a> {
+    type Item = &'a str;
+    fn next(&mut self) -> Option<Self::Item> {
+        match self.state {
+            0 => {
+                self.state += 1;
+                Some(self.ids.uuid)
+            }
+            1 => {
+                self.state += 1;
+                self.ids.name
+            }
+            _ => None,
+        }
+    }
+}
+
 impl Event for Message {
     fn get(&self, key: &str) -> Option<&str> {
         self.values().get(key).map(|x| x.borrow())
