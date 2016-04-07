@@ -45,3 +45,12 @@ mod reactor;
 mod state;
 mod timer;
 mod duration;
+
+pub trait Event {
+    fn get(&self, key: &str) -> Option<&str>;
+    fn ids(&self) -> &[String];
+}
+
+pub trait Template<E: Event> {
+    fn format(&self, msg: &[E]) -> Result<&str, String>;
+}
