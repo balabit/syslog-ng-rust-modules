@@ -19,7 +19,7 @@ use std::ffi::{CStr, CString};
 mod test;
 
 pub struct NVHandle(logmsg::NVHandle);
-pub struct LogMessage(*mut logmsg::LogMessage);
+pub struct LogMessage(pub *mut logmsg::LogMessage);
 
 impl Drop for LogMessage {
     fn drop(&mut self) {
