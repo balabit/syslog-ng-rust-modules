@@ -12,6 +12,7 @@ extern crate log;
 #[macro_use]
 extern crate syslog_ng_sys;
 extern crate glib;
+extern crate glib_sys;
 
 #[macro_use]
 mod proxies;
