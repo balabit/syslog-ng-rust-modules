@@ -15,4 +15,6 @@ extern "C" {
     pub fn cfg_get_user_version(cfg: *const GlobalConfig) -> c_int;
     pub fn cfg_get_parsed_version(cfg: *const GlobalConfig) -> c_int;
     pub fn cfg_get_filename(cfg: *const GlobalConfig) -> *const c_char;
+    pub fn cfg_new(version: c_int) -> *mut GlobalConfig;
+    pub fn cfg_free(slf: *mut GlobalConfig);
 }
