@@ -48,7 +48,26 @@ mod duration;
 
 pub trait Event {
     fn get(&self, key: &str) -> Option<&str>;
-    fn ids(&self) -> &[String];
+    fn ids(&self) -> EventIds;
+}
+
+use std::borrow::Borrow;
+
+pub struct EventIds<'a> {
+    uuid: &'a str,
+    name: Option<&'a str>
+}
+
+impl Event for Message {
+    fn get(&self, key: &str) -> Option<&str> {
+        self.values().get(key).map(|x| x.borrow())
+    }
+    fn ids(&self) -> EventIds {
+        EventIds {
+            uuid: self.uuid().borrow(),
+            name: self.name().map(|name| name.borrow())
+        }
+    }
 }
 
 pub struct TemplateError(String);
