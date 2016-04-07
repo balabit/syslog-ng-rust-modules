@@ -44,6 +44,12 @@ impl GlobalConfig {
     }
 }
 
+impl Drop for GlobalConfig {
+    fn drop(&mut self) {
+        unsafe { cfg::cfg_free(self.0) };
+    }
+}
+
 fn hex_to_dec(hex: u8) -> u8 {
     let mut dec = 0;
     let mut shifted_hex = hex;
