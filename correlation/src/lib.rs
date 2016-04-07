@@ -51,6 +51,8 @@ pub trait Event {
     fn ids(&self) -> &[String];
 }
 
+pub struct TemplateError(String);
+
 pub trait Template<E: Event> {
-    fn format(&self, msg: &[E]) -> Result<&str, String>;
+    fn format(&self, messages: &[E]) -> Result<&str, TemplateError>;
 }
