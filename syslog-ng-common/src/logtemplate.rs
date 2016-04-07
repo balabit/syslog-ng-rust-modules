@@ -26,8 +26,7 @@ impl LogTemplate {
             buffer: unsafe { glib_sys::g_string_sized_new(128) }
         }
     }
-    pub fn compile(content: &str) -> Result<LogTemplate, Error> {
-        let cfg = GlobalConfig::new(0x0308);
+    pub fn compile(cfg: &GlobalConfig, content: &str) -> Result<LogTemplate, Error> {
         let template = LogTemplate::new(&cfg);
 
         let content = CString::new(content).unwrap();
@@ -77,12 +76,14 @@ mod tests {
 
     #[test]
     fn test_template_can_be_compiled() {
-        let _ = LogTemplate::compile("literal").ok().unwrap();
+        let cfg = GlobalConfig::new(0x0308);
+        let _ = LogTemplate::compile(&cfg, "literal").ok().unwrap();
     }
 
     #[test]
     fn test_invalid_template_cannot_be_compiled() {
-        let _ = LogTemplate::compile("${unbalanced").err().unwrap();
+        let cfg = GlobalConfig::new(0x0308);
+        let _ = LogTemplate::compile(&cfg, "${unbalanced").err().unwrap();
     }
 
     #[test]
@@ -91,7 +92,9 @@ mod tests {
             log_msg_registry_init();
             log_template_global_init();
         }
-        let template = LogTemplate::compile("${kittens}").ok().unwrap();
+
+        let cfg = GlobalConfig::new(0x0308);
+        let template = LogTemplate::compile(&cfg, "${kittens}").ok().unwrap();
         let mut msg = LogMessage::new();
         msg.insert("kittens", "2");
         let formatted_msg = template.format(&msg, None, LogTimeZone::Local, 0, None);
