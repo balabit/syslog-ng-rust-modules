@@ -14,3 +14,8 @@ pub mod logmsg {
     pub use syslog_ng_sys::logmsg::log_msg_registry_init;
     pub use syslog_ng_sys::logmsg::log_msg_registry_deinit;
 }
+
+pub mod logtemplate {
+    pub use syslog_ng_sys::logtemplate::log_template_global_init;
+    pub use syslog_ng_sys::logtemplate::log_template_global_deinit;
+}
