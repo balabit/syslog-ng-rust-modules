@@ -35,3 +35,4 @@ pub use logger::init_logger;
 pub use cfg::GlobalConfig;
 pub use proxies::parser::{OptionError, Parser, ParserBuilder, ParserProxy};
 pub use logpipe::{LogPipe, Pipe};
+pub use logtemplate::{LogTemplate, LogTemplateOptions, LogTimeZone};
