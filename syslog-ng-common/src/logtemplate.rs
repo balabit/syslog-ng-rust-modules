@@ -1,12 +1,17 @@
 use syslog_ng_sys::logtemplate as sys;
 use glib::Error;
+use glib_sys;
 use LogMessage;
 
 use GlobalConfig;
 
-use std::ffi::CString;
+use std::ffi::{CString, CStr};
 
-pub struct LogTemplate(pub *mut sys::LogTemplate);
+pub struct LogTemplate{
+    pub wrapped: *mut sys::LogTemplate,
+    buffer: *mut glib_sys::GString
+}
+
 pub struct LogTemplateOptions(pub *mut sys::LogTemplateOptions);
 
 pub enum LogTimeZone {
@@ -16,9 +21,10 @@ pub enum LogTimeZone {
 
 impl LogTemplate {
     pub fn new(cfg: &GlobalConfig) -> LogTemplate {
-        LogTemplate (
-            unsafe { sys::log_template_new(cfg.0, ::std::ptr::null()) }
-        )
+        LogTemplate {
+            wrapped: unsafe { sys::log_template_new(cfg.0, ::std::ptr::null()) },
+            buffer: unsafe { glib_sys::g_string_sized_new(128) }
+        }
     }
     pub fn compile(content: &str) -> Result<LogTemplate, Error> {
         let cfg = GlobalConfig::new(0x0308);
@@ -26,7 +32,7 @@ impl LogTemplate {
 
         let content = CString::new(content).unwrap();
         let mut error = ::std::ptr::null_mut();
-        let result = unsafe { sys::log_template_compile(template.0, content.as_ptr(), &mut error) };
+        let result = unsafe { sys::log_template_compile(template.wrapped, content.as_ptr(), &mut error) };
         if result != 0 {
             Ok(template)
         } else {
@@ -34,22 +40,24 @@ impl LogTemplate {
         }
     }
 
-    pub fn format(&self, _msg: &LogMessage, _options: Option<&LogTemplateOptions>, _tz: LogTimeZone, _seq_num: i32, _context_id: Option<&str>) -> &str {
-        unimplemented!();
+    pub fn format(&self, msg: &LogMessage, options: Option<&LogTemplateOptions>, tz: LogTimeZone, seq_num: i32, context_id: Option<&str>) -> &str {
+        let options: *const sys::LogTemplateOptions = options.map_or(::std::ptr::null(), |options| options.0);
+        let result = unsafe {
+            if let Some(context_id) = context_id {
+                let context_id = CString::new(context_id).unwrap();
+                sys::log_template_format(self.wrapped, msg.0, options, tz as i32, seq_num, context_id.as_ptr(), self.buffer);
+            } else {
+                sys::log_template_format(self.wrapped, msg.0, options, tz as i32, seq_num, ::std::ptr::null(), self.buffer);
+            }
+            CStr::from_ptr((*self.buffer).str)
+        };
+        result.to_str().unwrap()
     }
-
-   // pub fn log_template_format(slf: *const LogTemplate,
-   //                            lm: *const LogMessage,
-   //                            opts: *const LogTemplateOptions,
-   //                            tz: c_int,
-   //                            seq_num: i32,
-   //                            context_id: *const c_char,
-   //                            result: *mut GString) -> c_void;
 }
 
 impl Drop for LogTemplate {
     fn drop(&mut self) {
-        unsafe { sys::log_template_unref(self.0) };
+        unsafe { sys::log_template_unref(self.wrapped) };
     }
 }
 
