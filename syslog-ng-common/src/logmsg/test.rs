@@ -26,3 +26,11 @@ fn test_given_empty_log_msg_when_values_are_inserted_then_we_can_get_them_back()
     logmsg.insert("qux", "baz");
     assert_eq!(&expected_values, &logmsg.values());
 }
+
+#[test]
+fn test_given_empty_log_msg_when_a_not_inserted_key_is_looked_up_then_get_returns_none() {
+    unsafe { log_msg_registry_init() };
+    let mut logmsg = LogMessage::new();
+    logmsg.insert("foo", "bar");
+    assert_eq!(None, logmsg.get("ham"));
+}
