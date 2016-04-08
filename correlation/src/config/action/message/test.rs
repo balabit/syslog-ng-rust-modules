@@ -20,6 +20,7 @@ use env_logger;
 use std::time::Duration;
 use std::sync::Arc;
 use uuid::Uuid;
+use Event;
 
 #[test]
 fn test_given_message_action_when_it_is_executed_then_the_additional_values_are_inserted_into_the_generated_message

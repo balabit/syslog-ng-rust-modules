@@ -35,10 +35,6 @@ impl Message {
         &self.message
     }
 
-    pub fn get(&self, key: &str) -> Option<&String> {
-        self.values.get(key)
-    }
-
     pub fn values(&self) -> &BTreeMap<String, String> {
         &self.values
     }
