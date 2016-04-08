@@ -46,33 +46,4 @@ impl Message {
     pub fn insert(&mut self, key: &str, value: &str) {
         self.values.insert(key.to_owned(), value.to_owned());
     }
-
-    pub fn ids(&self) -> IdIterator {
-        IdIterator {
-            message: self,
-            state: 0,
-        }
-    }
-}
-
-pub struct IdIterator<'a> {
-    message: &'a Message,
-    state: u8,
-}
-
-impl<'a> Iterator for IdIterator<'a> {
-    type Item = &'a String;
-    fn next(&mut self) -> Option<Self::Item> {
-        match self.state {
-            0 => {
-                self.state += 1;
-                Some(self.message.uuid())
-            }
-            1 => {
-                self.state += 1;
-                self.message.name()
-            }
-            _ => None,
-        }
-    }
 }
