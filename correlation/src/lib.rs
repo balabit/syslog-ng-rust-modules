@@ -92,18 +92,6 @@ impl<'a> Iterator for EventIdsIterator<'a> {
     }
 }
 
-impl Event for Message {
-    fn get(&self, key: &str) -> Option<&str> {
-        self.values().get(key).map(|x| x.borrow())
-    }
-    fn ids(&self) -> EventIds {
-        EventIds {
-            uuid: self.uuid().borrow(),
-            name: self.name().map(|name| name.borrow())
-        }
-    }
-}
-
 pub struct TemplateError(String);
 
 pub trait Template<E: Event> {

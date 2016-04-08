@@ -7,7 +7,10 @@
 // modified, or distributed except according to those terms.
 
 use std::collections::BTreeMap;
+use std::borrow::Borrow;
 
+use Event;
+use EventIds;
 pub use self::builder::MessageBuilder;
 
 mod builder;
@@ -41,5 +44,17 @@ impl Message {
 
     pub fn insert(&mut self, key: &str, value: &str) {
         self.values.insert(key.to_owned(), value.to_owned());
+    }
+}
+
+impl Event for Message {
+    fn get(&self, key: &str) -> Option<&str> {
+        self.values().get(key).map(|x| x.borrow())
+    }
+    fn ids(&self) -> EventIds {
+        EventIds {
+            uuid: self.uuid().borrow(),
+            name: self.name().map(|name| name.borrow())
+        }
     }
 }
