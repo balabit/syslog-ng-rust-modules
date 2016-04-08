@@ -4,7 +4,7 @@ extern crate log;
 extern crate syslog_ng_common;
 extern crate correlation;
 
-use correlation::{Request, ContextMap, MessageBuilder, Alert};
+use correlation::{Request, ContextMap, Alert, Event};
 use correlation::config::action::message::InjectMode;
 use correlation::correlator::{Correlator, AlertHandler, CorrelatorFactory};
 use correlation::config::ContextConfig;
@@ -14,15 +14,18 @@ use std::sync::{mpsc, Arc, Mutex};
 use syslog_ng_common::{MessageFormatter, LogMessage};
 use syslog_ng_common::{Parser, ParserBuilder, OptionError, Pipe};
 
+pub use correlation::Message;
+
 pub mod options;
+pub mod logevent;
 
 pub const CLASSIFIER_UUID: &'static str = ".classifier.uuid";
 pub const CLASSIFIER_CLASS: &'static str = ".classifier.class";
 
 struct MessageSender;
 
-impl<P> AlertHandler<P> for MessageSender where P: Pipe {
-    fn on_alert(&mut self, alert: Alert, reactor_input_channel: &mut mpsc::Sender<Request>, parent: &mut P) {
+impl<P, E: Event> AlertHandler<P, E> for MessageSender where P: Pipe {
+    fn on_alert(&mut self, alert: Alert<E>, reactor_input_channel: &mut mpsc::Sender<Request<E>>, parent: &mut P) {
         match alert.inject_mode {
             InjectMode::Log => {
                 debug!("LOG: {}", alert.message.message());
@@ -31,9 +34,9 @@ impl<P> AlertHandler<P> for MessageSender where P: Pipe {
                 debug!("FORWARD: {}", alert.message.message());
                 let message = alert.message;
                 let mut logmsg = LogMessage::new();
-                for (k, v) in message.values().iter() {
-                    logmsg.insert(k.borrow(), v.borrow());
-                }
+                // for (k, v) in message.values().iter() {
+                //     logmsg.insert(k.borrow(), v.borrow());
+                // }
                 logmsg.insert("MESSAGE", message.message());
                 parent.forward(logmsg);
             },
@@ -47,13 +50,13 @@ impl<P> AlertHandler<P> for MessageSender where P: Pipe {
     }
 }
 
-pub struct CorrelationParserBuilder<P: Pipe> {
+pub struct CorrelationParserBuilder<P, E> where P: Pipe, E: Event {
     contexts: Option<Vec<ContextConfig>>,
     formatter: MessageFormatter,
-    _marker: PhantomData<P>
+    _marker: PhantomData<(P, E)>
 }
 
-impl<P: Pipe> CorrelationParserBuilder<P> {
+impl<P, E> CorrelationParserBuilder<P, E> where P: Pipe, E: Event {
     pub fn set_file(&mut self, path: &str) {
         match CorrelatorFactory::load_file(path) {
             Ok(contexts) => {
@@ -70,8 +73,8 @@ impl<P: Pipe> CorrelationParserBuilder<P> {
     }
 }
 
-impl<P: Pipe> ParserBuilder<P> for CorrelationParserBuilder<P> {
-    type Parser = CorrelationParser<P>;
+impl<P, E> ParserBuilder<P> for CorrelationParserBuilder<P, E> where P: Pipe, E: 'static + Event {
+    type Parser = CorrelationParser<P, E>;
     fn new() -> Self {
         CorrelationParserBuilder {
             contexts: None,
@@ -93,25 +96,25 @@ impl<P: Pipe> ParserBuilder<P> for CorrelationParserBuilder<P> {
         let CorrelationParserBuilder {contexts, formatter, _marker } = self;
         let contexts = try!(contexts.ok_or(OptionError::missing_required_option(options::CONTEXTS_FILE)));
         let map = ContextMap::from_configs(contexts);
-        let mut correlator: Correlator<P> = Correlator::new(map);
+        let mut correlator: Correlator<P, E> = Correlator::new(map);
         correlator.set_alert_handler(Some(Box::new(MessageSender)));
         Ok(CorrelationParser::new(correlator, formatter))
     }
 }
 
-pub struct CorrelationParser<P: Pipe> {
-    correlator: Arc<Mutex<Correlator<P>>>,
+pub struct CorrelationParser<P: Pipe, E: 'static + Event> {
+    correlator: Arc<Mutex<Correlator<P, E>>>,
     formatter: MessageFormatter,
 }
 
-impl<P: Pipe> Clone for CorrelationParser<P> {
-    fn clone(&self) -> CorrelationParser<P> {
+impl<P, E> Clone for CorrelationParser<P, E> where P: Pipe, E: Event {
+    fn clone(&self) -> CorrelationParser<P, E> {
         CorrelationParser { correlator: self.correlator.clone(), formatter: self.formatter.clone() }
     }
 }
 
-impl<P: Pipe> CorrelationParser<P> {
-    pub fn new(correlator: Correlator<P>, formatter: MessageFormatter) -> CorrelationParser<P> {
+impl<P, E> CorrelationParser<P, E> where P: Pipe, E: Event {
+    pub fn new(correlator: Correlator<P, E>, formatter: MessageFormatter) -> CorrelationParser<P, E> {
         CorrelationParser {
             correlator: Arc::new(Mutex::new(correlator)),
             formatter: formatter,
@@ -119,19 +122,19 @@ impl<P: Pipe> CorrelationParser<P> {
     }
 }
 
-impl<P: Pipe> Parser<P> for CorrelationParser<P> {
+impl<P, E> Parser<P> for CorrelationParser<P, E> where P: Pipe, E: Event {
     fn parse(&mut self, parent: &mut P, msg: &mut LogMessage, message: &str) -> bool {
         debug!("CorrelationParser: process()");
         let message = {
-            //let tags = msg.tags();
-            let values = msg.values();
-            debug!("values: {:?}", &values);
-            if let Some(uuid) = values.get(CLASSIFIER_UUID) {
-                let name = match values.get(CLASSIFIER_CLASS) {
-                    Some(name) => Some(name.borrow()),
-                    None => None
-                };
-                MessageBuilder::new(&uuid, message).values(values.clone()).name(name).build()
+            if let Some(uuid) = msg.get(CLASSIFIER_UUID) {
+                let name = msg.get(CLASSIFIER_CLASS);
+
+                let mut event = E::new(uuid, message);
+                for (k, v) in msg.values() {
+                    event.set(&k, &v);
+                }
+                event.set_name(name);
+                event
             } else {
                 return false;
             }
@@ -156,4 +159,4 @@ impl<P: Pipe> Parser<P> for CorrelationParser<P> {
     }
 }
 
-parser_plugin!(CorrelationParserBuilder<LogParser>);
+parser_plugin!(CorrelationParserBuilder<LogParser, Message>);
