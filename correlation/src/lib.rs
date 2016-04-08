@@ -59,8 +59,8 @@ pub trait Event: Send + Clone {
 }
 
 pub struct EventIds<'a> {
-    uuid: &'a str,
-    name: Option<&'a str>
+    pub uuid: &'a str,
+    pub name: Option<&'a str>
 }
 
 impl<'a> IntoIterator for EventIds<'a> {
