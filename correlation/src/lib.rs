@@ -46,7 +46,7 @@ mod state;
 mod timer;
 mod duration;
 
-pub trait Event: Send + Clone {
+pub trait Event: Send + Sync + Clone {
     fn get(&self, key: &str) -> Option<&str>;
     fn uuid(&self) -> &str;
     fn ids(&self) -> EventIds;
