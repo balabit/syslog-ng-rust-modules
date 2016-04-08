@@ -42,7 +42,7 @@ impl<'cfg> LogTemplate<'cfg> {
         }
     }
 
-    pub fn format(&self, msg: &LogMessage, options: Option<&LogTemplateOptions>, tz: LogTimeZone, seq_num: i32, context_id: Option<&str>) -> &str {
+    pub fn format(&mut self, msg: &LogMessage, options: Option<&LogTemplateOptions>, tz: LogTimeZone, seq_num: i32, context_id: Option<&str>) -> &str {
         let options: *const sys::LogTemplateOptions = options.map_or(::std::ptr::null(), |options| options.0);
         let result = unsafe {
             if let Some(context_id) = context_id {
@@ -96,7 +96,7 @@ mod tests {
             log_template_global_init();
         }
         let cfg = GlobalConfig::new(0x0308);
-        let template = LogTemplate::compile(&cfg, "${kittens}").ok().unwrap();
+        let mut template = LogTemplate::compile(&cfg, "${kittens}").ok().unwrap();
         let mut msg = LogMessage::new();
         msg.insert("kittens", "2");
         let formatted_msg = template.format(&msg, None, LogTimeZone::Local, 0, None);
