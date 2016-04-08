@@ -34,10 +34,6 @@ impl Message {
         self.name.as_ref()
     }
 
-    pub fn message(&self) -> &String {
-        &self.message
-    }
-
     pub fn values(&self) -> &BTreeMap<String, String> {
         &self.values
     }
