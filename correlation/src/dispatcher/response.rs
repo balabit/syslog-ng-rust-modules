@@ -7,7 +7,8 @@
 // modified, or distributed except according to those terms.
 
 use super::Response;
+use Event;
 
-pub trait ResponseSender {
-    fn send_response(&mut self, response: Response);
+pub trait ResponseSender<E: Event> {
+    fn send_response(&mut self, response: Response<E>);
 }

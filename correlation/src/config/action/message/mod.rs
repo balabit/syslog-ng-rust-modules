@@ -55,7 +55,7 @@ impl MessageAction {
         &self.inject_mode
     }
 
-    fn execute<E: Event>(&self, _state: &State<E>, _context: &BaseContext, responder: &mut ResponseSender) {
+    fn execute<E: Event>(&self, _state: &State<E>, _context: &BaseContext, responder: &mut ResponseSender<E>) {
         let message = MessageBuilder::new(&self.uuid, self.message.clone())
                                     .name(self.name.clone())
                                     .values(self.values.clone())
@@ -88,20 +88,20 @@ impl Default for InjectMode {
 }
 
 #[derive(Debug, Clone)]
-pub struct Alert {
-    pub message: Message,
+pub struct Alert<E: Event> {
+    pub message: E,
     pub inject_mode: InjectMode,
 }
 
 impl<E: Event> Action<E> for MessageAction {
-    fn on_opened(&self, state: &State<E>, context: &BaseContext, responder: &mut ResponseSender) {
+    fn on_opened(&self, state: &State<E>, context: &BaseContext, responder: &mut ResponseSender<E>) {
         if self.when.on_opened {
             trace!("MessageAction: on_opened()");
             self.execute(state, context, responder);
         }
     }
 
-    fn on_closed(&self, state: &State<E>, context: &BaseContext, responder: &mut ResponseSender) {
+    fn on_closed(&self, state: &State<E>, context: &BaseContext, responder: &mut ResponseSender<E>) {
         if self.when.on_closed {
             trace!("MessageAction: on_closed()");
             self.execute(state, context, responder);

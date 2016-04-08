@@ -21,12 +21,12 @@ pub enum ActionType {
 }
 
 impl<E: Event> Action<E> for ActionType {
-    fn on_opened(&self, state: &State<E>, context: &BaseContext, responder: &mut ResponseSender) {
+    fn on_opened(&self, state: &State<E>, context: &BaseContext, responder: &mut ResponseSender<E>) {
         match *self {
             ActionType::Message(ref action) => action.on_opened(state, context, responder),
         }
     }
-    fn on_closed(&self, state: &State<E>, context: &BaseContext, responder: &mut ResponseSender) {
+    fn on_closed(&self, state: &State<E>, context: &BaseContext, responder: &mut ResponseSender<E>) {
         match *self {
             ActionType::Message(ref action) => action.on_closed(state, context, responder),
         }

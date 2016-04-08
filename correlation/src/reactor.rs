@@ -11,12 +11,12 @@ use context::ContextMap;
 use Event as MsgEvent;
 
 pub struct SharedData<'a, E: 'a + MsgEvent> {
-    pub responder: &'a mut ResponseSender,
+    pub responder: &'a mut ResponseSender<E>,
     pub map: &'a mut ContextMap<E>,
 }
 
 impl<'a, E: MsgEvent> SharedData<'a, E> {
-    pub fn new(map: &'a mut ContextMap<E>, responder: &'a mut ResponseSender) -> SharedData<'a, E> {
+    pub fn new(map: &'a mut ContextMap<E>, responder: &'a mut ResponseSender<E>) -> SharedData<'a, E> {
         SharedData {
             map: map,
             responder: responder,

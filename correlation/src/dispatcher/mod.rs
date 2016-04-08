@@ -11,6 +11,7 @@ use std::sync::mpsc::Sender;
 use action::Alert;
 use reactor::Event;
 use self::response::ResponseSender;
+use Event as MsgEvent;
 
 pub mod demux;
 pub mod handlers;
@@ -19,9 +20,9 @@ pub mod request;
 pub mod reactor;
 
 #[derive(Debug, Clone)]
-pub enum Response {
+pub enum Response<E: MsgEvent> {
     Exit,
-    Alert(Alert),
+    Alert(Alert<E>),
 }
 
 #[derive(Debug, Eq, Hash, PartialEq)]
@@ -30,7 +31,7 @@ pub enum ResponseHandle {
     Alert,
 }
 
-impl Event for Response {
+impl<E: MsgEvent> Event for Response<E> {
     type Handle = ResponseHandle;
     fn handle(&self) -> Self::Handle {
         match *self {
@@ -40,8 +41,8 @@ impl Event for Response {
     }
 }
 
-impl ResponseSender for Sender<Response> {
-    fn send_response(&mut self, response: Response) {
+impl<E: MsgEvent> ResponseSender<E> for Sender<Response<E>> {
+    fn send_response(&mut self, response: Response<E>) {
         let _ = self.send(response);
     }
 }

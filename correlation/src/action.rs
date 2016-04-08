@@ -14,6 +14,6 @@ use Event;
 pub use config::action::message::Alert;
 
 pub trait Action<E: Event> {
-    fn on_opened(&self, state: &State<E>, context: &BaseContext, &mut ResponseSender);
-    fn on_closed(&self, state: &State<E>, context: &BaseContext, &mut ResponseSender);
+    fn on_opened(&self, state: &State<E>, context: &BaseContext, &mut ResponseSender<E>);
+    fn on_closed(&self, state: &State<E>, context: &BaseContext, &mut ResponseSender<E>);
 }

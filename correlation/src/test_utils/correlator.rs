@@ -15,8 +15,8 @@ use Event;
 
 pub struct MockAlertHandler;
 
-impl<E: Event> AlertHandler<Vec<Alert>, E> for MockAlertHandler {
-    fn on_alert(&mut self, alert: Alert, _: &mut Sender<Request<E>>, extra_data: &mut Vec<Alert>) {
+impl<E: Event> AlertHandler<Vec<Alert<E>>, E> for MockAlertHandler {
+    fn on_alert(&mut self, alert: Alert<E>, _: &mut Sender<Request<E>>, extra_data: &mut Vec<Alert<E>>) {
         extra_data.push(alert);
     }
 }

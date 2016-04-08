@@ -88,7 +88,7 @@ impl BaseContext {
     pub fn on_timer<E: Event>(&self,
                     event: &TimerEvent,
                     state: &mut State<E>,
-                    responder: &mut ResponseSender) {
+                    responder: &mut ResponseSender<E>) {
         if state.is_open() {
             state.update_timers(event);
         }
@@ -100,7 +100,7 @@ impl BaseContext {
     pub fn on_message<E: Event>(&self,
                       event: Arc<E>,
                       state: &mut State<E>,
-                      responder: &mut ResponseSender) {
+                      responder: &mut ResponseSender<E>) {
         if state.is_open() {
             state.add_message(event);
         } else if self.is_opening(&*event) {
@@ -113,7 +113,7 @@ impl BaseContext {
         }
     }
 
-    fn open<E: Event>(&self, state: &mut State<E>, responder: &mut ResponseSender) {
+    fn open<E: Event>(&self, state: &mut State<E>, responder: &mut ResponseSender<E>) {
         trace!("Context: opening state; uuid={}", self.uuid());
         for i in self.actions() {
             i.on_opened(state, self, responder);
@@ -121,7 +121,7 @@ impl BaseContext {
         state.open();
     }
 
-    fn close<E: Event>(&self, state: &mut State<E>, responder: &mut ResponseSender) {
+    fn close<E: Event>(&self, state: &mut State<E>, responder: &mut ResponseSender<E>) {
         trace!("Context: closing state; uuid={}", self.uuid());
         for i in self.actions() {
             i.on_closed(state, self, responder);

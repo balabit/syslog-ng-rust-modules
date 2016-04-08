@@ -8,12 +8,19 @@
 
 use Response;
 use dispatcher::response::ResponseSender;
+use Event;
 
-#[derive(Clone, Default)]
-pub struct MockResponseSender(pub Vec<Response>);
+#[derive(Clone)]
+pub struct MockResponseSender<E: Event>(pub Vec<Response<E>>);
 
-impl ResponseSender for MockResponseSender {
-    fn send_response(&mut self, response: Response) {
+impl<E: Event> Default for MockResponseSender<E> {
+    fn default() -> MockResponseSender<E> {
+        MockResponseSender(Vec::default())
+    }
+}
+
+impl<E: Event> ResponseSender<E> for MockResponseSender<E> {
+    fn send_response(&mut self, response: Response<E>) {
         self.0.push(response);
     }
 }

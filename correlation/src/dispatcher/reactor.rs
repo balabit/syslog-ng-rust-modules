@@ -20,13 +20,13 @@ pub struct RequestReactor<E: MsgEvent> {
     handlers: BTreeMap<RequestHandle, Box<for<'a> EventHandler<Request<E>, SharedData<'a, E>>>>,
     demultiplexer: Demultiplexer<Request<E>>,
     pub context_map: ContextMap<E>,
-    responder: Box<ResponseSender>,
+    responder: Box<ResponseSender<E>>,
 }
 
 impl<E: MsgEvent> RequestReactor<E> {
     pub fn new(demultiplexer: Demultiplexer<Request<E>>,
                context_map: ContextMap<E>,
-               responder: Box<ResponseSender>)
+               responder: Box<ResponseSender<E>>)
                -> RequestReactor<E> {
         RequestReactor {
             demultiplexer: demultiplexer,

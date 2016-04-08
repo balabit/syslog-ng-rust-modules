@@ -30,7 +30,7 @@ pub enum Context<E: Event> {
 }
 
 impl<E: Event> Context<E> {
-    pub fn on_event(&mut self, event: Request<E>, responder: &mut ResponseSender) {
+    pub fn on_event(&mut self, event: Request<E>, responder: &mut ResponseSender<E>) {
         match *self {
             Context::Linear(ref mut context) => context.on_event(event, responder),
             Context::Map(ref mut context) => context.on_event(event, responder),

@@ -29,7 +29,7 @@ impl<E: Event> LinearContext<E> {
         }
     }
 
-    pub fn on_event(&mut self, event: Request<E>, responder: &mut ResponseSender) {
+    pub fn on_event(&mut self, event: Request<E>, responder: &mut ResponseSender<E>) {
         trace!("LinearContext: received event");
         match event {
             Request::Timer(event) => self.on_timer(&event, responder),
@@ -38,11 +38,11 @@ impl<E: Event> LinearContext<E> {
         }
     }
 
-    pub fn on_timer(&mut self, event: &TimerEvent, responder: &mut ResponseSender) {
+    pub fn on_timer(&mut self, event: &TimerEvent, responder: &mut ResponseSender<E>) {
         self.base.on_timer(event, &mut self.state, responder);
     }
 
-    pub fn on_message(&mut self, event: Arc<E>, responder: &mut ResponseSender) {
+    pub fn on_message(&mut self, event: Arc<E>, responder: &mut ResponseSender<E>) {
         self.base.on_message(event, &mut self.state, responder);
     }
 

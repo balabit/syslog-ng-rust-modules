@@ -35,12 +35,12 @@ mod factory;
 mod test;
 
 pub trait AlertHandler<D, E> where E: Event {
-    fn on_alert(&mut self, alert: Alert, channel: &mut Sender<Request<E>>, extra_data: &mut D);
+    fn on_alert(&mut self, alert: Alert<E>, channel: &mut Sender<Request<E>>, extra_data: &mut D);
 }
 
 pub struct Correlator<T, E: 'static + Event> {
     dispatcher_input_channel: mpsc::Sender<Request<E>>,
-    dispatcher_output_channel: mpsc::Receiver<Response>,
+    dispatcher_output_channel: mpsc::Receiver<Response<E>>,
     dispatcher_thread_handle: thread::JoinHandle<ContextMap<E>>,
     alert_handler: Option<Box<AlertHandler<T, E>>>
 }
@@ -86,7 +86,7 @@ impl<T, E: Event> Correlator<T, E> {
         self.dispatcher_input_channel.send(Request::Message(Arc::new(message)))
     }
 
-    fn handle_event(&mut self, event: Response, external_handler_data: &mut T) {
+    fn handle_event(&mut self, event: Response<E>, external_handler_data: &mut T) {
         match event {
             Response::Exit => {
                 let _ = self.dispatcher_input_channel.send(Request::Exit);
