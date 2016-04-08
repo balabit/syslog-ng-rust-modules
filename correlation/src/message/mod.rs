@@ -25,16 +25,6 @@ pub struct Message {
     values: BTreeMap<String, String>,
 }
 
-impl Message {
-    pub fn uuid(&self) -> &String {
-        &self.uuid
-    }
-
-    pub fn name(&self) -> Option<&String> {
-        self.name.as_ref()
-    }
-}
-
 impl Event for Message {
     fn get(&self, key: &str) -> Option<&str> {
         self.values.get(key).map(|x| x.borrow())
@@ -65,5 +55,11 @@ impl Event for Message {
     }
     fn message(&self) -> &str {
         self.message.borrow()
+    }
+    fn uuid(&self) -> &str {
+        &self.uuid
+    }
+    fn name(&self) -> Option<&str> {
+        self.name.as_ref().map(|name| name.borrow())
     }
 }

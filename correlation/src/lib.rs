@@ -48,9 +48,11 @@ mod duration;
 
 pub trait Event: Send + Sync + Clone {
     fn get(&self, key: &str) -> Option<&str>;
+    fn uuid(&self) -> &str;
     fn ids(&self) -> EventIds;
     fn new(uuid: &str, message: &str) -> Self;
     fn set_name(&mut self, name: Option<&str>);
+    fn name(&self) -> Option<&str>;
     fn set(&mut self, key: &str, value: &str);
     fn set_message(&mut self, message: &str);
     fn message(&self) -> &str;
