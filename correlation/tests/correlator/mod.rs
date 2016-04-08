@@ -19,7 +19,7 @@ fn test_given_correlator_when_messages_are_received_then_they_are_grouped_into_a
     let _ = env_logger::init();
     let contexts_file = "tests/correlator/contexts.json";
     let mut responses = Vec::new();
-    let mut correlator: Correlator<Vec<Alert>, Message> = CorrelatorFactory::from_path(contexts_file)
+    let mut correlator: Correlator<Vec<Alert<Message>>, Message> = CorrelatorFactory::from_path(contexts_file)
                              .ok()
                              .expect("Failed to load contexts from a valid contexts_file");
     let login_message = MessageBuilder::new("6d2cba0c-e241-464a-89c3-8035cac8f73e", "message")

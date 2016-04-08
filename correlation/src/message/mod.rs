@@ -57,4 +57,25 @@ impl Event for Message {
             name: self.name().map(|name| name.borrow())
         }
     }
+
+    fn new(uuid: &str, message: &str) -> Self {
+        Message {
+            uuid: uuid.to_string(),
+            message: message.to_string(),
+            name: None,
+            values: BTreeMap::new()
+        }
+    }
+    fn set_name(&mut self, name: Option<&str>) {
+        self.name = name.map(|name| name.to_string());
+    }
+    fn set(&mut self, key: &str, value: &str) {
+        self.values.insert(key.to_string(), value.to_string());
+    }
+    fn set_message(&mut self, message: &str) {
+        self.message = message.to_string();
+    }
+    fn message(&self) -> &str {
+        self.message.borrow()
+    }
 }

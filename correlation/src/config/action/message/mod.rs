@@ -14,6 +14,7 @@ use message::{Message, MessageBuilder};
 use Event;
 
 use std::collections::BTreeMap;
+use std::borrow::Borrow;
 use state::State;
 use super::ExecCondition;
 
@@ -56,12 +57,13 @@ impl MessageAction {
     }
 
     fn execute<E: Event>(&self, _state: &State<E>, _context: &BaseContext, responder: &mut ResponseSender<E>) {
-        let message = MessageBuilder::new(&self.uuid, self.message.clone())
-                                    .name(self.name.clone())
-                                    .values(self.values.clone())
-                                    .build();
+        let mut event = E::new(&self.uuid, &self.message);
+        event.set_name(self.name.as_ref().map(|name| name.borrow()));
+        for (k, v) in &self.values {
+            event.set(k, v);
+        }
         let response = Alert {
-            message: message,
+            message: event,
             inject_mode: self.inject_mode.clone(),
         };
         responder.send_response(Response::Alert(response));
