@@ -37,10 +37,6 @@ impl Message {
     pub fn values(&self) -> &BTreeMap<String, String> {
         &self.values
     }
-
-    pub fn insert(&mut self, key: &str, value: &str) {
-        self.values.insert(key.to_owned(), value.to_owned());
-    }
 }
 
 impl Event for Message {

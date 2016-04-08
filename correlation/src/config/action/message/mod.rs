@@ -10,7 +10,6 @@ use action::Action;
 use context::base::BaseContext;
 use dispatcher::Response;
 use dispatcher::response::ResponseSender;
-use message::{Message, MessageBuilder};
 use Event;
 
 use std::collections::BTreeMap;

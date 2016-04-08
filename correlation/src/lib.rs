@@ -56,8 +56,6 @@ pub trait Event: Send + Sync + Clone {
     fn message(&self) -> &str;
 }
 
-use std::borrow::Borrow;
-
 pub struct EventIds<'a> {
     uuid: &'a str,
     name: Option<&'a str>
