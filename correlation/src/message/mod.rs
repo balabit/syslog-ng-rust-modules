@@ -33,15 +33,11 @@ impl Message {
     pub fn name(&self) -> Option<&String> {
         self.name.as_ref()
     }
-
-    pub fn values(&self) -> &BTreeMap<String, String> {
-        &self.values
-    }
 }
 
 impl Event for Message {
     fn get(&self, key: &str) -> Option<&str> {
-        self.values().get(key).map(|x| x.borrow())
+        self.values.get(key).map(|x| x.borrow())
     }
     fn ids(&self) -> EventIds {
         EventIds {
