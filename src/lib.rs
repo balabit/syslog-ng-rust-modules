@@ -14,6 +14,8 @@ use std::sync::{mpsc, Arc, Mutex};
 use syslog_ng_common::{MessageFormatter, LogMessage};
 use syslog_ng_common::{Parser, ParserBuilder, OptionError, Pipe};
 
+use intologmessage::IntoLogMessage;
+
 pub use correlation::Message;
 
 pub mod options;
@@ -25,7 +27,7 @@ pub const CLASSIFIER_CLASS: &'static str = ".classifier.class";
 
 struct MessageSender;
 
-impl<P, E: Event> AlertHandler<P, E> for MessageSender where P: Pipe {
+impl<P, E> AlertHandler<P, E> for MessageSender where P: Pipe, E: Event + IntoLogMessage {
     fn on_alert(&mut self, alert: Alert<E>, reactor_input_channel: &mut mpsc::Sender<Request<E>>, parent: &mut P) {
         match alert.inject_mode {
             InjectMode::Log => {
@@ -33,12 +35,7 @@ impl<P, E: Event> AlertHandler<P, E> for MessageSender where P: Pipe {
             },
             InjectMode::Forward => {
                 debug!("FORWARD: {}", alert.message.message());
-                let message = alert.message;
-                let mut logmsg = LogMessage::new();
-                // for (k, v) in message.values().iter() {
-                //     logmsg.insert(k.borrow(), v.borrow());
-                // }
-                logmsg.insert("MESSAGE", message.message());
+                let logmsg = alert.message.into_logmessage();
                 parent.forward(logmsg);
             },
             InjectMode::Loopback => {
@@ -74,7 +71,7 @@ impl<P, E> CorrelationParserBuilder<P, E> where P: Pipe, E: Event {
     }
 }
 
-impl<P, E> ParserBuilder<P> for CorrelationParserBuilder<P, E> where P: Pipe, E: 'static + Event {
+impl<P, E> ParserBuilder<P> for CorrelationParserBuilder<P, E> where P: Pipe, E: 'static + Event + IntoLogMessage {
     type Parser = CorrelationParser<P, E>;
     fn new() -> Self {
         CorrelationParserBuilder {
