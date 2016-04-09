@@ -5,7 +5,7 @@ use super::CLASSIFIER_UUID;
 use super::CLASSIFIER_CLASS;
 
 #[derive(Clone)]
-pub struct LogEvent(LogMessage);
+pub struct LogEvent(pub LogMessage);
 
 unsafe impl Sync for LogEvent {}
 
