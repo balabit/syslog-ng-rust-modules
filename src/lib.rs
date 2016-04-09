@@ -16,7 +16,7 @@ use syslog_ng_common::{Parser, ParserBuilder, OptionError, Pipe};
 
 use intologmessage::IntoLogMessage;
 
-pub use correlation::Message;
+pub use logevent::LogEvent;
 
 pub mod options;
 pub mod logevent;
@@ -157,4 +157,4 @@ impl<P, E> Parser<P> for CorrelationParser<P, E> where P: Pipe, E: Event {
     }
 }
 
-parser_plugin!(CorrelationParserBuilder<LogParser, Message>);
+parser_plugin!(CorrelationParserBuilder<LogParser, LogEvent>);
