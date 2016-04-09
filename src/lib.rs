@@ -28,7 +28,7 @@ pub const CLASSIFIER_CLASS: &'static str = ".classifier.class";
 
 struct MessageSender;
 
-impl<P, E> AlertHandler<P, E> for MessageSender where P: Pipe, E: Event + IntoLogMessage {
+impl<P, E> AlertHandler<P, E> for MessageSender where P: Pipe, E: Event + Into<LogMessage> {
     fn on_alert(&mut self, alert: Alert<E>, reactor_input_channel: &mut mpsc::Sender<Request<E>>, parent: &mut P) {
         match alert.inject_mode {
             InjectMode::Log => {
@@ -36,7 +36,7 @@ impl<P, E> AlertHandler<P, E> for MessageSender where P: Pipe, E: Event + IntoLo
             },
             InjectMode::Forward => {
                 debug!("FORWARD: {}", alert.message.message());
-                let logmsg = alert.message.into_logmessage();
+                let logmsg = alert.message.into();
                 parent.forward(logmsg);
             },
             InjectMode::Loopback => {
@@ -72,7 +72,7 @@ impl<P, E> CorrelationParserBuilder<P, E> where P: Pipe, E: Event {
     }
 }
 
-impl<P, E> ParserBuilder<P> for CorrelationParserBuilder<P, E> where P: Pipe, E: 'static + Event + IntoLogMessage {
+impl<P, E> ParserBuilder<P> for CorrelationParserBuilder<P, E> where P: Pipe, E: 'static + Event + Into<LogMessage> {
     type Parser = CorrelationParser<P, E>;
     fn new() -> Self {
         CorrelationParserBuilder {
