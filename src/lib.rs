@@ -20,6 +20,7 @@ pub use logevent::LogEvent;
 
 pub mod options;
 pub mod logevent;
+pub mod mock;
 pub mod intologmessage;
 
 pub const CLASSIFIER_UUID: &'static str = ".classifier.uuid";
