@@ -19,10 +19,10 @@ mod test;
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Message {
-    uuid: String,
-    name: Option<String>,
-    message: String,
-    values: BTreeMap<String, String>,
+    pub uuid: String,
+    pub name: Option<String>,
+    pub message: String,
+    pub values: BTreeMap<String, String>,
 }
 
 impl Event for Message {
