@@ -18,6 +18,7 @@ pub use correlation::Message;
 
 pub mod options;
 pub mod logevent;
+pub mod intologmessage;
 
 pub const CLASSIFIER_UUID: &'static str = ".classifier.uuid";
 pub const CLASSIFIER_CLASS: &'static str = ".classifier.class";
