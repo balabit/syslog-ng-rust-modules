@@ -14,14 +14,11 @@ use std::sync::{mpsc, Arc, Mutex};
 use syslog_ng_common::{MessageFormatter, LogMessage};
 use syslog_ng_common::{Parser, ParserBuilder, OptionError, Pipe};
 
-use intologmessage::IntoLogMessage;
-
 pub use logevent::LogEvent;
 
 pub mod options;
 pub mod logevent;
 pub mod mock;
-pub mod intologmessage;
 
 pub const CLASSIFIER_UUID: &'static str = ".classifier.uuid";
 pub const CLASSIFIER_CLASS: &'static str = ".classifier.class";
