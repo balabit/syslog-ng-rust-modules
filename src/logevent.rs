@@ -46,3 +46,9 @@ impl Event for LogEvent {
         self.0.get("MESSAGE").unwrap()
     }
 }
+
+impl Into<LogMessage> for LogEvent {
+    fn into(self) -> LogMessage {
+        self.0
+    }
+}
