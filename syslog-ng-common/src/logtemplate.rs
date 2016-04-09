@@ -59,7 +59,10 @@ impl<'cfg> LogTemplate<'cfg> {
 
 impl<'cfg> Drop for LogTemplate<'cfg> {
     fn drop(&mut self) {
-        unsafe { sys::log_template_unref(self.wrapped) };
+        unsafe {
+            sys::log_template_unref(self.wrapped);
+            glib_sys::g_string_free(self.buffer, 1 as glib_sys::gboolean);
+        };
     }
 }
 
