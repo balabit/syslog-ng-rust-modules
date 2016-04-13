@@ -56,15 +56,15 @@ impl<T> MessageAction<T> {
         &self.inject_mode
     }
 
-    fn execute<E>(&self, _state: &State<E>, _context: &BaseContext<E, T>, responder: &mut ResponseSender<E>) where E: Event, T: Template<Event=E> {
-        let context_id = _context.uuid.to_hyphenated_string();
+    fn execute<E>(&self, state: &State<E>, context: &BaseContext<E, T>, responder: &mut ResponseSender<E>) where E: Event, T: Template<Event=E> {
+        let context_id = context.uuid.to_hyphenated_string();
         let mut message = String::new();
-        self.message.format_with_context(_state.messages(), &context_id, &mut message);
+        self.message.format_with_context(state.messages(), &context_id, &mut message);
         let mut event = E::new(&self.uuid, &message);
         event.set_name(self.name.as_ref().map(|name| name.borrow()));
         let mut value = String::new();
         for (k, v) in &self.values {
-            v.format_with_context(_state.messages(), &context_id, &mut value);
+            v.format_with_context(state.messages(), &context_id, &mut value);
             event.set(k, &value);
             value.clear();
         }

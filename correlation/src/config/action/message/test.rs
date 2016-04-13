@@ -65,7 +65,7 @@ fn test_executed_message_action_uses_the_templates() {
     let uuid = Uuid::parse_str(uuid_as_str).unwrap();
     let base_context = {
         let conditions = ConditionsBuilder::new(Duration::from_millis(100)).build();
-        BaseContextBuilder::<Message, MockTemplate>::new(uuid.clone(), conditions).name(Some("name".to_owned())).build()
+        BaseContextBuilder::<Message, MockTemplate>::new(uuid.to_owned(), conditions).name(Some("name".to_owned())).build()
     };
     let state = {
         let messages = vec![Arc::new(MessageBuilder::new("uuid1", "message1").build()),
