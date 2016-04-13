@@ -15,10 +15,12 @@ use syslog_ng_common::{MessageFormatter, LogMessage};
 use syslog_ng_common::{Parser, ParserBuilder, OptionError, Pipe};
 
 pub use logevent::LogEvent;
+pub use logtemplate::{LogTemplate, LogTemplateFactory};
 
 pub mod options;
 pub mod logevent;
 pub mod mock;
+pub mod logtemplate;
 
 pub const CLASSIFIER_UUID: &'static str = ".classifier.uuid";
 pub const CLASSIFIER_CLASS: &'static str = ".classifier.class";
