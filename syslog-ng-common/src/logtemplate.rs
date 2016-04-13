@@ -6,12 +6,12 @@ use LogMessage;
 use GlobalConfig;
 
 use std::ffi::{CString, CStr};
-use std::marker::PhantomData;
+use std::rc::Rc;
 
-pub struct LogTemplate<'cfg> {
+pub struct LogTemplate {
     pub wrapped: *mut sys::LogTemplate,
     buffer: *mut glib_sys::GString,
-    _marker: PhantomData<&'cfg GlobalConfig>
+    _cfg: Rc<GlobalConfig>
 }
 
 pub struct LogTemplateOptions(pub *mut sys::LogTemplateOptions);
@@ -21,16 +21,16 @@ pub enum LogTimeZone {
     Send = 1,
 }
 
-impl<'cfg> LogTemplate<'cfg> {
-    fn new(cfg: &'cfg GlobalConfig) -> LogTemplate {
+impl LogTemplate {
+    fn new(cfg: Rc<GlobalConfig>) -> LogTemplate {
         LogTemplate {
             wrapped: unsafe { sys::log_template_new(cfg.0, ::std::ptr::null()) },
             buffer: unsafe { glib_sys::g_string_sized_new(128) },
-            _marker: PhantomData
+            _cfg: cfg
         }
     }
-    pub fn compile(cfg: &'cfg GlobalConfig, content: &str) -> Result<LogTemplate<'cfg>, Error> {
-        let template = LogTemplate::new(&cfg);
+    pub fn compile(cfg: Rc<GlobalConfig>, content: &str) -> Result<LogTemplate, Error> {
+        let template = LogTemplate::new(cfg);
 
         let content = CString::new(content).unwrap();
         let mut error = ::std::ptr::null_mut();
@@ -57,7 +57,7 @@ impl<'cfg> LogTemplate<'cfg> {
     }
 }
 
-impl<'cfg> Drop for LogTemplate<'cfg> {
+impl Drop for LogTemplate {
     fn drop(&mut self) {
         unsafe {
             sys::log_template_unref(self.wrapped);
@@ -73,23 +73,24 @@ mod tests {
     use LogMessage;
     use ::sys::logmsg::log_msg_registry_init;
     use ::sys::logtemplate::log_template_global_init;
+    use std::rc::Rc;
 
     #[test]
     fn test_template_can_be_created() {
-        let cfg = GlobalConfig::new(0x0308);
-        let _ = LogTemplate::new(&cfg);
+        let cfg = Rc::new(GlobalConfig::new(0x0308));
+        let _ = LogTemplate::new(cfg);
     }
 
     #[test]
     fn test_template_can_be_compiled() {
-        let cfg = GlobalConfig::new(0x0308);
-        let _ = LogTemplate::compile(&cfg, "literal").ok().unwrap();
+        let cfg = Rc::new(GlobalConfig::new(0x0308));
+        let _ = LogTemplate::compile(cfg, "literal").ok().unwrap();
     }
 
     #[test]
     fn test_invalid_template_cannot_be_compiled() {
-        let cfg = GlobalConfig::new(0x0308);
-        let _ = LogTemplate::compile(&cfg, "${unbalanced").err().unwrap();
+        let cfg = Rc::new(GlobalConfig::new(0x0308));
+        let _ = LogTemplate::compile(cfg, "${unbalanced").err().unwrap();
     }
 
     #[test]
@@ -98,8 +99,8 @@ mod tests {
             log_msg_registry_init();
             log_template_global_init();
         }
-        let cfg = GlobalConfig::new(0x0308);
-        let mut template = LogTemplate::compile(&cfg, "${kittens}").ok().unwrap();
+        let cfg = Rc::new(GlobalConfig::new(0x0308));
+        let mut template = LogTemplate::compile(cfg, "${kittens}").ok().unwrap();
         let mut msg = LogMessage::new();
         msg.insert("kittens", "2");
         let formatted_msg = template.format(&msg, None, LogTimeZone::Local, 0, None);
