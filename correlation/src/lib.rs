@@ -103,7 +103,7 @@ pub trait TemplateFactory<E> where E: Event {
 }
 
 #[derive(Debug, Eq, PartialEq)]
-pub struct CompileError(String);
+pub struct CompileError(pub String);
 
 use std::sync::Arc;
 
