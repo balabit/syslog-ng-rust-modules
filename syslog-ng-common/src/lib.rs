@@ -14,6 +14,8 @@ extern crate syslog_ng_sys;
 extern crate glib;
 extern crate glib_sys;
 
+use std::sync::{Once, ONCE_INIT};
+
 #[macro_use]
 mod proxies;
 mod logger;
@@ -36,3 +38,11 @@ pub use cfg::GlobalConfig;
 pub use proxies::parser::{OptionError, Parser, ParserBuilder, ParserProxy};
 pub use logpipe::{LogPipe, Pipe};
 pub use logtemplate::{LogTemplate, LogTemplateOptions, LogTimeZone};
+
+#[allow(dead_code)]
+static SYSLOG_NG_INITIALIZED: Once = ONCE_INIT;
+
+pub unsafe fn syslog_ng_global_init() {
+    sys::logmsg::log_msg_registry_init();
+    sys::logtemplate::log_template_global_init();
+}
