@@ -75,6 +75,8 @@ fn test_executed_message_action_uses_the_templates() {
     let message_action = MessageActionBuilder::<MockTemplate>::new("uuid", MockTemplate::literal(uuid_as_str))
                                               .pair("key1", MockTemplate::literal("value1"))
                                               .pair("key2", MockTemplate::literal("value2"))
+                                              .pair("context_id", MockTemplate::context_id())
+                                              .pair("context_len", MockTemplate::context_len())
                                               .build();
 
     message_action.on_closed(&state, &base_context, &mut responder);
@@ -87,6 +89,8 @@ fn test_executed_message_action_uses_the_templates() {
                    message.get("key1").expect("Failed to get an additional key-value pair from a generated message"));
         assert_eq!("value2",
                    message.get("key2").expect("Failed to get an additional key-value pair from a generated message"));
+        assert_eq!(uuid_as_str, message.get("context_id").unwrap());
+        assert_eq!("2", message.get("context_len").unwrap());
     } else {
         unreachable!();
     }
