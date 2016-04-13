@@ -4,10 +4,9 @@ extern crate log;
 extern crate syslog_ng_common;
 extern crate correlation;
 
-use correlation::{Request, ContextMap, Alert, Event};
+use correlation::{Request, Alert, Event, Template, TemplateFactory};
 use correlation::config::action::message::InjectMode;
 use correlation::correlator::{Correlator, AlertHandler, CorrelatorFactory};
-use correlation::config::ContextConfig;
 use std::borrow::Borrow;
 use std::marker::PhantomData;
 use std::sync::{mpsc, Arc, Mutex};
@@ -48,17 +47,18 @@ impl<P, E> AlertHandler<P, E> for MessageSender where P: Pipe, E: Event + Into<L
     }
 }
 
-pub struct CorrelationParserBuilder<P, E> where P: Pipe, E: Event {
-    contexts: Option<Vec<ContextConfig>>,
+pub struct CorrelationParserBuilder<P, E, T, TF> where P: Pipe, E: 'static + Event, T: 'static + Template<Event=E>, TF: TemplateFactory<E, Template=T> {
+    contexts: Option<Correlator<P, E, T>>,
     formatter: MessageFormatter,
-    _marker: PhantomData<(P, E)>
+    template_factory: TF,
+    _marker: PhantomData<(P, E, T, TF)>
 }
 
-impl<P, E> CorrelationParserBuilder<P, E> where P: Pipe, E: Event {
+impl<P, E, T, TF> CorrelationParserBuilder<P, E, T, TF> where P: Pipe, E: Event, T: Template<Event=E>, TF: TemplateFactory<E, Template=T> {
     pub fn set_file(&mut self, path: &str) {
-        match CorrelatorFactory::load_file(path) {
-            Ok(contexts) => {
-                self.contexts = Some(contexts);
+        match CorrelatorFactory::from_path(path, &self.template_factory) {
+            Ok(correlator) => {
+                self.contexts = Some(correlator);
             },
             Err(err) => {
                 error!("CorrelationParser: failed to set config file: {:?}", &err);
@@ -71,12 +71,13 @@ impl<P, E> CorrelationParserBuilder<P, E> where P: Pipe, E: Event {
     }
 }
 
-impl<P, E> ParserBuilder<P> for CorrelationParserBuilder<P, E> where P: Pipe, E: 'static + Event + Into<LogMessage> {
-    type Parser = CorrelationParser<P, E>;
+impl<P, E, T, TF> ParserBuilder<P> for CorrelationParserBuilder<P, E, T, TF> where P: Pipe, E: 'static + Event + Into<LogMessage>, T: 'static + Template<Event=E>, TF: TemplateFactory<E, Template=T> + Default {
+    type Parser = CorrelationParser<P, E, T>;
     fn new() -> Self {
         CorrelationParserBuilder {
             contexts: None,
             formatter: MessageFormatter::new(),
+            template_factory: TF::default(),
             _marker: PhantomData
         }
     }
@@ -91,28 +92,26 @@ impl<P, E> ParserBuilder<P> for CorrelationParserBuilder<P, E> where P: Pipe, E:
     }
     fn build(self) -> Result<Self::Parser, OptionError> {
         debug!("Building CorrelationParser");
-        let CorrelationParserBuilder {contexts, formatter, _marker } = self;
-        let contexts = try!(contexts.ok_or(OptionError::missing_required_option(options::CONTEXTS_FILE)));
-        let map = ContextMap::from_configs(contexts);
-        let mut correlator: Correlator<P, E> = Correlator::new(map);
-        correlator.set_alert_handler(Some(Box::new(MessageSender)));
-        Ok(CorrelationParser::new(correlator, formatter))
+        let CorrelationParserBuilder {contexts, template_factory, formatter, _marker } = self;
+        let mut contexts = try!(contexts.ok_or(OptionError::missing_required_option(options::CONTEXTS_FILE)));
+        contexts.set_alert_handler(Some(Box::new(MessageSender)));
+        Ok(CorrelationParser::new(contexts, formatter))
     }
 }
 
-pub struct CorrelationParser<P: Pipe, E: 'static + Event> {
-    correlator: Arc<Mutex<Correlator<P, E>>>,
+pub struct CorrelationParser<P: Pipe, E: 'static + Event, T: 'static + Template<Event=E>> {
+    correlator: Arc<Mutex<Correlator<P, E, T>>>,
     formatter: MessageFormatter,
 }
 
-impl<P, E> Clone for CorrelationParser<P, E> where P: Pipe, E: Event {
-    fn clone(&self) -> CorrelationParser<P, E> {
+impl<P, E, T> Clone for CorrelationParser<P, E, T> where P: Pipe, E: Event, T: Template<Event=E> {
+    fn clone(&self) -> CorrelationParser<P, E, T> {
         CorrelationParser { correlator: self.correlator.clone(), formatter: self.formatter.clone() }
     }
 }
 
-impl<P, E> CorrelationParser<P, E> where P: Pipe, E: Event {
-    pub fn new(correlator: Correlator<P, E>, formatter: MessageFormatter) -> CorrelationParser<P, E> {
+impl<P, E, T> CorrelationParser<P, E, T> where P: Pipe, E: Event, T: Template<Event=E> {
+    pub fn new(correlator: Correlator<P, E, T>, formatter: MessageFormatter) -> CorrelationParser<P, E, T> {
         CorrelationParser {
             correlator: Arc::new(Mutex::new(correlator)),
             formatter: formatter,
@@ -120,7 +119,7 @@ impl<P, E> CorrelationParser<P, E> where P: Pipe, E: Event {
     }
 }
 
-impl<P, E> Parser<P> for CorrelationParser<P, E> where P: Pipe, E: Event {
+impl<P, E, T> Parser<P> for CorrelationParser<P, E, T> where P: Pipe, E: Event, T: Template<Event=E> {
     fn parse(&mut self, parent: &mut P, msg: &mut LogMessage, message: &str) -> bool {
         debug!("CorrelationParser: process()");
         let message = {
@@ -157,4 +156,4 @@ impl<P, E> Parser<P> for CorrelationParser<P, E> where P: Pipe, E: Event {
     }
 }
 
-parser_plugin!(CorrelationParserBuilder<LogParser, LogEvent>);
+parser_plugin!(CorrelationParserBuilder<LogParser, LogEvent, LogTemplate, LogTemplateFactory>);
