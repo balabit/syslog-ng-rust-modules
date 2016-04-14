@@ -1,7 +1,9 @@
-use syslog_ng_common::LogMessage;
-use correlation::{Message, Event, EventIds};
+use syslog_ng_common::{LogMessage, GlobalConfig};
+use correlation::{Message, Event, EventIds, Template, TemplateFactory, CompileError};
 
 use std::borrow::Borrow;
+use std::fmt::Write;
+use std::sync::Arc;
 
 #[derive(Clone)]
 pub struct MockEvent(pub Message);
@@ -44,5 +46,29 @@ impl Into<LogMessage> for MockEvent {
         }
         logmsg.insert("MESSAGE", &self.0.message);
         logmsg
+    }
+}
+
+pub struct MockLogTemplate(String);
+
+impl Template for MockLogTemplate {
+    type Event = MockEvent;
+    fn format_with_context(&self, _: &[Arc<Self::Event>], _: &str, buffer: &mut String) {
+        let _ = buffer.write_str(&self.0);
+    }
+}
+
+pub struct MockLogTemplateFactory;
+
+impl TemplateFactory<MockEvent> for MockLogTemplateFactory {
+    type Template = MockLogTemplate;
+    fn compile(&self, value: &str) -> Result<Self::Template, CompileError> {
+        Ok(MockLogTemplate(value.to_owned()))
+    }
+}
+
+impl From<GlobalConfig> for MockLogTemplateFactory {
+    fn from(_: GlobalConfig) -> MockLogTemplateFactory {
+        MockLogTemplateFactory
     }
 }
