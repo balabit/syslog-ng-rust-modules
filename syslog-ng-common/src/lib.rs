@@ -40,7 +40,7 @@ pub use logpipe::{LogPipe, Pipe};
 pub use logtemplate::{LogTemplate, LogTemplateOptions, LogTimeZone};
 
 #[allow(dead_code)]
-static SYSLOG_NG_INITIALIZED: Once = ONCE_INIT;
+pub static SYSLOG_NG_INITIALIZED: Once = ONCE_INIT;
 
 pub unsafe fn syslog_ng_global_init() {
     sys::logmsg::log_msg_registry_init();
