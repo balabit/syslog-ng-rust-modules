@@ -16,13 +16,17 @@ impl Template for LogTemplate {
     }
 }
 
-// pub struct LogTemplateFactory(Rc<GlobalConfig>);
-#[derive(Default)]
-pub struct LogTemplateFactory;
+pub struct LogTemplateFactory(GlobalConfig);
 
 impl TemplateFactory<LogEvent> for LogTemplateFactory {
     type Template = LogTemplate;
-    fn compile(&self, value: &str) -> Result<Self::Template, CompileError> {
+    fn compile(&self, _: &str) -> Result<Self::Template, CompileError> {
         Err(CompileError("wtf".to_owned()))
+    }
+}
+
+impl From<GlobalConfig> for LogTemplateFactory {
+    fn from(cfg: GlobalConfig) -> LogTemplateFactory {
+        LogTemplateFactory(cfg)
     }
 }
