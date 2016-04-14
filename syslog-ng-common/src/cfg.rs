@@ -9,16 +9,29 @@
 use syslog_ng_sys::cfg;
 use std::ffi::CStr;
 
-pub struct GlobalConfig(pub *mut cfg::GlobalConfig);
+use SYSLOG_NG_INITIALIZED;
+use syslog_ng_global_init;
+
+enum InternalState {
+    Owned(*mut cfg::GlobalConfig),
+    Borrowed(*mut cfg::GlobalConfig),
+}
+
+pub struct GlobalConfig(InternalState);
 
 impl GlobalConfig {
     pub fn new(version: i32) -> GlobalConfig {
         let cfg = unsafe { cfg::cfg_new(version) };
-        GlobalConfig(cfg)
+        GlobalConfig(InternalState::Owned(cfg))
+    }
+
+    pub fn borrow(cfg: *mut cfg::GlobalConfig) -> GlobalConfig {
+        GlobalConfig(InternalState::Borrowed(cfg))
     }
 
     pub fn get_user_version(&self) -> (u8, u8) {
-        let mut version = unsafe { cfg::cfg_get_user_version(self.0) };
+        let ptr = self.raw_ptr();
+        let mut version = unsafe { cfg::cfg_get_user_version(ptr) };
 
         if version < 0 {
             error!("User config version must be greater than 0, using 0 as version");
@@ -29,7 +42,8 @@ impl GlobalConfig {
     }
 
     pub fn get_parsed_version(&self) -> (u8, u8) {
-        let mut version = unsafe { cfg::cfg_get_parsed_version(self.0) };
+        let ptr = self.raw_ptr();
+        let mut version = unsafe { cfg::cfg_get_parsed_version(ptr) };
 
         if version < 0 {
             error!("Parsed config version must be greater than 0, using 0 as version");
@@ -40,13 +54,23 @@ impl GlobalConfig {
     }
 
     pub fn get_filename(&self) -> &CStr {
-        unsafe { CStr::from_ptr(cfg::cfg_get_filename(self.0)) }
+        let ptr = self.raw_ptr();
+        unsafe { CStr::from_ptr(cfg::cfg_get_filename(ptr)) }
+    }
+
+    pub fn raw_ptr(&self) -> *mut cfg::GlobalConfig {
+        match self.0 {
+            InternalState::Owned(ptr) => ptr,
+            InternalState::Borrowed(ptr) => ptr,
+        }
     }
 }
 
 impl Drop for GlobalConfig {
     fn drop(&mut self) {
-        unsafe { cfg::cfg_free(self.0) };
+        if let InternalState::Owned(ptr) = self.0 {
+            unsafe { cfg::cfg_free(ptr) };
+        }
     }
 }
 
@@ -94,4 +118,13 @@ fn hex_version_when_converted_to_major_version_works() {
 
     let (major, _) = convert_version(version);
     assert_eq!(major, 3);
+}
+
+#[test]
+fn test_borrowed_configuration_is_not_freed_on_destruction() {
+    SYSLOG_NG_INITIALIZED.call_once(|| {
+        unsafe { syslog_ng_global_init(); }
+    });
+    let owned = GlobalConfig::new(0x0308);
+    let _ = GlobalConfig::borrow(owned.raw_ptr());
 }

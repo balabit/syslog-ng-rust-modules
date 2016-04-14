@@ -6,12 +6,10 @@ use LogMessage;
 use GlobalConfig;
 
 use std::ffi::{CString, CStr};
-use std::rc::Rc;
 
 pub struct LogTemplate {
     pub wrapped: *mut sys::LogTemplate,
     buffer: *mut glib_sys::GString,
-    _cfg: Rc<GlobalConfig>
 }
 
 pub struct LogTemplateOptions(pub *mut sys::LogTemplateOptions);
@@ -22,14 +20,14 @@ pub enum LogTimeZone {
 }
 
 impl LogTemplate {
-    fn new(cfg: Rc<GlobalConfig>) -> LogTemplate {
+    fn new(cfg: &GlobalConfig) -> LogTemplate {
+        let raw_cfg = cfg.raw_ptr();
         LogTemplate {
-            wrapped: unsafe { sys::log_template_new(cfg.0, ::std::ptr::null()) },
+            wrapped: unsafe { sys::log_template_new(raw_cfg, ::std::ptr::null()) },
             buffer: unsafe { glib_sys::g_string_sized_new(128) },
-            _cfg: cfg
         }
     }
-    pub fn compile(cfg: Rc<GlobalConfig>, content: &str) -> Result<LogTemplate, Error> {
+    pub fn compile(cfg: &GlobalConfig, content: &str) -> Result<LogTemplate, Error> {
         let template = LogTemplate::new(cfg);
 
         let content = CString::new(content).unwrap();
@@ -72,7 +70,6 @@ mod tests {
     use GlobalConfig;
     use LogMessage;
 
-    use std::rc::Rc;
     use SYSLOG_NG_INITIALIZED;
     use syslog_ng_global_init;
 
@@ -81,8 +78,8 @@ mod tests {
         SYSLOG_NG_INITIALIZED.call_once(|| {
             unsafe { syslog_ng_global_init(); }
         });
-        let cfg = Rc::new(GlobalConfig::new(0x0308));
-        let _ = LogTemplate::new(cfg);
+        let cfg = GlobalConfig::new(0x0308);
+        let _ = LogTemplate::new(&cfg);
     }
 
     #[test]
@@ -90,8 +87,8 @@ mod tests {
         SYSLOG_NG_INITIALIZED.call_once(|| {
             unsafe { syslog_ng_global_init(); }
         });
-        let cfg = Rc::new(GlobalConfig::new(0x0308));
-        let _ = LogTemplate::compile(cfg, "literal").ok().unwrap();
+        let cfg = GlobalConfig::new(0x0308);
+        let _ = LogTemplate::compile(&cfg, "literal").ok().unwrap();
     }
 
     #[test]
@@ -99,8 +96,8 @@ mod tests {
         SYSLOG_NG_INITIALIZED.call_once(|| {
             unsafe { syslog_ng_global_init(); }
         });
-        let cfg = Rc::new(GlobalConfig::new(0x0308));
-        let _ = LogTemplate::compile(cfg, "${unbalanced").err().unwrap();
+        let cfg = GlobalConfig::new(0x0308);
+        let _ = LogTemplate::compile(&cfg, "${unbalanced").err().unwrap();
     }
 
     #[test]
@@ -108,8 +105,8 @@ mod tests {
         SYSLOG_NG_INITIALIZED.call_once(|| {
             unsafe { syslog_ng_global_init(); }
         });
-        let cfg = Rc::new(GlobalConfig::new(0x0308));
-        let mut template = LogTemplate::compile(cfg, "${kittens}").ok().unwrap();
+        let cfg = GlobalConfig::new(0x0308);
+        let mut template = LogTemplate::compile(&cfg, "${kittens}").ok().unwrap();
         let mut msg = LogMessage::new();
         msg.insert("kittens", "2");
         let formatted_msg = template.format(&msg, None, LogTimeZone::Local, 0, None);
