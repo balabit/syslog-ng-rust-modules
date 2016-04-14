@@ -4,8 +4,8 @@ extern crate syslog_ng_common;
 extern crate env_logger;
 
 use correlation_parser::{CorrelationParserBuilder, options, CLASSIFIER_UUID, CLASSIFIER_CLASS};
-use correlation_parser::mock::MockEvent;
-use correlation::{Event};
+use correlation_parser::mock::{MockEvent, MockLogTemplate, MockLogTemplateFactory};
+use correlation::Event;
 use syslog_ng_common::{ParserBuilder, LogMessage, Parser, SYSLOG_NG_INITIALIZED, syslog_ng_global_init, GlobalConfig};
 use syslog_ng_common::mock::MockPipe;
 
@@ -26,7 +26,8 @@ fn test_alert_is_forwarded() {
     let message = "seq: 0000000000, thread: 0000, runid: 1456947132, stamp: 2016-03-02T20:32:12 PAD";
 
     let mut pipe = MockPipe::new();
-    let mut builder = CorrelationParserBuilder::<MockPipe, MockEvent>::new();
+    let cfg = GlobalConfig::new(0x0308);
+    let mut builder = CorrelationParserBuilder::<MockPipe, MockEvent, MockLogTemplate, MockLogTemplateFactory>::new(cfg);
     builder.option(options::CONTEXTS_FILE.to_owned(), config_file.to_owned());
     let mut parser = builder.build().unwrap();
     assert_eq!(true, parser.parse(&mut pipe, &mut logmsg, message));
