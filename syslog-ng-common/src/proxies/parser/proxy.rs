@@ -8,6 +8,7 @@
 
 use LogMessage;
 use LogParser;
+use GlobalConfig;
 
 pub use proxies::parser::{OptionError, Parser, ParserBuilder};
 
@@ -21,10 +22,10 @@ pub struct ParserProxy<B>
 
 impl<B> ParserProxy<B> where B: ParserBuilder<LogParser>
 {
-    pub fn new() -> ParserProxy<B> {
+    pub fn new(cfg: GlobalConfig) -> ParserProxy<B> {
         ParserProxy {
             parser: None,
-            builder: Some(B::new()),
+            builder: Some(B::new(cfg)),
         }
     }
 

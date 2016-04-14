@@ -14,10 +14,11 @@ mod proxy;
 
 pub use self::option_error::OptionError;
 pub use self::proxy::ParserProxy;
+use GlobalConfig;
 
 pub trait ParserBuilder<P: Pipe> {
     type Parser: Parser<P>;
-    fn new() -> Self;
+    fn new(GlobalConfig) -> Self;
     fn option(&mut self, _name: String, _value: String) {}
     fn build(self) -> Result<Self::Parser, OptionError>;
 }
@@ -36,6 +37,7 @@ pub mod _parser_plugin {
     use $crate::LogParser;
     use $crate::init_logger;
     use $crate::ParserProxy;
+    use $crate::GlobalConfig;
 
     use std::ffi::CStr;
 
@@ -83,9 +85,10 @@ pub mod _parser_plugin {
     }
 
     #[no_mangle]
-    pub extern fn native_parser_proxy_new() -> Box<ParserProxy<$name>> {
+    pub extern fn native_parser_proxy_new(cfg: *mut $crate::sys::GlobalConfig) -> Box<ParserProxy<$name>> {
         init_logger();
-        Box::new(ParserProxy::new())
+        let cfg = GlobalConfig::borrow(cfg);
+        Box::new(ParserProxy::new(cfg))
     }
 
     #[no_mangle]
