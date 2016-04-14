@@ -51,7 +51,7 @@ impl<P: Pipe> Parser<P> for DummyParser<P> {
 // this verifies that the macro can be expanded
 parser_plugin!(DummyParserBuilder<LogParser>);
 
-use syslog_ng_common::sys::logmsg::log_msg_registry_init;
+use syslog_ng_common::{SYSLOG_NG_INITIALIZED, syslog_ng_global_init};
 
 struct DummyPipe;
 
@@ -62,14 +62,9 @@ impl Pipe for DummyPipe {
 #[test]
 fn test_given_parser_implementation_when_it_receives_a_message_then_it_adds_a_specific_key_value_pair_to_it
     () {
-    unsafe {
-        // we may initialize it multiple times -> we leak some memory.
-        // we may deinit it after each tests, but it's racy: the tests
-        // are running concurrently. That's why I didn't write a guard
-        // around it.
-        log_msg_registry_init();
-    };
-    let builder = DummyParserBuilder::<DummyPipe>::new();
+    SYSLOG_NG_INITIALIZED.call_once(|| {
+        unsafe { syslog_ng_global_init(); }
+    });
     let mut parser = builder.build().ok().expect("Failed to build DummyParser");
     let mut msg = LogMessage::new();
     let input = "The quick brown ...";
