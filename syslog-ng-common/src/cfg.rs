@@ -9,9 +9,6 @@
 use syslog_ng_sys::cfg;
 use std::ffi::CStr;
 
-use SYSLOG_NG_INITIALIZED;
-use syslog_ng_global_init;
-
 enum InternalState {
     Owned(*mut cfg::GlobalConfig),
     Borrowed(*mut cfg::GlobalConfig),
@@ -120,11 +117,19 @@ fn hex_version_when_converted_to_major_version_works() {
     assert_eq!(major, 3);
 }
 
-#[test]
-fn test_borrowed_configuration_is_not_freed_on_destruction() {
-    SYSLOG_NG_INITIALIZED.call_once(|| {
-        unsafe { syslog_ng_global_init(); }
-    });
-    let owned = GlobalConfig::new(0x0308);
-    let _ = GlobalConfig::borrow(owned.raw_ptr());
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    use SYSLOG_NG_INITIALIZED;
+    use syslog_ng_global_init;
+
+    #[test]
+    fn test_borrowed_configuration_is_not_freed_on_destruction() {
+        SYSLOG_NG_INITIALIZED.call_once(|| {
+            unsafe { syslog_ng_global_init(); }
+        });
+        let owned = GlobalConfig::new(0x0308);
+        let _ = GlobalConfig::borrow(owned.raw_ptr());
+    }
 }
