@@ -24,11 +24,11 @@ impl<P: Pipe> Clone for DummyParser<P> {
 pub struct DummyParserBuilder<P: Pipe>(PhantomData<P>);
 
 use syslog_ng_common::LogMessage;
-use syslog_ng_common::{Parser, ParserBuilder, OptionError, Pipe};
+use syslog_ng_common::{Parser, ParserBuilder, OptionError, Pipe, GlobalConfig};
 
 impl<P: Pipe> ParserBuilder<P> for DummyParserBuilder<P> {
     type Parser = DummyParser<P>;
-    fn new() -> Self {
+    fn new(_: GlobalConfig) -> Self {
         DummyParserBuilder(PhantomData)
     }
     fn option(&mut self, name: String, value: String) {
@@ -65,6 +65,8 @@ fn test_given_parser_implementation_when_it_receives_a_message_then_it_adds_a_sp
     SYSLOG_NG_INITIALIZED.call_once(|| {
         unsafe { syslog_ng_global_init(); }
     });
+    let cfg = GlobalConfig::new(0x0308);
+    let builder = DummyParserBuilder::<DummyPipe>::new(cfg);
     let mut parser = builder.build().ok().expect("Failed to build DummyParser");
     let mut msg = LogMessage::new();
     let input = "The quick brown ...";
