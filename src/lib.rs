@@ -11,7 +11,7 @@ use std::borrow::Borrow;
 use std::marker::PhantomData;
 use std::sync::{mpsc, Arc, Mutex};
 use syslog_ng_common::{MessageFormatter, LogMessage};
-use syslog_ng_common::{Parser, ParserBuilder, OptionError, Pipe};
+use syslog_ng_common::{Parser, ParserBuilder, OptionError, Pipe, GlobalConfig};
 
 pub use logevent::LogEvent;
 pub use logtemplate::{LogTemplate, LogTemplateFactory};
@@ -71,13 +71,13 @@ impl<P, E, T, TF> CorrelationParserBuilder<P, E, T, TF> where P: Pipe, E: Event,
     }
 }
 
-impl<P, E, T, TF> ParserBuilder<P> for CorrelationParserBuilder<P, E, T, TF> where P: Pipe, E: 'static + Event + Into<LogMessage>, T: 'static + Template<Event=E>, TF: TemplateFactory<E, Template=T> + Default {
+impl<P, E, T, TF> ParserBuilder<P> for CorrelationParserBuilder<P, E, T, TF> where P: Pipe, E: 'static + Event + Into<LogMessage>, T: 'static + Template<Event=E>, TF: TemplateFactory<E, Template=T> + From<GlobalConfig> {
     type Parser = CorrelationParser<P, E, T>;
-    fn new() -> Self {
+    fn new(cfg: GlobalConfig) -> Self {
         CorrelationParserBuilder {
             contexts: None,
             formatter: MessageFormatter::new(),
-            template_factory: TF::default(),
+            template_factory: TF::from(cfg),
             _marker: PhantomData
         }
     }
@@ -93,6 +93,7 @@ impl<P, E, T, TF> ParserBuilder<P> for CorrelationParserBuilder<P, E, T, TF> whe
     fn build(self) -> Result<Self::Parser, OptionError> {
         debug!("Building CorrelationParser");
         let CorrelationParserBuilder {contexts, template_factory, formatter, _marker } = self;
+        let _ = template_factory;
         let mut contexts = try!(contexts.ok_or(OptionError::missing_required_option(options::CONTEXTS_FILE)));
         contexts.set_alert_handler(Some(Box::new(MessageSender)));
         Ok(CorrelationParser::new(contexts, formatter))
