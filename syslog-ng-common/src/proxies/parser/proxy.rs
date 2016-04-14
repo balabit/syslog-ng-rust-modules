@@ -43,10 +43,6 @@ impl<B> ParserProxy<B> where B: ParserBuilder<LogParser>
     }
 
     pub fn set_option(&mut self, name: String, value: String) {
-        if self.builder.is_none() {
-            self.builder = Some(B::new());
-        }
-
         let builder = self.builder.as_mut().expect("Failed to get builder on a ParserProxy");
         builder.option(name, value);
     }
