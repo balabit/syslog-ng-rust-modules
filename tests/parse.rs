@@ -6,9 +6,8 @@ extern crate env_logger;
 use correlation_parser::{CorrelationParserBuilder, options, CLASSIFIER_UUID, CLASSIFIER_CLASS};
 use correlation_parser::mock::MockEvent;
 use correlation::{Event};
-use syslog_ng_common::{ParserBuilder, LogMessage, Parser};
+use syslog_ng_common::{ParserBuilder, LogMessage, Parser, SYSLOG_NG_INITIALIZED, syslog_ng_global_init, GlobalConfig};
 use syslog_ng_common::mock::MockPipe;
-use syslog_ng_common::sys::logmsg::log_msg_registry_init;
 
 use std::thread;
 use std::time::Duration;
@@ -16,7 +15,9 @@ use std::time::Duration;
 #[test]
 fn test_alert_is_forwarded() {
     let _ = env_logger::init();
-    unsafe { log_msg_registry_init()};
+    SYSLOG_NG_INITIALIZED.call_once(|| {
+        unsafe { syslog_ng_global_init(); }
+    });
     let mut logmsg = LogMessage::new();
     logmsg.insert(CLASSIFIER_UUID, "9cd7a5d6-d439-484d-95ac-7bf3bd055082");
     logmsg.insert(CLASSIFIER_CLASS, "LOGGEN");
