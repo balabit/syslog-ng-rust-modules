@@ -45,6 +45,9 @@ pub use plugin::Plugin;
 pub static SYSLOG_NG_INITIALIZED: Once = ONCE_INIT;
 
 pub unsafe fn syslog_ng_global_init() {
+    use syslog_ng_sys::resolved_configurable_paths as c_paths;
+
+    c_paths::resolved_configurable_paths_init(&mut c_paths::resolvedConfigurablePaths);
     sys::logmsg::log_msg_registry_init();
     sys::logtemplate::log_template_global_init();
 }
