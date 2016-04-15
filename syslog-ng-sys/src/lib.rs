@@ -18,6 +18,7 @@ pub mod messages;
 pub mod logparser;
 pub mod logpipe;
 pub mod logtemplate;
+pub mod plugin;
 
 pub use types::*;
 pub use logmsg::*;
@@ -25,3 +26,4 @@ pub use cfg::*;
 pub use messages::*;
 pub use logparser::LogParser;
 pub use logpipe::{LogPathOptions, LogPipe};
+pub use plugin::Plugin;
