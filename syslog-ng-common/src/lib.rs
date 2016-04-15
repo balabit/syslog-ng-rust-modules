@@ -28,6 +28,7 @@ mod logparser;
 mod logpipe;
 pub mod mock;
 pub mod logtemplate;
+mod plugin;
 
 pub use syslog_ng_sys::{c_int, c_char, ssize_t};
 pub use logparser::LogParser;
@@ -38,6 +39,7 @@ pub use cfg::GlobalConfig;
 pub use proxies::parser::{OptionError, Parser, ParserBuilder, ParserProxy};
 pub use logpipe::{LogPipe, Pipe};
 pub use logtemplate::{LogTemplate, LogTemplateOptions, LogTimeZone};
+pub use plugin::Plugin;
 
 #[allow(dead_code)]
 pub static SYSLOG_NG_INITIALIZED: Once = ONCE_INIT;
