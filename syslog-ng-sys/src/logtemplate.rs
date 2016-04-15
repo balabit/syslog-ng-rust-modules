@@ -27,4 +27,12 @@ extern "C" {
     pub fn log_template_unref(s: *mut LogTemplate);
     pub fn log_template_global_init();
     pub fn log_template_global_deinit();
+    pub fn log_template_format_with_context(slf: *const LogTemplate,
+                                            messages: *const *const LogMessage,
+                                            num_messages: c_int,
+                                            opts: *const LogTemplateOptions,
+                                            tz: c_int,
+                                            seq_num: i32,
+                                            context_id: *const c_char,
+                                            result: *mut GString) -> c_void;
 }
