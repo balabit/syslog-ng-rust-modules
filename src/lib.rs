@@ -10,6 +10,7 @@ use correlation::correlator::{Correlator, AlertHandler, CorrelatorFactory};
 use std::borrow::Borrow;
 use std::marker::PhantomData;
 use std::sync::{mpsc, Arc, Mutex};
+use std::error::Error;
 use syslog_ng_common::{MessageFormatter, LogMessage};
 use syslog_ng_common::{Parser, ParserBuilder, OptionError, Pipe, GlobalConfig};
 
@@ -61,7 +62,11 @@ impl<P, E, T, TF> CorrelationParserBuilder<P, E, T, TF> where P: Pipe, E: Event,
                 self.contexts = Some(correlator);
             },
             Err(err) => {
-                error!("CorrelationParser: failed to set config file: {:?}", &err);
+                error!("Failed to initialize correlation-parser from configuration file: {}", &err);
+                while let Some(err) = err.cause() {
+                    info!("Error: {}", err.description());
+                    info!("Cause: {}", &err);
+                }
             }
         }
     }
