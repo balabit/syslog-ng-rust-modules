@@ -77,7 +77,8 @@ mod test {
     use context::BaseContextBuilder;
     use uuid::Uuid;
     use std::time::Duration;
-    use test_utils::MockResponseSender;
+    use test_utils::{MockResponseSender, MockTemplate};
+    use Message;
 
     #[test]
     fn test_given_condition_when_an_opening_message_is_received_then_the_state_becomes_opened() {
@@ -92,7 +93,7 @@ mod test {
                             .build();
         let msg_which_should_not_be_ignored = MessageBuilder::new(&msg_id1, "message").build();
         let msg_which_should_be_ignored = MessageBuilder::new(&msg_id2, "message").build();
-        let base = BaseContextBuilder::new(Uuid::new_v4(), condition).patterns(patterns).build();
+        let base = BaseContextBuilder::<Message, MockTemplate>::new(Uuid::new_v4(), condition).patterns(patterns).build();
         assert_false!(base.is_opening(&msg_which_should_be_ignored));
         assert_true!(base.is_opening(&msg_which_should_not_be_ignored));
     }
@@ -111,7 +112,7 @@ mod test {
         let conditions = ConditionsBuilder::new(timeout)
                              .last_closes(true)
                              .build();
-        let context = BaseContextBuilder::new(Uuid::new_v4(), conditions).patterns(patterns).build();
+        let context = BaseContextBuilder::<Message, MockTemplate>::new(Uuid::new_v4(), conditions).patterns(patterns).build();
         let msg_opening = Arc::new(MessageBuilder::new(&msg_id1, "message").build());
         let msg_closing = Arc::new(MessageBuilder::new(&msg_id2, "message").build());
         assert_false!(state.is_open());
@@ -164,7 +165,7 @@ mod test {
         let timeout = Duration::from_millis(100);
         let msg_id = "11eaf6f8-0640-460f-aee2-a72d2f2ab258".to_owned();
         let condition = ConditionsBuilder::new(timeout).build();
-        let base = BaseContextBuilder::new(Uuid::new_v4(), condition).build();
+        let base = BaseContextBuilder::<Message, MockTemplate>::new(Uuid::new_v4(), condition).build();
         let msg = MessageBuilder::new(&msg_id, "message").build();
         assert_true!(base.is_opening(&msg));
     }
@@ -183,7 +184,7 @@ mod test {
         let condition = ConditionsBuilder::new(timeout)
                             .first_opens(true)
                             .build();
-        let base = BaseContextBuilder::new(Uuid::new_v4(), condition).patterns(patterns).build();
+        let base = BaseContextBuilder::<Message, MockTemplate>::new(Uuid::new_v4(), condition).patterns(patterns).build();
         let msg = MessageBuilder::new(&uuid, "message").name(Some(msg_id)).build();
         assert_true!(base.is_opening(&msg));
     }
@@ -205,7 +206,7 @@ mod test {
                              .build();
         let p1_msg = MessageBuilder::new(&p1_uuid, "message").name(Some(p1)).build();
         let p2_msg = MessageBuilder::new(&p2_uuid, "message").name(Some(p2)).build();
-        let context = BaseContextBuilder::new(Uuid::new_v4(), conditions).patterns(patterns).build();
+        let context = BaseContextBuilder::<Message, MockTemplate>::new(Uuid::new_v4(), conditions).patterns(patterns).build();
         assert_false!(state.is_open());
         context.on_message(Arc::new(p1_msg), &mut state, &mut responder);
         context.on_message(Arc::new(p2_msg), &mut state, &mut responder);
@@ -222,7 +223,7 @@ mod test {
         let conditions = ConditionsBuilder::new(Duration::from_millis(100))
                              .first_opens(true)
                              .build();
-        let context = BaseContextBuilder::new(Uuid::new_v4(), conditions).patterns(Vec::new()).build();
+        let context = BaseContextBuilder::<Message, MockTemplate>::new(Uuid::new_v4(), conditions).patterns(Vec::new()).build();
         let mut state = State::new();
         context.on_message(Arc::new(msg), &mut state, &mut responder);
     }
@@ -237,7 +238,7 @@ mod test {
         let conditions = ConditionsBuilder::new(Duration::from_millis(100))
                              .last_closes(true)
                              .build();
-        let context = BaseContextBuilder::new(Uuid::new_v4(), conditions).build();
+        let context = BaseContextBuilder::<Message, MockTemplate>::new(Uuid::new_v4(), conditions).build();
         let mut state = State::new();
         context.on_message(Arc::new(msg), &mut state, &mut responder);
     }

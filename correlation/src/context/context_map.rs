@@ -126,8 +126,9 @@ mod tests {
     use std::time::Duration;
     use Event;
     use Message;
+    use test_utils::MockTemplate;
 
-    fn assert_context_map_contains_uuid<E: Event>(context_map: &mut ContextMap<E>, uuid: &Uuid, key: &str) {
+    fn assert_context_map_contains_uuid(context_map: &mut ContextMap<Message, MockTemplate>, uuid: &Uuid, key: &str) {
         let mut iter = context_map.contexts_iter_mut(key);
         let context = iter.next().expect("Failed to get back an inserted context");
         if let Context::Linear(ref context) = *context {
@@ -140,7 +141,7 @@ mod tests {
     #[test]
     fn test_given_context_map_when_a_context_is_inserted_then_its_patters_are_inserted_to_the_map_with_its_id
         () {
-        let mut context_map = ContextMap::<Message>::new();
+        let mut context_map = ContextMap::<Message, MockTemplate>::new();
         let uuid = Uuid::new_v4();
         let context1 = {
             let conditions = {

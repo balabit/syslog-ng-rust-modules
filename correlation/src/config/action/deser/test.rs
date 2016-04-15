@@ -20,7 +20,7 @@ fn test_given_action_when_it_is_deserialized_then_we_get_the_right_result() {
         }
     "#;
 
-    let result = from_str::<ActionType>(text);
+    let result = from_str::<ActionType<String>>(text);
     let action = result.expect("Failed to deserialize a valid ActionType");
     match action {
         ActionType::Message(message) => {
@@ -32,7 +32,7 @@ fn test_given_action_when_it_is_deserialized_then_we_get_the_right_result() {
 #[test]
 fn test_given_unknown_action_when_it_is_deserialized_then_we_get_an_error() {
     let text = r#"{ "unknown": {} }"#;
-    let result = from_str::<ActionType>(text);
+    let result = from_str::<ActionType<String>>(text);
     let _ = result.err().expect("Successfully deserialized an unknown action");
 }
 

@@ -139,10 +139,11 @@ impl Deserialize for InjectMode {
 #[cfg(test)]
 mod test {
     use config::action::message::{MessageActionBuilder, MessageAction, InjectMode};
+    use std::fmt::Debug;
 
     use serde_json::from_str;
 
-    fn assert_message_action_eq<T>(expected: &MessageAction<T>, actual: &MessageAction<T>) {
+    fn assert_message_action_eq<T: Eq + Debug>(expected: &MessageAction<T>, actual: &MessageAction<T>) {
         assert_eq!(expected.uuid(), actual.uuid());
         assert_eq!(expected.name(), actual.name());
         assert_eq!(expected.message(), actual.message());
@@ -168,7 +169,7 @@ mod test {
                                    .pair("key1", "value1")
                                    .pair("key2", "value2")
                                    .build();
-        let result = from_str::<MessageAction>(text);
+        let result = from_str::<MessageAction<String>>(text);
         let message = result.expect("Failed to deserialize a valid MessageAction object");
         assert_message_action_eq(&expected_message, &message);
     }
@@ -184,7 +185,7 @@ mod test {
         "#;
 
         let expected_message = MessageActionBuilder::new("UUID", "message").build();
-        let result = from_str::<MessageAction>(text);
+        let result = from_str::<MessageAction<String>>(text);
         let message = result.expect("Failed to deserialize a valid MessageAction object");
         assert_message_action_eq(&expected_message, &message);
     }
@@ -197,7 +198,7 @@ mod test {
         }
         "#;
 
-        let result = from_str::<MessageAction>(text);
+        let result = from_str::<MessageAction<String>>(text);
         let _ = result.err().expect("Successfully deserialized an invalid MessageAction object");
     }
 
@@ -241,7 +242,7 @@ mod test {
         let expected_message = MessageActionBuilder::new("UUID", "message")
                                    .inject_mode(InjectMode::Forward)
                                    .build();
-        let result = from_str::<MessageAction>(text);
+        let result = from_str::<MessageAction<String>>(text);
         let message = result.expect("Failed to deserialize a valid MessageAction object");
         assert_message_action_eq(&expected_message, &message);
     }
@@ -249,14 +250,14 @@ mod test {
     #[test]
     fn test_given_message_is_deserialized_when_it_contains_an_unexpected_field_then_an_error_is_returned() {
         let text = r#"{ "unexpected": "UUID" }"#;
-        let result = from_str::<MessageAction>(text);
+        let result = from_str::<MessageAction<String>>(text);
         let _ = result.err().unwrap();
     }
 
     #[test]
     fn test_given_message_without_message_field_when_it_is_deserialized_then_an_error_is_returned() {
         let text = r#"{ "uuid": "missing_msg" }"#;
-        let result = from_str::<MessageAction>(text);
+        let result = from_str::<MessageAction<String>>(text);
         let _ = result.err().unwrap();
     }
 }

@@ -162,7 +162,7 @@ mod test {
         }
         "#;
 
-        let result = from_str::<ContextConfig>(text);
+        let result = from_str::<ContextConfig<String>>(text);
         let expected_name = "TEST_NAME".to_owned();
         let expected_uuid = Uuid::parse_str("86ca9f93-84fb-4813-b037-6526f7a585a3").ok().unwrap();
         let expected_conditions = ConditionsBuilder::new(Duration::from_millis(100))
@@ -172,7 +172,7 @@ mod test {
             on_opened: false,
             on_closed: true,
         };
-        let expected_actions = vec![ActionType::Message(MessageActionBuilder::new("uuid1",
+        let expected_actions = vec![ActionType::Message(MessageActionBuilder::<String>::new("uuid1",
                                                                                   "message")
                                                             .when(expected_exec_cond)
                                                             .build())];
@@ -186,7 +186,7 @@ mod test {
     #[test]
     fn test_given_config_context_when_it_does_not_have_uuid_then_it_cannot_be_deserialized() {
         let text = r#"{ "conditions": { "timeout": 100 }}"#;
-        let result = from_str::<ContextConfig>(text);
+        let result = from_str::<ContextConfig<String>>(text);
         let _ = result.err()
                       .expect("Successfully deserialized a config context without an uuid key");
     }
@@ -198,7 +198,7 @@ mod test {
             {"uuid": "86ca9f93-84fb-4813-b037-6526f7a585a3",
             "conditions": { "timeout": 100},
             "unknown": "unknown" }"#;
-        let result = from_str::<ContextConfig>(text);
+        let result = from_str::<ContextConfig<String>>(text);
         let _ = result.err()
                       .expect("Successfully deserialized a config context with an unknown key");
     }
@@ -215,7 +215,7 @@ mod test {
         }
         "#;
 
-        let result = from_str::<ContextConfig>(text);
+        let result = from_str::<ContextConfig<String>>(text);
         let expected_uuid = Uuid::parse_str("86ca9f93-84fb-4813-b037-6526f7a585a3").ok().unwrap();
         let expected_conditions = ConditionsBuilder::new(Duration::from_millis(100)).build();
         let context = result.expect("Failed to deserialize a valid ContextConfig");
@@ -235,7 +235,7 @@ mod test {
         }
         "#;
 
-        let result = from_str::<ContextConfig>(text);
+        let result = from_str::<ContextConfig<String>>(text);
         let _ = result.err()
                       .expect("Successfully deserialized an invalid ContextConfig (UUID is \
                                invalid)");
@@ -253,7 +253,7 @@ mod test {
         }
         "#;
         let expected_context_id = vec!["HOST".to_owned(), "PROGRAM".to_owned()];
-        let result = from_str::<ContextConfig>(text);
+        let result = from_str::<ContextConfig<String>>(text);
         let context = result.expect("Failed to deserialize a valid ContextConfig");
         assert_eq!(&expected_context_id,
                    context.context_id.as_ref().unwrap());
