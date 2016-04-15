@@ -61,3 +61,28 @@ impl Display for Error {
         }
     }
 }
+
+impl ::std::error::Error for Error {
+    fn description(&self) -> &str {
+        match *self {
+            Error::Io(ref error) => error.description(),
+            Error::SerdeJson(ref error) => error.description(),
+            Error::SerdeYaml(ref error) => error.description(),
+            Error::TemplateCompileError(ref error) => error.description(),
+            Error::UnsupportedFileExtension(_) => "The correlation library does not support this file format",
+            Error::FileExtensionNotFound => "The configuration file does not have file extension",
+            Error::NotUtf8FileName => "File name is not a valid UTF-8 character sequence",
+        }
+    }
+    fn cause(&self) -> Option<&::std::error::Error> {
+        match *self {
+            Error::Io(ref error) => error.cause(),
+            Error::SerdeJson(ref error) => error.cause(),
+            Error::SerdeYaml(ref error) => error.cause(),
+            Error::TemplateCompileError(ref error) => error.cause(),
+            Error::UnsupportedFileExtension(_) => None,
+            Error::FileExtensionNotFound => None,
+            Error::NotUtf8FileName => None,
+        }
+    }
+}
