@@ -10,11 +10,14 @@ use serde_json;
 use serde_yaml;
 use std::io;
 
+use CompileError;
+
 #[derive(Debug)]
 pub enum Error {
     Io(io::Error),
     SerdeJson(serde_json::error::Error),
     SerdeYaml(serde_yaml::error::Error),
+    TemplateCompileError(CompileError),
     UnsupportedFileExtension,
     NotUtf8FileName
 }
@@ -34,5 +37,11 @@ impl From<serde_json::error::Error> for Error {
 impl From<serde_yaml::error::Error> for Error {
     fn from(error: serde_yaml::error::Error) -> Error {
         Error::SerdeYaml(error)
+    }
+}
+
+impl From<CompileError> for Error {
+    fn from(error: CompileError) -> Error {
+        Error::TemplateCompileError(error)
     }
 }

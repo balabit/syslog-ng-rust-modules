@@ -15,14 +15,15 @@ use dispatcher::request::Request;
 use dispatcher::response::ResponseSender;
 use context::base::BaseContext;
 use Event;
+use Template;
 
-pub struct LinearContext<E: Event> {
-    base: BaseContext,
+pub struct LinearContext<E, T> where E: Event, T: Template<Event=E> {
+    base: BaseContext<E, T>,
     state: State<E>,
 }
 
-impl<E: Event> LinearContext<E> {
-    pub fn new(base: BaseContext) -> LinearContext<E> {
+impl<E, T> LinearContext<E, T> where E: Event, T: Template<Event=E> {
+    pub fn new(base: BaseContext<E, T>) -> LinearContext<E, T> {
         LinearContext {
             base: base,
             state: State::new(),

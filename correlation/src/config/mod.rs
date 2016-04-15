@@ -7,33 +7,82 @@
 // modified, or distributed except according to those terms.
 
 use uuid::Uuid;
+use std::collections::BTreeMap;
 
 use config::action::ActionType;
+use config::action::message::MessageAction;
 use conditions::Conditions;
+use Event;
+use TemplateFactory;
+use CompileError;
+use std::borrow::Borrow;
 
 mod deser;
 pub mod action;
 
-pub struct ContextConfig {
+pub struct ContextConfig<T> {
     pub name: Option<String>,
     pub uuid: Uuid,
     pub conditions: Conditions,
     pub context_id: Option<Vec<String>>,
-    pub actions: Vec<ActionType>,
+    pub actions: Vec<ActionType<T>>,
     pub patterns: Vec<String>
 }
 
-pub struct ContextConfigBuilder {
+pub fn compile_templates<T, E, TF>(original: Vec<ContextConfig<T>>, factory: &TF) -> Result<Vec<ContextConfig<TF::Template>>, CompileError>
+    where T: Borrow<str>, E: Event, TF: TemplateFactory<E> {
+    let mut new_contexts: Vec<ContextConfig<TF::Template>> = Vec::new();
+    for context in original {
+        let ContextConfig {name, uuid, conditions, context_id, actions, patterns} = context;
+        let mut new_actions: Vec<ActionType<TF::Template>> = Vec::new();
+
+        for action in actions {
+            let ActionType::Message(message_action) = action;
+            let MessageAction {uuid, name, message, values, when, inject_mode} = message_action;
+            let new_message = try!(factory.compile(message.borrow()));
+            let mut new_values = BTreeMap::new();
+
+            for (key, value) in values {
+                let value = try!(factory.compile(value.borrow()));
+                new_values.insert(key, value);
+            }
+
+            let action: MessageAction<TF::Template> = MessageAction {
+                uuid: uuid,
+                name: name,
+                message: new_message,
+                values: new_values,
+                when: when,
+                inject_mode: inject_mode
+            };
+            new_actions.push(ActionType::Message(action));
+        }
+
+        let config = ContextConfig {
+            name: name,
+            uuid: uuid,
+            conditions: conditions,
+            context_id: context_id,
+            actions: new_actions,
+            patterns: patterns
+        };
+
+        new_contexts.push(config);
+    }
+    Ok(new_contexts)
+}
+
+pub struct ContextConfigBuilder<T> {
     name: Option<String>,
     uuid: Uuid,
     conditions: Conditions,
     context_id: Option<Vec<String>>,
-    actions: Vec<ActionType>,
+    actions: Vec<ActionType<T>>,
     patterns: Vec<String>
 }
 
-impl ContextConfigBuilder {
-    pub fn new(uuid: Uuid, conditions: Conditions) -> ContextConfigBuilder {
+impl<T> ContextConfigBuilder<T> {
+    pub fn new(uuid: Uuid, conditions: Conditions) -> ContextConfigBuilder<T> {
         ContextConfigBuilder {
             name: None,
             uuid: uuid,
@@ -44,27 +93,27 @@ impl ContextConfigBuilder {
         }
     }
 
-    pub fn context_id(mut self, context_id: Option<Vec<String>>) -> ContextConfigBuilder {
+    pub fn context_id(mut self, context_id: Option<Vec<String>>) -> ContextConfigBuilder<T> {
         self.context_id = context_id;
         self
     }
 
-    pub fn actions(mut self, actions: Vec<ActionType>) -> ContextConfigBuilder {
+    pub fn actions(mut self, actions: Vec<ActionType<T>>) -> ContextConfigBuilder<T> {
         self.actions = actions;
         self
     }
 
-    pub fn name(mut self, name: String) -> ContextConfigBuilder {
+    pub fn name(mut self, name: String) -> ContextConfigBuilder<T> {
         self.name = Some(name);
         self
     }
 
-    pub fn patterns(mut self, patterns: Vec<String>) -> ContextConfigBuilder {
+    pub fn patterns(mut self, patterns: Vec<String>) -> ContextConfigBuilder<T> {
         self.patterns = patterns;
         self
     }
 
-    pub fn build(self) -> ContextConfig {
+    pub fn build(self) -> ContextConfig<T> {
         ContextConfig {
             name: self.name,
             uuid: self.uuid,

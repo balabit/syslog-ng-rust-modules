@@ -17,16 +17,17 @@ use dispatcher::response::ResponseSender;
 use action::Action;
 use timer::TimerEvent;
 use Event;
+use Template;
 
-pub struct BaseContext {
-    name: Option<String>,
-    uuid: Uuid,
-    conditions: Conditions,
-    actions: Vec<ActionType>,
+pub struct BaseContext<E, T> where E: Event, T: Template<Event=E> {
+    pub name: Option<String>,
+    pub uuid: Uuid,
+    pub conditions: Conditions,
+    pub actions: Vec<ActionType<T>>,
     pub patterns: Vec<String>,
 }
 
-impl BaseContext {
+impl<E, T> BaseContext<E, T> where E: Event, T: Template<Event=E> {
     pub fn uuid(&self) -> &Uuid {
         &self.uuid
     }
@@ -35,11 +36,11 @@ impl BaseContext {
         self.name.as_ref()
     }
 
-    pub fn actions(&self) -> &[ActionType] {
+    pub fn actions(&self) -> &[ActionType<T>] {
         &self.actions
     }
 
-    pub fn is_opening<E: Event>(&self, message: &E) -> bool {
+    pub fn is_opening(&self, message: &E) -> bool {
         if self.conditions.first_opens {
             self.patterns.first().iter().any(|first| message.ids().into_iter().any(|id| &id == first))
         } else {
@@ -47,21 +48,21 @@ impl BaseContext {
         }
     }
 
-    pub fn is_closing<E: Event>(&self, state: &State<E>) -> bool {
+    pub fn is_closing(&self, state: &State<E>) -> bool {
         trace!("Conditions: shoud we close this context?");
         state.is_open() && self.is_closing_condition_met(state)
     }
 
-    fn is_closing_condition_met<E: Event>(&self, state: &State<E>) -> bool {
+    fn is_closing_condition_met(&self, state: &State<E>) -> bool {
         self.is_max_size_reached(state) || self.is_closing_message(state) ||
         self.is_any_timer_expired(state)
     }
 
-    fn is_max_size_reached<E: Event>(&self, state: &State<E>) -> bool {
+    fn is_max_size_reached(&self, state: &State<E>) -> bool {
         self.conditions.max_size.map_or(false, |max_size| state.messages().len() >= max_size)
     }
 
-    fn is_closing_message<E: Event>(&self, state: &State<E>) -> bool {
+    fn is_closing_message(&self, state: &State<E>) -> bool {
         if self.conditions.last_closes {
             state.messages().last().iter().any(|last_message| {
                 self.patterns.last().iter().any(|last| last_message.ids().into_iter().any(|id| &id == last))
@@ -71,21 +72,21 @@ impl BaseContext {
         }
     }
 
-    fn is_any_timer_expired<E: Event>(&self, state: &State<E>) -> bool {
+    fn is_any_timer_expired(&self, state: &State<E>) -> bool {
         self.is_timeout_expired(state) || self.is_renew_timeout_expired(state)
     }
 
-    fn is_timeout_expired<E: Event>(&self, state: &State<E>) -> bool {
+    fn is_timeout_expired(&self, state: &State<E>) -> bool {
         state.elapsed_time() >= self.conditions.timeout
     }
 
-    fn is_renew_timeout_expired<E: Event>(&self, state: &State<E>) -> bool {
+    fn is_renew_timeout_expired(&self, state: &State<E>) -> bool {
         self.conditions.renew_timeout.map_or(false, |renew_timeout| {
             state.elapsed_time_since_last_message() >= renew_timeout
         })
     }
 
-    pub fn on_timer<E: Event>(&self,
+    pub fn on_timer(&self,
                     event: &TimerEvent,
                     state: &mut State<E>,
                     responder: &mut ResponseSender<E>) {
@@ -97,7 +98,7 @@ impl BaseContext {
         }
     }
 
-    pub fn on_message<E: Event>(&self,
+    pub fn on_message(&self,
                       event: Arc<E>,
                       state: &mut State<E>,
                       responder: &mut ResponseSender<E>) {
@@ -113,7 +114,7 @@ impl BaseContext {
         }
     }
 
-    fn open<E: Event>(&self, state: &mut State<E>, responder: &mut ResponseSender<E>) {
+    fn open(&self, state: &mut State<E>, responder: &mut ResponseSender<E>) {
         trace!("Context: opening state; uuid={}", self.uuid());
         for i in self.actions() {
             i.on_opened(state, self, responder);
@@ -121,7 +122,7 @@ impl BaseContext {
         state.open();
     }
 
-    fn close<E: Event>(&self, state: &mut State<E>, responder: &mut ResponseSender<E>) {
+    fn close(&self, state: &mut State<E>, responder: &mut ResponseSender<E>) {
         trace!("Context: closing state; uuid={}", self.uuid());
         for i in self.actions() {
             i.on_closed(state, self, responder);
@@ -130,16 +131,16 @@ impl BaseContext {
     }
 }
 
-pub struct BaseContextBuilder {
+pub struct BaseContextBuilder<E, T> where E: Event, T: Template<Event=E> {
     name: Option<String>,
     uuid: Uuid,
     conditions: Conditions,
-    actions: Vec<ActionType>,
+    actions: Vec<ActionType<T>>,
     patterns: Vec<String>
 }
 
-impl BaseContextBuilder {
-    pub fn new(uuid: Uuid, conditions: Conditions) -> BaseContextBuilder {
+impl<E, T> BaseContextBuilder<E, T> where E: Event, T: Template<Event=E> {
+    pub fn new(uuid: Uuid, conditions: Conditions) -> BaseContextBuilder<E, T> {
         BaseContextBuilder {
             name: None,
             uuid: uuid,
@@ -149,21 +150,21 @@ impl BaseContextBuilder {
         }
     }
 
-    pub fn name(mut self, name: Option<String>) -> BaseContextBuilder {
+    pub fn name(mut self, name: Option<String>) -> BaseContextBuilder<E, T> {
         self.name = name;
         self
     }
 
-    pub fn actions(mut self, actions: Vec<ActionType>) -> BaseContextBuilder {
+    pub fn actions(mut self, actions: Vec<ActionType<T>>) -> BaseContextBuilder<E, T> {
         self.actions = actions;
         self
     }
 
-    pub fn patterns(mut self, patterns: Vec<String>) -> BaseContextBuilder {
+    pub fn patterns(mut self, patterns: Vec<String>) -> BaseContextBuilder<E, T> {
         self.patterns = patterns;
         self
     }
-    pub fn build(self) -> BaseContext {
+    pub fn build(self) -> BaseContext<E, T> {
         let BaseContextBuilder {name, uuid, conditions, actions, patterns} = self;
         BaseContext {
             name: name,

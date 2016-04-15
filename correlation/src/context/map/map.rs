@@ -15,17 +15,18 @@ use context::base::BaseContext;
 use dispatcher::request::Request;
 use dispatcher::response::ResponseSender;
 use Event;
+use Template;
 
 pub type ContextKey = Vec<(String, String)>;
 
-pub struct MapContext<E: Event> {
-    base: BaseContext,
+pub struct MapContext<E, T> where E: Event, T: Template<Event=E> {
+    base: BaseContext<E, T>,
     map: BTreeMap<ContextKey, State<E>>,
     context_id: Vec<String>,
 }
 
-impl<E: Event> MapContext<E> {
-    pub fn new(base: BaseContext, context_id: Vec<String>) -> MapContext<E> {
+impl<E, T> MapContext<E, T> where E: Event, T: Template<Event=E> {
+    pub fn new(base: BaseContext<E, T>, context_id: Vec<String>) -> MapContext<E, T> {
         MapContext {
             base: base,
             map: BTreeMap::new(),

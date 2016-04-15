@@ -12,21 +12,22 @@ use context::BaseContext;
 use dispatcher::response::ResponseSender;
 use self::message::MessageAction;
 use Event;
+use Template;
 
 pub mod message;
 mod deser;
 
-pub enum ActionType {
-    Message(MessageAction),
+pub enum ActionType<T> {
+    Message(MessageAction<T>),
 }
 
-impl<E: Event> Action<E> for ActionType {
-    fn on_opened(&self, state: &State<E>, context: &BaseContext, responder: &mut ResponseSender<E>) {
+impl<E, T> Action<E, T> for ActionType<T> where E: Event, T: Template<Event=E> {
+    fn on_opened(&self, state: &State<E>, context: &BaseContext<E, T>, responder: &mut ResponseSender<E>) {
         match *self {
             ActionType::Message(ref action) => action.on_opened(state, context, responder),
         }
     }
-    fn on_closed(&self, state: &State<E>, context: &BaseContext, responder: &mut ResponseSender<E>) {
+    fn on_closed(&self, state: &State<E>, context: &BaseContext<E, T>, responder: &mut ResponseSender<E>) {
         match *self {
             ActionType::Message(ref action) => action.on_closed(state, context, responder),
         }

@@ -10,10 +10,11 @@ use state::State;
 use dispatcher::response::ResponseSender;
 use context::base::BaseContext;
 use Event;
+use Template;
 
 pub use config::action::message::Alert;
 
-pub trait Action<E: Event> {
-    fn on_opened(&self, state: &State<E>, context: &BaseContext, &mut ResponseSender<E>);
-    fn on_closed(&self, state: &State<E>, context: &BaseContext, &mut ResponseSender<E>);
+pub trait Action<E, T> where E: Event, T: Template<Event=E> {
+    fn on_opened(&self, state: &State<E>, context: &BaseContext<E, T>, &mut ResponseSender<E>);
+    fn on_closed(&self, state: &State<E>, context: &BaseContext<E, T>, &mut ResponseSender<E>);
 }

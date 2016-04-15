@@ -10,6 +10,7 @@ use dispatcher::request::Request;
 use dispatcher::response::ResponseSender;
 use config::ContextConfig;
 use Event;
+use Template;
 
 pub use self::linear::LinearContext;
 pub use self::map::MapContext;
@@ -24,12 +25,12 @@ pub mod map;
 #[cfg(test)]
 mod test;
 
-pub enum Context<E: Event> {
-    Linear(LinearContext<E>),
-    Map(MapContext<E>),
+pub enum Context<E, T> where E: Event, T: Template<Event=E> {
+    Linear(LinearContext<E, T>),
+    Map(MapContext<E, T>),
 }
 
-impl<E: Event> Context<E> {
+impl<E, T> Context<E, T> where E: Event, T: Template<Event=E> {
     pub fn on_event(&mut self, event: Request<E>, responder: &mut ResponseSender<E>) {
         match *self {
             Context::Linear(ref mut context) => context.on_event(event, responder),
@@ -45,8 +46,8 @@ impl<E: Event> Context<E> {
     }
 }
 
-impl<E: Event> From<ContextConfig> for Context<E> {
-    fn from(config: ContextConfig) -> Context<E> {
+impl<E, T> From<ContextConfig<T>> for Context<E, T> where E: Event, T: Template<Event=E> {
+    fn from(config: ContextConfig<T>) -> Context<E, T> {
         let ContextConfig {name, uuid, conditions, context_id, actions, patterns} = config;
 
         let base = BaseContextBuilder::new(uuid, conditions);

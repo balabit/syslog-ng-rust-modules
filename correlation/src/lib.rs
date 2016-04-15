@@ -97,16 +97,17 @@ impl<'a> Iterator for EventIdsIterator<'a> {
     }
 }
 
-pub trait TemplateFactory {
-    type Template: Template;
-    fn compile(value: &str) -> Result<Self::Template, CompileError>;
+pub trait TemplateFactory<E> where E: Event {
+    type Template: Template<Event=E>;
+    fn compile(&self, value: &str) -> Result<Self::Template, CompileError>;
 }
 
+#[derive(Debug)]
 pub struct CompileError(String);
 
-pub trait Template {
-    type Event: Event;
-    fn format(&self, messages: &[Self::Event], context_id: &str) -> &str;
-}
+use std::sync::Arc;
 
+pub trait Template: Send {
+    type Event: Event;
+    fn format_with_context(&self, messages: &[Arc<Self::Event>], context_id: &str) -> &str;
 }

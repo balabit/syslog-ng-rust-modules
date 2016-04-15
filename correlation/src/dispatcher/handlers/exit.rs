@@ -11,12 +11,13 @@ use dispatcher::Response;
 use dispatcher::request::{Request, RequestHandle};
 use reactor::{EventHandler, SharedData};
 use Event;
+use Template;
 
 #[derive(Default)]
 pub struct ExitEventHandler;
 
-impl<'a, E: Event> EventHandler<Request<E>, SharedData<'a, E>> for ExitEventHandler {
-    fn handle_event(&mut self, event: Request<E>, data: &mut SharedData<E>) {
+impl<'a, E, T> EventHandler<Request<E>, SharedData<'a, E, T>> for ExitEventHandler where E: Event, T: Template<Event=E> {
+    fn handle_event(&mut self, event: Request<E>, data: &mut SharedData<E, T>) {
         if let Request::Exit = event {
             data.responder.send_response(Response::Exit);
         } else {

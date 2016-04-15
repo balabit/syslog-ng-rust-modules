@@ -11,14 +11,15 @@ use std::collections::HashMap;
 use config::ContextConfig;
 use context::Context;
 use Event;
+use Template;
 
-pub struct ContextMap<E: Event> {
+pub struct ContextMap<E, T> where E: Event, T: Template<Event=E> {
     map: HashMap<String, Vec<usize>>,
-    contexts: Vec<Context<E>>,
+    contexts: Vec<Context<E, T>>,
 }
 
-impl<E: Event> Default for ContextMap<E> {
-    fn default() -> ContextMap<E> {
+impl<E, T> Default for ContextMap<E, T> where E: Event, T: Template<Event=E> {
+    fn default() -> ContextMap<E, T> {
         ContextMap {
             map: HashMap::default(),
             contexts: Vec::default()
@@ -26,12 +27,13 @@ impl<E: Event> Default for ContextMap<E> {
     }
 }
 
-impl<E: Event> ContextMap<E> {
-    pub fn new() -> ContextMap<E> {
+impl<E, T> ContextMap<E, T> where E: Event, T: Template<Event=E> {
+    pub fn new() -> ContextMap<E, T> {
         ContextMap::default()
     }
 
-    pub fn from_configs(configs: Vec<ContextConfig>) -> ContextMap<E> {
+    pub fn from_configs(configs: Vec<ContextConfig<T>>) -> ContextMap<E, T>
+        where T: Template<Event=E> {
         let mut context_map = ContextMap::new();
         for i in configs {
             context_map.insert(i.into());
@@ -39,23 +41,23 @@ impl<E: Event> ContextMap<E> {
         context_map
     }
 
-    pub fn insert(&mut self, context: Context<E>) {
+    pub fn insert(&mut self, context: Context<E, T>) {
         self.contexts.push(context);
         let last_context = self.contexts
                                .last()
                                .expect("Failed to remove the last Context from a non empty vector");
         let index_of_last_context = self.contexts.len() - 1;
         let patterns = last_context.patterns();
-        ContextMap::<E>::update_indices(&mut self.map, index_of_last_context, patterns);
+        ContextMap::<E, T>::update_indices(&mut self.map, index_of_last_context, patterns);
     }
 
     fn update_indices(map: &mut HashMap<String, Vec<usize>>,
                       new_index: usize,
                       patterns: &[String]) {
         if patterns.is_empty() {
-            ContextMap::<E>::add_index_to_every_index_vectors(map, new_index);
+            ContextMap::<E, T>::add_index_to_every_index_vectors(map, new_index);
         } else {
-            ContextMap::<E>::add_index_to_looked_up_index_vectors(map, new_index, patterns);
+            ContextMap::<E, T>::add_index_to_looked_up_index_vectors(map, new_index, patterns);
         }
     }
 
@@ -73,11 +75,11 @@ impl<E: Event> ContextMap<E> {
         }
     }
 
-    pub fn contexts_mut(&mut self) -> &mut Vec<Context<E>> {
+    pub fn contexts_mut(&mut self) -> &mut Vec<Context<E, T>> {
         &mut self.contexts
     }
 
-    pub fn contexts_iter_mut(&mut self, key: &str) -> Iterator<E> {
+    pub fn contexts_iter_mut(&mut self, key: &str) -> Iterator<E, T> {
         let ids = self.map.get(key);
         Iterator {
             ids: ids,
@@ -92,15 +94,15 @@ pub trait StreamingIterator {
     fn next(&mut self) -> Option<&mut Self::Item>;
 }
 
-pub struct Iterator<'a, E: 'a + Event> {
+pub struct Iterator<'a, E, T> where E: 'a + Event, T: 'a + Template<Event=E> {
     ids: Option<&'a Vec<usize>>,
     pos: usize,
-    contexts: &'a mut Vec<Context<E>>,
+    contexts: &'a mut Vec<Context<E, T>>,
 }
 
-impl<'a, E: Event> StreamingIterator for Iterator<'a, E> {
-    type Item = Context<E>;
-    fn next(&mut self) -> Option<&mut Context<E>> {
+impl<'a, E, T> StreamingIterator for Iterator<'a, E, T> where E: Event, T: Template<Event=E> {
+    type Item = Context<E, T>;
+    fn next(&mut self) -> Option<&mut Context<E, T>> {
         if let Some(ids) = self.ids {
             if let Some(id) = ids.get(self.pos) {
                 self.pos += 1;

@@ -9,12 +9,13 @@
 use dispatcher::request::{Request, RequestHandle};
 use reactor::{EventHandler, SharedData};
 use Event;
+use Template;
 
 #[derive(Default)]
 pub struct TimerEventHandler;
 
-impl<'a, E: Event> EventHandler<Request<E>, SharedData<'a, E>> for TimerEventHandler {
-    fn handle_event(&mut self, event: Request<E>, data: &mut SharedData<E>) {
+impl<'a, E, T> EventHandler<Request<E>, SharedData<'a, E, T>> for TimerEventHandler where E: 'a + Event, T: Template<Event=E>{
+    fn handle_event(&mut self, event: Request<E>, data: &mut SharedData<E, T>) {
         for i in data.map.contexts_mut() {
             i.on_event(event.clone(), data.responder);
         }

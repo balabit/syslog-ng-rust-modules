@@ -14,20 +14,21 @@ use dispatcher::request::{RequestHandle, Request};
 use reactor::{Event, EventDemultiplexer, EventHandler, Reactor, SharedData};
 use dispatcher::response::ResponseSender;
 use Event as MsgEvent;
+use Template;
 
 #[allow(type_complexity)]
-pub struct RequestReactor<E: MsgEvent> {
-    handlers: BTreeMap<RequestHandle, Box<for<'a> EventHandler<Request<E>, SharedData<'a, E>>>>,
+pub struct RequestReactor<E, T> where E: MsgEvent, T: Template<Event=E> {
+    handlers: BTreeMap<RequestHandle, Box<for<'a> EventHandler<Request<E>, SharedData<'a, E, T>>>>,
     demultiplexer: Demultiplexer<Request<E>>,
-    pub context_map: ContextMap<E>,
+    pub context_map: ContextMap<E, T>,
     responder: Box<ResponseSender<E>>,
 }
 
-impl<E: MsgEvent> RequestReactor<E> {
+impl<E, T> RequestReactor<E, T> where E: MsgEvent, T: Template<Event=E> {
     pub fn new(demultiplexer: Demultiplexer<Request<E>>,
-               context_map: ContextMap<E>,
+               context_map: ContextMap<E, T>,
                responder: Box<ResponseSender<E>>)
-               -> RequestReactor<E> {
+               -> RequestReactor<E, T> {
         RequestReactor {
             demultiplexer: demultiplexer,
             context_map: context_map,
@@ -37,7 +38,7 @@ impl<E: MsgEvent> RequestReactor<E> {
     }
 }
 
-impl<E: MsgEvent> Reactor<E> for RequestReactor<E> {
+impl<E, T> Reactor<E, T> for RequestReactor<E, T> where E: MsgEvent, T: Template<Event=E> {
     type Event = Request<E>;
     fn handle_events(&mut self) {
         let mut shared_data = SharedData::new(&mut self.context_map, &mut *self.responder);
@@ -51,7 +52,7 @@ impl<E: MsgEvent> Reactor<E> for RequestReactor<E> {
         }
     }
     fn register_handler(&mut self,
-                        handler: Box<for<'a> EventHandler<Self::Event, SharedData<'a, E>>>) {
+                        handler: Box<for<'a> EventHandler<Self::Event, SharedData<'a, E, T>>>) {
         self.handlers.insert(handler.handle(), handler);
     }
     fn remove_handler_by_handle(&mut self, handler: &RequestHandle) {
