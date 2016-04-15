@@ -43,7 +43,7 @@ impl CorrelatorFactory {
                         let content = try!(CorrelatorFactory::read(&path));
                         serde_yaml::from_str::<Vec<ContextConfig<String>>>(&content).map_err(Error::SerdeYaml)
                     },
-                    _ => Err(Error::UnsupportedFileExtension),
+                    other => Err(Error::UnsupportedFileExtension(other.to_owned())),
                 }
             },
             None => {
