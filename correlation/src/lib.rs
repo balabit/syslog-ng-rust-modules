@@ -113,6 +113,13 @@ impl Display for CompileError {
     }
 }
 
+impl ::std::error::Error for CompileError {
+    fn description(&self) -> &str {
+        "Failed to compile template expression"
+    }
+    fn cause(&self) -> Option<&::std::error::Error> { None }
+}
+
 use std::sync::Arc;
 
 pub trait Template: Send {
