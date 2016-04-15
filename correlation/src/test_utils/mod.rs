@@ -8,6 +8,8 @@
 
 pub use self::correlator::MockAlertHandler;
 pub use self::responder::MockResponseSender;
+pub use self::template::{MockTemplate, MockTemplateFactory};
 
 mod correlator;
 mod responder;
+mod template;
