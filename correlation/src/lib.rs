@@ -97,8 +97,16 @@ impl<'a> Iterator for EventIdsIterator<'a> {
     }
 }
 
-pub struct TemplateError(String);
+pub trait TemplateFactory {
+    type Template: Template;
+    fn compile(value: &str) -> Result<Self::Template, CompileError>;
+}
 
-pub trait Template<E: Event> {
-    fn format(&self, messages: &[E]) -> Result<&str, TemplateError>;
+pub struct CompileError(String);
+
+pub trait Template {
+    type Event: Event;
+    fn format(&self, messages: &[Self::Event], context_id: &str) -> &str;
+}
+
 }
