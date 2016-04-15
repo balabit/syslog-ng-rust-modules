@@ -12,6 +12,12 @@ pub struct MockTemplate {
 
 pub trait Mock: Send {
     fn call(&self, messages: &[Arc<Message>], context_id: &str) -> &str;
+
+/// implement Mock for bare fns
+impl<F: Send + for<'a, 'b, 'c> Fn(&'a [Arc<Message>], &'b str, &'c mut String)> Mock for F {
+    fn call(&self, messages: &[Arc<Message>], context_id: &str, buffer: &mut String) {
+        (*self)(messages, context_id, buffer)
+    }
 }
 
 struct LiteralMockTemplate(String);
