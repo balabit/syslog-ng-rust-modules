@@ -138,4 +138,16 @@ mod tests {
         let formatted_msg = template.format(&msg, None, LogTimeZone::Local, 0, None);
         assert_eq!("2", formatted_msg);
     }
+
+    #[test]
+    fn test_context_id_can_be_used() {
+        SYSLOG_NG_INITIALIZED.call_once(|| {
+            unsafe { syslog_ng_global_init(); }
+        });
+        let cfg = GlobalConfig::new(0x0308);
+        let mut template = LogTemplate::compile(&cfg, "${CONTEXT_ID}").ok().unwrap();
+        let msg = LogMessage::new();
+        let actual = template.format(&msg, None, LogTimeZone::Local, 0, Some("context-id"));
+        assert_eq!("context-id", actual);
+    }
 }
