@@ -19,6 +19,7 @@ pub enum Error {
     SerdeYaml(serde_yaml::error::Error),
     TemplateCompileError(CompileError),
     UnsupportedFileExtension,
+    FileExtensionNotFound,
     NotUtf8FileName
 }
 

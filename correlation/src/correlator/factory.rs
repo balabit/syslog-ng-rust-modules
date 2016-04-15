@@ -47,7 +47,7 @@ impl CorrelatorFactory {
                 }
             },
             None => {
-                Err(Error::UnsupportedFileExtension)
+                Err(Error::FileExtensionNotFound)
             }
         }
 
