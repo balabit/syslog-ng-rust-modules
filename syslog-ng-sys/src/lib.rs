@@ -19,6 +19,7 @@ pub mod logparser;
 pub mod logpipe;
 pub mod logtemplate;
 pub mod plugin;
+pub mod resolved_configurable_paths;
 
 pub use types::*;
 pub use logmsg::*;
