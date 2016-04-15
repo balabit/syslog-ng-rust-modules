@@ -105,6 +105,14 @@ pub trait TemplateFactory<E> where E: Event {
 #[derive(Debug, Eq, PartialEq)]
 pub struct CompileError(pub String);
 
+use std::fmt::{Display, Formatter, Error as FmtError};
+
+impl Display for CompileError {
+    fn fmt(&self, formatter: &mut Formatter) -> Result<(), FmtError> {
+        formatter.write_str(&self.0)
+    }
+}
+
 use std::sync::Arc;
 
 pub trait Template: Send {
