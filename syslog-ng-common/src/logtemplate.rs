@@ -1,4 +1,4 @@
-use syslog_ng_sys::c_char;
+use syslog_ng_sys::{self, c_char};
 use syslog_ng_sys::logtemplate as sys;
 use glib::Error;
 use glib_sys;
@@ -50,6 +50,26 @@ impl LogTemplate {
             });
 
             sys::log_template_format(self.wrapped, msg.0, options, tz as i32, seq_num, context_id, self.buffer);
+
+            if context_id != ::std::ptr::null() {
+                let _ = CString::from_raw(context_id as *mut c_char);
+            }
+
+            CStr::from_ptr((*self.buffer).str)
+        };
+        result.to_str().unwrap()
+    }
+
+    pub fn format_with_context(&mut self, messages: &[LogMessage], options: Option<&LogTemplateOptions>, tz: LogTimeZone, seq_num: i32, context_id: Option<&str>) -> &str {
+        let options: *const sys::LogTemplateOptions = options.map_or(::std::ptr::null(), |options| options.0);
+        let messages = messages.iter().map(|msg| msg.0 as *const syslog_ng_sys::LogMessage).collect::<Vec<*const syslog_ng_sys::LogMessage>>();
+        let result = unsafe {
+            let context_id: *const c_char = context_id.map_or(::std::ptr::null(), |id| {
+                let cstring = CString::new(id).unwrap();
+                cstring.into_raw()
+            });
+
+            sys::log_template_format_with_context(self.wrapped, messages.as_ptr(), messages.len() as i32, options, tz as i32, seq_num, context_id, self.buffer);
 
             if context_id != ::std::ptr::null() {
                 let _ = CString::from_raw(context_id as *mut c_char);
