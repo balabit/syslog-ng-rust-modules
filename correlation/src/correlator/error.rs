@@ -9,6 +9,7 @@
 use serde_json;
 use serde_yaml;
 use std::io;
+use std::fmt::{Display, Error as FmtError, Formatter};
 
 use CompileError;
 
@@ -44,5 +45,19 @@ impl From<serde_yaml::error::Error> for Error {
 impl From<CompileError> for Error {
     fn from(error: CompileError) -> Error {
         Error::TemplateCompileError(error)
+    }
+}
+
+impl Display for Error {
+    fn fmt(&self, formatter: &mut Formatter) -> Result<(), FmtError> {
+        match *self {
+            Error::Io(ref error) => error.fmt(formatter),
+            Error::SerdeJson(ref error) => error.fmt(formatter),
+            Error::SerdeYaml(ref error) => error.fmt(formatter),
+            Error::TemplateCompileError(ref error) => error.fmt(formatter),
+            Error::UnsupportedFileExtension(ref ext) => formatter.write_fmt(format_args!("File extension '{}' is not supported", ext)),
+            Error::FileExtensionNotFound => formatter.write_str("The configuration file does not have an extension"),
+            Error::NotUtf8FileName => formatter.write_str("File name is not a valid UTF-8 character sequence"),
+        }
     }
 }
