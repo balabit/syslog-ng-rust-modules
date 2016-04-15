@@ -4,6 +4,7 @@ use TemplateFactory;
 use Message;
 use CompileError;
 
+use std::fmt::Write;
 use std::sync::Arc;
 
 pub struct MockTemplate {
@@ -11,7 +12,8 @@ pub struct MockTemplate {
 }
 
 pub trait Mock: Send {
-    fn call(&self, messages: &[Arc<Message>], context_id: &str) -> &str;
+    fn call(&self, messages: &[Arc<Message>], context_id: &str, &mut String);
+}
 
 /// implement Mock for bare fns
 impl<F: Send + for<'a, 'b, 'c> Fn(&'a [Arc<Message>], &'b str, &'c mut String)> Mock for F {
@@ -23,8 +25,8 @@ impl<F: Send + for<'a, 'b, 'c> Fn(&'a [Arc<Message>], &'b str, &'c mut String)> 
 struct LiteralMockTemplate(String);
 
 impl Mock for LiteralMockTemplate {
-    fn call(&self, _: &[Arc<Message>], _: &str) -> &str {
-        &self.0
+    fn call(&self, _: &[Arc<Message>], _: &str, buffer: &mut String) {
+        let _ = buffer.write_str(&self.0);
     }
 }
 
@@ -39,8 +41,8 @@ impl MockTemplate {
 
 impl Template for MockTemplate {
     type Event = Message;
-    fn format_with_context(&self, messages: &[Arc<Self::Event>], context_id: &str) -> &str {
-        self.with_context.call(messages, context_id)
+    fn format_with_context(&self, messages: &[Arc<Self::Event>], context_id: &str, buffer: &mut String) {
+        self.with_context.call(messages, context_id, buffer)
     }
 }
 
@@ -77,7 +79,9 @@ fn test_mock_template_factory_can_generate_template_which_returns_the_compiled_v
     let factory = MockTemplateFactory::compile_value();
     let expected = "VALUE";
     let template = factory.compile(expected).ok().unwrap();
-    let actual = template.format_with_context(&[], "doesn't matter");
+    let dummy_context_id = "doesn't matter";
+    let mut actual = String::new();
+    template.format_with_context(&[], dummy_context_id, &mut actual);
     assert_eq!(expected, actual);
 }
 
@@ -85,6 +89,8 @@ fn test_mock_template_factory_can_generate_template_which_returns_the_compiled_v
 fn test_mock_template_returns_the_expected_literal() {
     let expected = "literal";
     let template = MockTemplate::literal(expected);
-    let actual = template.format_with_context(&[], "doesn't matter");
+    let dummy_context_id = "doesn't matter";
+    let mut actual = String::new();
+    template.format_with_context(&[], dummy_context_id, &mut actual);
     assert_eq!(expected, actual);
 }
