@@ -32,11 +32,6 @@ pub trait EventHandler<T: Event, D> {
     fn handle(&self) -> T::Handle;
 }
 
-pub trait EventDemultiplexer {
-    type Event: Event;
-    fn select(&mut self) -> Option<Self::Event>;
-}
-
 pub trait Event {
     type Handle;
     fn handle(&self) -> Self::Handle;
