@@ -8,10 +8,6 @@ keywords = ["logging", "event processing"]
 description = "A library for grouping events based on predefined rules."
 license = "MIT/Apache-2.0"
 
-[[bin]]
-name = "test"
-path = "src/bin/test.rs"
-
 [dependencies]
 maplit = "0.1"
 uuid = "0.1"
