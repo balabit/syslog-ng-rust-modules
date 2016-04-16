@@ -12,13 +12,13 @@ use context::base::BaseContextBuilder;
 
 use conditions::ConditionsBuilder;
 use dispatcher::Response;
-use test_utils::MockResponseSender;
 use state::State;
 use action::Action;
 
 use env_logger;
 use std::time::Duration;
 use std::sync::Arc;
+use std::collections::VecDeque;
 use uuid::Uuid;
 use Event;
 use Message;
@@ -27,7 +27,7 @@ use test_utils::{MockTemplate};
 #[test]
 fn test_given_message_action_when_it_is_executed_then_the_additional_values_are_inserted_into_the_generated_message
     () {
-    let mut responder = MockResponseSender::default();
+    let mut responder = VecDeque::default();
     let _ = env_logger::init();
     let base_context = {
         let conditions = ConditionsBuilder::new(Duration::from_millis(100)).build();
@@ -45,22 +45,18 @@ fn test_given_message_action_when_it_is_executed_then_the_additional_values_are_
                                               .build();
 
     message_action.on_closed(&state, &base_context, &mut responder);
-    assert_eq!(1, responder.0.len());
-    let responses = responder.0;
-    if let Response::Alert(ref response) = *responses.get(0).unwrap() {
-        let message = &response.message;
-        assert_eq!("value1",
-                   message.get("key1").expect("Failed to get an additional key-value pair from a generated message"));
-        assert_eq!("value2",
-                   message.get("key2").expect("Failed to get an additional key-value pair from a generated message"));
-    } else {
-        unreachable!();
-    }
+    assert_eq!(1, responder.len());
+    let response = responder.get(0).unwrap();
+    let message = &response.message;
+    assert_eq!("value1",
+               message.get("key1").expect("Failed to get an additional key-value pair from a generated message"));
+    assert_eq!("value2",
+               message.get("key2").expect("Failed to get an additional key-value pair from a generated message"));
 }
 
 #[test]
 fn test_executed_message_action_uses_the_templates() {
-    let mut responder = MockResponseSender::default();
+    let mut responder = VecDeque::default();
     let uuid_as_str = "2f34112c-6fc8-406b-a6f0-78158ca724b6";
     let uuid = Uuid::parse_str(uuid_as_str).unwrap();
     let base_context = {
@@ -80,18 +76,14 @@ fn test_executed_message_action_uses_the_templates() {
                                               .build();
 
     message_action.on_closed(&state, &base_context, &mut responder);
-    assert_eq!(1, responder.0.len());
-    let responses = responder.0;
-    if let Response::Alert(ref response) = *responses.get(0).unwrap() {
-        let message = &response.message;
-        assert_eq!(uuid_as_str, message.message());
-        assert_eq!("value1",
-                   message.get("key1").expect("Failed to get an additional key-value pair from a generated message"));
-        assert_eq!("value2",
-                   message.get("key2").expect("Failed to get an additional key-value pair from a generated message"));
-        assert_eq!(uuid_as_str, message.get("context_id").unwrap());
-        assert_eq!("2", message.get("context_len").unwrap());
-    } else {
-        unreachable!();
-    }
+    assert_eq!(1, responder.len());
+    let response = responder.get(0).unwrap();
+    let message = &response.message;
+    assert_eq!(uuid_as_str, message.message());
+    assert_eq!("value1",
+               message.get("key1").expect("Failed to get an additional key-value pair from a generated message"));
+    assert_eq!("value2",
+               message.get("key2").expect("Failed to get an additional key-value pair from a generated message"));
+    assert_eq!(uuid_as_str, message.get("context_id").unwrap());
+    assert_eq!("2", message.get("context_len").unwrap());
 }

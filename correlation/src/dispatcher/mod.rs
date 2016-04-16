@@ -6,15 +6,11 @@
 // option. All files in the project carrying such notice may not be copied,
 // modified, or distributed except according to those terms.
 
-use std::sync::mpsc::Sender;
-
-use action::Alert;
+use Alert;
 use reactor::Event;
-use self::response::ResponseSender;
 use Event as MsgEvent;
 
 pub mod handlers;
-pub mod response;
 pub mod request;
 
 #[derive(Debug, Clone)]
@@ -36,11 +32,5 @@ impl<E: MsgEvent> Event for Response<E> {
             Response::Exit => ResponseHandle::Exit,
             Response::Alert(_) => ResponseHandle::Alert,
         }
-    }
-}
-
-impl<E: MsgEvent> ResponseSender<E> for Sender<Response<E>> {
-    fn send_response(&mut self, response: Response<E>) {
-        let _ = self.send(response);
     }
 }

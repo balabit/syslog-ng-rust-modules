@@ -6,11 +6,13 @@
 // option. All files in the project carrying such notice may not be copied,
 // modified, or distributed except according to those terms.
 
+use std::collections::VecDeque;
+
 use dispatcher::request::Request;
-use dispatcher::response::ResponseSender;
 use config::ContextConfig;
 use Event;
 use Template;
+use Alert;
 
 pub use self::linear::LinearContext;
 pub use self::map::MapContext;
@@ -31,7 +33,7 @@ pub enum Context<E, T> where E: Event, T: Template<Event=E> {
 }
 
 impl<E, T> Context<E, T> where E: Event, T: Template<Event=E> {
-    pub fn on_event(&mut self, event: Request<E>, responder: &mut ResponseSender<E>) {
+    pub fn on_event(&mut self, event: Request<E>, responder: &mut VecDeque<Alert<E>>) {
         match *self {
             Context::Linear(ref mut context) => context.on_event(event, responder),
             Context::Map(ref mut context) => context.on_event(event, responder),

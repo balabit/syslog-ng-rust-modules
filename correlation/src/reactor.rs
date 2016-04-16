@@ -6,18 +6,20 @@
 // option. All files in the project carrying such notice may not be copied,
 // modified, or distributed except according to those terms.
 
-use dispatcher::response::ResponseSender;
 use context::ContextMap;
 use Event as MsgEvent;
 use Template;
+use Alert;
+
+use std::collections::VecDeque;
 
 pub struct SharedData<'a, E, T> where E: 'a + MsgEvent, T: 'a + Template<Event=E> {
-    pub responder: &'a mut ResponseSender<E>,
+    pub responder: &'a mut VecDeque<Alert<E>>,
     pub map: &'a mut ContextMap<E, T>,
 }
 
 impl<'a, E, T> SharedData<'a, E, T> where E: 'a + MsgEvent, T: Template<Event=E> {
-    pub fn new(map: &'a mut ContextMap<E, T>, responder: &'a mut ResponseSender<E>) -> SharedData<'a, E, T> {
+    pub fn new(map: &'a mut ContextMap<E, T>, responder: &'a mut VecDeque<Alert<E>>) -> SharedData<'a, E, T> {
         SharedData {
             map: map,
             responder: responder,

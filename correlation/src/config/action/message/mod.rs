@@ -9,11 +9,11 @@
 use action::Action;
 use context::base::BaseContext;
 use dispatcher::Response;
-use dispatcher::response::ResponseSender;
 use Event;
 use Template;
 
 use std::collections::BTreeMap;
+use std::collections::VecDeque;
 use std::borrow::Borrow;
 use state::State;
 use super::ExecCondition;
@@ -56,7 +56,7 @@ impl<T> MessageAction<T> {
         &self.inject_mode
     }
 
-    fn execute<E>(&self, state: &State<E>, context: &BaseContext<E, T>, responder: &mut ResponseSender<E>) where E: Event, T: Template<Event=E> {
+    fn execute<E>(&self, state: &State<E>, context: &BaseContext<E, T>, responder: &mut VecDeque<Alert<E>>) where E: Event, T: Template<Event=E> {
         let context_id = context.uuid.to_hyphenated_string();
         let mut message = String::new();
         self.message.format_with_context(state.messages(), &context_id, &mut message);
@@ -72,7 +72,7 @@ impl<T> MessageAction<T> {
             message: event,
             inject_mode: self.inject_mode.clone(),
         };
-        responder.send_response(Response::Alert(response));
+        responder.push_back(response);
     }
 }
 
@@ -102,14 +102,14 @@ pub struct Alert<E: Event> {
 }
 
 impl<E, T> Action<E, T> for MessageAction<T> where E: Event, T: Template<Event=E> {
-    fn on_opened(&self, state: &State<E>, context: &BaseContext<E, T>, responder: &mut ResponseSender<E>) {
+    fn on_opened(&self, state: &State<E>, context: &BaseContext<E, T>, responder: &mut VecDeque<Alert<E>>) {
         if self.when.on_opened {
             trace!("MessageAction: on_opened()");
             self.execute(state, context, responder);
         }
     }
 
-    fn on_closed(&self, state: &State<E>, context: &BaseContext<E, T>, responder: &mut ResponseSender<E>) {
+    fn on_closed(&self, state: &State<E>, context: &BaseContext<E, T>, responder: &mut VecDeque<Alert<E>>) {
         if self.when.on_closed {
             trace!("MessageAction: on_closed()");
             self.execute(state, context, responder);

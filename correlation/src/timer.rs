@@ -6,12 +6,7 @@
 // option. All files in the project carrying such notice may not be copied,
 // modified, or distributed except according to those terms.
 
-use std::sync::mpsc;
-use std::thread;
 use std::time::Duration;
-use Event;
-
-use dispatcher::request::Request;
 
 #[derive(Clone, Copy, Debug)]
 pub struct TimerEvent(pub Duration);

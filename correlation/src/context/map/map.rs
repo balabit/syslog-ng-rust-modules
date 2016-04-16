@@ -7,15 +7,16 @@
 // modified, or distributed except according to those terms.
 
 use std::collections::BTreeMap;
+use std::collections::VecDeque;
 use std::sync::Arc;
 
 use state::State;
 use timer::TimerEvent;
 use context::base::BaseContext;
 use dispatcher::request::Request;
-use dispatcher::response::ResponseSender;
 use Event;
 use Template;
+use Alert;
 
 pub type ContextKey = Vec<(String, String)>;
 
@@ -34,7 +35,7 @@ impl<E, T> MapContext<E, T> where E: Event, T: Template<Event=E> {
         }
     }
 
-    pub fn on_event(&mut self, event: Request<E>, responder: &mut ResponseSender<E>) {
+    pub fn on_event(&mut self, event: Request<E>, responder: &mut VecDeque<Alert<E>>) {
         trace!("MapContext: received event");
         match event {
             Request::Timer(event) => self.on_timer(&event, responder),
@@ -44,7 +45,7 @@ impl<E, T> MapContext<E, T> where E: Event, T: Template<Event=E> {
     }
 
     #[allow(for_kv_map)]
-    pub fn on_timer(&mut self, event: &TimerEvent, responder: &mut ResponseSender<E>) {
+    pub fn on_timer(&mut self, event: &TimerEvent, responder: &mut VecDeque<Alert<E>>) {
         for (_, mut state) in &mut self.map {
             self.base.on_timer(event, &mut state, responder);
         }
@@ -70,12 +71,12 @@ impl<E, T> MapContext<E, T> where E: Event, T: Template<Event=E> {
         }
     }
 
-    pub fn on_message(&mut self, event: Arc<E>, responder: &mut ResponseSender<E>) {
+    pub fn on_message(&mut self, event: Arc<E>, responder: &mut VecDeque<Alert<E>>) {
         self.update_state(event, responder);
         self.remove_closed_states();
     }
 
-    fn update_state(&mut self, event: Arc<E>, responder: &mut ResponseSender<E>) {
+    fn update_state(&mut self, event: Arc<E>, responder: &mut VecDeque<Alert<E>>) {
         let key: ContextKey = self.context_id.iter().map(|key| {
                 (key.to_owned(), event.get(&key).map_or_else(|| "".to_owned(), |value| value.to_owned()))
             }).collect();

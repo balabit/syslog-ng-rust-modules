@@ -7,17 +7,18 @@
 // modified, or distributed except according to those terms.
 
 use std::sync::Arc;
+use std::collections::VecDeque;
 
 use uuid::Uuid;
 
 use config::action::ActionType;
 use conditions::Conditions;
 use state::State;
-use dispatcher::response::ResponseSender;
 use action::Action;
 use timer::TimerEvent;
 use Event;
 use Template;
+use Alert;
 
 pub struct BaseContext<E, T> where E: Event, T: Template<Event=E> {
     pub name: Option<String>,
@@ -89,7 +90,7 @@ impl<E, T> BaseContext<E, T> where E: Event, T: Template<Event=E> {
     pub fn on_timer(&self,
                     event: &TimerEvent,
                     state: &mut State<E>,
-                    responder: &mut ResponseSender<E>) {
+                    responder: &mut VecDeque<Alert<E>>) {
         if state.is_open() {
             state.update_timers(event);
         }
@@ -101,7 +102,7 @@ impl<E, T> BaseContext<E, T> where E: Event, T: Template<Event=E> {
     pub fn on_message(&self,
                       event: Arc<E>,
                       state: &mut State<E>,
-                      responder: &mut ResponseSender<E>) {
+                      responder: &mut VecDeque<Alert<E>>) {
         if state.is_open() {
             state.add_message(event);
         } else if self.is_opening(&*event) {
@@ -114,7 +115,7 @@ impl<E, T> BaseContext<E, T> where E: Event, T: Template<Event=E> {
         }
     }
 
-    fn open(&self, state: &mut State<E>, responder: &mut ResponseSender<E>) {
+    fn open(&self, state: &mut State<E>, responder: &mut VecDeque<Alert<E>>) {
         trace!("Context: opening state; uuid={}", self.uuid());
         for i in self.actions() {
             i.on_opened(state, self, responder);
@@ -122,7 +123,7 @@ impl<E, T> BaseContext<E, T> where E: Event, T: Template<Event=E> {
         state.open();
     }
 
-    fn close(&self, state: &mut State<E>, responder: &mut ResponseSender<E>) {
+    fn close(&self, state: &mut State<E>, responder: &mut VecDeque<Alert<E>>) {
         trace!("Context: closing state; uuid={}", self.uuid());
         for i in self.actions() {
             i.on_closed(state, self, responder);

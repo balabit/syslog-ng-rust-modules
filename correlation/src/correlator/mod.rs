@@ -10,7 +10,7 @@ use std::time::Duration;
 use std::sync::Arc;
 use std::collections::VecDeque;
 
-use Response;
+use Alert;
 use context::ContextMap;
 use dispatcher::request::Request;
 use dispatcher::handlers::timer::TimerEventHandler;
@@ -30,7 +30,7 @@ mod test;
 
 pub struct Correlator<E, T> where E: 'static + Event, T: 'static + Template<Event=E> {
     pub context_map: ContextMap<E, T>,
-    pub responses: VecDeque<Response<E>>,
+    pub responses: VecDeque<Alert<E>>,
     message_event_handler: MessageEventHandler,
     timer_event_handler: TimerEventHandler,
 }

@@ -6,8 +6,9 @@
 // option. All files in the project carrying such notice may not be copied,
 // modified, or distributed except according to those terms.
 
+use std::collections::VecDeque;
+
 use state::State;
-use dispatcher::response::ResponseSender;
 use context::base::BaseContext;
 use Event;
 use Template;
@@ -15,6 +16,6 @@ use Template;
 pub use config::action::message::Alert;
 
 pub trait Action<E, T> where E: Event, T: Template<Event=E> {
-    fn on_opened(&self, state: &State<E>, context: &BaseContext<E, T>, &mut ResponseSender<E>);
-    fn on_closed(&self, state: &State<E>, context: &BaseContext<E, T>, &mut ResponseSender<E>);
+    fn on_opened(&self, state: &State<E>, context: &BaseContext<E, T>, &mut VecDeque<Alert<E>>);
+    fn on_closed(&self, state: &State<E>, context: &BaseContext<E, T>, &mut VecDeque<Alert<E>>);
 }

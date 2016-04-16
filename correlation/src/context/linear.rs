@@ -8,11 +8,12 @@
 
 use uuid::Uuid;
 use std::sync::Arc;
+use std::collections::VecDeque;
 
+use Alert;
 use state::State;
 use timer::TimerEvent;
 use dispatcher::request::Request;
-use dispatcher::response::ResponseSender;
 use context::base::BaseContext;
 use Event;
 use Template;
@@ -30,7 +31,7 @@ impl<E, T> LinearContext<E, T> where E: Event, T: Template<Event=E> {
         }
     }
 
-    pub fn on_event(&mut self, event: Request<E>, responder: &mut ResponseSender<E>) {
+    pub fn on_event(&mut self, event: Request<E>, responder: &mut VecDeque<Alert<E>>) {
         trace!("LinearContext: received event");
         match event {
             Request::Timer(event) => self.on_timer(&event, responder),
@@ -39,11 +40,11 @@ impl<E, T> LinearContext<E, T> where E: Event, T: Template<Event=E> {
         }
     }
 
-    pub fn on_timer(&mut self, event: &TimerEvent, responder: &mut ResponseSender<E>) {
+    pub fn on_timer(&mut self, event: &TimerEvent, responder: &mut VecDeque<Alert<E>>) {
         self.base.on_timer(event, &mut self.state, responder);
     }
 
-    pub fn on_message(&mut self, event: Arc<E>, responder: &mut ResponseSender<E>) {
+    pub fn on_message(&mut self, event: Arc<E>, responder: &mut VecDeque<Alert<E>>) {
         self.base.on_message(event, &mut self.state, responder);
     }
 

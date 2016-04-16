@@ -10,16 +10,17 @@ use conditions::ConditionsBuilder;
 use context::{BaseContextBuilder, MapContext};
 use timer::TimerEvent;
 use message::MessageBuilder;
-use test_utils::{MockResponseSender, MockTemplate};
+use test_utils::MockTemplate;
 use Message;
 
 use uuid::Uuid;
 use std::sync::Arc;
 use std::time::Duration;
+use std::collections::VecDeque;
 
 #[test]
 fn test_given_map_context_when_messages_have_the_same_kvpairs_then_they_go_to_the_same_context() {
-    let mut responder = MockResponseSender::default();
+    let mut responder = VecDeque::default();
     let delta = Duration::from_millis(10);
     let timeout = Duration::from_millis(30);
     let event = TimerEvent(delta);
