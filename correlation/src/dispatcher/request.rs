@@ -17,14 +17,12 @@ use Event;
 pub enum Request<E: Event> {
     Message(Arc<E>),
     Timer(Duration),
-    Exit,
 }
 
 #[derive(Clone, Debug, Eq, PartialEq, PartialOrd, Ord)]
 pub enum RequestHandle {
     Message,
     Timer,
-    Exit,
 }
 
 impl<E: Event> reactor::Event for Request<E> {
@@ -33,7 +31,6 @@ impl<E: Event> reactor::Event for Request<E> {
         match *self {
             Request::Message(_) => RequestHandle::Message,
             Request::Timer(_) => RequestHandle::Timer,
-            Request::Exit => RequestHandle::Exit,
         }
     }
 }

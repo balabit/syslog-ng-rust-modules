@@ -36,7 +36,6 @@ impl<E, T> LinearContext<E, T> where E: Event, T: Template<Event=E> {
         match event {
             Request::Timer(event) => self.on_timer(&event, responder),
             Request::Message(message) => self.on_message(message, responder),
-            _ => {}
         }
     }
 
