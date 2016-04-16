@@ -13,11 +13,9 @@ use reactor::Event;
 use self::response::ResponseSender;
 use Event as MsgEvent;
 
-pub mod demux;
 pub mod handlers;
 pub mod response;
 pub mod request;
-pub mod reactor;
 
 #[derive(Debug, Clone)]
 pub enum Response<E: MsgEvent> {
