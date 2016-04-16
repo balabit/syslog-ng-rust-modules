@@ -8,7 +8,14 @@
 
 use super::Response;
 use Event;
+use std::collections::VecDeque;
 
 pub trait ResponseSender<E: Event> {
     fn send_response(&mut self, response: Response<E>);
+}
+
+impl<E> ResponseSender<E> for VecDeque<Response<E>> where E: Event {
+    fn send_response(&mut self, response: Response<E>) {
+        self.push_back(response);
+    }
 }
