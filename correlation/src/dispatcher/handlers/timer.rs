@@ -6,18 +6,19 @@
 // option. All files in the project carrying such notice may not be copied,
 // modified, or distributed except according to those terms.
 
-use dispatcher::request::{Request};
 use reactor::{EventHandler, SharedData};
 use Event;
 use Template;
 
+use std::time::Duration;
+
 #[derive(Default)]
 pub struct TimerEventHandler;
 
-impl<'a, E, T> EventHandler<Request<E>, SharedData<'a, E, T>> for TimerEventHandler where E: 'a + Event, T: Template<Event=E>{
-    fn handle_event(&mut self, event: Request<E>, data: &mut SharedData<E, T>) {
+impl<'a, 'd, E, T> EventHandler<&'d Duration, SharedData<'a, E, T>> for TimerEventHandler where E: 'a + Event, T: Template<Event=E>{
+    fn handle_event(&mut self, event: &Duration, data: &mut SharedData<E, T>) {
         for i in data.map.contexts_mut() {
-            i.on_event(event.clone(), data.responder);
+            i.on_timer(event, data.responder);
         }
     }
 }

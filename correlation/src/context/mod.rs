@@ -7,6 +7,7 @@
 // modified, or distributed except according to those terms.
 
 use std::collections::VecDeque;
+use std::time::Duration;
 
 use dispatcher::request::Request;
 use config::ContextConfig;
@@ -37,6 +38,13 @@ impl<E, T> Context<E, T> where E: Event, T: Template<Event=E> {
         match *self {
             Context::Linear(ref mut context) => context.on_event(event, responder),
             Context::Map(ref mut context) => context.on_event(event, responder),
+        }
+    }
+
+    pub fn on_timer(&mut self, event: &Duration, responder: &mut VecDeque<Alert<E>>) {
+        match *self {
+            Context::Linear(ref mut context) => context.on_timer(event, responder),
+            Context::Map(ref mut context) => context.on_timer(event, responder),
         }
     }
 
