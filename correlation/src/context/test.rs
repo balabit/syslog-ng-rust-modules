@@ -12,9 +12,8 @@ use std::collections::VecDeque;
 
 use message::MessageBuilder;
 use context::LinearContext;
-use context::BaseContextBuilder;
 use conditions::ConditionsBuilder;
-use test_utils::MockTemplate;
+use test_utils::{MockTemplate, BaseContextBuilder};
 use Message;
 
 #[test]

@@ -121,12 +121,12 @@ mod tests {
     use super::*;
 
     use conditions::ConditionsBuilder;
-    use context::{Context, LinearContext, BaseContextBuilder};
+    use context::{Context, LinearContext};
     use uuid::Uuid;
     use std::time::Duration;
     use Event;
     use Message;
-    use test_utils::MockTemplate;
+    use test_utils::{MockTemplate, BaseContextBuilder};
 
     fn assert_context_map_contains_uuid(context_map: &mut ContextMap<Message, MockTemplate>, uuid: &Uuid, key: &str) {
         let mut iter = context_map.contexts_iter_mut(key);

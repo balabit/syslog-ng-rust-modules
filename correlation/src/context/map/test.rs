@@ -7,9 +7,9 @@
 // modified, or distributed except according to those terms.
 
 use conditions::ConditionsBuilder;
-use context::{BaseContextBuilder, MapContext};
+use context::MapContext;
 use message::MessageBuilder;
-use test_utils::MockTemplate;
+use test_utils::{MockTemplate, BaseContextBuilder};
 use Message;
 
 use uuid::Uuid;

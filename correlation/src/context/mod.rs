@@ -17,7 +17,6 @@ use Alert;
 pub use self::linear::LinearContext;
 pub use self::map::MapContext;
 pub use self::base::BaseContext;
-pub use self::base::BaseContextBuilder;
 pub use self::context_map::ContextMap;
 
 pub mod base;

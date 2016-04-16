@@ -8,7 +8,6 @@
 
 use config::action::message::MessageActionBuilder;
 use message::MessageBuilder;
-use context::base::BaseContextBuilder;
 
 use conditions::ConditionsBuilder;
 use state::State;
@@ -20,7 +19,7 @@ use std::collections::VecDeque;
 use uuid::Uuid;
 use Event;
 use Message;
-use test_utils::{MockTemplate};
+use test_utils::{MockTemplate, BaseContextBuilder};
 
 #[test]
 fn test_given_message_action_when_it_is_executed_then_the_additional_values_are_inserted_into_the_generated_message

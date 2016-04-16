@@ -7,5 +7,7 @@
 // modified, or distributed except according to those terms.
 
 pub use self::template::{MockTemplate, MockTemplateFactory};
+pub use self::base_context::BaseContextBuilder;
 
 mod template;
+mod base_context;

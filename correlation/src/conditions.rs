@@ -73,11 +73,10 @@ mod test {
     use message::MessageBuilder;
     use state::State;
     use super::ConditionsBuilder;
-    use context::BaseContextBuilder;
     use uuid::Uuid;
     use std::time::Duration;
     use std::collections::VecDeque;
-    use test_utils::MockTemplate;
+    use test_utils::{MockTemplate, BaseContextBuilder};
     use Message;
 
     #[test]

@@ -10,7 +10,8 @@ crate_type = ["dylib", "rlib"]
 [dependencies]
 log = "0.3"
 env_logger = "0.3"
-syslog-ng-common = "0.7.0"
+# syslog-ng-common = "0.7.0"
+syslog-ng-common = {path = "../syslog-ng-rs/syslog-ng-common"}
 
 [dependencies.correlation]
 path = "correlation"
