@@ -18,7 +18,6 @@ use correlation::{MessageBuilder, Message};
 use correlation::ContextMap;
 use correlation::test_utils::{MockTemplate};
 use uuid::Uuid;
-use std::thread;
 use std::time::Duration;
 
 #[allow(dead_code)]
@@ -40,12 +39,10 @@ fn main() {
         ContextConfigBuilder::new(Uuid::new_v4(), condition.clone()).patterns(patterns.clone()).actions(Vec::new()).build(),
         ContextConfigBuilder::new(Uuid::new_v4(), condition.clone()).patterns(patterns.clone()).actions(Vec::new()).build(),
     ];
-    let mut external_handler_data = ();
-    let mut correlator: Correlator<(), Message, MockTemplate> = Correlator::new(ContextMap::from_configs(contexts));
-    let _ = correlator.push_message(MessageBuilder::new(&uuid1, "message").build());
-    thread::sleep(Duration::from_millis(20));
-    let _ = correlator.push_message(MessageBuilder::new(&uuid2, "message").build());
-    thread::sleep(Duration::from_millis(80));
-    let _ = correlator.push_message(MessageBuilder::new(&uuid3, "message").build());
-    let _ = correlator.stop(&mut external_handler_data);
+    let mut correlator: Correlator<Message, MockTemplate> = Correlator::new(ContextMap::from_configs(contexts));
+    correlator.push_message(MessageBuilder::new(&uuid1, "message").build());
+    correlator.elapse_time(Duration::from_millis(20));
+    correlator.push_message(MessageBuilder::new(&uuid2, "message").build());
+    correlator.elapse_time(Duration::from_millis(80));
+    correlator.push_message(MessageBuilder::new(&uuid3, "message").build());
 }
