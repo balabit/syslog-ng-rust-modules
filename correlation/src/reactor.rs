@@ -27,8 +27,6 @@ impl<'a, E, T> SharedData<'a, E, T> where E: 'a + MsgEvent, T: Template<Event=E>
     }
 }
 
-pub trait EventHandler<T: Event, D> {
+pub trait EventHandler<T, D> {
     fn handle_event(&mut self, event: T, shared_data: &mut D);
 }
-
-pub trait Event {}

@@ -9,14 +9,8 @@
 use std::sync::Arc;
 use std::time::Duration;
 
-use reactor;
-use Event;
-
-
 #[derive(Clone, Debug)]
-pub enum Request<E: Event> {
+pub enum Request<E> {
     Message(Arc<E>),
     Timer(Duration),
 }
-
-impl<E: Event> reactor::Event for Request<E> {}
