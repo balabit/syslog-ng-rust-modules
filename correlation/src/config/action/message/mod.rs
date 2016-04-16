@@ -8,7 +8,6 @@
 
 use action::Action;
 use context::base::BaseContext;
-use dispatcher::Response;
 use Event;
 use Template;
 

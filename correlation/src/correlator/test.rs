@@ -12,12 +12,10 @@ use conditions::ConditionsBuilder;
 use correlator::Correlator;
 use context::ContextMap;
 use message::MessageBuilder;
-use action::Alert;
 use Message;
 
 use uuid::Uuid;
 use serde_json::from_str;
-use std::thread;
 use std::time::Duration;
 use config::compile_templates;
 

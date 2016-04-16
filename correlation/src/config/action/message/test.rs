@@ -11,7 +11,6 @@ use message::MessageBuilder;
 use context::base::BaseContextBuilder;
 
 use conditions::ConditionsBuilder;
-use dispatcher::Response;
 use state::State;
 use action::Action;
 
