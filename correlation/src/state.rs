@@ -9,7 +9,6 @@
 use std::sync::Arc;
 
 use Event;
-use timer::TimerEvent;
 use std::time::Duration;
 
 #[derive(Debug)]
@@ -69,8 +68,8 @@ impl<E: Event> State<E> {
         self.elapsed_time_since_last_message = Duration::from_secs(0);
     }
 
-    pub fn update_timers(&mut self, event: &TimerEvent) {
-        let delta = event.0;
+    pub fn update_timers(&mut self, event: &Duration) {
+        let delta = *event;
         self.elapsed_time = self.elapsed_time + delta;
         self.elapsed_time_since_last_message = self.elapsed_time_since_last_message + delta;
     }

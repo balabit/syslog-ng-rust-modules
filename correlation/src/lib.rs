@@ -42,7 +42,6 @@ mod context;
 mod dispatcher;
 mod reactor;
 mod state;
-mod timer;
 mod duration;
 
 pub trait Event: Send + Sync + Clone {

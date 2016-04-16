@@ -9,9 +9,9 @@
 use std::collections::BTreeMap;
 use std::collections::VecDeque;
 use std::sync::Arc;
+use std::time::Duration;
 
 use state::State;
-use timer::TimerEvent;
 use context::base::BaseContext;
 use dispatcher::request::Request;
 use Event;
@@ -45,9 +45,9 @@ impl<E, T> MapContext<E, T> where E: Event, T: Template<Event=E> {
     }
 
     #[allow(for_kv_map)]
-    pub fn on_timer(&mut self, event: &TimerEvent, responder: &mut VecDeque<Alert<E>>) {
+    pub fn on_timer(&mut self, event: &Duration, responder: &mut VecDeque<Alert<E>>) {
         for (_, mut state) in &mut self.map {
-            self.base.on_timer(event, &mut state, responder);
+            self.base.on_timer(&event, &mut state, responder);
         }
         self.remove_closed_states();
     }

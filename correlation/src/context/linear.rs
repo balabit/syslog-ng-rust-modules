@@ -9,10 +9,10 @@
 use uuid::Uuid;
 use std::sync::Arc;
 use std::collections::VecDeque;
+use std::time::Duration;
 
 use Alert;
 use state::State;
-use timer::TimerEvent;
 use dispatcher::request::Request;
 use context::base::BaseContext;
 use Event;
@@ -40,7 +40,7 @@ impl<E, T> LinearContext<E, T> where E: Event, T: Template<Event=E> {
         }
     }
 
-    pub fn on_timer(&mut self, event: &TimerEvent, responder: &mut VecDeque<Alert<E>>) {
+    pub fn on_timer(&mut self, event: &Duration, responder: &mut VecDeque<Alert<E>>) {
         self.base.on_timer(event, &mut self.state, responder);
     }
 

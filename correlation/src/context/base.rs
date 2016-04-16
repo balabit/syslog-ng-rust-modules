@@ -8,6 +8,7 @@
 
 use std::sync::Arc;
 use std::collections::VecDeque;
+use std::time::Duration;
 
 use uuid::Uuid;
 
@@ -15,7 +16,6 @@ use config::action::ActionType;
 use conditions::Conditions;
 use state::State;
 use action::Action;
-use timer::TimerEvent;
 use Event;
 use Template;
 use Alert;
@@ -88,11 +88,11 @@ impl<E, T> BaseContext<E, T> where E: Event, T: Template<Event=E> {
     }
 
     pub fn on_timer(&self,
-                    event: &TimerEvent,
+                    event: &Duration,
                     state: &mut State<E>,
                     responder: &mut VecDeque<Alert<E>>) {
         if state.is_open() {
-            state.update_timers(event);
+            state.update_timers(&event);
         }
         if self.is_closing(state) {
             self.close(state, responder);

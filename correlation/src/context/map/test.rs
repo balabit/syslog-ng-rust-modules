@@ -8,7 +8,6 @@
 
 use conditions::ConditionsBuilder;
 use context::{BaseContextBuilder, MapContext};
-use timer::TimerEvent;
 use message::MessageBuilder;
 use test_utils::MockTemplate;
 use Message;
@@ -23,7 +22,6 @@ fn test_given_map_context_when_messages_have_the_same_kvpairs_then_they_go_to_th
     let mut responder = VecDeque::default();
     let delta = Duration::from_millis(10);
     let timeout = Duration::from_millis(30);
-    let event = TimerEvent(delta);
     let msg_id1 = "11eaf6f8-0640-460f-aee2-a72d2f2ab258".to_owned();
     let msg_id2 = "21eaf6f8-0640-460f-aee2-a72d2f2ab258".to_owned();
     let msg_id3 = "31eaf6f8-0640-460f-aee2-a72d2f2ab258".to_owned();
@@ -60,12 +58,12 @@ fn test_given_map_context_when_messages_have_the_same_kvpairs_then_they_go_to_th
     assert_false!(context.is_open());
     context.on_message(Arc::new(msg1), &mut responder);
     assert_true!(context.is_open());
-    context.on_timer(&event, &mut responder);
+    context.on_timer(&delta, &mut responder);
     context.on_message(Arc::new(msg2), &mut responder);
     context.on_message(Arc::new(msg3), &mut responder);
-    context.on_timer(&event, &mut responder);
-    context.on_timer(&event, &mut responder);
+    context.on_timer(&delta, &mut responder);
+    context.on_timer(&delta, &mut responder);
     assert_true!(context.is_open());
-    context.on_timer(&event, &mut responder);
+    context.on_timer(&delta, &mut responder);
     assert_false!(context.is_open());
 }

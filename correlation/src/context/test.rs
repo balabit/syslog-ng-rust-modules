@@ -12,7 +12,6 @@ use std::time::Duration;
 use std::collections::VecDeque;
 
 use message::MessageBuilder;
-use timer::TimerEvent;
 use context::LinearContext;
 use context::BaseContextBuilder;
 use conditions::ConditionsBuilder;
@@ -36,11 +35,11 @@ fn test_given_close_condition_with_timeout_when_the_timeout_expires_then_the_con
     assert_false!(context.is_open());
     context.on_message(event, &mut responder);
     assert_true!(context.is_open());
-    context.on_timer(&TimerEvent::from_millis(50), &mut responder);
+    context.on_timer(&Duration::from_millis(50), &mut responder);
     assert_true!(context.is_open());
-    context.on_timer(&TimerEvent::from_millis(49), &mut responder);
+    context.on_timer(&Duration::from_millis(49), &mut responder);
     assert_true!(context.is_open());
-    context.on_timer(&TimerEvent::from_millis(1), &mut responder);
+    context.on_timer(&Duration::from_millis(1), &mut responder);
     assert_false!(context.is_open());
 }
 
@@ -88,11 +87,11 @@ fn test_given_close_condition_with_renew_timeout_when_the_timeout_expires_withou
     let event = Arc::new(msg1);
     context.on_message(event.clone(), &mut responder);
     assert_true!(context.is_open());
-    context.on_timer(&TimerEvent::from_millis(8), &mut responder);
+    context.on_timer(&Duration::from_millis(8), &mut responder);
     assert_true!(context.is_open());
-    context.on_timer(&TimerEvent::from_millis(1), &mut responder);
+    context.on_timer(&Duration::from_millis(1), &mut responder);
     assert_true!(context.is_open());
-    context.on_timer(&TimerEvent::from_millis(1), &mut responder);
+    context.on_timer(&Duration::from_millis(1), &mut responder);
     assert_false!(context.is_open());
 }
 
@@ -116,12 +115,12 @@ fn test_given_close_condition_with_renew_timeout_when_the_timeout_expires_with_r
     assert_false!(context.is_open());
     context.on_message(event.clone(), &mut responder);
     assert_true!(context.is_open());
-    context.on_timer(&TimerEvent::from_millis(8), &mut responder);
+    context.on_timer(&Duration::from_millis(8), &mut responder);
     assert_true!(context.is_open());
-    context.on_timer(&TimerEvent::from_millis(1), &mut responder);
+    context.on_timer(&Duration::from_millis(1), &mut responder);
     assert_true!(context.is_open());
     context.on_message(event.clone(), &mut responder);
     assert_true!(context.is_open());
-    context.on_timer(&TimerEvent::from_millis(1), &mut responder);
+    context.on_timer(&Duration::from_millis(1), &mut responder);
     assert_true!(context.is_open());
 }

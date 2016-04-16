@@ -7,16 +7,16 @@
 // modified, or distributed except according to those terms.
 
 use std::sync::Arc;
+use std::time::Duration;
 
 use reactor;
-use timer::TimerEvent;
 use Event;
 
 
 #[derive(Clone, Debug)]
 pub enum Request<E: Event> {
     Message(Arc<E>),
-    Timer(TimerEvent),
+    Timer(Duration),
     Exit,
 }
 

@@ -16,7 +16,6 @@ use dispatcher::request::Request;
 use dispatcher::handlers::timer::TimerEventHandler;
 use dispatcher::handlers::message::MessageEventHandler;
 use reactor::{EventHandler, SharedData};
-use timer::TimerEvent;
 use Event;
 use Template;
 
@@ -52,6 +51,6 @@ impl<E, T> Correlator<E, T> where E: Event, T: 'static + Template<Event=E> {
 
     pub fn elapse_time(&mut self, span: Duration) {
         let mut shared_data = SharedData::new(&mut self.context_map, &mut self.responses);
-        self.timer_event_handler.handle_event(Request::Timer(TimerEvent(span)), &mut shared_data);
+        self.timer_event_handler.handle_event(Request::Timer(span), &mut shared_data);
     }
 }
