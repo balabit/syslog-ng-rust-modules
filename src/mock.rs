@@ -3,7 +3,6 @@ use correlation::{Message, Event, EventIds, Template, TemplateFactory, CompileEr
 
 use std::borrow::Borrow;
 use std::fmt::Write;
-use std::sync::Arc;
 
 #[derive(Clone)]
 pub struct MockEvent(pub Message);
@@ -53,7 +52,7 @@ pub struct MockLogTemplate(String);
 
 impl Template for MockLogTemplate {
     type Event = MockEvent;
-    fn format_with_context(&self, _: &[Arc<Self::Event>], _: &str, buffer: &mut String) {
+    fn format_with_context(&self, _: &[Self::Event], _: &str, buffer: &mut String) {
         let _ = buffer.write_str(&self.0);
     }
 }

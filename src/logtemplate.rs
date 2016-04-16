@@ -1,4 +1,3 @@
-use std::sync::Arc;
 use std::fmt::Write;
 use std::cell::RefCell;
 
@@ -13,7 +12,7 @@ pub struct LogTemplate(RefCell<syslog_ng_common::LogTemplate>);
 
 impl Template for LogTemplate {
     type Event = LogEvent;
-    fn format_with_context(&self, messages: &[Arc<Self::Event>], context_id: &str, buffer: &mut String) {
+    fn format_with_context(&self, messages: &[Self::Event], context_id: &str, buffer: &mut String) {
         let messages: Vec<syslog_ng_common::LogMessage> = messages.iter().map(|event| event.0.clone()).collect();
         let mut template = self.0.borrow_mut();
         let formatted_str = template.format_with_context(&messages, None, LogTimeZone::Send, 0, Some(context_id));

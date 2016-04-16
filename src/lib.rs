@@ -4,12 +4,12 @@ extern crate log;
 extern crate syslog_ng_common;
 extern crate correlation;
 
-use correlation::{Request, Alert, Event, Template, TemplateFactory};
+use correlation::{Alert, Event, Template, TemplateFactory};
 use correlation::config::action::message::InjectMode;
-use correlation::correlator::{Correlator, AlertHandler, CorrelatorFactory};
+use correlation::correlator::{Correlator, CorrelatorFactory};
 use std::borrow::Borrow;
 use std::marker::PhantomData;
-use std::sync::{mpsc, Arc, Mutex};
+use std::sync::{Arc, Mutex, MutexGuard};
 use std::error::Error;
 use syslog_ng_common::{MessageFormatter, LogMessage};
 use syslog_ng_common::{Parser, ParserBuilder, OptionError, Pipe, GlobalConfig};
@@ -25,31 +25,8 @@ pub mod logtemplate;
 pub const CLASSIFIER_UUID: &'static str = ".classifier.uuid";
 pub const CLASSIFIER_CLASS: &'static str = ".classifier.class";
 
-struct MessageSender;
-
-impl<P, E> AlertHandler<P, E> for MessageSender where P: Pipe, E: Event + Into<LogMessage> {
-    fn on_alert(&mut self, alert: Alert<E>, reactor_input_channel: &mut mpsc::Sender<Request<E>>, parent: &mut P) {
-        match alert.inject_mode {
-            InjectMode::Log => {
-                debug!("LOG: {}", alert.message.message());
-            },
-            InjectMode::Forward => {
-                debug!("FORWARD: {}", alert.message.message());
-                let logmsg = alert.message.into();
-                parent.forward(logmsg);
-            },
-            InjectMode::Loopback => {
-                debug!("LOOPBACK: {}", alert.message.message());
-                if let Err(err) = reactor_input_channel.send(Request::Message(Arc::new(alert.message))) {
-                    error!("{}", err);
-                }
-            },
-        }
-    }
-}
-
 pub struct CorrelationParserBuilder<P, E, T, TF> where P: Pipe, E: 'static + Event, T: 'static + Template<Event=E>, TF: TemplateFactory<E, Template=T> {
-    contexts: Option<Correlator<P, E, T>>,
+    contexts: Option<Correlator<E, T>>,
     formatter: MessageFormatter,
     template_factory: TF,
     _marker: PhantomData<(P, E, T, TF)>
@@ -57,7 +34,7 @@ pub struct CorrelationParserBuilder<P, E, T, TF> where P: Pipe, E: 'static + Eve
 
 impl<P, E, T, TF> CorrelationParserBuilder<P, E, T, TF> where P: Pipe, E: Event, T: Template<Event=E>, TF: TemplateFactory<E, Template=T> {
     pub fn set_file(&mut self, path: &str) {
-        match CorrelatorFactory::from_path(path, &self.template_factory) {
+        match CorrelatorFactory::from_path::<T, &str, E, TF>(path, &self.template_factory) {
             Ok(correlator) => {
                 self.contexts = Some(correlator);
             },
@@ -77,7 +54,7 @@ impl<P, E, T, TF> CorrelationParserBuilder<P, E, T, TF> where P: Pipe, E: Event,
 }
 
 impl<P, E, T, TF> ParserBuilder<P> for CorrelationParserBuilder<P, E, T, TF> where P: Pipe, E: 'static + Event + Into<LogMessage>, T: 'static + Template<Event=E>, TF: TemplateFactory<E, Template=T> + From<GlobalConfig> {
-    type Parser = CorrelationParser<P, E, T>;
+    type Parser = CorrelationParser<E, T>;
     fn new(cfg: GlobalConfig) -> Self {
         CorrelationParserBuilder {
             contexts: None,
@@ -99,33 +76,49 @@ impl<P, E, T, TF> ParserBuilder<P> for CorrelationParserBuilder<P, E, T, TF> whe
         debug!("Building CorrelationParser");
         let CorrelationParserBuilder {contexts, template_factory, formatter, _marker } = self;
         let _ = template_factory;
-        let mut contexts = try!(contexts.ok_or(OptionError::missing_required_option(options::CONTEXTS_FILE)));
-        contexts.set_alert_handler(Some(Box::new(MessageSender)));
+        let contexts = try!(contexts.ok_or(OptionError::missing_required_option(options::CONTEXTS_FILE)));
         Ok(CorrelationParser::new(contexts, formatter))
     }
 }
 
-pub struct CorrelationParser<P: Pipe, E: 'static + Event, T: 'static + Template<Event=E>> {
-    correlator: Arc<Mutex<Correlator<P, E, T>>>,
+pub struct CorrelationParser<E: 'static + Event, T: 'static + Template<Event=E>> {
+    correlator: Arc<Mutex<Correlator<E, T>>>,
     formatter: MessageFormatter,
 }
 
-impl<P, E, T> Clone for CorrelationParser<P, E, T> where P: Pipe, E: Event, T: Template<Event=E> {
-    fn clone(&self) -> CorrelationParser<P, E, T> {
+impl<E, T> Clone for CorrelationParser<E, T> where E: Event, T: Template<Event=E> {
+    fn clone(&self) -> CorrelationParser<E, T> {
         CorrelationParser { correlator: self.correlator.clone(), formatter: self.formatter.clone() }
     }
 }
 
-impl<P, E, T> CorrelationParser<P, E, T> where P: Pipe, E: Event, T: Template<Event=E> {
-    pub fn new(correlator: Correlator<P, E, T>, formatter: MessageFormatter) -> CorrelationParser<P, E, T> {
+impl<E, T> CorrelationParser<E, T> where E: Event, T: Template<Event=E> {
+    pub fn new(correlator: Correlator<E, T>, formatter: MessageFormatter) -> CorrelationParser<E, T> {
         CorrelationParser {
             correlator: Arc::new(Mutex::new(correlator)),
             formatter: formatter,
         }
     }
+    fn on_alert<P>(guard: &mut MutexGuard<Correlator<E, T>>, alert: Alert<E>, parent: &mut P)
+        where P: Pipe, E: Into<LogMessage> {
+        match alert.inject_mode {
+            InjectMode::Log => {
+                debug!("LOG: {}", alert.message.message());
+            },
+            InjectMode::Forward => {
+                debug!("FORWARD: {}", alert.message.message());
+                let logmsg = alert.message.into();
+                parent.forward(logmsg);
+            },
+            InjectMode::Loopback => {
+                debug!("LOOPBACK: {}", alert.message.message());
+                guard.push_message(alert.message);
+            },
+        }
+    }
 }
 
-impl<P, E, T> Parser<P> for CorrelationParser<P, E, T> where P: Pipe, E: Event, T: Template<Event=E> {
+impl<P, E, T> Parser<P> for CorrelationParser<E, T> where P: Pipe, E: Event + Into<LogMessage>, T: Template<Event=E> {
     fn parse(&mut self, parent: &mut P, msg: &mut LogMessage, message: &str) -> bool {
         debug!("CorrelationParser: process()");
         let message = {
@@ -145,14 +138,11 @@ impl<P, E, T> Parser<P> for CorrelationParser<P, E, T> where P: Pipe, E: Event, 
 
         match self.correlator.lock() {
             Ok(mut guard) => {
-                guard.handle_events(parent);
-                match guard.push_message(message) {
-                    Ok(_) => true,
-                    Err(err) => {
-                        error!("{}", err);
-                        false
-                    }
+                guard.push_message(message);
+                while let Some(alert) = guard.responses.pop_front() {
+                    CorrelationParser::on_alert(&mut guard, alert, parent);
                 }
+                true
             },
             Err(err) => {
                 error!("{}", err);
