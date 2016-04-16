@@ -22,15 +22,3 @@ impl TimerEvent {
         TimerEvent(Duration::from_millis(ms))
     }
 }
-
-pub struct Timer;
-
-impl Timer {
-    pub fn from_chan<E: 'static + Event>(duration: Duration, tx: mpsc::Sender<Request<E>>) {
-        thread::spawn(move || {
-            while let Ok(_) = tx.send(Request::Timer(TimerEvent(duration))) {
-                thread::sleep(duration);
-            }
-        });
-    }
-}
