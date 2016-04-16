@@ -24,7 +24,7 @@ use TemplateFactory;
 pub struct CorrelatorFactory;
 
 impl CorrelatorFactory {
-    pub fn from_path<T, P, E, TF>(path: P, template_factory: &TF) -> Result<Correlator<T, E, TF::Template>, Error>
+    pub fn from_path<T, P, E, TF>(path: P, template_factory: &TF) -> Result<Correlator<E, TF::Template>, Error>
         where P: AsRef<Path>, E: Event, TF: TemplateFactory<E> {
         let contexts = try!(CorrelatorFactory::load_file(path));
         let contexts_after_template_compilation = try!(compile_templates(contexts, template_factory));
