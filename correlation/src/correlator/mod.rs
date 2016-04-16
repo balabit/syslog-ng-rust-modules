@@ -45,7 +45,7 @@ impl<E, T> Correlator<E, T> where E: Event, T: 'static + Template<Event=E> {
 
     pub fn push_message(&mut self, message: E) {
         let mut shared_data = SharedData::new(&mut self.context_map, &mut self.responses);
-        self.message_event_handler.handle_event(Request::Message(message), &mut shared_data);
+        self.message_event_handler.handle_event(message, &mut shared_data);
     }
 
     pub fn elapse_time(&mut self, span: Duration) {
