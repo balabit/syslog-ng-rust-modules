@@ -58,12 +58,7 @@ impl<E, T> Context<E, T> where E: Event, T: Template<Event=E> {
 impl<E, T> From<ContextConfig<T>> for Context<E, T> where E: Event, T: Template<Event=E> {
     fn from(config: ContextConfig<T>) -> Context<E, T> {
         let ContextConfig {name, uuid, conditions, context_id, actions, patterns} = config;
-
-        let base = BaseContextBuilder::new(uuid, conditions);
-        let base = base.name(name);
-        let base = base.patterns(patterns);
-        let base = base.actions(actions);
-        let base = base.build();
+        let base = BaseContext {uuid: uuid, conditions: conditions, name: name, patterns: patterns, actions: actions};
 
         if let Some(context_id) = context_id {
             Context::Map(MapContext::new(base, context_id))
