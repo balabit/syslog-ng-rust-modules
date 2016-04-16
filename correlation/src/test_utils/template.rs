@@ -5,19 +5,18 @@ use Message;
 use CompileError;
 
 use std::fmt::Write;
-use std::sync::Arc;
 
 pub struct MockTemplate {
     pub with_context: Box<Mock>,
 }
 
 pub trait Mock: Send {
-    fn call(&self, messages: &[Arc<Message>], context_id: &str, &mut String);
+    fn call(&self, messages: &[Message], context_id: &str, &mut String);
 }
 
 /// implement Mock for bare fns
-impl<F: Send + for<'a, 'b, 'c> Fn(&'a [Arc<Message>], &'b str, &'c mut String)> Mock for F {
-    fn call(&self, messages: &[Arc<Message>], context_id: &str, buffer: &mut String) {
+impl<F: Send + for<'a, 'b, 'c> Fn(&'a [Message], &'b str, &'c mut String)> Mock for F {
+    fn call(&self, messages: &[Message], context_id: &str, buffer: &mut String) {
         (*self)(messages, context_id, buffer)
     }
 }
@@ -25,16 +24,16 @@ impl<F: Send + for<'a, 'b, 'c> Fn(&'a [Arc<Message>], &'b str, &'c mut String)> 
 struct LiteralMockTemplate(String);
 
 impl Mock for LiteralMockTemplate {
-    fn call(&self, _: &[Arc<Message>], _: &str, buffer: &mut String) {
+    fn call(&self, _: &[Message], _: &str, buffer: &mut String) {
         let _ = buffer.write_str(&self.0);
     }
 }
 
-fn context_id(_: &[Arc<Message>], context_id: &str, buffer: &mut String) {
+fn context_id(_: &[Message], context_id: &str, buffer: &mut String) {
     let _ = buffer.write_str(context_id);
 }
 
-fn context_len(messages: &[Arc<Message>], _: &str, buffer: &mut String) {
+fn context_len(messages: &[Message], _: &str, buffer: &mut String) {
     let _ = buffer.write_fmt(format_args!("{}", messages.len()));
 }
 
@@ -59,7 +58,7 @@ impl MockTemplate {
 
 impl Template for MockTemplate {
     type Event = Message;
-    fn format_with_context(&self, messages: &[Arc<Self::Event>], context_id: &str, buffer: &mut String) {
+    fn format_with_context(&self, messages: &[Self::Event], context_id: &str, buffer: &mut String) {
         self.with_context.call(messages, context_id, buffer)
     }
 }

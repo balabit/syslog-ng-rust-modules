@@ -6,7 +6,6 @@
 // option. All files in the project carrying such notice may not be copied,
 // modified, or distributed except according to those terms.
 
-use std::sync::Arc;
 use std::collections::VecDeque;
 use std::time::Duration;
 
@@ -100,12 +99,12 @@ impl<E, T> BaseContext<E, T> where E: Event, T: Template<Event=E> {
     }
 
     pub fn on_message(&self,
-                      event: Arc<E>,
+                      event: E,
                       state: &mut State<E>,
                       responder: &mut VecDeque<Alert<E>>) {
         if state.is_open() {
             state.add_message(event);
-        } else if self.is_opening(&*event) {
+        } else if self.is_opening(&event) {
             state.add_message(event);
             self.open(state, responder);
         }

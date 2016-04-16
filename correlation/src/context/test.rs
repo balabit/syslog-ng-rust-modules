@@ -7,7 +7,6 @@
 // modified, or distributed except according to those terms.
 
 use uuid::Uuid;
-use std::sync::Arc;
 use std::time::Duration;
 use std::collections::VecDeque;
 
@@ -31,9 +30,8 @@ fn test_given_close_condition_with_timeout_when_the_timeout_expires_then_the_con
     let base = BaseContextBuilder::<Message, MockTemplate>::new(Uuid::new_v4(), conditions).patterns(patterns).build();
     let mut context = LinearContext::new(base);
     let msg1 = MessageBuilder::new(&msg_id, "message").build();
-    let event = Arc::new(msg1);
     assert_false!(context.is_open());
-    context.on_message(event, &mut responder);
+    context.on_message(msg1, &mut responder);
     assert_true!(context.is_open());
     context.on_timer(&Duration::from_millis(50), &mut responder);
     assert_true!(context.is_open());
@@ -59,12 +57,11 @@ fn test_given_close_condition_with_max_size_when_the_max_size_reached_then_the_c
     let base = BaseContextBuilder::<Message, MockTemplate>::new(Uuid::new_v4(), conditions).patterns(patterns).build();
     let mut context = LinearContext::new(base);
     let msg1 = MessageBuilder::new(&msg_id, "message").build();
-    let event = Arc::new(msg1);
-    context.on_message(event.clone(), &mut responder);
+    context.on_message(msg1.clone(), &mut responder);
     assert_true!(context.is_open());
-    context.on_message(event.clone(), &mut responder);
+    context.on_message(msg1.clone(), &mut responder);
     assert_true!(context.is_open());
-    context.on_message(event.clone(), &mut responder);
+    context.on_message(msg1.clone(), &mut responder);
     assert_false!(context.is_open());
 }
 
@@ -84,8 +81,7 @@ fn test_given_close_condition_with_renew_timeout_when_the_timeout_expires_withou
     let base = BaseContextBuilder::<Message, MockTemplate>::new(Uuid::new_v4(), conditions).patterns(patterns).build();
     let mut context = LinearContext::new(base);
     let msg1 = MessageBuilder::new(&msg_id, "message").build();
-    let event = Arc::new(msg1);
-    context.on_message(event.clone(), &mut responder);
+    context.on_message(msg1.clone(), &mut responder);
     assert_true!(context.is_open());
     context.on_timer(&Duration::from_millis(8), &mut responder);
     assert_true!(context.is_open());
@@ -111,15 +107,14 @@ fn test_given_close_condition_with_renew_timeout_when_the_timeout_expires_with_r
     let base = BaseContextBuilder::<Message, MockTemplate>::new(Uuid::new_v4(), conditions).patterns(patterns).build();
     let mut context = LinearContext::new(base);
     let msg1 = MessageBuilder::new(&msg_id, "message").build();
-    let event = Arc::new(msg1);
     assert_false!(context.is_open());
-    context.on_message(event.clone(), &mut responder);
+    context.on_message(msg1.clone(), &mut responder);
     assert_true!(context.is_open());
     context.on_timer(&Duration::from_millis(8), &mut responder);
     assert_true!(context.is_open());
     context.on_timer(&Duration::from_millis(1), &mut responder);
     assert_true!(context.is_open());
-    context.on_message(event.clone(), &mut responder);
+    context.on_message(msg1.clone(), &mut responder);
     assert_true!(context.is_open());
     context.on_timer(&Duration::from_millis(1), &mut responder);
     assert_true!(context.is_open());

@@ -69,7 +69,6 @@ impl ConditionsBuilder {
 mod test {
     use serde_json::from_str;
     use super::Conditions;
-    use std::sync::Arc;
 
     use message::MessageBuilder;
     use state::State;
@@ -114,8 +113,8 @@ mod test {
                              .last_closes(true)
                              .build();
         let context = BaseContextBuilder::<Message, MockTemplate>::new(Uuid::new_v4(), conditions).patterns(patterns).build();
-        let msg_opening = Arc::new(MessageBuilder::new(&msg_id1, "message").build());
-        let msg_closing = Arc::new(MessageBuilder::new(&msg_id2, "message").build());
+        let msg_opening = MessageBuilder::new(&msg_id1, "message").build();
+        let msg_closing = MessageBuilder::new(&msg_id2, "message").build();
         assert_false!(state.is_open());
         context.on_message(msg_opening, &mut state, &mut responder);
         assert_true!(state.is_open());
@@ -209,8 +208,8 @@ mod test {
         let p2_msg = MessageBuilder::new(&p2_uuid, "message").name(Some(p2)).build();
         let context = BaseContextBuilder::<Message, MockTemplate>::new(Uuid::new_v4(), conditions).patterns(patterns).build();
         assert_false!(state.is_open());
-        context.on_message(Arc::new(p1_msg), &mut state, &mut responder);
-        context.on_message(Arc::new(p2_msg), &mut state, &mut responder);
+        context.on_message(p1_msg, &mut state, &mut responder);
+        context.on_message(p2_msg, &mut state, &mut responder);
         assert_false!(state.is_open());
     }
 
@@ -226,7 +225,7 @@ mod test {
                              .build();
         let context = BaseContextBuilder::<Message, MockTemplate>::new(Uuid::new_v4(), conditions).patterns(Vec::new()).build();
         let mut state = State::new();
-        context.on_message(Arc::new(msg), &mut state, &mut responder);
+        context.on_message(msg, &mut state, &mut responder);
     }
 
     #[test]
@@ -241,7 +240,7 @@ mod test {
                              .build();
         let context = BaseContextBuilder::<Message, MockTemplate>::new(Uuid::new_v4(), conditions).build();
         let mut state = State::new();
-        context.on_message(Arc::new(msg), &mut state, &mut responder);
+        context.on_message(msg, &mut state, &mut responder);
     }
 }
 

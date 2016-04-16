@@ -118,9 +118,7 @@ impl ::std::error::Error for CompileError {
     fn cause(&self) -> Option<&::std::error::Error> { None }
 }
 
-use std::sync::Arc;
-
 pub trait Template: Send {
     type Event: Event;
-    fn format_with_context(&self, messages: &[Arc<Self::Event>], context_id: &str, buffer: &mut String);
+    fn format_with_context(&self, messages: &[Self::Event], context_id: &str, buffer: &mut String);
 }

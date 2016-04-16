@@ -8,7 +8,6 @@
 
 use std::collections::BTreeMap;
 use std::collections::VecDeque;
-use std::sync::Arc;
 use std::time::Duration;
 
 use state::State;
@@ -70,12 +69,12 @@ impl<E, T> MapContext<E, T> where E: Event, T: Template<Event=E> {
         }
     }
 
-    pub fn on_message(&mut self, event: Arc<E>, responder: &mut VecDeque<Alert<E>>) {
+    pub fn on_message(&mut self, event: E, responder: &mut VecDeque<Alert<E>>) {
         self.update_state(event, responder);
         self.remove_closed_states();
     }
 
-    fn update_state(&mut self, event: Arc<E>, responder: &mut VecDeque<Alert<E>>) {
+    fn update_state(&mut self, event: E, responder: &mut VecDeque<Alert<E>>) {
         let key: ContextKey = self.context_id.iter().map(|key| {
                 (key.to_owned(), event.get(&key).map_or_else(|| "".to_owned(), |value| value.to_owned()))
             }).collect();

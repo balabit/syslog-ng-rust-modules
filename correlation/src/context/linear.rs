@@ -7,7 +7,6 @@
 // modified, or distributed except according to those terms.
 
 use uuid::Uuid;
-use std::sync::Arc;
 use std::collections::VecDeque;
 use std::time::Duration;
 
@@ -43,7 +42,7 @@ impl<E, T> LinearContext<E, T> where E: Event, T: Template<Event=E> {
         self.base.on_timer(event, &mut self.state, responder);
     }
 
-    pub fn on_message(&mut self, event: Arc<E>, responder: &mut VecDeque<Alert<E>>) {
+    pub fn on_message(&mut self, event: E, responder: &mut VecDeque<Alert<E>>) {
         self.base.on_message(event, &mut self.state, responder);
     }
 

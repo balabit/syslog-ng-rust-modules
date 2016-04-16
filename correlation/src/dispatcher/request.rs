@@ -6,11 +6,10 @@
 // option. All files in the project carrying such notice may not be copied,
 // modified, or distributed except according to those terms.
 
-use std::sync::Arc;
 use std::time::Duration;
 
 #[derive(Clone, Debug)]
 pub enum Request<E> {
-    Message(Arc<E>),
+    Message(E),
     Timer(Duration),
 }

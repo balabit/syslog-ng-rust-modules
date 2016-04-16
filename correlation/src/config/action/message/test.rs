@@ -16,7 +16,6 @@ use action::Action;
 
 use env_logger;
 use std::time::Duration;
-use std::sync::Arc;
 use std::collections::VecDeque;
 use uuid::Uuid;
 use Event;
@@ -34,8 +33,8 @@ fn test_given_message_action_when_it_is_executed_then_the_additional_values_are_
         BaseContextBuilder::<Message, MockTemplate>::new(uuid, conditions).name(Some("name".to_owned())).build()
     };
     let state = {
-        let messages = vec![Arc::new(MessageBuilder::new("uuid1", "message1").build()),
-                            Arc::new(MessageBuilder::new("uuid2", "message2").build())];
+        let messages = vec![MessageBuilder::new("uuid1", "message1").build(),
+                            MessageBuilder::new("uuid2", "message2").build()];
         State::with_messages(messages)
     };
     let message_action = MessageActionBuilder::<MockTemplate>::new("uuid", MockTemplate::literal("message"))
@@ -63,8 +62,8 @@ fn test_executed_message_action_uses_the_templates() {
         BaseContextBuilder::<Message, MockTemplate>::new(uuid.to_owned(), conditions).name(Some("name".to_owned())).build()
     };
     let state = {
-        let messages = vec![Arc::new(MessageBuilder::new("uuid1", "message1").build()),
-                            Arc::new(MessageBuilder::new("uuid2", "message2").build())];
+        let messages = vec![MessageBuilder::new("uuid1", "message1").build(),
+                            MessageBuilder::new("uuid2", "message2").build()];
         State::with_messages(messages)
     };
     let message_action = MessageActionBuilder::<MockTemplate>::new("uuid", MockTemplate::literal(uuid_as_str))

@@ -6,8 +6,6 @@
 // option. All files in the project carrying such notice may not be copied,
 // modified, or distributed except according to those terms.
 
-use std::sync::Arc;
-
 use Event;
 use std::time::Duration;
 
@@ -15,7 +13,7 @@ use std::time::Duration;
 pub struct State<E: Event> {
     elapsed_time: Duration,
     elapsed_time_since_last_message: Duration,
-    messages: Vec<Arc<E>>,
+    messages: Vec<E>,
     opened: bool,
 }
 
@@ -30,7 +28,7 @@ impl<E: Event> State<E> {
         State::default()
     }
 
-    pub fn with_messages(messages: Vec<Arc<E>>) -> State<E> {
+    pub fn with_messages(messages: Vec<E>) -> State<E> {
         State {
             elapsed_time: Duration::from_secs(0),
             elapsed_time_since_last_message: Duration::from_secs(0),
@@ -59,11 +57,11 @@ impl<E: Event> State<E> {
         self.elapsed_time_since_last_message
     }
 
-    pub fn messages(&self) -> &[Arc<E>] {
+    pub fn messages(&self) -> &[E] {
         &self.messages
     }
 
-    pub fn add_message(&mut self, message: Arc<E>) {
+    pub fn add_message(&mut self, message: E) {
         self.messages.push(message);
         self.elapsed_time_since_last_message = Duration::from_secs(0);
     }
