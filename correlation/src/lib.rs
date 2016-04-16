@@ -27,7 +27,6 @@ mod macros;
 pub use action::Alert;
 pub use conditions::{Conditions, ConditionsBuilder};
 pub use config::action::ActionType;
-pub use dispatcher::request::Request;
 pub use message::{Message, MessageBuilder};
 pub use context::ContextMap;
 pub use reactor::{EventHandler, SharedData};

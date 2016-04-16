@@ -9,7 +9,6 @@
 use std::collections::VecDeque;
 use std::time::Duration;
 
-use dispatcher::request::Request;
 use config::ContextConfig;
 use Event;
 use Template;
@@ -34,10 +33,10 @@ pub enum Context<E, T> where E: Event, T: Template<Event=E> {
 }
 
 impl<E, T> Context<E, T> where E: Event, T: Template<Event=E> {
-    pub fn on_event(&mut self, event: Request<E>, responder: &mut VecDeque<Alert<E>>) {
+    pub fn on_message(&mut self, event: E, responder: &mut VecDeque<Alert<E>>) {
         match *self {
-            Context::Linear(ref mut context) => context.on_event(event, responder),
-            Context::Map(ref mut context) => context.on_event(event, responder),
+            Context::Linear(ref mut context) => context.on_message(event, responder),
+            Context::Map(ref mut context) => context.on_message(event, responder),
         }
     }
 

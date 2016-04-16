@@ -6,7 +6,6 @@
 // option. All files in the project carrying such notice may not be copied,
 // modified, or distributed except according to those terms.
 
-use dispatcher::request::{Request};
 use context::context_map::StreamingIterator;
 use reactor::{EventHandler, SharedData};
 use Event;
@@ -21,7 +20,7 @@ impl<'a, E, T> EventHandler<E, SharedData<'a, E, T>> for MessageEventHandler whe
         for i in event.ids() {
             let mut iter = data.map.contexts_iter_mut(i);
             while let Some(context) = iter.next() {
-                context.on_event(Request::Message(event.clone()), data.responder);
+                context.on_message(event.clone(), data.responder);
             }
         }
     }

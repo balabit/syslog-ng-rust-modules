@@ -7,4 +7,3 @@
 // modified, or distributed except according to those terms.
 
 pub mod handlers;
-pub mod request;

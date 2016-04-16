@@ -12,7 +12,6 @@ use std::time::Duration;
 
 use state::State;
 use context::base::BaseContext;
-use dispatcher::request::Request;
 use Event;
 use Template;
 use Alert;
@@ -31,14 +30,6 @@ impl<E, T> MapContext<E, T> where E: Event, T: Template<Event=E> {
             base: base,
             map: BTreeMap::new(),
             context_id: context_id,
-        }
-    }
-
-    pub fn on_event(&mut self, event: Request<E>, responder: &mut VecDeque<Alert<E>>) {
-        trace!("MapContext: received event");
-        match event {
-            Request::Timer(event) => self.on_timer(&event, responder),
-            Request::Message(message) => self.on_message(message, responder),
         }
     }
 
