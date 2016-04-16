@@ -11,6 +11,8 @@ use std::borrow::Borrow;
 use std::marker::PhantomData;
 use std::sync::{Arc, Mutex, MutexGuard};
 use std::error::Error;
+use std::time::Duration;
+use std::str::FromStr;
 use syslog_ng_common::{MessageFormatter, LogMessage};
 use syslog_ng_common::{Parser, ParserBuilder, OptionError, Pipe, GlobalConfig};
 
@@ -29,6 +31,7 @@ pub struct CorrelationParserBuilder<P, E, T, TF> where P: Pipe, E: 'static + Eve
     contexts: Option<Correlator<E, T>>,
     formatter: MessageFormatter,
     template_factory: TF,
+    delta: Option<Duration>,
     _marker: PhantomData<(P, E, T, TF)>
 }
 
@@ -51,6 +54,16 @@ impl<P, E, T, TF> CorrelationParserBuilder<P, E, T, TF> where P: Pipe, E: Event,
     pub fn set_prefix(&mut self, prefix: String) {
         self.formatter.set_prefix(prefix);
     }
+
+    pub fn set_delta(&mut self, delta: String) {
+        match u64::from_str(&delta) {
+            Ok(delta) => {
+                info!("correlation-parser: using {} ms as delta time between timer events", &delta);
+                self.delta = Some(Duration::from_millis(delta));
+            },
+            Err(err) => error!("{}", err)
+        }
+    }
 }
 
 impl<P, E, T, TF> ParserBuilder<P> for CorrelationParserBuilder<P, E, T, TF> where P: Pipe, E: 'static + Event + Into<LogMessage>, T: 'static + Template<Event=E>, TF: TemplateFactory<E, Template=T> + From<GlobalConfig> {
@@ -60,6 +73,7 @@ impl<P, E, T, TF> ParserBuilder<P> for CorrelationParserBuilder<P, E, T, TF> whe
             contexts: None,
             formatter: MessageFormatter::new(),
             template_factory: TF::from(cfg),
+            delta: Some(Duration::from_millis(1000)),
             _marker: PhantomData
         }
     }
@@ -67,15 +81,17 @@ impl<P, E, T, TF> ParserBuilder<P> for CorrelationParserBuilder<P, E, T, TF> whe
         debug!("CorrelationParser: set_option(key={}, value={})", &name, &value);
 
         match name.borrow() {
-            "contexts_file" => self.set_file(&value),
-            "prefix" => self.set_prefix(value),
+            options::CONTEXTS_FILE => self.set_file(&value),
+            options::PREFIX => self.set_prefix(value),
+            options::DELTA => self.set_delta(value),
             _ => debug!("CorrelationParser: not supported key: {:?}", name)
         };
     }
     fn build(self) -> Result<Self::Parser, OptionError> {
         debug!("Building CorrelationParser");
-        let CorrelationParserBuilder {contexts, template_factory, formatter, _marker } = self;
+        let CorrelationParserBuilder {contexts, template_factory, formatter, delta, _marker } = self;
         let _ = template_factory;
+        let _ = delta;
         let contexts = try!(contexts.ok_or(OptionError::missing_required_option(options::CONTEXTS_FILE)));
         Ok(CorrelationParser::new(contexts, formatter))
     }
