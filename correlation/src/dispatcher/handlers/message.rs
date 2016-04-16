@@ -6,7 +6,7 @@
 // option. All files in the project carrying such notice may not be copied,
 // modified, or distributed except according to those terms.
 
-use dispatcher::request::{Request, RequestHandle};
+use dispatcher::request::{Request};
 use context::context_map::StreamingIterator;
 use reactor::{EventHandler, SharedData};
 use Event;
@@ -28,8 +28,5 @@ impl<'a, E, T> EventHandler<Request<E>, SharedData<'a, E, T>> for MessageEventHa
         } else {
             unreachable!("MessageEventHandler should only handle Message events");
         }
-    }
-    fn handle(&self) -> RequestHandle {
-        RequestHandle::Message
     }
 }

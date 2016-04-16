@@ -6,7 +6,7 @@
 // option. All files in the project carrying such notice may not be copied,
 // modified, or distributed except according to those terms.
 
-use dispatcher::request::{Request, RequestHandle};
+use dispatcher::request::{Request};
 use reactor::{EventHandler, SharedData};
 use Event;
 use Template;
@@ -19,8 +19,5 @@ impl<'a, E, T> EventHandler<Request<E>, SharedData<'a, E, T>> for TimerEventHand
         for i in data.map.contexts_mut() {
             i.on_event(event.clone(), data.responder);
         }
-    }
-    fn handle(&self) -> RequestHandle {
-        RequestHandle::Timer
     }
 }
