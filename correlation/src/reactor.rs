@@ -37,15 +37,6 @@ pub trait EventDemultiplexer {
     fn select(&mut self) -> Option<Self::Event>;
 }
 
-pub trait Reactor<E, T> where E: MsgEvent, T: Template<Event=E> {
-    type Event: Event;
-    fn handle_events(&mut self);
-    fn register_handler(&mut self,
-                        handler: Box<for<'a> EventHandler<Self::Event, SharedData<'a, E, T>>>);
-    fn remove_handler_by_handle(&mut self,
-                                 handler: &<<Self as Reactor<E, T>>::Event as Event>::Handle);
-}
-
 pub trait Event {
     type Handle;
     fn handle(&self) -> Self::Handle;
