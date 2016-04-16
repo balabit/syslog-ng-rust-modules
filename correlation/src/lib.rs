@@ -38,7 +38,6 @@ mod conditions;
 mod action;
 mod message;
 mod context;
-mod dispatcher;
 mod reactor;
 mod state;
 mod duration;

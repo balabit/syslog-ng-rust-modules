@@ -11,8 +11,8 @@ use std::collections::VecDeque;
 
 use Alert;
 use context::ContextMap;
-use dispatcher::handlers::timer::TimerEventHandler;
-use dispatcher::handlers::message::MessageEventHandler;
+use self::timer::TimerEventHandler;
+use self::message::MessageEventHandler;
 use reactor::{EventHandler, SharedData};
 use Event;
 use Template;
@@ -22,6 +22,8 @@ pub use self::factory::CorrelatorFactory;
 
 mod error;
 mod factory;
+mod message;
+mod timer;
 #[cfg(test)]
 mod test;
 
