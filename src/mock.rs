@@ -71,3 +71,46 @@ impl From<GlobalConfig> for MockLogTemplateFactory {
         MockLogTemplateFactory
     }
 }
+
+
+use std::sync::Arc;
+use std::sync::Mutex;
+use std::time::Duration;
+
+use correlation::correlator::Correlator;
+use Timer;
+
+pub struct MockTimer<E, T> where E: 'static + Event, T: 'static + Template<Event=E> {
+    correlator: Arc<Mutex<Correlator<E, T>>>,
+    delta: Duration,
+}
+
+impl<E, T> MockTimer<E, T> where E: 'static + Event, T: 'static + Template<Event=E> {
+    pub fn elapse_time(&mut self, delta: Duration) {
+        let mut guard = self.correlator.lock().unwrap();
+        guard.elapse_time(delta);
+    }
+
+    pub fn elapse_set_time(&mut self) {
+        let mut guard = self.correlator.lock().unwrap();
+        guard.elapse_time(self.delta);
+    }
+}
+
+impl<E, T> Clone for MockTimer<E, T> where E: 'static + Event, T: 'static + Template<Event=E> {
+    fn clone(&self) -> MockTimer<E, T> {
+        MockTimer {
+            delta: self.delta,
+            correlator: self.correlator.clone()
+        }
+    }
+}
+
+impl<E, T> Timer<E, T> for MockTimer<E, T> where E: 'static + Event + Send, T: 'static + Template<Event=E> {
+    fn new(delta: Duration, correlator: Arc<Mutex<Correlator<E, T>>>) -> Self {
+        MockTimer {
+            delta: delta,
+            correlator: correlator
+        }
+    }
+}
