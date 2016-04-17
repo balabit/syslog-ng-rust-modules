@@ -106,15 +106,16 @@ impl<T> Visitor for ContextVisitor<T> where T: Deserialize {
             }
         }
 
+        try!(visitor.end());
+
         let uuid = try!(ContextVisitor::<T>::parse_uuid::<V>(uuid));
         let actions = actions.unwrap_or_default();
-
-        try!(visitor.end());
+        let conditions = try!(conditions.ok_or(V::Error::missing_field("conditions")));
 
         Ok(ContextConfig {
             name: name,
             uuid: uuid,
-            conditions: conditions.unwrap(),
+            conditions: conditions,
             context_id: context_id,
             actions: actions,
             patterns: patterns.unwrap_or_default()
@@ -257,5 +258,14 @@ mod test {
         let context = result.expect("Failed to deserialize a valid ContextConfig");
         assert_eq!(&expected_context_id,
                    context.context_id.as_ref().unwrap());
+    }
+    #[test]
+    fn test_given_config_when_it_doesn_not_have_conditions_then_it_does_not_panic() {
+        let text = r#"
+        {
+            "uuid": "86ca9f93-84fb-4813-b037-6526f7a585a3"
+        }
+        "#;
+        let _ = from_str::<ContextConfig<String>>(text).err().unwrap();
     }
 }
