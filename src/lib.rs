@@ -29,15 +29,19 @@ pub mod timer;
 pub const CLASSIFIER_UUID: &'static str = ".classifier.uuid";
 pub const CLASSIFIER_CLASS: &'static str = ".classifier.class";
 
-pub struct CorrelationParserBuilder<P, E, T, TF> where P: Pipe, E: 'static + Event, T: 'static + Template<Event=E>, TF: TemplateFactory<E, Template=T> {
+pub trait Timer<E, T>: Clone where E: Event + Send, T: Template<Event=E> {
+    fn new(delta: Duration, correlator: Arc<Mutex<Correlator<E, T>>>) -> Self;
+}
+
+pub struct CorrelationParserBuilder<P, E, T, TF, TM> where P: Pipe, E: 'static + Event + Send, T: 'static + Template<Event=E>, TF: TemplateFactory<E, Template=T>, TM: Timer<E, T> {
     contexts: Option<Correlator<E, T>>,
     formatter: MessageFormatter,
     template_factory: TF,
     delta: Option<Duration>,
-    _marker: PhantomData<(P, E, T, TF)>
+    _marker: PhantomData<(P, E, T, TF, TM)>
 }
 
-impl<P, E, T, TF> CorrelationParserBuilder<P, E, T, TF> where P: Pipe, E: Event, T: Template<Event=E>, TF: TemplateFactory<E, Template=T> {
+impl<P, E, T, TF, TM> CorrelationParserBuilder<P, E, T, TF, TM> where P: Pipe, E: Event + Send, T: Template<Event=E>, TF: TemplateFactory<E, Template=T>, TM: Timer<E, T> {
     pub fn set_file(&mut self, path: &str) {
         match CorrelatorFactory::from_path::<T, &str, E, TF>(path, &self.template_factory) {
             Ok(correlator) => {
@@ -68,8 +72,8 @@ impl<P, E, T, TF> CorrelationParserBuilder<P, E, T, TF> where P: Pipe, E: Event,
     }
 }
 
-impl<P, E, T, TF> ParserBuilder<P> for CorrelationParserBuilder<P, E, T, TF> where P: Pipe, E: 'static + Event + Into<LogMessage>, T: 'static + Template<Event=E>, TF: TemplateFactory<E, Template=T> + From<GlobalConfig> {
-    type Parser = CorrelationParser<E, T>;
+impl<P, E, T, TF, TM> ParserBuilder<P> for CorrelationParserBuilder<P, E, T, TF, TM> where P: Pipe, E: 'static + Event + Into<LogMessage> + Send, T: 'static + Template<Event=E>, TF: TemplateFactory<E, Template=T> + From<GlobalConfig>, TM: Timer<E, T> {
+    type Parser = CorrelationParser<E, T, TM>;
     fn new(cfg: GlobalConfig) -> Self {
         CorrelationParserBuilder {
             contexts: None,
@@ -93,28 +97,39 @@ impl<P, E, T, TF> ParserBuilder<P> for CorrelationParserBuilder<P, E, T, TF> whe
         debug!("Building CorrelationParser");
         let CorrelationParserBuilder {contexts, template_factory, formatter, delta, _marker } = self;
         let _ = template_factory;
-        let _ = delta;
         let contexts = try!(contexts.ok_or(OptionError::missing_required_option(options::CONTEXTS_FILE)));
-        Ok(CorrelationParser::new(contexts, formatter))
+        let delta = try!(delta.ok_or(OptionError::missing_required_option(options::DELTA)));
+        let correlator = Arc::new(Mutex::new(contexts));
+        let timer = TM::new(delta, correlator.clone());
+        Ok(CorrelationParser::new(correlator, formatter, delta, timer))
     }
 }
 
-pub struct CorrelationParser<E: 'static + Event, T: 'static + Template<Event=E>> {
+pub struct CorrelationParser<E, T, TM> where E: 'static + Event + Send, T: 'static + Template<Event=E>, TM: Timer<E, T> {
     correlator: Arc<Mutex<Correlator<E, T>>>,
+    delta: Duration,
     formatter: MessageFormatter,
+    pub timer: TM
 }
 
-impl<E, T> Clone for CorrelationParser<E, T> where E: Event, T: Template<Event=E> {
-    fn clone(&self) -> CorrelationParser<E, T> {
-        CorrelationParser { correlator: self.correlator.clone(), formatter: self.formatter.clone() }
+impl<E, T, TM> Clone for CorrelationParser<E, T, TM> where E: Event + Send, T: Template<Event=E>, TM: Timer<E, T> {
+    fn clone(&self) -> CorrelationParser<E, T, TM> {
+        CorrelationParser {
+            correlator: self.correlator.clone(),
+            formatter: self.formatter.clone(),
+            delta: self.delta.clone(),
+            timer: self.timer.clone()
+        }
     }
 }
 
-impl<E, T> CorrelationParser<E, T> where E: Event, T: Template<Event=E> {
-    pub fn new(correlator: Correlator<E, T>, formatter: MessageFormatter) -> CorrelationParser<E, T> {
+impl<E, T, TM> CorrelationParser<E, T, TM> where E: Event + Send, T: Template<Event=E>, TM: Timer<E, T> {
+    pub fn new(correlator: Arc<Mutex<Correlator<E, T>>>, formatter: MessageFormatter, delta: Duration, timer: TM) -> CorrelationParser<E, T, TM> {
         CorrelationParser {
-            correlator: Arc::new(Mutex::new(correlator)),
+            correlator: correlator,
             formatter: formatter,
+            delta: delta,
+            timer: timer
         }
     }
     fn on_alert<P>(guard: &mut MutexGuard<Correlator<E, T>>, alert: Alert<E>, parent: &mut P)
@@ -136,7 +151,7 @@ impl<E, T> CorrelationParser<E, T> where E: Event, T: Template<Event=E> {
     }
 }
 
-impl<P, E, T> Parser<P> for CorrelationParser<E, T> where P: Pipe, E: Event + Into<LogMessage>, T: Template<Event=E> {
+impl<P, E, T, TM> Parser<P> for CorrelationParser<E, T, TM> where P: Pipe, E: Event + Into<LogMessage> + Send, T: Template<Event=E>, TM: Timer<E, T> {
     fn parse(&mut self, parent: &mut P, msg: &mut LogMessage, message: &str) -> bool {
         debug!("CorrelationParser: process()");
         let message = {
@@ -158,7 +173,7 @@ impl<P, E, T> Parser<P> for CorrelationParser<E, T> where P: Pipe, E: Event + In
             Ok(mut guard) => {
                 guard.push_message(message);
                 while let Some(alert) = guard.responses.pop_front() {
-                    CorrelationParser::on_alert(&mut guard, alert, parent);
+                    CorrelationParser::<E, T, TM>::on_alert(&mut guard, alert, parent);
                 }
                 true
             },
@@ -170,4 +185,4 @@ impl<P, E, T> Parser<P> for CorrelationParser<E, T> where P: Pipe, E: Event + In
     }
 }
 
-parser_plugin!(CorrelationParserBuilder<LogParser, LogEvent, LogTemplate, LogTemplateFactory>);
+parser_plugin!(CorrelationParserBuilder<LogParser, LogEvent, LogTemplate, LogTemplateFactory, Watchdog>);
