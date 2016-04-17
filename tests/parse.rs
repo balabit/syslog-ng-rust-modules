@@ -4,12 +4,11 @@ extern crate syslog_ng_common;
 extern crate env_logger;
 
 use correlation_parser::{CorrelationParserBuilder, options, CLASSIFIER_UUID, CLASSIFIER_CLASS};
-use correlation_parser::mock::{MockEvent, MockLogTemplate, MockLogTemplateFactory};
+use correlation_parser::mock::{MockEvent, MockLogTemplate, MockLogTemplateFactory, MockTimer};
 use correlation::Event;
 use syslog_ng_common::{ParserBuilder, LogMessage, Parser, SYSLOG_NG_INITIALIZED, syslog_ng_global_init, GlobalConfig};
 use syslog_ng_common::mock::MockPipe;
 
-use std::thread;
 use std::time::Duration;
 
 #[test]
@@ -27,16 +26,17 @@ fn test_alert_is_forwarded() {
 
     let mut pipe = MockPipe::new();
     let cfg = GlobalConfig::new(0x0308);
-    let mut builder = CorrelationParserBuilder::<MockPipe, MockEvent, MockLogTemplate, MockLogTemplateFactory>::new(cfg);
+    let mut builder = CorrelationParserBuilder::<MockPipe, MockEvent, MockLogTemplate, MockLogTemplateFactory, MockTimer<MockEvent, MockLogTemplate>>::new(cfg);
     builder.option(options::CONTEXTS_FILE.to_owned(), config_file.to_owned());
     let mut parser = builder.build().unwrap();
+    let mut timer = parser.timer.clone();
     assert_eq!(true, parser.parse(&mut pipe, &mut logmsg, message));
     assert_eq!(true, parser.parse(&mut pipe, &mut logmsg, message));
     assert_eq!(0, pipe.forwarded_messages.len());
-    thread::sleep(Duration::from_secs(3));
+    timer.elapse_time(Duration::from_secs(3));
     assert_eq!(0, pipe.forwarded_messages.len());
-    thread::sleep(Duration::from_secs(2));
-    // after 10 secs we should get one message when the parses next gets access to the pipe
+    timer.elapse_time(Duration::from_secs(2));
+    // after 5 secs we should get one message when the parses next gets access to the pipe
     assert_eq!(true, parser.parse(&mut pipe, &mut logmsg, message));
     assert_eq!(1, pipe.forwarded_messages.len());
     let alert = pipe.forwarded_messages.get(0).unwrap();
