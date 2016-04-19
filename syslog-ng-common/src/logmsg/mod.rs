@@ -67,14 +67,12 @@ impl LogMessage {
         }
     }
 
-    pub fn get<K: Into<NVHandle>>(&self, key: K) -> Option<&str> {
+    pub fn get<K: Into<NVHandle>>(&self, key: K) -> Option<&[u8]> {
         let handle = key.into();
         let mut size: ssize_t = 0;
-        let value = unsafe {
-            let value = logmsg::__log_msg_get_value(self.0, handle.0, &mut size);
-            LogMessage::c_char_to_str(value, size)
-        };
+        let value = unsafe { logmsg::__log_msg_get_value(self.0, handle.0, &mut size) };
         if size > 0 {
+            let value = unsafe { from_raw_parts(value as *const u8, size as usize) };
             Some(value)
         } else {
             None

@@ -39,3 +39,15 @@ fn test_given_empty_log_msg_when_a_not_inserted_key_is_looked_up_then_get_return
     logmsg.insert("foo", "bar");
     assert_eq!(None, logmsg.get("ham"));
 }
+
+#[test]
+fn test_log_msg_get_returns_the_expected_value() {
+    SYSLOG_NG_INITIALIZED.call_once(|| {
+        unsafe { syslog_ng_global_init(); }
+    });
+    let mut logmsg = LogMessage::new();
+    logmsg.insert("foo", "bar");
+    let expected = b"bar";
+    let actual = logmsg.get("foo");
+    assert_eq!(Some(&expected[..]), actual);
+}
