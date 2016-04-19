@@ -12,14 +12,14 @@ fn test_log_message_context_can_be_formatted(cfg: &GlobalConfig) {
     msg_2.insert("bar", "BAR");
     msg_2.insert("baz", "2");
     let messages = [msg_1, msg_2];
-    let formatted_msg = template.format_with_context(&messages, None, LogTimeZone::Local, 0, None);
+    let formatted_msg = template.format_with_context(&messages, None, LogTimeZone::Local, 0, "dummy");
     assert_eq!(b"1,2", formatted_msg);
 }
 
 fn test_empty_log_message_context_can_be_formatted(cfg: &GlobalConfig) {
     let mut template = LogTemplate::compile(&cfg, r#"$(grep ("${bar}" == "BAR") ${baz})"#).ok().unwrap();
     let messages = [];
-    let formatted_msg = template.format_with_context(&messages, None, LogTimeZone::Local, 0, None);
+    let formatted_msg = template.format_with_context(&messages, None, LogTimeZone::Local, 0, "dummy");
     assert_eq!(b"", formatted_msg);
 }
 
