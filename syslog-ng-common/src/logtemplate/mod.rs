@@ -6,6 +6,7 @@ use LogMessage;
 
 use GlobalConfig;
 
+use std::slice::from_raw_parts;
 use std::ffi::{CString, CStr};
 
 #[cfg(test)]
@@ -44,13 +45,12 @@ impl LogTemplate {
         }
     }
 
-    pub fn format(&mut self, msg: &LogMessage, options: Option<&LogTemplateOptions>, tz: LogTimeZone, seq_num: i32) -> &str {
+    pub fn format(&mut self, msg: &LogMessage, options: Option<&LogTemplateOptions>, tz: LogTimeZone, seq_num: i32) -> &[u8] {
         let options: *const sys::LogTemplateOptions = options.map_or(::std::ptr::null(), |options| options.0);
-        let result = unsafe {
+        unsafe {
             sys::log_template_format(self.wrapped, msg.0, options, tz as i32, seq_num, ::std::ptr::null(), self.buffer);
-            CStr::from_ptr((*self.buffer).str)
-        };
-        result.to_str().unwrap()
+            from_raw_parts((*self.buffer).str as *const u8, (*self.buffer).len)
+        }
     }
 
     pub fn format_with_context(&mut self, messages: &[LogMessage], options: Option<&LogTemplateOptions>, tz: LogTimeZone, seq_num: i32, context_id: Option<&str>) -> &str {

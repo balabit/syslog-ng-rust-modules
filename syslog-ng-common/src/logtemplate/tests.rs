@@ -42,7 +42,7 @@ fn test_log_message_can_be_formatted() {
     let mut msg = LogMessage::new();
     msg.insert("kittens", "2");
     let formatted_msg = template.format(&msg, None, LogTimeZone::Local, 0);
-    assert_eq!("2", formatted_msg);
+    assert_eq!(b"2", formatted_msg);
 }
 
 #[test]
