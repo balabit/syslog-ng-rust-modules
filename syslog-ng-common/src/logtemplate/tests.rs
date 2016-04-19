@@ -55,5 +55,5 @@ fn test_context_id_can_be_used() {
     let msg = LogMessage::new();
     let messages = [msg];
     let actual = template.format_with_context(&messages, None, LogTimeZone::Local, 0, Some("context-id"));
-    assert_eq!("context-id", actual);
+    assert_eq!(b"context-id", actual);
 }

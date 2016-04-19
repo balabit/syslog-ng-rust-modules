@@ -7,7 +7,7 @@ use LogMessage;
 use GlobalConfig;
 
 use std::slice::from_raw_parts;
-use std::ffi::{CString, CStr};
+use std::ffi::CString;
 
 #[cfg(test)]
 mod tests;
@@ -53,10 +53,10 @@ impl LogTemplate {
         }
     }
 
-    pub fn format_with_context(&mut self, messages: &[LogMessage], options: Option<&LogTemplateOptions>, tz: LogTimeZone, seq_num: i32, context_id: Option<&str>) -> &str {
+    pub fn format_with_context(&mut self, messages: &[LogMessage], options: Option<&LogTemplateOptions>, tz: LogTimeZone, seq_num: i32, context_id: Option<&str>) -> &[u8] {
         let options: *const sys::LogTemplateOptions = options.map_or(::std::ptr::null(), |options| options.0);
         let messages = messages.iter().map(|msg| msg.0 as *const syslog_ng_sys::LogMessage).collect::<Vec<*const syslog_ng_sys::LogMessage>>();
-        let result = unsafe {
+        unsafe {
             let context_id: *const c_char = context_id.map_or(::std::ptr::null(), |id| {
                 let cstring = CString::new(id).unwrap();
                 cstring.into_raw()
@@ -68,9 +68,8 @@ impl LogTemplate {
                 let _ = CString::from_raw(context_id as *mut c_char);
             }
 
-            CStr::from_ptr((*self.buffer).str)
-        };
-        result.to_str().unwrap()
+            from_raw_parts((*self.buffer).str as *const u8, (*self.buffer).len)
+        }
     }
 }
 
