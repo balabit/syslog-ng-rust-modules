@@ -44,20 +44,10 @@ impl LogTemplate {
         }
     }
 
-    pub fn format(&mut self, msg: &LogMessage, options: Option<&LogTemplateOptions>, tz: LogTimeZone, seq_num: i32, context_id: Option<&str>) -> &str {
+    pub fn format(&mut self, msg: &LogMessage, options: Option<&LogTemplateOptions>, tz: LogTimeZone, seq_num: i32) -> &str {
         let options: *const sys::LogTemplateOptions = options.map_or(::std::ptr::null(), |options| options.0);
         let result = unsafe {
-            let context_id: *const c_char = context_id.map_or(::std::ptr::null(), |id| {
-                let cstring = CString::new(id).unwrap();
-                cstring.into_raw()
-            });
-
-            sys::log_template_format(self.wrapped, msg.0, options, tz as i32, seq_num, context_id, self.buffer);
-
-            if context_id != ::std::ptr::null() {
-                let _ = CString::from_raw(context_id as *mut c_char);
-            }
-
+            sys::log_template_format(self.wrapped, msg.0, options, tz as i32, seq_num, ::std::ptr::null(), self.buffer);
             CStr::from_ptr((*self.buffer).str)
         };
         result.to_str().unwrap()

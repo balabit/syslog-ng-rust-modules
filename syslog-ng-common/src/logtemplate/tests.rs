@@ -41,7 +41,7 @@ fn test_log_message_can_be_formatted() {
     let mut template = LogTemplate::compile(&cfg, "${kittens}").ok().unwrap();
     let mut msg = LogMessage::new();
     msg.insert("kittens", "2");
-    let formatted_msg = template.format(&msg, None, LogTimeZone::Local, 0, None);
+    let formatted_msg = template.format(&msg, None, LogTimeZone::Local, 0);
     assert_eq!("2", formatted_msg);
 }
 
@@ -53,6 +53,7 @@ fn test_context_id_can_be_used() {
     let cfg = GlobalConfig::new(0x0308);
     let mut template = LogTemplate::compile(&cfg, "${CONTEXT_ID}").ok().unwrap();
     let msg = LogMessage::new();
-    let actual = template.format(&msg, None, LogTimeZone::Local, 0, Some("context-id"));
+    let messages = [msg];
+    let actual = template.format_with_context(&messages, None, LogTimeZone::Local, 0, Some("context-id"));
     assert_eq!("context-id", actual);
 }
