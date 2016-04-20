@@ -14,7 +14,7 @@ use Event;
 use Template;
 
 pub struct ContextMap<E, T> where E: Event, T: Template<Event=E> {
-    map: HashMap<String, Vec<usize>>,
+    map: HashMap<Vec<u8>, Vec<usize>>,
     contexts: Vec<Context<E, T>>,
 }
 
@@ -51,7 +51,7 @@ impl<E, T> ContextMap<E, T> where E: Event, T: Template<Event=E> {
         ContextMap::<E, T>::update_indices(&mut self.map, index_of_last_context, patterns);
     }
 
-    fn update_indices(map: &mut HashMap<String, Vec<usize>>,
+    fn update_indices(map: &mut HashMap<Vec<u8>, Vec<usize>>,
                       new_index: usize,
                       patterns: &[String]) {
         if patterns.is_empty() {
@@ -61,17 +61,17 @@ impl<E, T> ContextMap<E, T> where E: Event, T: Template<Event=E> {
         }
     }
 
-    fn add_index_to_every_index_vectors(map: &mut HashMap<String, Vec<usize>>, new_index: usize) {
+    fn add_index_to_every_index_vectors(map: &mut HashMap<Vec<u8>, Vec<usize>>, new_index: usize) {
         for (_, v) in map.iter_mut() {
             v.push(new_index);
         }
     }
 
-    fn add_index_to_looked_up_index_vectors(map: &mut HashMap<String, Vec<usize>>,
+    fn add_index_to_looked_up_index_vectors(map: &mut HashMap<Vec<u8>, Vec<usize>>,
                                             new_index: usize,
                                             patterns: &[String]) {
         for i in patterns {
-            map.entry(i.clone()).or_insert_with(Vec::new).push(new_index);
+            map.entry(i.as_bytes().to_vec()).or_insert_with(Vec::new).push(new_index);
         }
     }
 
@@ -79,7 +79,7 @@ impl<E, T> ContextMap<E, T> where E: Event, T: Template<Event=E> {
         &mut self.contexts
     }
 
-    pub fn contexts_iter_mut(&mut self, key: &str) -> Iterator<E, T> {
+    pub fn contexts_iter_mut(&mut self, key: &[u8]) -> Iterator<E, T> {
         let ids = self.map.get(key);
         Iterator {
             ids: ids,

@@ -19,15 +19,15 @@ mod test;
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Message {
-    pub uuid: String,
-    pub name: Option<String>,
-    pub message: String,
-    pub values: BTreeMap<String, String>,
+    pub uuid: Vec<u8>,
+    pub name: Option<Vec<u8>>,
+    pub message: Vec<u8>,
+    pub values: BTreeMap<Vec<u8>, Vec<u8>>,
 }
 
 impl Event for Message {
-    fn get(&self, key: &str) -> Option<&str> {
-        self.values.get(key).map(|x| x.borrow())
+    fn get(&self, key: &[u8]) -> Option<&[u8]> {
+        self.values.get(key).map(|value| &value[..])
     }
     fn ids(&self) -> EventIds {
         EventIds {
@@ -36,30 +36,30 @@ impl Event for Message {
         }
     }
 
-    fn new(uuid: &str, message: &str) -> Self {
+    fn new(uuid: &[u8], message: &[u8]) -> Self {
         Message {
-            uuid: uuid.to_string(),
-            message: message.to_string(),
+            uuid: uuid.to_vec(),
+            message: message.to_vec(),
             name: None,
             values: BTreeMap::new()
         }
     }
-    fn set_name(&mut self, name: Option<&str>) {
-        self.name = name.map(|name| name.to_string());
+    fn set_name(&mut self, name: Option<&[u8]>) {
+        self.name = name.map(|name| name.to_vec());
     }
-    fn set(&mut self, key: &str, value: &str) {
-        self.values.insert(key.to_string(), value.to_string());
+    fn set(&mut self, key: &[u8], value: &[u8]) {
+        self.values.insert(key.to_vec(), value.to_vec());
     }
-    fn set_message(&mut self, message: &str) {
-        self.message = message.to_string();
+    fn set_message(&mut self, message: &[u8]) {
+        self.message = message.to_vec();
     }
-    fn message(&self) -> &str {
+    fn message(&self) -> &[u8] {
         self.message.borrow()
     }
-    fn uuid(&self) -> &str {
+    fn uuid(&self) -> &[u8] {
         &self.uuid
     }
-    fn name(&self) -> Option<&str> {
+    fn name(&self) -> Option<&[u8]> {
         self.name.as_ref().map(|name| name.borrow())
     }
 }

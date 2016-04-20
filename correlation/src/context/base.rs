@@ -42,7 +42,7 @@ impl<E, T> BaseContext<E, T> where E: Event, T: Template<Event=E> {
 
     pub fn is_opening(&self, message: &E) -> bool {
         if self.conditions.first_opens {
-            self.patterns.first().iter().any(|first| message.ids().into_iter().any(|id| &id == first))
+            self.patterns.first().iter().any(|first| message.ids().into_iter().any(|id| &id[..] == first.as_bytes()))
         } else {
             true
         }
@@ -65,7 +65,7 @@ impl<E, T> BaseContext<E, T> where E: Event, T: Template<Event=E> {
     fn is_closing_message(&self, state: &State<E>) -> bool {
         if self.conditions.last_closes {
             state.messages().last().iter().any(|last_message| {
-                self.patterns.last().iter().any(|last| last_message.ids().into_iter().any(|id| &id == last))
+                self.patterns.last().iter().any(|last| last_message.ids().into_iter().any(|id| &id[..] == last.as_bytes()))
             })
         } else {
             false

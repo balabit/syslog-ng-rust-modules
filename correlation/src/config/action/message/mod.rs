@@ -13,7 +13,6 @@ use Template;
 
 use std::collections::BTreeMap;
 use std::collections::VecDeque;
-use std::borrow::Borrow;
 use state::State;
 use super::ExecCondition;
 
@@ -59,12 +58,12 @@ impl<T> MessageAction<T> {
         let context_id = context.uuid.to_hyphenated_string();
         let mut message = String::new();
         self.message.format_with_context(state.messages(), &context_id, &mut message);
-        let mut event = E::new(&self.uuid, &message);
-        event.set_name(self.name.as_ref().map(|name| name.borrow()));
+        let mut event = E::new(&self.uuid.as_bytes(), &message.as_bytes());
+        event.set_name(self.name.as_ref().map(|name| name.as_bytes()));
         let mut value = String::new();
         for (k, v) in &self.values {
             v.format_with_context(state.messages(), &context_id, &mut value);
-            event.set(k, &value);
+            event.set(k.as_bytes(), &value.as_bytes());
             value.clear();
         }
         let response = Alert {

@@ -43,24 +43,24 @@ mod state;
 mod duration;
 
 pub trait Event: Clone {
-    fn get(&self, key: &str) -> Option<&str>;
-    fn uuid(&self) -> &str;
+    fn get(&self, key: &[u8]) -> Option<&[u8]>;
+    fn uuid(&self) -> &[u8];
     fn ids(&self) -> EventIds;
-    fn new(uuid: &str, message: &str) -> Self;
-    fn set_name(&mut self, name: Option<&str>);
-    fn name(&self) -> Option<&str>;
-    fn set(&mut self, key: &str, value: &str);
-    fn set_message(&mut self, message: &str);
-    fn message(&self) -> &str;
+    fn new(uuid: &[u8], message: &[u8]) -> Self;
+    fn set_name(&mut self, name: Option<&[u8]>);
+    fn name(&self) -> Option<&[u8]>;
+    fn set(&mut self, key: &[u8], value: &[u8]);
+    fn set_message(&mut self, message: &[u8]);
+    fn message(&self) -> &[u8];
 }
 
 pub struct EventIds<'a> {
-    pub uuid: &'a str,
-    pub name: Option<&'a str>
+    pub uuid: &'a [u8],
+    pub name: Option<&'a [u8]>
 }
 
 impl<'a> IntoIterator for EventIds<'a> {
-    type Item = &'a str;
+    type Item = &'a [u8];
     type IntoIter = EventIdsIterator<'a>;
 
     fn into_iter(self) -> EventIdsIterator<'a> {
@@ -77,7 +77,7 @@ pub struct EventIdsIterator<'ids> {
 }
 
 impl<'a> Iterator for EventIdsIterator<'a> {
-    type Item = &'a str;
+    type Item = &'a [u8];
     fn next(&mut self) -> Option<Self::Item> {
         match self.state {
             0 => {

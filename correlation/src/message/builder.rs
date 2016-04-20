@@ -11,33 +11,33 @@ use std::convert::Into;
 use super::Message;
 
 pub struct MessageBuilder {
-    uuid: String,
-    name: Option<String>,
-    message: String,
-    values: BTreeMap<String, String>,
+    uuid: Vec<u8>,
+    name: Option<Vec<u8>>,
+    message: Vec<u8>,
+    values: BTreeMap<Vec<u8>, Vec<u8>>,
 }
 
 impl MessageBuilder {
-    pub fn new<S: Into<String>>(uuid: &str, message: S) -> MessageBuilder {
+    pub fn new<S: Into<Vec<u8>>>(uuid: S, message: S) -> MessageBuilder {
         MessageBuilder {
-            uuid: uuid.to_owned(),
+            uuid: uuid.into(),
             name: None,
             message: message.into(),
             values: BTreeMap::new(),
         }
     }
 
-    pub fn name<S: Into<String>>(&mut self, name: Option<S>) -> &mut MessageBuilder {
+    pub fn name<S: Into<Vec<u8>>>(&mut self, name: Option<S>) -> &mut MessageBuilder {
         self.name = name.map(|name| name.into());
         self
     }
 
-    pub fn values(&mut self, values: BTreeMap<String, String>) -> &mut MessageBuilder {
+    pub fn values(&mut self, values: BTreeMap<Vec<u8>, Vec<u8>>) -> &mut MessageBuilder {
         self.values = values;
         self
     }
 
-    pub fn pair(&mut self, key: &str, value: &str) -> &mut MessageBuilder {
+    pub fn pair(&mut self, key: &[u8], value: &[u8]) -> &mut MessageBuilder {
         self.values.insert(key.to_owned(), value.to_owned());
         self
     }
