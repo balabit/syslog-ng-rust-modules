@@ -10,7 +10,6 @@ use syslog_ng_sys::{LogTagId, logmsg};
 use syslog_ng_sys::types::*;
 
 use std::collections::BTreeMap;
-use std::str;
 use std::mem;
 use std::slice::from_raw_parts;
 use std::ffi::{CStr, CString};
@@ -81,9 +80,9 @@ impl LogMessage {
         }
     }
 
-    pub fn set_tag(&mut self, tag: &str) {
+    pub fn set_tag(&mut self, tag: &[u8]) {
+        let c_tag = CString::new(tag).unwrap();
         unsafe {
-            let c_tag = CString::new(tag).unwrap();
             logmsg::log_msg_set_tag_by_name(self.0, c_tag.as_ptr());
         }
     }
@@ -98,20 +97,14 @@ impl LogMessage {
         values
     }
 
-    pub fn tags(&self) -> Vec<String> {
+    pub fn tags(&self) -> Vec<Vec<u8>> {
         let mut tags = Vec::new();
         unsafe {
-            let user_data = mem::transmute::<&mut Vec<String>, *mut c_void>(&mut tags);
+            let user_data = mem::transmute::<&mut Vec<Vec<u8>>, *mut c_void>(&mut tags);
             logmsg::log_msg_tags_foreach(self.0, insert_tag_to_vec, user_data);
         }
         tags
     }
-}
-
-fn c_char_to_string(value: *const c_char) -> String {
-    let bytes = unsafe { CStr::from_ptr(value).to_bytes() };
-    let str_slice: &str = str::from_utf8(bytes).unwrap();
-    str_slice.to_owned()
 }
 
 extern "C" fn insert_tag_to_vec(_: *const logmsg::LogMessage,
@@ -120,9 +113,9 @@ extern "C" fn insert_tag_to_vec(_: *const logmsg::LogMessage,
                                 user_data: *mut c_void)
                                 -> bool {
     unsafe {
-        let name = c_char_to_string(name);
-        let mut vec: &mut Vec<String> = mem::transmute(user_data);
-        vec.push(name);
+        let bytes = CStr::from_ptr(name).to_bytes().to_vec();
+        let mut vec: &mut Vec<Vec<u8>> = mem::transmute(user_data);
+        vec.push(bytes);
     }
     false
 }

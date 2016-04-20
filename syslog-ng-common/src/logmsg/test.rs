@@ -65,3 +65,15 @@ fn test_byte_slices_can_be_used_as_names_in_log_message_insert() {
     let actual = logmsg.get("foo");
     assert_eq!(Some(&expected[..]), actual);
 }
+
+#[test]
+fn test_set_tags_can_be_iterated_over_in_log_message() {
+    SYSLOG_NG_INITIALIZED.call_once(|| {
+        unsafe { syslog_ng_global_init(); }
+    });
+    let mut logmsg = LogMessage::new();
+    logmsg.set_tag(b"foo");
+    let expected = vec![b"foo".to_vec()];
+    let actual = logmsg.tags();
+    assert_eq!(expected, actual);
+}
