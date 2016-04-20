@@ -8,6 +8,7 @@ find_package(Cargo REQUIRED)
 find_package(PkgConfig REQUIRED)
 
 pkg_check_modules (SYSLOG_NG REQUIRED syslog-ng)
+pkg_check_modules (IVYKIS REQUIRED ivykis)
 
 include(UseRust)
 include(UsePkgConfig)
