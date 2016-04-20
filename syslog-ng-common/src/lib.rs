@@ -49,5 +49,6 @@ pub unsafe fn syslog_ng_global_init() {
 
     c_paths::resolved_configurable_paths_init(&mut c_paths::resolvedConfigurablePaths);
     sys::logmsg::log_msg_registry_init();
+    sys::logmsg::log_tags_global_init();
     sys::logtemplate::log_template_global_init();
 }
