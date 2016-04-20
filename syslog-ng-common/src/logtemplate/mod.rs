@@ -35,6 +35,15 @@ impl From<NulError> for Error {
     }
 }
 
+impl Error {
+    pub fn into_vec(self) -> Vec<u8> {
+        match self {
+            Error::Glib(error) => error.to_string().into(),
+            Error::Nul(error) => error.into_vec(),
+        }
+    }
+}
+
 impl LogTemplate {
     fn new(cfg: &GlobalConfig) -> LogTemplate {
         let raw_cfg = cfg.raw_ptr();
