@@ -56,4 +56,5 @@ extern "C" {
                              handle: NVHandle,
                              value: *const c_char,
                              value_length: ssize_t);
+    pub fn log_tags_global_init();
 }
