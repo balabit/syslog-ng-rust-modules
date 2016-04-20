@@ -40,7 +40,7 @@ fn test_log_message_can_be_formatted() {
     let cfg = GlobalConfig::new(0x0308);
     let mut template = LogTemplate::compile(&cfg, "${kittens}").ok().unwrap();
     let mut msg = LogMessage::new();
-    msg.insert("kittens", "2");
+    msg.insert("kittens", b"2");
     let formatted_msg = template.format(&msg, None, LogTimeZone::Local, 0);
     assert_eq!(b"2", formatted_msg);
 }

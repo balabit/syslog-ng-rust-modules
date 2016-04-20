@@ -6,11 +6,11 @@ fn test_log_message_context_can_be_formatted(cfg: &GlobalConfig) {
     let mut template = LogTemplate::compile(&cfg, r#"$(grep ("${bar}" == "BAR") ${baz})"#).ok().unwrap();
     let mut msg_1 = LogMessage::new();
     let mut msg_2 = LogMessage::new();
-    msg_1.insert("foo", "FOO");
-    msg_1.insert("bar", "BAR");
-    msg_1.insert("baz", "1");
-    msg_2.insert("bar", "BAR");
-    msg_2.insert("baz", "2");
+    msg_1.insert("foo", b"FOO");
+    msg_1.insert("bar", b"BAR");
+    msg_1.insert("baz", b"1");
+    msg_2.insert("bar", b"BAR");
+    msg_2.insert("baz", b"2");
     let messages = [msg_1, msg_2];
     let formatted_msg = template.format_with_context(&messages, None, LogTimeZone::Local, 0, "dummy");
     assert_eq!(b"1,2", formatted_msg);

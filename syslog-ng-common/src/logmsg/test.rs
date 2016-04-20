@@ -26,9 +26,9 @@ fn test_given_empty_log_msg_when_values_are_inserted_then_we_can_get_them_back()
         values
     };
 
-    logmsg.insert("foo", "bar");
-    logmsg.insert("qux", "baz");
-    logmsg.insert("empty", "");
+    logmsg.insert("foo", b"bar");
+    logmsg.insert("qux", b"baz");
+    logmsg.insert("empty", b"");
     assert_eq!(&expected_values, &logmsg.values());
 }
 
@@ -38,7 +38,7 @@ fn test_given_empty_log_msg_when_a_not_inserted_key_is_looked_up_then_get_return
         unsafe { syslog_ng_global_init(); }
     });
     let mut logmsg = LogMessage::new();
-    logmsg.insert("foo", "bar");
+    logmsg.insert("foo", b"bar");
     assert_eq!(None, logmsg.get("ham"));
 }
 
@@ -48,7 +48,7 @@ fn test_log_msg_get_returns_the_expected_value() {
         unsafe { syslog_ng_global_init(); }
     });
     let mut logmsg = LogMessage::new();
-    logmsg.insert("foo", "bar");
+    logmsg.insert("foo", b"bar");
     let expected = b"bar";
     let actual = logmsg.get("foo");
     assert_eq!(Some(&expected[..]), actual);
