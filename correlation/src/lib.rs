@@ -95,17 +95,18 @@ impl<'a> Iterator for EventIdsIterator<'a> {
 
 pub trait TemplateFactory<E> where E: Event {
     type Template: Template<Event=E>;
-    fn compile(&self, value: &str) -> Result<Self::Template, CompileError>;
+    fn compile(&self, value: &[u8]) -> Result<Self::Template, CompileError>;
 }
 
 #[derive(Debug, Eq, PartialEq)]
-pub struct CompileError(pub String);
+pub struct CompileError(pub Vec<u8>);
 
 use std::fmt::{Display, Formatter, Error as FmtError};
 
 impl Display for CompileError {
     fn fmt(&self, formatter: &mut Formatter) -> Result<(), FmtError> {
-        formatter.write_str(&self.0)
+        let as_str = String::from_utf8_lossy(&self.0[..]);
+        formatter.write_str(&as_str[..])
     }
 }
 
@@ -116,7 +117,9 @@ impl ::std::error::Error for CompileError {
     fn cause(&self) -> Option<&::std::error::Error> { None }
 }
 
+use std::io::Write;
+
 pub trait Template: Send {
     type Event: Event;
-    fn format_with_context(&self, messages: &[Self::Event], context_id: &str, buffer: &mut String);
+    fn format_with_context(&self, messages: &[Self::Event], context_id: &str, buffer: &mut Write);
 }

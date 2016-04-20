@@ -15,7 +15,6 @@ use conditions::Conditions;
 use Event;
 use TemplateFactory;
 use CompileError;
-use std::borrow::Borrow;
 
 mod deser;
 pub mod action;
@@ -30,7 +29,7 @@ pub struct ContextConfig<T> {
 }
 
 pub fn compile_templates<T, E, TF>(original: Vec<ContextConfig<T>>, factory: &TF) -> Result<Vec<ContextConfig<TF::Template>>, CompileError>
-    where T: Borrow<str>, E: Event, TF: TemplateFactory<E> {
+    where T: AsRef<[u8]>, E: Event, TF: TemplateFactory<E> {
     let mut new_contexts: Vec<ContextConfig<TF::Template>> = Vec::new();
     for context in original {
         let ContextConfig {name, uuid, conditions, context_id, actions, patterns} = context;
@@ -39,11 +38,11 @@ pub fn compile_templates<T, E, TF>(original: Vec<ContextConfig<T>>, factory: &TF
         for action in actions {
             let ActionType::Message(message_action) = action;
             let MessageAction {uuid, name, message, values, when, inject_mode} = message_action;
-            let new_message = try!(factory.compile(message.borrow()));
+            let new_message = try!(factory.compile(message.as_ref()));
             let mut new_values = BTreeMap::new();
 
             for (key, value) in values {
-                let value = try!(factory.compile(value.borrow()));
+                let value = try!(factory.compile(value.as_ref()));
                 new_values.insert(key, value);
             }
 

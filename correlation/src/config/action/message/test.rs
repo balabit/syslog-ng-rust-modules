@@ -36,9 +36,9 @@ fn test_given_message_action_when_it_is_executed_then_the_additional_values_are_
                             MessageBuilder::new("uuid2", "message2").build()];
         State::with_messages(messages)
     };
-    let message_action = MessageActionBuilder::<MockTemplate>::new("uuid", MockTemplate::literal("message"))
-                                              .pair("key1", MockTemplate::literal("value1"))
-                                              .pair("key2", MockTemplate::literal("value2"))
+    let message_action = MessageActionBuilder::<MockTemplate>::new("uuid", MockTemplate::literal(b"message"))
+                                              .pair("key1", MockTemplate::literal(b"value1"))
+                                              .pair("key2", MockTemplate::literal(b"value2"))
                                               .build();
 
     message_action.on_closed(&state, &base_context, &mut responder);
@@ -65,9 +65,9 @@ fn test_executed_message_action_uses_the_templates() {
                             MessageBuilder::new("uuid2", "message2").build()];
         State::with_messages(messages)
     };
-    let message_action = MessageActionBuilder::<MockTemplate>::new("uuid", MockTemplate::literal(uuid_as_str))
-                                              .pair("key1", MockTemplate::literal("value1"))
-                                              .pair("key2", MockTemplate::literal("value2"))
+    let message_action = MessageActionBuilder::<MockTemplate>::new("uuid", MockTemplate::literal(uuid_as_str.as_bytes()))
+                                              .pair("key1", MockTemplate::literal(b"value1"))
+                                              .pair("key2", MockTemplate::literal(b"value2"))
                                               .pair("context_id", MockTemplate::context_id())
                                               .pair("context_len", MockTemplate::context_len())
                                               .build();
