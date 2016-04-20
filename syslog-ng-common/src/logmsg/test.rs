@@ -53,3 +53,15 @@ fn test_log_msg_get_returns_the_expected_value() {
     let actual = logmsg.get("foo");
     assert_eq!(Some(&expected[..]), actual);
 }
+
+#[test]
+fn test_byte_slices_can_be_used_as_names_in_log_message_insert() {
+    SYSLOG_NG_INITIALIZED.call_once(|| {
+        unsafe { syslog_ng_global_init(); }
+    });
+    let mut logmsg = LogMessage::new();
+    logmsg.insert(&b"foo"[..], b"bar");
+    let expected = b"bar";
+    let actual = logmsg.get("foo");
+    assert_eq!(Some(&expected[..]), actual);
+}

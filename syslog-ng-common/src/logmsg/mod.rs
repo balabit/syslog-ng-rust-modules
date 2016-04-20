@@ -149,3 +149,18 @@ impl<'a> Into<NVHandle> for &'a str {
         NVHandle(handle)
     }
 }
+
+impl<'a> Into<NVHandle> for &'a [u8] {
+    fn into(self) -> NVHandle {
+        let mut name = Vec::from(self);
+
+        let has_trailing_zero = name.last().map_or(false, |last| *last == 0);
+
+        if !has_trailing_zero {
+            name.push(0 as u8);
+        }
+
+        let handle = unsafe { logmsg::log_msg_get_value_handle(name.as_ptr() as *const i8) };
+        NVHandle(handle)
+    }
+}
