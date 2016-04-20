@@ -3,7 +3,7 @@ extern crate syslog_ng_common;
 use syslog_ng_common::{GlobalConfig, LogMessage, SYSLOG_NG_INITIALIZED, syslog_ng_global_init, LogTemplate, LogTimeZone, Plugin};
 
 fn test_log_message_context_can_be_formatted(cfg: &GlobalConfig) {
-    let mut template = LogTemplate::compile(&cfg, r#"$(grep ("${bar}" == "BAR") ${baz})"#).ok().unwrap();
+    let mut template = LogTemplate::compile(&cfg, br#"$(grep ("${bar}" == "BAR") ${baz})"#).ok().unwrap();
     let mut msg_1 = LogMessage::new();
     let mut msg_2 = LogMessage::new();
     msg_1.insert("foo", b"FOO");
@@ -17,7 +17,7 @@ fn test_log_message_context_can_be_formatted(cfg: &GlobalConfig) {
 }
 
 fn test_empty_log_message_context_can_be_formatted(cfg: &GlobalConfig) {
-    let mut template = LogTemplate::compile(&cfg, r#"$(grep ("${bar}" == "BAR") ${baz})"#).ok().unwrap();
+    let mut template = LogTemplate::compile(&cfg, br#"$(grep ("${bar}" == "BAR") ${baz})"#).ok().unwrap();
     let messages = [];
     let formatted_msg = template.format_with_context(&messages, None, LogTimeZone::Local, 0, "dummy");
     assert_eq!(b"", formatted_msg);

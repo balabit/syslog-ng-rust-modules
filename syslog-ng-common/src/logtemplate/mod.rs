@@ -1,13 +1,13 @@
 use syslog_ng_sys;
 use syslog_ng_sys::logtemplate as sys;
-use glib::Error;
 use glib_sys;
+use glib;
 use LogMessage;
 
 use GlobalConfig;
 
 use std::slice::from_raw_parts;
-use std::ffi::CString;
+use std::ffi::{CString, NulError};
 
 #[cfg(test)]
 mod tests;
@@ -24,6 +24,17 @@ pub enum LogTimeZone {
     Send = 1,
 }
 
+pub enum Error {
+    Glib(glib::Error),
+    Nul(NulError)
+}
+
+impl From<NulError> for Error {
+    fn from(error: NulError) -> Error {
+        Error::Nul(error)
+    }
+}
+
 impl LogTemplate {
     fn new(cfg: &GlobalConfig) -> LogTemplate {
         let raw_cfg = cfg.raw_ptr();
@@ -32,16 +43,15 @@ impl LogTemplate {
             buffer: unsafe { glib_sys::g_string_sized_new(128) },
         }
     }
-    pub fn compile(cfg: &GlobalConfig, content: &str) -> Result<LogTemplate, Error> {
+    pub fn compile(cfg: &GlobalConfig, content: &[u8]) -> Result<LogTemplate, Error> {
         let template = LogTemplate::new(cfg);
-
-        let content = CString::new(content).unwrap();
+        let content = try!(CString::new(content));
         let mut error = ::std::ptr::null_mut();
         let result = unsafe { sys::log_template_compile(template.wrapped, content.as_ptr(), &mut error) };
         if result != 0 {
             Ok(template)
         } else {
-            Err(Error::wrap(error))
+            Err(Error::Glib(glib::Error::wrap(error)))
         }
     }
 
