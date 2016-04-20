@@ -45,10 +45,10 @@ fn test_given_message_action_when_it_is_executed_then_the_additional_values_are_
     assert_eq!(1, responder.len());
     let response = responder.get(0).unwrap();
     let message = &response.message;
-    assert_eq!("value1",
-               message.get("key1").expect("Failed to get an additional key-value pair from a generated message"));
-    assert_eq!("value2",
-               message.get("key2").expect("Failed to get an additional key-value pair from a generated message"));
+    assert_eq!(b"value1",
+               message.get(b"key1").expect("Failed to get an additional key-value pair from a generated message"));
+    assert_eq!(b"value2",
+               message.get(b"key2").expect("Failed to get an additional key-value pair from a generated message"));
 }
 
 #[test]
@@ -76,11 +76,11 @@ fn test_executed_message_action_uses_the_templates() {
     assert_eq!(1, responder.len());
     let response = responder.get(0).unwrap();
     let message = &response.message;
-    assert_eq!(uuid_as_str, message.message());
-    assert_eq!("value1",
-               message.get("key1").expect("Failed to get an additional key-value pair from a generated message"));
-    assert_eq!("value2",
-               message.get("key2").expect("Failed to get an additional key-value pair from a generated message"));
-    assert_eq!(uuid_as_str, message.get("context_id").unwrap());
-    assert_eq!("2", message.get("context_len").unwrap());
+    assert_eq!(uuid_as_str.as_bytes(), message.message());
+    assert_eq!(b"value1",
+               message.get(b"key1").expect("Failed to get an additional key-value pair from a generated message"));
+    assert_eq!(b"value2",
+               message.get(b"key2").expect("Failed to get an additional key-value pair from a generated message"));
+    assert_eq!(uuid_as_str.as_bytes(), message.get(b"context_id").unwrap());
+    assert_eq!(b"2", message.get(b"context_len").unwrap());
 }

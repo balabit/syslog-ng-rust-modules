@@ -93,13 +93,13 @@ const JSON_CONFIG: &'static str = r#"
 
 #[test]
 fn test_given_manually_built_correlator_when_it_closes_a_context_then_the_actions_are_executed() {
-    let uuid1 = "1b47ba91-d867-4a8c-9553-a5dfd6ea1274".to_owned();
-    let uuid2 = "2b47ba91-d867-4a8c-9553-a5dfd6ea1274".to_owned();
-    let uuid3 = "3b47ba91-d867-4a8c-9553-a5dfd6ea1274".to_owned();
+    let uuid1 = "1b47ba91-d867-4a8c-9553-a5dfd6ea1274";
+    let uuid2 = "2b47ba91-d867-4a8c-9553-a5dfd6ea1274";
+    let uuid3 = "3b47ba91-d867-4a8c-9553-a5dfd6ea1274";
     let patterns = vec![
-        uuid1.clone(),
-        uuid2.clone(),
-        uuid3.clone(),
+        uuid1.to_owned(),
+        uuid2.to_owned(),
+        uuid3.to_owned(),
     ];
     let condition = ConditionsBuilder::new(Duration::from_millis(100))
                         .first_opens(true)
@@ -113,11 +113,11 @@ fn test_given_manually_built_correlator_when_it_closes_a_context_then_the_action
     let template_factory = MockTemplateFactory::compile_value();
     let contexts = compile_templates(contexts, &template_factory).unwrap();
     let mut correlator: Correlator<Message, MockTemplate> = Correlator::new(ContextMap::from_configs(contexts));
-    correlator.push_message(MessageBuilder::new(&uuid1, "message").build());
+    correlator.push_message(MessageBuilder::new(uuid1.as_bytes(), b"message").build());
     correlator.elapse_time(Duration::from_millis(20));
-    correlator.push_message(MessageBuilder::new(&uuid2, "message").build());
+    correlator.push_message(MessageBuilder::new(uuid2.as_bytes(), b"message").build());
     correlator.elapse_time(Duration::from_millis(80));
-    correlator.push_message(MessageBuilder::new(&uuid3, "message").build());
+    correlator.push_message(MessageBuilder::new(uuid3.as_bytes(), b"message").build());
     assert_eq!(3, correlator.responses.len());
 }
 
@@ -138,34 +138,34 @@ fn test_given_correlator_when_it_is_built_from_json_then_we_get_the_expected_cor
 #[test]
 fn test_given_correlator_when_it_is_built_from_json_then_it_produces_the_expected_number_of_messages
     () {
-    let uuid1 = "1b47ba91-d867-4a8c-9553-a5dfd6ea1274".to_owned();
-    let uuid2 = "2b47ba91-d867-4a8c-9553-a5dfd6ea1274".to_owned();
-    let uuid3 = "3b47ba91-d867-4a8c-9553-a5dfd6ea1274".to_owned();
+    let uuid1 = "1b47ba91-d867-4a8c-9553-a5dfd6ea1274";
+    let uuid2 = "2b47ba91-d867-4a8c-9553-a5dfd6ea1274";
+    let uuid3 = "3b47ba91-d867-4a8c-9553-a5dfd6ea1274";
     let result = from_str::<Vec<ContextConfig<String>>>(JSON_CONFIG);
     let contexts = result.expect("Failed to deserialize a config::ContextConfig from JSON");
     let template_factory = MockTemplateFactory::compile_value();
     let contexts = compile_templates(contexts, &template_factory).unwrap();
     let mut correlator: Correlator<Message, MockTemplate> = Correlator::new(ContextMap::from_configs(contexts));
-    correlator.push_message(MessageBuilder::new(&uuid1, "message")
+    correlator.push_message(MessageBuilder::new(uuid1, "message")
                                         .name(Some("p1"))
                                         .build());
     correlator.elapse_time(Duration::from_millis(20));
-    correlator.push_message(MessageBuilder::new(&uuid2, "message")
+    correlator.push_message(MessageBuilder::new(uuid2, "message")
                                         .name(Some("p2"))
                                         .build());
-    correlator.push_message(MessageBuilder::new(&uuid3, "message")
+    correlator.push_message(MessageBuilder::new(uuid3, "message")
                                         .name(Some("p3"))
                                         .build());
-    correlator.push_message(MessageBuilder::new(&uuid3, "message")
+    correlator.push_message(MessageBuilder::new(uuid3, "message")
                                         .name(Some("p3"))
                                         .build());
-    correlator.push_message(MessageBuilder::new(&uuid3, "message")
+    correlator.push_message(MessageBuilder::new(uuid3, "message")
                                         .name(Some("p3"))
                                         .build());
-    correlator.push_message(MessageBuilder::new(&uuid3, "message")
+    correlator.push_message(MessageBuilder::new(uuid3, "message")
                                         .name(Some("p3"))
                                         .build());
-    correlator.push_message(MessageBuilder::new(&uuid3, "message")
+    correlator.push_message(MessageBuilder::new(uuid3, "message")
                                         .name(Some("p3"))
                                         .build());
     correlator.elapse_time(Duration::from_millis(200));

@@ -129,7 +129,7 @@ mod tests {
     use test_utils::{MockTemplate, BaseContextBuilder};
 
     fn assert_context_map_contains_uuid(context_map: &mut ContextMap<Message, MockTemplate>, uuid: &Uuid, key: &str) {
-        let mut iter = context_map.contexts_iter_mut(key);
+        let mut iter = context_map.contexts_iter_mut(key.as_bytes());
         let context = iter.next().expect("Failed to get back an inserted context");
         if let Context::Linear(ref context) = *context {
             assert_eq!(uuid, context.uuid());

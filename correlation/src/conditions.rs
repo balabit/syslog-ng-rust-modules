@@ -82,16 +82,16 @@ mod test {
     #[test]
     fn test_given_condition_when_an_opening_message_is_received_then_the_state_becomes_opened() {
         let timeout = Duration::from_millis(100);
-        let msg_id1 = "11eaf6f8-0640-460f-aee2-a72d2f2ab258".to_owned();
-        let msg_id2 = "21eaf6f8-0640-460f-aee2-a72d2f2ab258".to_owned();
+        let msg_id1 = "11eaf6f8-0640-460f-aee2-a72d2f2ab258";
+        let msg_id2 = "21eaf6f8-0640-460f-aee2-a72d2f2ab258";
         let patterns = vec![
-            msg_id1.clone(),
+            msg_id1.to_owned(),
         ];
         let condition = ConditionsBuilder::new(timeout)
                             .first_opens(true)
                             .build();
-        let msg_which_should_not_be_ignored = MessageBuilder::new(&msg_id1, "message").build();
-        let msg_which_should_be_ignored = MessageBuilder::new(&msg_id2, "message").build();
+        let msg_which_should_not_be_ignored = MessageBuilder::new(msg_id1, "message").build();
+        let msg_which_should_be_ignored = MessageBuilder::new(msg_id2, "message").build();
         let base = BaseContextBuilder::<Message, MockTemplate>::new(Uuid::new_v4(), condition).patterns(patterns).build();
         assert_false!(base.is_opening(&msg_which_should_be_ignored));
         assert_true!(base.is_opening(&msg_which_should_not_be_ignored));
@@ -101,19 +101,19 @@ mod test {
     fn test_given_condition_when_a_closing_message_is_received_then_the_state_becomes_closed() {
         let mut responder = VecDeque::default();
         let timeout = Duration::from_millis(100);
-        let msg_id1 = "11eaf6f8-0640-460f-aee2-a72d2f2ab258".to_owned();
-        let msg_id2 = "21eaf6f8-0640-460f-aee2-a72d2f2ab258".to_owned();
+        let msg_id1 = "11eaf6f8-0640-460f-aee2-a72d2f2ab258";
+        let msg_id2 = "21eaf6f8-0640-460f-aee2-a72d2f2ab258";
         let patterns = vec![
-            msg_id1.clone(),
-            msg_id2.clone(),
+            msg_id1.to_owned(),
+            msg_id2.to_owned(),
         ];
         let mut state = State::new();
         let conditions = ConditionsBuilder::new(timeout)
                              .last_closes(true)
                              .build();
         let context = BaseContextBuilder::<Message, MockTemplate>::new(Uuid::new_v4(), conditions).patterns(patterns).build();
-        let msg_opening = MessageBuilder::new(&msg_id1, "message").build();
-        let msg_closing = MessageBuilder::new(&msg_id2, "message").build();
+        let msg_opening = MessageBuilder::new(msg_id1, "message").build();
+        let msg_closing = MessageBuilder::new(msg_id2, "message").build();
         assert_false!(state.is_open());
         context.on_message(msg_opening, &mut state, &mut responder);
         assert_true!(state.is_open());
@@ -162,10 +162,10 @@ mod test {
     #[test]
     fn test_given_condition_when_there_are_no_patterns_then_any_message_can_open_the_context() {
         let timeout = Duration::from_millis(100);
-        let msg_id = "11eaf6f8-0640-460f-aee2-a72d2f2ab258".to_owned();
+        let msg_id = "11eaf6f8-0640-460f-aee2-a72d2f2ab258";
         let condition = ConditionsBuilder::new(timeout).build();
         let base = BaseContextBuilder::<Message, MockTemplate>::new(Uuid::new_v4(), condition).build();
-        let msg = MessageBuilder::new(&msg_id, "message").build();
+        let msg = MessageBuilder::new(msg_id, "message").build();
         assert_true!(base.is_opening(&msg));
     }
 
@@ -178,13 +178,13 @@ mod test {
                 "p2".to_owned(),
                 "p3".to_owned(),
         ];
-        let uuid = "e4f3f8b2-3135-4916-a5ea-621a754dab0d".to_owned();
+        let uuid = "e4f3f8b2-3135-4916-a5ea-621a754dab0d";
         let msg_id = "p1".to_owned();
         let condition = ConditionsBuilder::new(timeout)
                             .first_opens(true)
                             .build();
         let base = BaseContextBuilder::<Message, MockTemplate>::new(Uuid::new_v4(), condition).patterns(patterns).build();
-        let msg = MessageBuilder::new(&uuid, "message").name(Some(msg_id)).build();
+        let msg = MessageBuilder::new(uuid, "message").name(Some(msg_id)).build();
         assert_true!(base.is_opening(&msg));
     }
 
@@ -194,8 +194,8 @@ mod test {
         let mut responder = VecDeque::default();
         let timeout = Duration::from_millis(100);
         let patterns = vec!["p1".to_owned(), "p2".to_owned()];
-        let p1_uuid = "e4f3f8b2-3135-4916-a5ea-621a754dab0d".to_owned();
-        let p2_uuid = "f4f3f8b2-3135-4916-a5ea-621a754dab0d".to_owned();
+        let p1_uuid = "e4f3f8b2-3135-4916-a5ea-621a754dab0d";
+        let p2_uuid = "f4f3f8b2-3135-4916-a5ea-621a754dab0d";
         let p1 = "p1".to_owned();
         let p2 = "p2".to_owned();
         let mut state = State::new();
@@ -203,8 +203,8 @@ mod test {
                              .first_opens(true)
                              .last_closes(true)
                              .build();
-        let p1_msg = MessageBuilder::new(&p1_uuid, "message").name(Some(p1)).build();
-        let p2_msg = MessageBuilder::new(&p2_uuid, "message").name(Some(p2)).build();
+        let p1_msg = MessageBuilder::new(p1_uuid, "message").name(Some(p1)).build();
+        let p2_msg = MessageBuilder::new(p2_uuid, "message").name(Some(p2)).build();
         let context = BaseContextBuilder::<Message, MockTemplate>::new(Uuid::new_v4(), conditions).patterns(patterns).build();
         assert_false!(state.is_open());
         context.on_message(p1_msg, &mut state, &mut responder);
