@@ -18,8 +18,8 @@ fn test_alert_is_forwarded() {
         unsafe { syslog_ng_global_init(); }
     });
     let mut logmsg = LogMessage::new();
-    logmsg.insert(CLASSIFIER_UUID, "9cd7a5d6-d439-484d-95ac-7bf3bd055082");
-    logmsg.insert(CLASSIFIER_CLASS, "LOGGEN");
+    logmsg.insert(CLASSIFIER_UUID, b"9cd7a5d6-d439-484d-95ac-7bf3bd055082");
+    logmsg.insert(CLASSIFIER_CLASS, b"LOGGEN");
 
     let config_file = "tests/contexts.json";
     let message = "seq: 0000000000, thread: 0000, runid: 1456947132, stamp: 2016-03-02T20:32:12 PAD";
@@ -43,5 +43,5 @@ fn test_alert_is_forwarded() {
     for i in alert.values() {
         println!("{:?}", i);
     }
-    assert_eq!("artificial test message", alert.get("MESSAGE").unwrap());
+    assert_eq!(b"artificial test message", alert.get(&b"MESSAGE"[..]).unwrap());
 }

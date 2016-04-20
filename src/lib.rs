@@ -26,8 +26,8 @@ pub mod mock;
 pub mod logtemplate;
 pub mod timer;
 
-pub const CLASSIFIER_UUID: &'static str = ".classifier.uuid";
-pub const CLASSIFIER_CLASS: &'static str = ".classifier.class";
+pub const CLASSIFIER_UUID: &'static [u8] = b".classifier.uuid";
+pub const CLASSIFIER_CLASS: &'static [u8] = b".classifier.class";
 
 pub trait Timer<E, T>: Clone where E: Event + Send, T: Template<Event=E> {
     fn new(delta: Duration, correlator: Arc<Mutex<Correlator<E, T>>>) -> Self;
@@ -136,15 +136,15 @@ impl<E, T, TM> CorrelationParser<E, T, TM> where E: Event + Send, T: Template<Ev
         where P: Pipe, E: Into<LogMessage> {
         match alert.inject_mode {
             InjectMode::Log => {
-                debug!("LOG: {}", alert.message.message());
+                debug!("LOG: {}", String::from_utf8_lossy(alert.message.message()));
             },
             InjectMode::Forward => {
-                debug!("FORWARD: {}", alert.message.message());
+                debug!("FORWARD: {}", String::from_utf8_lossy(alert.message.message()));
                 let logmsg = alert.message.into();
                 parent.forward(logmsg);
             },
             InjectMode::Loopback => {
-                debug!("LOOPBACK: {}", alert.message.message());
+                debug!("LOOPBACK: {}", String::from_utf8_lossy(alert.message.message()));
                 guard.push_message(alert.message);
             },
         }
@@ -158,7 +158,7 @@ impl<P, E, T, TM> Parser<P> for CorrelationParser<E, T, TM> where P: Pipe, E: Ev
             if let Some(uuid) = msg.get(CLASSIFIER_UUID) {
                 let name = msg.get(CLASSIFIER_CLASS);
 
-                let mut event = E::new(uuid, message);
+                let mut event = E::new(uuid, message.as_bytes());
                 for (k, v) in msg.values() {
                     event.set(&k, &v);
                 }
