@@ -55,11 +55,6 @@ impl LogMessage {
         unsafe {logmsg::log_msg_ref(self.0)}
     }
 
-    unsafe fn c_char_to_str<'a>(value: *const c_char, len: ssize_t) -> &'a str {
-        let slce = from_raw_parts(value, len as usize);
-        str::from_utf8(mem::transmute(slce)).unwrap()
-    }
-
     pub fn get_value_handle(value_name: &str) -> NVHandle {
         unsafe {
             let name = CString::new(value_name).unwrap();
@@ -93,10 +88,10 @@ impl LogMessage {
         }
     }
 
-    pub fn values(&self) -> BTreeMap<String, String> {
+    pub fn values(&self) -> BTreeMap<Vec<u8>, Vec<u8>> {
         let mut values = BTreeMap::new();
         unsafe {
-            let user_data = mem::transmute::<&mut BTreeMap<String, String>,
+            let user_data = mem::transmute::<&mut BTreeMap<Vec<u8>, Vec<u8>>,
                                              *mut c_void>(&mut values);
             logmsg::log_msg_values_foreach(self.0, insert_kvpair_to_map, user_data);
         }
@@ -139,9 +134,9 @@ extern "C" fn insert_kvpair_to_map(_: logmsg::NVHandle,
                                    user_data: *mut c_void)
                                    -> bool {
     unsafe {
-        let name = c_char_to_string(name);
-        let value = LogMessage::c_char_to_str(value, value_len).to_string();
-        let mut map: &mut BTreeMap<String, String> = mem::transmute(user_data);
+        let name = CStr::from_ptr(name).to_bytes().to_vec();
+        let value = from_raw_parts(value as *const u8, value_len as usize).to_vec();
+        let mut map: &mut BTreeMap<Vec<u8>, Vec<u8>> = mem::transmute(user_data);
         map.insert(name, value);
     }
     false

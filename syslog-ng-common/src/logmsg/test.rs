@@ -20,13 +20,15 @@ fn test_given_empty_log_msg_when_values_are_inserted_then_we_can_get_them_back()
     let mut logmsg = LogMessage::new();
     let expected_values = {
         let mut values = BTreeMap::new();
-        values.insert("foo".to_string(), "bar".to_string());
-        values.insert("qux".to_string(), "baz".to_string());
+        values.insert(b"foo".to_vec(), b"bar".to_vec());
+        values.insert(b"qux".to_vec(), b"baz".to_vec());
+        values.insert(b"empty".to_vec(), b"".to_vec());
         values
     };
 
     logmsg.insert("foo", "bar");
     logmsg.insert("qux", "baz");
+    logmsg.insert("empty", "");
     assert_eq!(&expected_values, &logmsg.values());
 }
 
