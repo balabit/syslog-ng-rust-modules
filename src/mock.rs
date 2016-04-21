@@ -85,12 +85,12 @@ pub struct MockTimer<E, T> where E: 'static + Event, T: 'static + Template<Event
 }
 
 impl<E, T> MockTimer<E, T> where E: 'static + Event, T: 'static + Template<Event=E> {
-    pub fn elapse_time(&mut self, delta: Duration) {
+    pub fn elapse_time(&self, delta: Duration) {
         let mut guard = self.correlator.lock().unwrap();
         guard.elapse_time(delta);
     }
 
-    pub fn elapse_set_time(&mut self) {
+    pub fn elapse_set_time(&self) {
         let mut guard = self.correlator.lock().unwrap();
         guard.elapse_time(self.delta);
     }

@@ -29,7 +29,7 @@ pub mod timer;
 pub const CLASSIFIER_UUID: &'static [u8] = b".classifier.uuid";
 pub const CLASSIFIER_CLASS: &'static [u8] = b".classifier.class";
 
-pub trait Timer<E, T>: Clone where E: Event + Send, T: Template<Event=E> {
+pub trait Timer<E, T> where E: Event + Send, T: Template<Event=E> {
     fn new(delta: Duration, correlator: Arc<Mutex<Correlator<E, T>>>) -> Self;
 }
 
@@ -100,7 +100,7 @@ impl<P, E, T, TF, TM> ParserBuilder<P> for CorrelationParserBuilder<P, E, T, TF,
         let contexts = try!(contexts.ok_or(OptionError::missing_required_option(options::CONTEXTS_FILE)));
         let delta = try!(delta.ok_or(OptionError::missing_required_option(options::DELTA)));
         let correlator = Arc::new(Mutex::new(contexts));
-        let timer = TM::new(delta, correlator.clone());
+        let timer = Arc::new(TM::new(delta, correlator.clone()));
         Ok(CorrelationParser::new(correlator, formatter, delta, timer))
     }
 }
@@ -109,7 +109,7 @@ pub struct CorrelationParser<E, T, TM> where E: 'static + Event + Send, T: 'stat
     correlator: Arc<Mutex<Correlator<E, T>>>,
     delta: Duration,
     formatter: MessageFormatter,
-    pub timer: TM
+    pub timer: Arc<TM>
 }
 
 impl<E, T, TM> Clone for CorrelationParser<E, T, TM> where E: Event + Send, T: Template<Event=E>, TM: Timer<E, T> {
@@ -124,7 +124,7 @@ impl<E, T, TM> Clone for CorrelationParser<E, T, TM> where E: Event + Send, T: T
 }
 
 impl<E, T, TM> CorrelationParser<E, T, TM> where E: Event + Send, T: Template<Event=E>, TM: Timer<E, T> {
-    pub fn new(correlator: Arc<Mutex<Correlator<E, T>>>, formatter: MessageFormatter, delta: Duration, timer: TM) -> CorrelationParser<E, T, TM> {
+    pub fn new(correlator: Arc<Mutex<Correlator<E, T>>>, formatter: MessageFormatter, delta: Duration, timer: Arc<TM>) -> CorrelationParser<E, T, TM> {
         CorrelationParser {
             correlator: correlator,
             formatter: formatter,

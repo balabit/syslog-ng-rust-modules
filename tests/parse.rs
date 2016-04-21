@@ -29,7 +29,7 @@ fn test_alert_is_forwarded() {
     let mut builder = CorrelationParserBuilder::<MockPipe, MockEvent, MockLogTemplate, MockLogTemplateFactory, MockTimer<MockEvent, MockLogTemplate>>::new(cfg);
     builder.option(options::CONTEXTS_FILE.to_owned(), config_file.to_owned());
     let mut parser = builder.build().unwrap();
-    let mut timer = parser.timer.clone();
+    let timer = parser.timer.clone();
     assert_eq!(true, parser.parse(&mut pipe, &mut logmsg, message));
     assert_eq!(true, parser.parse(&mut pipe, &mut logmsg, message));
     assert_eq!(0, pipe.forwarded_messages.len());
