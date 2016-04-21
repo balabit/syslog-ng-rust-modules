@@ -67,7 +67,7 @@ impl<E, T> MapContext<E, T> where E: Event, T: Template<Event=E> {
 
     fn update_state(&mut self, event: E, responder: &mut VecDeque<Alert<E>>) {
         let key = self.context_id.iter().map(|key| {
-                ((&key[..].as_bytes()).to_vec(), event.get(key.as_bytes()).map_or_else(|| Vec::new(), |value| value.to_vec()))
+                ((&key[..].as_bytes()).to_vec(), event.get(key.as_bytes()).map_or_else(Vec::new, |value| value.to_vec()))
             }).collect::<ContextKey>();
         let mut state = self.map.entry(key).or_insert_with(State::new);
         self.base.on_message(event, &mut state, responder);

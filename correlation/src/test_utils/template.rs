@@ -94,7 +94,7 @@ fn test_mock_template_factory_can_generate_errors() {
 #[test]
 fn test_mock_template_factory_can_generate_template_which_returns_the_compiled_value() {
     let factory = MockTemplateFactory::compile_value();
-    let expected = "VALUE".as_bytes();
+    let expected = b"VALUE";
     let template = factory.compile(expected).ok().unwrap();
     let dummy_context_id = "doesn't matter";
     let mut actual = Vec::new();

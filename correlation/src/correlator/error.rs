@@ -80,9 +80,9 @@ impl ::std::error::Error for Error {
             Error::SerdeJson(ref error) => error.cause(),
             Error::SerdeYaml(ref error) => error.cause(),
             Error::TemplateCompileError(ref error) => error.cause(),
-            Error::UnsupportedFileExtension(_) => None,
-            Error::FileExtensionNotFound => None,
-            Error::NotUtf8FileName => None,
+            Error::UnsupportedFileExtension(_) |
+                Error::FileExtensionNotFound |
+                Error::NotUtf8FileName => None,
         }
     }
 }
