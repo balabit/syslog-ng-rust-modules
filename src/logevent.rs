@@ -14,7 +14,9 @@ impl Event for LogEvent {
         self.0.get(key)
     }
     fn uuid(&self) -> &[u8] {
-        self.get(CLASSIFIER_UUID).unwrap()
+        // we can't create a LogEvent without an uuid, but it can be deleted after creation
+        // it's better to return an empty byte slice than to panic
+        self.get(CLASSIFIER_UUID).unwrap_or(&b""[..])
     }
     fn ids(&self) -> EventIds {
         EventIds {
@@ -43,7 +45,9 @@ impl Event for LogEvent {
         self.0.insert("MESSAGE", message);
     }
     fn message(&self) -> &[u8] {
-        self.0.get("MESSAGE").unwrap()
+        // we can't create a LogEvent without a message, but it can be deleted after creation
+        // it's better to return an empty byte slice than to panic
+        self.0.get("MESSAGE").unwrap_or(&b""[..])
     }
 }
 
