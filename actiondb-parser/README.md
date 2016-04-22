@@ -2,51 +2,61 @@
 
 A fast and easy way to parse your logs into events.
 
-## Requirements
-
-* a C compiler installed
-* rustc and cargo installed (tested from 1.5, but it can work with older versions)
-* pkg-config installed
-* syslog-ng 3.8 installed and can be found by pkg-config
-
 ## Usage
 
-You have to compile the source code and copy the resulted shared library into a location
-which is looked up by syslog-ng.
+Sample syslog-ng configuration:
 
-1. Compilation:
-
- ```
-git clone https://github.com/ihrwein/actiondb-parser.git
-cd actiondb-parser
-cargo build --release
+```
+parser{
+  actiondb(
+    # the patterns will be loaded from this file
+    pattern_file("/home/btibi/install/syslog-ng/etc/loggen.yaml")
+    # all the parsed keys should be prefixed with `.adb`
+    prefix(".adb")
+  );
+};
 ```
 
-2. Copy the `libactiondb_parser.so` file next to `libcsvparser.so` (that's the easiest way to find
-the proper directory)
+`loggen.yaml`:
 
- ```
-cp target/release/libactiondb_parser.so <target directory>
+
+```yaml
+patterns:
+  -
+    uuid: "6d2cba0c-e241-464a-89c3-8035cac8f73e"
+    name: "LOGGEN"
+    pattern: "seq: %{INT:.loggen.seq}, thread: %{INT:.loggen.thread}, runid: %{INT:.loggen.runid}, stamp: %{GREEDY:.loggen.stamp} %{GREEDY:.loggen.padding}"
+    tags:
+      - "tag1"
+      - "tag2"
+    values:
+      key1: "value1"
+      key2: "value2"
+    test_messages:
+      -
+        message: "seq: 0000000001, thread: 0000, runid: 1437655178, stamp: 2015-07-23T14:39:38 PADDPADDPADDPADD"
+        values:
+          .loggen.seq: "0000000001"
+          .loggen.thread: "0000"
+          .loggen.runid: "1437655178"
+          .loggen.stamp: "2015-07-23T14:39:38"
+          .loggen.padding: "PADDPADDPADDPADD"
+        tags:
+          - "tag1"
 ```
 
-3. You can use it immediately:
 
- ```
-    parser{
-        actiondb-rs(
-            # the patterns will be loaded from this file
-            option("pattern_file", "/home/tibi/install/syslog-ng/etc/loggen.json")
-            # all the parsed keys should be prefixed with `.adb`
-            option("prefix", ".adb")
-        );
-    };
-```
-
-Note, that in order to use the parser, you don't need the Rust runtime, it's already compiled
-into the shared library. Check the required libraries with `ldd`. I suppose still you have to install
-`libgcc1`.
 
 For the exact configuration file format, check ActionDB's readme file: https://github.com/ihrwein/actiondb/blob/master/README.md
+
+## adbtool
+
+`adbtool` is a tool which can be used for the following purposes:
+* validate patterns,
+* parse text files.
+
+It support the `validate` and `parse` subcommands. For more information check
+it's `--help` option.
 
 ## License
 
