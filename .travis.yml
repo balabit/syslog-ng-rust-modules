@@ -1,0 +1,27 @@
+language: rust
+dist: trusty
+sudo: required
+
+env:
+    - PKG_CONFIG_PATH=$PKG_CONFIG_PATH:$HOME/install/syslog-ng/lib/pkgconfig
+
+# run builds for all the trains (and more)
+matrix:
+  include:
+    - rust: stable
+
+before_script:
+  - sudo apt-get update -qq
+  - sudo apt-get install -qq autoconf-archive bison cmake docbook-xsl flex libcap-dev libesmtp-dev libevtlog-dev libgeoip-dev libglib2.0-dev libhiredis-dev libjson0-dev libnet1-dev libpcre3-dev libssl-dev libwrap0-dev openjdk-7-jdk pkg-config python3-all-dev libpython3-dev libpython3-all-dev time xsltproc
+  - cd ..
+  - git clone https://github.com/balabit/syslog-ng.git
+  - cd syslog-ng
+  - ./autogen.sh
+  - ./configure --with-ivykis=internal --prefix=$HOME/install/syslog-ng --disable-python --disable-java --disable-sql --disable-amqp
+  - make -j install
+  - cd ../syslog-ng-rust-modules
+  - mkdir build
+  - cd build
+  - cmake -DCMAKE_INSTALL_PREFIX=$HOME/install/syslog-ng -DENABLE_REGEX_PARSER=ON -DENABLE_PYTHON_PARSER=ON -DENABLE_ACTIONDB_PARSER=ON  ..
+script:
+  - make install
