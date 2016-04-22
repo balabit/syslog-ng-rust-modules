@@ -1,10 +1,11 @@
-use syslog_ng_common::{ParserBuilder, mock};
+use syslog_ng_common::{ParserBuilder, mock, GlobalConfig};
 
 use PythonParser;
 use PythonParserBuilder;
 
 pub fn build_parser_with_options(module_name: &str, class_name: &str, options: &[(&str, &str)]) -> PythonParser<mock::MockPipe> {
-    let mut builder = PythonParserBuilder::new();
+    let cfg = GlobalConfig::new(0x0308);
+    let mut builder = PythonParserBuilder::new(cfg);
     builder.option(::options::MODULE.to_owned(), module_name.to_owned());
     builder.option(::options::CLASS.to_owned(), class_name.to_owned());
     for &(k, v) in options {

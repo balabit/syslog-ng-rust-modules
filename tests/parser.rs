@@ -93,9 +93,9 @@ fn test_regex_parser() {
     let mut logmsg = LogMessage::new();
     let mut pipe = MockPipe::new();
     assert_eq!(true, parser.parse(&mut pipe, &mut logmsg, message));
-    assert_eq!("0000000000", logmsg.get("seq"));
-    assert_eq!("0000", logmsg.get("thread"));
-    assert_eq!("1456947132", logmsg.get("runid"));
-    assert_eq!("2016-03-02T20:32:12", logmsg.get("stamp"));
-    assert_eq!("PAD", logmsg.get("padding"));
+    assert_eq!(b"0000000000", logmsg.get("seq").unwrap());
+    assert_eq!(b"0000", logmsg.get("thread").unwrap());
+    assert_eq!(b"1456947132", logmsg.get("runid").unwrap());
+    assert_eq!(b"2016-03-02T20:32:12", logmsg.get("stamp").unwrap());
+    assert_eq!(b"PAD", logmsg.get("padding").unwrap());
 }

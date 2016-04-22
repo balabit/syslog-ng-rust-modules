@@ -5,7 +5,7 @@ extern crate env_logger;
 
 use std::env;
 use python_parser::{PythonParserBuilder, options};
-use syslog_ng_common::ParserBuilder;
+use syslog_ng_common::{ParserBuilder, SYSLOG_NG_INITIALIZED, syslog_ng_global_init, GlobalConfig};
 use syslog_ng_common::mock::MockPipe;
 use cpython::{Python, PyDict};
 
@@ -124,7 +124,11 @@ fn test_module_loading_and_class_initialization() {
 #[test]
 fn test_parser_can_be_built_if_there_is_no_error() {
     env::set_var("PYTHONPATH", env::current_dir().unwrap());
-    let mut builder = PythonParserBuilder::<MockPipe>::new();
+    SYSLOG_NG_INITIALIZED.call_once(|| {
+        unsafe { syslog_ng_global_init(); }
+    });
+    let cfg = GlobalConfig::new(0x0308);
+    let mut builder = PythonParserBuilder::<MockPipe>::new(cfg);
     builder.option(options::MODULE.to_owned(), "_test_module".to_owned());
     builder.option(options::CLASS.to_owned(), "ExistingParser".to_owned());
     let _ = builder.build().unwrap();
@@ -133,7 +137,11 @@ fn test_parser_can_be_built_if_there_is_no_error() {
 #[test]
 fn test_parser_cannot_be_built_if_there_is_an_error() {
     env::set_var("PYTHONPATH", env::current_dir().unwrap());
-    let mut builder = PythonParserBuilder::<MockPipe>::new();
+    SYSLOG_NG_INITIALIZED.call_once(|| {
+        unsafe { syslog_ng_global_init(); }
+    });
+    let cfg = GlobalConfig::new(0x0308);
+    let mut builder = PythonParserBuilder::<MockPipe>::new(cfg);
     builder.option(options::MODULE.to_owned(), "_test_module".to_owned());
     builder.option(options::CLASS.to_owned(), "NonExistingParser".to_owned());
     let _ = builder.build().err().unwrap();
@@ -142,7 +150,11 @@ fn test_parser_cannot_be_built_if_there_is_an_error() {
 #[test]
 fn test_exception_is_raised_in_init_method() {
     env::set_var("PYTHONPATH", env::current_dir().unwrap());
-    let mut builder = PythonParserBuilder::<MockPipe>::new();
+    SYSLOG_NG_INITIALIZED.call_once(|| {
+        unsafe { syslog_ng_global_init(); }
+    });
+    let cfg = GlobalConfig::new(0x0308);
+    let mut builder = PythonParserBuilder::<MockPipe>::new(cfg);
     builder.option(options::MODULE.to_owned(), "_test_module".to_owned());
     builder.option(options::CLASS.to_owned(), "ExceptionIsRaisedInInitMethod".to_owned());
     let _ = builder.build().err().unwrap();

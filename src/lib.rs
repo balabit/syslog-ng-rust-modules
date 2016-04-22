@@ -11,7 +11,7 @@ pub mod utils;
 use std::borrow::Borrow;
 use std::marker::PhantomData;
 
-use syslog_ng_common::{LogMessage, Parser, ParserBuilder, OptionError, Pipe};
+use syslog_ng_common::{LogMessage, Parser, ParserBuilder, OptionError, Pipe, GlobalConfig};
 use cpython::{Python, PyDict, NoArgs, PyClone, PyObject, PyResult, PyModule, PyErr, PyString};
 use cpython::ObjectProtocol; //for call method
 use cpython::exc::TypeError;
@@ -99,7 +99,7 @@ impl<P: Pipe> PythonParserBuilder<P> {
 
 impl<P: Pipe> ParserBuilder<P> for PythonParserBuilder<P> {
     type Parser = PythonParser<P>;
-    fn new() -> Self {
+    fn new(_: GlobalConfig) -> Self {
         PythonParserBuilder {
             module: None,
             class: None,

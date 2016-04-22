@@ -5,13 +5,17 @@ use cpython::rustobject::{TypeBuilder, PyRustObject};
 use cpython::ObjectProtocol; //for call method
 
 fn getitem(py: Python, slf: &PyRustObject<LogMessage>, arg: &str) -> PyResult<PyString> {
-    let value = slf.get(py).get(arg);
-    Ok(PyString::new(py, value))
+    if let Some(value) = slf.get(py).get(arg) {
+        let value = String::from_utf8_lossy(value);
+        Ok(PyString::new(py, &value))
+    } else {
+        Ok(PyString::new(py, ""))
+    }
 }
 
 fn setitem(py: Python, slf: &PyRustObject<LogMessage>, key: &str, value: &str) -> PyResult<NoArgs> {
     let msg = slf.get_mut(py);
-    msg.insert(key, value);
+    msg.insert(key, value.as_bytes());
     Ok(NoArgs)
 }
 
