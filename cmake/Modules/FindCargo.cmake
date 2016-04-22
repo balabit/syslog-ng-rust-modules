@@ -3,21 +3,28 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 # The module defines the following variables:
-#   RUST_FOUND - true if the Rust was found
-#   RUST_EXECUTABLE - path to the executable
-#   RUST_VERSION - Rust version number
+#   CARGO_FOUND - true if cargo was found
+#   CARGO_EXECUTABLE - path to the executable
+#   CARGO_VERSION - cargo version number
 # Example usage:
-#   find_package(Rust 0.12.0 REQUIRED)
+#   find_package(Cargo 0.10.0 REQUIRED)
 
+include(CheckMultirust)
 
-find_program(RUST_EXECUTABLE rustc PATHS PATH_SUFFIXES bin)
-if (RUST_EXECUTABLE)
-    execute_process(COMMAND ${RUST_EXECUTABLE} -v OUTPUT_VARIABLE RUST_VERSION_OUTPUT OUTPUT_STRIP_TRAILING_WHITESPACE)
-    if(RUST_VERSION_OUTPUT MATCHES "rustc ([0-9]+\\.[0-9]+\\.[0-9]+)")
-        set(RUST_VERSION ${CMAKE_MATCH_1})
+if (MULTIRUST_FOUND)
+  find_program(CARGO_EXECUTABLE cargo HINTS ${MULTIRUST_TOOLCHAIN_BIN_DIR} PATHS PATH_SUFFIXES bin)
+else()
+  find_program(CARGO_EXECUTABLE cargo PATHS PATH_SUFFIXES bin)
+endif()
+
+if (CARGO_EXECUTABLE)
+    set(COMMAND ${CARGO_EXECUTABLE} --version)
+    execute_process(COMMAND ${COMMAND} OUTPUT_VARIABLE CARGO_VERSION_OUTPUT OUTPUT_STRIP_TRAILING_WHITESPACE)
+    if(CARGO_VERSION_OUTPUT MATCHES "cargo ([0-9]+\\.[0-9]+\\.[0-9]+)")
+      set(CARGO_VERSION ${CMAKE_MATCH_1} CACHE INTERNAL "Cargo version")
     endif()
 endif()
-mark_as_advanced(RUST_EXECUTABLE)
+mark_as_advanced(CARGO_EXECUTABLE)
 
 include(FindPackageHandleStandardArgs)
-find_package_handle_standard_args(Rust REQUIRED_VARS RUST_EXECUTABLE RUST_VERSION VERSION_VAR RUST_VERSION)
+find_package_handle_standard_args(Cargo REQUIRED_VARS CARGO_EXECUTABLE CARGO_VERSION VERSION_VAR CARGO_VERSION)
