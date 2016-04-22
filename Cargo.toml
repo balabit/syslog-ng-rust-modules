@@ -16,7 +16,7 @@ crate_type = ["rlib", "dylib"]
 [dependencies]
 log = "0.3"
 actiondb = "0.7.0"
-syslog-ng-common = "0.7"
+syslog-ng-common = "0.8.0"
 
 [build-dependencies]
 syslog-ng-build = "0.2"
