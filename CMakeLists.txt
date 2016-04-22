@@ -11,4 +11,5 @@ pkg_check_modules (SYSLOG_NG REQUIRED syslog-ng)
 
 include(UseRust)
 include(UsePkgConfig)
+add_subdirectory(python-parser)
 add_subdirectory(regex-parser)
