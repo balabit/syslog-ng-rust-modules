@@ -1,0 +1,24 @@
+[package]
+name = "correlation"
+version = "0.6.0"
+authors = ["Tibor Benke <ihrwein@gmail.com>"]
+homepage = "https://github.com/ihrwein/correlation"
+repository = "https://github.com/ihrwein/correlation"
+keywords = ["logging", "event processing"]
+description = "A library for grouping events based on predefined rules."
+license = "MIT/Apache-2.0"
+
+[dependencies]
+maplit = "0.1"
+uuid = "0.1"
+serde = "0.7"
+serde_json = "0.7"
+serde_yaml = "0.2"
+rustc-serialize = "0.3"
+log = "0.3"
+env_logger = "0.3.1"
+clippy = {version = "*", optional = true}
+
+[features]
+default=[]
+nightly = ["clippy"]
