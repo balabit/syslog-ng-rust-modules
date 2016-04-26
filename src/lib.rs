@@ -102,6 +102,7 @@ impl<P: Pipe> PythonParserBuilder<P> {
 }
 
 fn python_register_callbacks(py: Python, dict: &mut PyDict) -> PyResult<()> {
+    try!(python_register_callback(py, dict, "error", py_fn!(python_error_callback(error_message: &str))));
     Ok(())
 }
 
@@ -112,6 +113,11 @@ fn python_register_callback<F: ToPyObject>(py: Python, dict: &mut PyDict, name: 
         try!(dict.set_item(py, name, function));
     }
     Ok(())
+}
+
+fn python_error_callback(_: Python, error_message: &str) -> PyResult<NoArgs> {
+    error!("{}", error_message);
+    Ok(NoArgs)
 }
 
 impl<P: Pipe> ParserBuilder<P> for PythonParserBuilder<P> {
