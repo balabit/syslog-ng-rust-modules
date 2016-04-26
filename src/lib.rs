@@ -12,7 +12,7 @@ use std::borrow::Borrow;
 use std::marker::PhantomData;
 
 use syslog_ng_common::{LogMessage, Parser, ParserBuilder, OptionError, Pipe, GlobalConfig};
-use cpython::{Python, PyDict, NoArgs, PyClone, PyObject, PyResult, PyModule, PyErr, PyString};
+use cpython::{Python, PyDict, NoArgs, PyClone, PyObject, PyResult, PyModule, PyErr, PyString, ToPyObject};
 use cpython::ObjectProtocol; //for call method
 use cpython::exc::TypeError;
 
@@ -102,6 +102,15 @@ impl<P: Pipe> PythonParserBuilder<P> {
 }
 
 fn python_register_callbacks(py: Python, dict: &mut PyDict) -> PyResult<()> {
+    Ok(())
+}
+
+fn python_register_callback<F: ToPyObject>(py: Python, dict: &mut PyDict, name: &str, function: F) -> PyResult<()> {
+    if try!(dict.contains(py, name)) {
+        warn!("Already implemented {}() function, omitting callback definition.", name);
+    } else {
+        try!(dict.set_item(py, name, function));
+    }
     Ok(())
 }
 
