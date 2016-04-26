@@ -104,6 +104,7 @@ impl<P: Pipe> PythonParserBuilder<P> {
 fn python_register_callbacks(py: Python, dict: &mut PyDict) -> PyResult<()> {
     try!(python_register_callback(py, dict, "error", py_fn!(python_error_callback(error_message: &str))));
     try!(python_register_callback(py, dict, "info", py_fn!(python_info_callback(info_message: &str))));
+    try!(python_register_callback(py, dict, "trace", py_fn!(python_trace_callback(trace_message: &str))));
     Ok(())
 }
 
@@ -123,6 +124,11 @@ fn python_error_callback(_: Python, error_message: &str) -> PyResult<NoArgs> {
 
 fn python_info_callback(_: Python, info_message: &str) -> PyResult<NoArgs> {
     info!("{}", info_message);
+    Ok(NoArgs)
+}
+
+fn python_trace_callback(_: Python, trace_message: &str) -> PyResult<NoArgs> {
+    trace!("{}", trace_message);
     Ok(NoArgs)
 }
 
