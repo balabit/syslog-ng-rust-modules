@@ -1,6 +1,6 @@
 [package]
 name = "regex-parser"
-version = "0.1.0"
+version = "0.2.0"
 authors = ["Tibor Benke <ihrwein@gmail.com>"]
 build = "build.rs"
 
@@ -8,7 +8,7 @@ build = "build.rs"
 crate-type = ["rlib", "dylib"]
 
 [dependencies]
-syslog-ng-common = "0.7"
+syslog-ng-common = "0.8"
 regex = "0.1"
 log = "0.3"
 
