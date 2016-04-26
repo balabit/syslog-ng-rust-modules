@@ -10,6 +10,6 @@ if (ENABLE_PYTHON_PARSER)
   pkg_check_modules(PYTHONLIBS python3>=3.4 REQUIRED)
   add_cargo_lib_target(python-parser)
 
-  install(FILES ${PYTHON_PARSER_PATH} DESTINATION ${SYSLOG_NG_MODULEDIR})
-  install(DIRECTORY scl/ DESTINATION ${SYSLOG_NG_SCLDIR})
+  install(FILES ${PYTHON_PARSER_PATH} DESTINATION lib/syslog-ng)
+  install(DIRECTORY scl/ DESTINATION share/syslog-ng/include/scl)
 endif()

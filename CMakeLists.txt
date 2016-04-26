@@ -10,12 +10,6 @@ find_package(PkgConfig REQUIRED)
 pkg_check_modules (SYSLOG_NG REQUIRED syslog-ng)
 
 include(UseRust)
-include(UsePkgConfig)
-
-pkg_check_variable(syslog-ng moduledir)
-pkg_check_variable(syslog-ng scldir)
-message("ModuleDir: ${SYSLOG_NG_MODULEDIR}")
-message("SclDir: ${SYSLOG_NG_SCLDIR}")
 
 add_subdirectory(python-parser)
 add_subdirectory(regex-parser)
