@@ -1,8 +1,7 @@
 use regex::Regex;
 use super::*;
 
-use syslog_ng_common::sys::logmsg::log_msg_registry_init;
-use syslog_ng_common::{LogMessage, Parser, ParserBuilder, OptionError, mock};
+use syslog_ng_common::{LogMessage, Parser, ParserBuilder, OptionError, mock, GlobalConfig, SYSLOG_NG_INITIALIZED, syslog_ng_global_init};
 
 #[test]
 fn test_loggen_regex_can_be_compiled() {
@@ -32,9 +31,11 @@ fn test_syslog_regex_parses_syslog_message() {
 
 #[test]
 fn test_parse_inserts_parsed_named_captures_into_the_logmsg() {
-    unsafe {
-        log_msg_registry_init();
-    };
+    SYSLOG_NG_INITIALIZED.call_once(|| {
+        unsafe {
+            syslog_ng_global_init();
+        }
+    });
 
     let loggen_regex = Regex::new(LOGGEN_EXPR).unwrap();
     let mut parser = RegexParser { regex: loggen_regex };
@@ -43,23 +44,35 @@ fn test_parse_inserts_parsed_named_captures_into_the_logmsg() {
     let input = "seq: 0000000000, thread: 0000, runid: 1456947132, stamp: 2016-03-02T20:32:12 \
                  PAD";
     parser.parse(&mut pipe, &mut logmsg, input);
-    assert_eq!("0000000000", logmsg.get("seq"));
-    assert_eq!("0000", logmsg.get("thread"));
-    assert_eq!("1456947132", logmsg.get("runid"));
-    assert_eq!("2016-03-02T20:32:12", logmsg.get("stamp"));
-    assert_eq!("PAD", logmsg.get("padding"));
+    assert_eq!(b"0000000000", logmsg.get("seq").unwrap());
+    assert_eq!(b"0000", logmsg.get("thread").unwrap());
+    assert_eq!(b"1456947132", logmsg.get("runid").unwrap());
+    assert_eq!(b"2016-03-02T20:32:12", logmsg.get("stamp").unwrap());
+    assert_eq!(b"PAD", logmsg.get("padding").unwrap());
 }
 
 #[test]
 fn test_parser_can_be_built_with_valid_regex() {
-    let mut builder = RegexParserBuilder::<mock::MockPipe>::new();
+    SYSLOG_NG_INITIALIZED.call_once(|| {
+        unsafe {
+            syslog_ng_global_init();
+        }
+    });
+    let cfg = GlobalConfig::new(0x0308);
+    let mut builder = RegexParserBuilder::<mock::MockPipe>::new(cfg);
     builder.option(REGEX_OPTION.to_string(), "[abc]d".to_string());
     let _ = builder.build().unwrap();
 }
 
 #[test]
 fn test_parser_cannot_be_built_with_invalid_regex() {
-    let mut builder = RegexParserBuilder::<mock::MockPipe>::new();
+    SYSLOG_NG_INITIALIZED.call_once(|| {
+        unsafe {
+            syslog_ng_global_init();
+        }
+    });
+    let cfg = GlobalConfig::new(0x0308);
+    let mut builder = RegexParserBuilder::<mock::MockPipe>::new(cfg);
     builder.option(REGEX_OPTION.to_string(), "[abcd".to_string());
     assert_eq!(Some(OptionError::missing_required_option(REGEX_OPTION)), builder.build().err());
 }

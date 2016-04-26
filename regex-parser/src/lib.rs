@@ -5,7 +5,7 @@ extern crate log;
 extern crate regex;
 
 use std::marker::PhantomData;
-use syslog_ng_common::{LogMessage, Parser, ParserBuilder, OptionError, Pipe};
+use syslog_ng_common::{LogMessage, Parser, ParserBuilder, OptionError, Pipe, GlobalConfig};
 use regex::Regex;
 
 // Example: "seq: 0000000000, thread: 0000, runid: 1456947132, stamp: 2016-03-02T20:32:12 PAD"
@@ -27,7 +27,7 @@ pub struct RegexParserBuilder<P: Pipe> {
 
 impl<P: Pipe> ParserBuilder<P> for RegexParserBuilder<P> {
     type Parser = RegexParser;
-    fn new() -> Self {
+    fn new(_: GlobalConfig) -> Self {
         RegexParserBuilder { regex: None, _marker: PhantomData }
     }
     fn option(&mut self, name: String, value: String) {
@@ -54,7 +54,7 @@ impl<P: Pipe> Parser<P> for RegexParser {
         if let Some(captures) = self.regex.captures(input) {
             for (name, value) in captures.iter_named() {
                 if let Some(value) = value {
-                    logmsg.insert(name, value);
+                    logmsg.insert(name, value.as_bytes());
                 }
             }
             true
