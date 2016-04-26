@@ -1,8 +1,7 @@
 use regex::Regex;
 use super::*;
 
-use syslog_ng_common::sys::logmsg::log_msg_registry_init;
-use syslog_ng_common::{LogMessage, Parser, ParserBuilder, OptionError, mock, GlobalConfig};
+use syslog_ng_common::{LogMessage, Parser, ParserBuilder, OptionError, mock, GlobalConfig, SYSLOG_NG_INITIALIZED, syslog_ng_global_init};
 
 #[test]
 fn test_loggen_regex_can_be_compiled() {
@@ -32,9 +31,11 @@ fn test_syslog_regex_parses_syslog_message() {
 
 #[test]
 fn test_parse_inserts_parsed_named_captures_into_the_logmsg() {
-    unsafe {
-        log_msg_registry_init();
-    };
+    SYSLOG_NG_INITIALIZED.call_once(|| {
+        unsafe {
+            syslog_ng_global_init();
+        }
+    });
 
     let loggen_regex = Regex::new(LOGGEN_EXPR).unwrap();
     let mut parser = RegexParser { regex: loggen_regex };
@@ -52,6 +53,11 @@ fn test_parse_inserts_parsed_named_captures_into_the_logmsg() {
 
 #[test]
 fn test_parser_can_be_built_with_valid_regex() {
+    SYSLOG_NG_INITIALIZED.call_once(|| {
+        unsafe {
+            syslog_ng_global_init();
+        }
+    });
     let cfg = GlobalConfig::new(0x0308);
     let mut builder = RegexParserBuilder::<mock::MockPipe>::new(cfg);
     builder.option(REGEX_OPTION.to_string(), "[abc]d".to_string());
@@ -60,6 +66,11 @@ fn test_parser_can_be_built_with_valid_regex() {
 
 #[test]
 fn test_parser_cannot_be_built_with_invalid_regex() {
+    SYSLOG_NG_INITIALIZED.call_once(|| {
+        unsafe {
+            syslog_ng_global_init();
+        }
+    });
     let cfg = GlobalConfig::new(0x0308);
     let mut builder = RegexParserBuilder::<mock::MockPipe>::new(cfg);
     builder.option(REGEX_OPTION.to_string(), "[abcd".to_string());
