@@ -92,9 +92,17 @@ impl<P: Pipe> PythonParserBuilder<P> {
 
     pub fn load_and_init_class<'p>(py: Python<'p>, module_name: &str, class_name: &str, options: &[(String, String)]) -> PyResult<PyObject> {
         let module = try!(Self::load_module(py, module_name));
+        let mut dict = module.dict(py);
+
+        try!(python_register_callbacks(py, &mut dict));
+
         let class = try!(Self::load_class(py, &module, class_name));
         Self::initialize_class(py, &class, options)
     }
+}
+
+fn python_register_callbacks(py: Python, dict: &mut PyDict) -> PyResult<()> {
+    Ok(())
 }
 
 impl<P: Pipe> ParserBuilder<P> for PythonParserBuilder<P> {
