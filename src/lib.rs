@@ -12,7 +12,7 @@ use std::borrow::Borrow;
 use std::marker::PhantomData;
 
 use syslog_ng_common::{LogMessage, Parser, ParserBuilder, OptionError, Pipe, GlobalConfig};
-use cpython::{Python, PyDict, NoArgs, PyClone, PyObject, PyResult, PyModule, PyErr, PyString};
+use cpython::{Python, PyDict, NoArgs, PyClone, PyObject, PyResult, PyModule, PyErr, PyString, ToPyObject};
 use cpython::ObjectProtocol; //for call method
 use cpython::exc::TypeError;
 
@@ -92,9 +92,56 @@ impl<P: Pipe> PythonParserBuilder<P> {
 
     pub fn load_and_init_class<'p>(py: Python<'p>, module_name: &str, class_name: &str, options: &[(String, String)]) -> PyResult<PyObject> {
         let module = try!(Self::load_module(py, module_name));
+        let mut dict = module.dict(py);
+
+        try!(python_register_callbacks(py, &mut dict));
+
         let class = try!(Self::load_class(py, &module, class_name));
         Self::initialize_class(py, &class, options)
     }
+}
+
+fn python_register_callbacks(py: Python, dict: &mut PyDict) -> PyResult<()> {
+    try!(python_register_callback(py, dict, "error", py_fn!(python_error_callback(error_message: &str))));
+    try!(python_register_callback(py, dict, "info", py_fn!(python_info_callback(info_message: &str))));
+    try!(python_register_callback(py, dict, "trace", py_fn!(python_trace_callback(trace_message: &str))));
+    try!(python_register_callback(py, dict, "warning", py_fn!(python_warning_callback(warning_message: &str))));
+    try!(python_register_callback(py, dict, "debug", py_fn!(python_debug_callback(debug_message: &str))));
+    Ok(())
+}
+
+fn python_register_callback<F: ToPyObject>(py: Python, dict: &mut PyDict, name: &str, function: F) -> PyResult<()> {
+    if try!(dict.contains(py, name)) {
+        warn!("Already implemented {}() function, omitting callback definition.", name);
+    } else {
+        try!(dict.set_item(py, name, function));
+    }
+    Ok(())
+}
+
+fn python_error_callback(_: Python, error_message: &str) -> PyResult<NoArgs> {
+    error!("{}", error_message);
+    Ok(NoArgs)
+}
+
+fn python_info_callback(_: Python, info_message: &str) -> PyResult<NoArgs> {
+    info!("{}", info_message);
+    Ok(NoArgs)
+}
+
+fn python_trace_callback(_: Python, trace_message: &str) -> PyResult<NoArgs> {
+    trace!("{}", trace_message);
+    Ok(NoArgs)
+}
+
+fn python_warning_callback(_: Python, warning_message: &str) -> PyResult<NoArgs> {
+    warn!("{}", warning_message);
+    Ok(NoArgs)
+}
+
+fn python_debug_callback(_: Python, debug_message: &str) -> PyResult<NoArgs> {
+    debug!("{}", debug_message);
+    Ok(NoArgs)
 }
 
 impl<P: Pipe> ParserBuilder<P> for PythonParserBuilder<P> {
@@ -126,7 +173,7 @@ impl<P: Pipe> ParserBuilder<P> for PythonParserBuilder<P> {
                         Ok(PythonParser {parser: parser_instance, _marker: PhantomData})
                     },
                     Err(error) => {
-                        error!("Failed to create Python parser, class='{}'", class_name);
+                        error!("Failed to create Python parser, class='{}', error='{:?}'", class_name, error);
                         Err(OptionError::verbatim_error(format!("{:?}", error)))
                     }
                 }
