@@ -106,6 +106,7 @@ fn python_register_callbacks(py: Python, dict: &mut PyDict) -> PyResult<()> {
     try!(python_register_callback(py, dict, "info", py_fn!(python_info_callback(info_message: &str))));
     try!(python_register_callback(py, dict, "trace", py_fn!(python_trace_callback(trace_message: &str))));
     try!(python_register_callback(py, dict, "warning", py_fn!(python_warning_callback(warning_message: &str))));
+    try!(python_register_callback(py, dict, "debug", py_fn!(python_debug_callback(debug_message: &str))));
     Ok(())
 }
 
@@ -135,6 +136,11 @@ fn python_trace_callback(_: Python, trace_message: &str) -> PyResult<NoArgs> {
 
 fn python_warning_callback(_: Python, warning_message: &str) -> PyResult<NoArgs> {
     warn!("{}", warning_message);
+    Ok(NoArgs)
+}
+
+fn python_debug_callback(_: Python, debug_message: &str) -> PyResult<NoArgs> {
+    debug!("{}", debug_message);
     Ok(NoArgs)
 }
 

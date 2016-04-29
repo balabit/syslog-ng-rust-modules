@@ -51,3 +51,4 @@ class LoggingIsUsedInInitMethod:
         warning("WARNING")
         trace("TRACE")
         error("ERROR")
+        debug("DEBUG")

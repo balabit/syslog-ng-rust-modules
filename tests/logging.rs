@@ -66,6 +66,7 @@ fn logging_callbacks_can_be_used_from_init_method(messages: Arc<Mutex<Vec<Simpli
         SimplifiedLogRecord::new(LogLevel::Warn, "WARNING"),
         SimplifiedLogRecord::new(LogLevel::Trace, "TRACE"),
         SimplifiedLogRecord::new(LogLevel::Error, "ERROR"),
+        SimplifiedLogRecord::new(LogLevel::Debug, "DEBUG"),
     ];
     let cfg = GlobalConfig::new(0x0308);
     let mut builder = PythonParserBuilder::<MockPipe>::new(cfg);
@@ -84,6 +85,7 @@ fn logging_callbacks_are_not_overriden_if_they_are_already_defined(messages: Arc
         SimplifiedLogRecord::new(LogLevel::Warn, "Already implemented warning() function, omitting callback definition."),
         SimplifiedLogRecord::new(LogLevel::Warn, "Already implemented trace() function, omitting callback definition."),
         SimplifiedLogRecord::new(LogLevel::Warn, "Already implemented error() function, omitting callback definition."),
+        SimplifiedLogRecord::new(LogLevel::Warn, "Already implemented debug() function, omitting callback definition."),
     ];
     let cfg = GlobalConfig::new(0x0308);
     let mut builder = PythonParserBuilder::<MockPipe>::new(cfg);
