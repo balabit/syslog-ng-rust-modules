@@ -167,7 +167,7 @@ impl<P: Pipe> ParserBuilder<P> for PythonParserBuilder<P> {
                         Ok(PythonParser {parser: parser_instance, _marker: PhantomData})
                     },
                     Err(error) => {
-                        error!("Failed to create Python parser, class='{}'", class_name);
+                        error!("Failed to create Python parser, class='{}', error='{:?}'", class_name, error);
                         Err(OptionError::verbatim_error(format!("{:?}", error)))
                     }
                 }
