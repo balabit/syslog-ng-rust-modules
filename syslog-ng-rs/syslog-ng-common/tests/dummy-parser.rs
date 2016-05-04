@@ -43,7 +43,7 @@ impl<P: Pipe> ParserBuilder<P> for DummyParserBuilder<P> {
 impl<P: Pipe> Parser<P> for DummyParser<P> {
     fn parse(&mut self, _: &mut P, message: &mut LogMessage, input: &str) -> bool {
         debug!("Processing input in Rust Parser: {}", input);
-        message.insert("input", input);
+        message.insert(&b"input"[..], input.as_bytes());
         true
     }
 }
@@ -73,5 +73,6 @@ fn test_given_parser_implementation_when_it_receives_a_message_then_it_adds_a_sp
     let mut pipe = DummyPipe;
     let result = parser.parse(&mut pipe, &mut msg, input);
     assert!(result);
-    assert_eq!(msg.get("input").unwrap(), input);
+    assert_eq!(msg.get(&b"input"[..]).unwrap(), input.as_bytes());
 }
+
