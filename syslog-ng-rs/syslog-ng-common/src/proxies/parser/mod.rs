@@ -16,14 +16,14 @@ pub use self::option_error::OptionError;
 pub use self::proxy::ParserProxy;
 use GlobalConfig;
 
-pub trait ParserBuilder<P: Pipe> {
+pub trait ParserBuilder<P: Pipe>: Clone {
     type Parser: Parser<P>;
     fn new(GlobalConfig) -> Self;
     fn option(&mut self, _name: String, _value: String) {}
     fn build(self) -> Result<Self::Parser, OptionError>;
 }
 
-pub trait Parser<P: Pipe>: Clone {
+pub trait Parser<P: Pipe> {
     fn parse(&mut self, pipe: &mut P, msg: &mut LogMessage, input: &str) -> bool;
 }
 

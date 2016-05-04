@@ -48,6 +48,12 @@ impl<P: Pipe> Parser<P> for DummyParser<P> {
     }
 }
 
+impl<P: Pipe> Clone for DummyParserBuilder<P> {
+    fn clone(&self) -> Self {
+        DummyParserBuilder(PhantomData)
+    }
+}
+
 // this verifies that the macro can be expanded
 parser_plugin!(DummyParserBuilder<LogParser>);
 

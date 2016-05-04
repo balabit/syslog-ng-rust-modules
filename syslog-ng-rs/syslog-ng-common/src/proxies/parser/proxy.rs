@@ -58,7 +58,6 @@ impl<B> ParserProxy<B> where B: ParserBuilder<LogParser>
 
 impl<B> Clone for ParserProxy<B> where B: ParserBuilder<LogParser> {
     fn clone(&self) -> ParserProxy<B> {
-        // it makes no sense to clone() the builder
-        ParserProxy {parser: self.parser.clone(), builder: None}
+        ParserProxy {parser: None, builder: self.builder.clone()}
     }
 }
