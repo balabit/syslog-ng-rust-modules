@@ -43,16 +43,18 @@ pub mod _parser_plugin {
 
     use super::*;
 
-    #[no_mangle]
-    pub extern fn native_parser_proxy_init(this: &mut ParserProxy<$name>) -> c_int {
-        let res = this.init();
-
-        match res {
+    fn bool_to_int(result: bool) -> c_int {
+        match result {
             true => 1,
             false => 0
         }
     }
 
+    #[no_mangle]
+    pub extern fn native_parser_proxy_init(this: &mut ParserProxy<$name>) -> c_int {
+        let result = this.init();
+        bool_to_int(result)
+    }
     #[no_mangle]
     pub extern fn native_parser_proxy_free(_: Box<ParserProxy<$name>>) {
     }
