@@ -15,12 +15,6 @@ use std::marker::PhantomData;
 
 pub struct DummyParser<P: Pipe>(PhantomData<P>);
 
-impl<P: Pipe> Clone for DummyParser<P> {
-    fn clone(&self) -> DummyParser<P> {
-        DummyParser(self.0.clone())
-    }
-}
-
 pub struct DummyParserBuilder<P: Pipe>(PhantomData<P>);
 
 use syslog_ng_common::LogMessage;
