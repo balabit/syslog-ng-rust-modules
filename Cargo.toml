@@ -15,7 +15,7 @@ crate_type = ["rlib", "dylib"]
 
 [dependencies]
 log = "0.3"
-actiondb = "0.7.0"
+actiondb = { path = "actiondb" }
 syslog-ng-common = "0.8.0"
 
 [build-dependencies]

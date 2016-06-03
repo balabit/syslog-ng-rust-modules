@@ -57,7 +57,7 @@ impl MessageFiller {
     }
 
     fn fill_uuid(formatter: &mut MessageFormatter, msg: &mut LogMessage, result: &MatchResult) {
-        let uuid = result.pattern().uuid().to_hyphenated_string();
+        let uuid = result.pattern().uuid().hyphenated().to_string();
         let (key, value) = formatter.format(keys::PATTERN_UUID, &uuid);
         msg.insert(key, value.as_bytes());
     }
