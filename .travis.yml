@@ -16,7 +16,7 @@ before_script:
   - cd ..
   - git clone https://github.com/balabit/syslog-ng.git
   - cd syslog-ng
-  - ./autogen.sh
+#- ./autogen.sh
 # - ./configure --with-ivykis=internal --prefix=$HOME/install/syslog-ng --disable-python --disable-java --disable-sql --disable-amqp
   - cmake -DCMAKE_INSTALL_PREFIX=$HOME/install/syslog-ng
   - make -j install
