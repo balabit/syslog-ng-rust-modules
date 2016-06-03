@@ -35,9 +35,6 @@ install:
       sqlite3
       xsltproc
 
-compiler:
-  - clang
-
 matrix:
   include:
     - rust: nightly
