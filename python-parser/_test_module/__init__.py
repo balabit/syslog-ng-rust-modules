@@ -44,3 +44,11 @@ class ExceptionIsRaisedInInitMethod:
     def init(self, options):
         raise TypeError("text")
         return True
+
+class LoggingIsUsedInInitMethod:
+    def init(self, options):
+        info("INFO")
+        warning("WARNING")
+        trace("TRACE")
+        error("ERROR")
+        debug("DEBUG")
