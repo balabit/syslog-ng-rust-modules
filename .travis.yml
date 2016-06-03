@@ -1,25 +1,70 @@
 language: rust
+git:
+  submodules: false
 dist: trusty
 sudo: required
 
 env:
     - PKG_CONFIG_PATH=$PKG_CONFIG_PATH:$HOME/install/syslog-ng/lib/pkgconfig
 
-# run builds for all the trains (and more)
+install:
+  - curl http://download.opensuse.org/repositories/home:/laszlo_budai:/syslog-ng/xUbuntu_12.04/Release.key | sudo apt-key add -
+  - echo "deb http://download.opensuse.org/repositories/home:/laszlo_budai:/syslog-ng/xUbuntu_12.04 ./" | sudo tee --append /etc/apt/sources.list.d/syslog-ng-obs.list
+  - sudo apt-get update -qq
+  - sudo apt-get install -qq
+      autoconf-archive
+      bison
+      docbook-xsl
+      flex
+      gradle-2.2.1
+      libcap-dev
+      libdbd-sqlite3
+      libdbi0-dev
+      libesmtp-dev
+      libevtlog-dev
+      libgeoip-dev
+      libglib2.0-dev
+      libhiredis-dev
+      libivykis-dev
+      libjson0-dev
+      libnet1-dev
+      libriemann-client-dev
+      libwrap0-dev
+      pkg-config
+      sqlite3
+      xsltproc
+
+compiler:
+  - clang
+
 matrix:
   include:
-    - rust: stable
+    - env: B=trusty-cmake
+      sudo: required
+      before_script:
+      script:
+        - mkdir build
+        - cd build
+        - cmake
+            -DCMAKE_C_FLAGS=-Werror
+            -DCMAKE_INSTALL_PREFIX=$HOME/install/syslog-ng
+            ..
+        - make -j install
 
 before_script:
-  - sudo apt-get update -qq
-  - sudo apt-get install -qq autoconf-archive bison cmake docbook-xsl flex libcap-dev libesmtp-dev libevtlog-dev libgeoip-dev libglib2.0-dev libhiredis-dev libjson0-dev libnet1-dev libpcre3-dev libssl-dev libwrap0-dev openjdk-7-jdk pkg-config python3-all-dev libpython3-dev libpython3-all-dev time xsltproc
+  - unset PYTHON_CFLAGS # HACK
   - cd ..
   - git clone https://github.com/balabit/syslog-ng.git
   - cd syslog-ng
-  - ./autogen.sh
-  - ./configure --with-ivykis=internal --prefix=$HOME/install/syslog-ng --disable-python --disable-java --disable-sql --disable-amqp
+  - mkdir build
+  - cd build
+  - >
+    cmake -DENABLE_JAVA:BOOL=OFF
+    -DENABLE_GRADLE:BOOL=OFF
+    -DENABLE_PYTHON:BOOL=OFF
+    -DCMAKE_INSTALL_PREFIX="$HOME/install/syslog-ng" ..
   - make -j install
-  - cd ../syslog-ng-rust-modules
+  - cd ../../syslog-ng-rust-modules
   - mkdir build
   - cd build
   - >
