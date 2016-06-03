@@ -1,0 +1,26 @@
+[package]
+name = "actiondb"
+version = "0.7.0"
+authors = ["Tibor Benke <tibor.benke@balabit.com>"]
+homepage = "https://github.com/ihrwein/actiondb"
+repository = "https://github.com/ihrwein/actiondb"
+readme = "README.md"
+keywords = ["log", "parser"]
+description = "A safe and efficient unstructured text (log) parsing library."
+license = "LGPL-2.1"
+
+[dependencies]
+clap = "2.1"
+log = "0.3"
+uuid = "^0.2.2"
+serde = "0.7"
+serde_json = "0.7"
+serde_yaml = "0.2.3"
+# there is no reason to use THAT particular version, but every update introduces
+# new warnings, which results in compilation errors. Clippy should be updated
+# time-to-time.
+clippy = {version = "0.0.*", optional = true}
+
+[features]
+default=["uuid/v4", "uuid/serde"]
+nightly = ["clippy"]
