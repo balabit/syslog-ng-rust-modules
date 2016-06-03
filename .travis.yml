@@ -6,6 +6,7 @@ sudo: required
 
 env:
     - PKG_CONFIG_PATH=$PKG_CONFIG_PATH:$HOME/install/syslog-ng/lib/pkgconfig
+    - CMAKE_C_FLAGS=-std=c99
 
 install:
   - curl http://download.opensuse.org/repositories/home:/laszlo_budai:/syslog-ng/xUbuntu_12.04/Release.key | sudo apt-key add -
@@ -52,7 +53,8 @@ before_script:
   - mkdir build
   - cd build
   - >
-    cmake -DENABLE_JAVA:BOOL=OFF
+    cmake -DCMAKE_C_FLAGS=$CMAKE_C_FLAGS
+    -DENABLE_JAVA:BOOL=OFF
     -DENABLE_GRADLE:BOOL=OFF
     -DENABLE_PYTHON:BOOL=OFF
     -DCMAKE_INSTALL_PREFIX="$HOME/install/syslog-ng" ..
