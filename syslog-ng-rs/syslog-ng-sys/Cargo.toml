@@ -1,0 +1,22 @@
+[package]
+name = "syslog-ng-sys"
+version = "0.3.0"
+authors = ["Tibor Benke <ihrwein@gmail.com>"]
+build = "build.rs"
+links = "syslog-ng"
+homepage = "https://github.com/ihrwein/syslog-ng-rs"
+repository = "https://github.com/ihrwein/syslog-ng-rs"
+keywords = ["syslog-ng"]
+description = "Low level bindings for syslog-ng"
+license = "MIT/Apache-2.0"
+
+[lib]
+name = "syslog_ng_sys"
+
+[dependencies]
+libc = "0.2"
+log = "0.3"
+glib-sys = "0.3.0"
+
+[build-dependencies]
+pkg-config = "0.3"

@@ -8,7 +8,7 @@ build = "build.rs"
 crate-type = ["rlib", "dylib"]
 
 [dependencies]
-syslog-ng-common = "0.8"
+syslog-ng-common = { path = "../syslog-ng-rs/syslog-ng-common" }
 cpython = { git = "https://github.com/ihrwein/rust-cpython.git" }
 log = "0.3"
 env_logger = "0.3"
