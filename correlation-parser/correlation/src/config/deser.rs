@@ -268,4 +268,17 @@ mod test {
         "#;
         let _ = from_str::<ContextConfig<String>>(text).err().unwrap();
     }
+
+    #[test]
+    fn test_given_config_context_when_it_invalid_uuid_then_we_dont_panic() {
+        let text = r#"
+        {
+            "uuid": "231231212212423424324323477343246663",
+            "conditions": {
+                "timeout": 100
+            }
+        }
+        "#;
+        let _ = from_str::<ContextConfig<String>>(text).err().unwrap();
+    }
 }
