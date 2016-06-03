@@ -4,10 +4,6 @@ git:
 dist: trusty
 sudo: required
 
-env:
-    - PKG_CONFIG_PATH=$PKG_CONFIG_PATH:$HOME/install/syslog-ng/lib/pkgconfig
-    - CMAKE_C_FLAGS=-std=c99
-
 install:
   - curl http://download.opensuse.org/repositories/home:/laszlo_budai:/syslog-ng/xUbuntu_14.04/Release.key | sudo apt-key add -
   - echo "deb http://download.opensuse.org/repositories/home:/laszlo_budai:/syslog-ng/xUbuntu_14.04 ./" | sudo tee --append /etc/apt/sources.list.d/syslog-ng-obs.list
@@ -41,6 +37,9 @@ matrix:
       env: TRAVIS_CARGO_NIGHTLY_FEATURE=nightly
     - rust: beta
     - rust: stable
+      env:
+        - PKG_CONFIG_PATH=$PKG_CONFIG_PATH:$HOME/install/syslog-ng/lib/pkgconfig
+        - CMAKE_C_FLAGS=-std=gnu99
 
 before_script:
   - unset PYTHON_CFLAGS # HACK
