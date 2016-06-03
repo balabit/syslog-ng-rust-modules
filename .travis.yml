@@ -18,7 +18,7 @@ before_script:
   - cd syslog-ng
 #- ./autogen.sh
 # - ./configure --with-ivykis=internal --prefix=$HOME/install/syslog-ng --disable-python --disable-java --disable-sql --disable-amqp
-  - cmake -DCMAKE_INSTALL_PREFIX=$HOME/install/syslog-ng -DENABLE_AMQP=OFF -DENABLE_JAVA=OFF -DENABLE_GRADLE=OFF
+  - cmake -DCMAKE_INSTALL_PREFIX=$HOME/install/syslog-ng -DENABLE_AMQP=OFF -DENABLE_JAVA=OFF -DENABLE_GRADLE=OFF -DCMAKE_C_FLAGS='-Werror --std=c99'
   - make -j install
   - cd ../syslog-ng-rust-modules
   - mkdir build
