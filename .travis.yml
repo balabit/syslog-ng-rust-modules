@@ -56,7 +56,10 @@ before_script:
     -DENABLE_PYTHON:BOOL=OFF
     -DCMAKE_INSTALL_PREFIX="$HOME/install/syslog-ng" ..
   - make -j install
-  - cd ../../syslog-ng-rust-modules
+  - cd ../..
+
+script:
+  - cd syslog-ng-rust-modules
   - mkdir build
   - cd build
   - >
@@ -65,5 +68,4 @@ before_script:
     -DENABLE_PYTHON_PARSER=ON
     -DENABLE_ACTIONDB_PARSER=ON
     -DENABLE_CORRELATION_PARSER=ON ..
-script:
   - make install
