@@ -61,7 +61,7 @@ before_script:
 script:
   - cd syslog-ng-rust-modules
   # find every crate (containing a Cargo.toml file) and run `cargo test` command in it
-  - find . -name Cargo.toml -exec ./cargo-test.sh `dirname {}` \;
+  - find . -name Cargo.toml | xargs -n 1 ./cargo-test.sh
   - mkdir build
   - cd build
   - >
