@@ -71,4 +71,5 @@ script:
   - make install
   # find every crate (containing a Cargo.toml file) and run `cargo test` command in it
   - cd ..
+  - cat CMakeCache.txt
   - find . -name Cargo.toml | xargs -n 1 ./cargo-test.sh
