@@ -40,7 +40,7 @@ matrix:
       env:
         - PKG_CONFIG_PATH=$PKG_CONFIG_PATH:$HOME/install/syslog-ng/lib/pkgconfig
         - CMAKE_C_FLAGS=-std=gnu99
-        - LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$HOME/install/syslog-ng/lib
+        - LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$HOME/install/syslog-ng/lib:/opt/python/3.5.0
 
 before_script:
   - unset PYTHON_CFLAGS # HACK
