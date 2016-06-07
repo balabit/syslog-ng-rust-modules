@@ -64,10 +64,10 @@ script:
   - cd build
   - >
     cmake -DCMAKE_INSTALL_PREFIX=$HOME/install/syslog-ng
-    -DENABLE_REGEX_PARSER=ON
+    -DENABLE_REGEX_PARSER=OFF
     -DENABLE_PYTHON_PARSER=ON
-    -DENABLE_ACTIONDB_PARSER=ON
-    -DENABLE_CORRELATION_PARSER=ON ..
+    -DENABLE_ACTIONDB_PARSER=OFF
+    -DENABLE_CORRELATION_PARSER=OFF ..
   - make install
   - cat CMakeCache.txt
   # find every crate (containing a Cargo.toml file) and run `cargo test` command in it
