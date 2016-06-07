@@ -18,6 +18,7 @@ install:
       libjson0-dev
       libwrap0-dev
       pkg-config
+      cmake
 
 matrix:
   include:
