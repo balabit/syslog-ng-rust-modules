@@ -13,22 +13,14 @@ install:
       bison
       docbook-xsl
       flex
-      gradle-2.2.1
       libcap-dev
-      libdbd-sqlite3
-      libdbi0-dev
-      libesmtp-dev
       libevtlog-dev
-      libgeoip-dev
       libglib2.0-dev
-      libhiredis-dev
       libivykis-dev
       libjson0-dev
       libnet1-dev
-      libriemann-client-dev
       libwrap0-dev
       pkg-config
-      sqlite3
       xsltproc
 
 matrix:
