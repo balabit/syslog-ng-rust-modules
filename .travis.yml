@@ -4,6 +4,10 @@ git:
 dist: trusty
 sudo: required
 
+python:
+  - "3.4"
+  - "3.5"
+
 install:
   - curl http://download.opensuse.org/repositories/home:/laszlo_budai:/syslog-ng/xUbuntu_14.04/Release.key | sudo apt-key add -
   - echo "deb http://download.opensuse.org/repositories/home:/laszlo_budai:/syslog-ng/xUbuntu_14.04 ./" | sudo tee --append /etc/apt/sources.list.d/syslog-ng-obs.list
