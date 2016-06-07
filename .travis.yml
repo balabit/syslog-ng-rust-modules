@@ -1,8 +1,16 @@
-language: rust
+language: python
+python:
+#  - "2.7"
+  - "3.4"
+#  - "3.5"
 git:
   submodules: false
 dist: trusty
 sudo: required
+
+env:
+  - RUST_VERSION=1.7.0
+  - RUST_VERSION=nightly
 
 install:
   - curl http://download.opensuse.org/repositories/home:/laszlo_budai:/syslog-ng/xUbuntu_14.04/Release.key | sudo apt-key add -
@@ -19,6 +27,17 @@ install:
       libwrap0-dev
       pkg-config
       cmake
+# copied from https://github.com/dgrunwald/rust-cpython/blob/master/.travis.yml (7c59d554ec6470963b4880345f39b5a543c00496)
+  - python -c "import sysconfig; print('\n'.join(map(repr,sorted(sysconfig.get_config_vars().items()))))"
+  - mkdir ~/rust-installer
+  - curl -sL https://static.rust-lang.org/rustup.sh -o ~/rust-installer/rustup.sh
+  - sh ~/rust-installer/rustup.sh --prefix=~/rust --spec=$RUST_VERSION -y --disable-sudo
+  - export PATH="$HOME/rust/bin:$PATH"
+  - export PYTHON_LIB=$(python -c "import sysconfig; print(sysconfig.get_config_var('LIBDIR'))")
+  - find $PYTHON_LIB
+  - export LIBRARY_PATH="$LIBRARY_PATH:$PYTHON_LIB"
+  - export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$PYTHON_LIB:$HOME/rust/lib"
+  - rustc -V
 
 matrix:
   include:
@@ -33,8 +52,7 @@ matrix:
 #        - PKG_CONFIG_PATH=$PKG_CONFIG_PATH:$HOME/install/syslog-ng/lib/pkgconfig
 #        - CMAKE_C_FLAGS=-std=gnu99
 #        - LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$HOME/install/syslog-ng/lib
-    - rust: stable
-      env:
+    - env:
         - PKG_CONFIG_PATH=$PKG_CONFIG_PATH:$HOME/install/syslog-ng/lib/pkgconfig
         - CMAKE_C_FLAGS=-std=gnu99
         - LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$HOME/install/syslog-ng/lib"
