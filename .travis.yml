@@ -68,8 +68,6 @@ before_script:
 
 script:
   - cd syslog-ng-rust-modules
-  # find every crate (containing a Cargo.toml file) and run `cargo test` command in it
-  - find . -name Cargo.toml | xargs -n 1 ./cargo-test.sh
   - mkdir build
   - cd build
   - >
@@ -79,3 +77,6 @@ script:
     -DENABLE_ACTIONDB_PARSER=ON
     -DENABLE_CORRELATION_PARSER=ON ..
   - make install
+  # find every crate (containing a Cargo.toml file) and run `cargo test` command in it
+  - cd ..
+  - find . -name Cargo.toml | xargs -n 1 ./cargo-test.sh
