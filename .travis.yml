@@ -2,18 +2,21 @@ language: python
 git:
   submodules: false
 
+addons:
+  apt:
+    packages:
+    - bison
+    - flex
+    - libcap-dev
+    - libevtlog-dev
+    - libglib2.0-dev
+    - libivykis-dev
+    - libjson0-dev
+    - libwrap0-dev
+    - pkg-config
+    - cmake
+
 install:
-  - apt-get install -qq
-      bison
-      flex
-      libcap-dev
-      libevtlog-dev
-      libglib2.0-dev
-      libivykis-dev
-      libjson0-dev
-      libwrap0-dev
-      pkg-config
-      cmake
 # copied from https://github.com/dgrunwald/rust-cpython/blob/master/.travis.yml (7c59d554ec6470963b4880345f39b5a543c00496)
   - python -c "import sysconfig; print('\n'.join(map(repr,sorted(sysconfig.get_config_vars().items()))))"
   - mkdir ~/rust-installer
