@@ -3,6 +3,9 @@ language: python
 git:
   submodules: false
 
+python:
+  - "3.4"
+
 dist: trusty
 
 addons:
