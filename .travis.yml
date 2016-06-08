@@ -1,6 +1,9 @@
 language: python
+
 git:
   submodules: false
+
+dist: trusty
 
 addons:
   apt:
