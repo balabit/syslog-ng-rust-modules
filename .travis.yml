@@ -38,6 +38,7 @@ install:
   - autoreconf -i
   - ./configure --prefix=$HOME/install/syslog-ng
   - make install
+  - cd ..
 
 matrix:
   include:
