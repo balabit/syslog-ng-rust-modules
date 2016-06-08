@@ -10,11 +10,11 @@ addons:
     - libcap-dev
     - libevtlog-dev
     - libglib2.0-dev
-    - libivykis-dev
     - libjson0-dev
     - libwrap0-dev
     - pkg-config
     - cmake
+    - autoconf
 
 install:
 # copied from https://github.com/dgrunwald/rust-cpython/blob/master/.travis.yml (7c59d554ec6470963b4880345f39b5a543c00496)
@@ -28,6 +28,13 @@ install:
   - export LIBRARY_PATH="$LIBRARY_PATH:$PYTHON_LIB"
   - export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$PYTHON_LIB:$HOME/rust/lib"
   - rustc -V
+# install ivykis
+  - curl -sL https://github.com/balabit/ivykis/archive/master.zip -o ivykis.zip
+  - unzip ivykis.zip
+  - cd ivykis-master
+  - autoreconf -i
+  - ./configure --prefix=$HOME/install/syslog-ng
+  - make install
 
 matrix:
   include:
