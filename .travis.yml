@@ -3,9 +3,6 @@ language: python
 git:
   submodules: false
 
-python:
-  - "3.4"
-
 dist: trusty
 
 addons:
@@ -56,7 +53,8 @@ matrix:
 #        - PKG_CONFIG_PATH=$PKG_CONFIG_PATH:$HOME/install/syslog-ng/lib/pkgconfig
 #        - CMAKE_C_FLAGS=-std=gnu99
 #        - LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$HOME/install/syslog-ng/lib
-    - env:
+    - python: "3.4"
+      env:
         - PKG_CONFIG_PATH=$PKG_CONFIG_PATH:$HOME/install/syslog-ng/lib/pkgconfig
         - CMAKE_C_FLAGS=-std=gnu99
         - LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$HOME/install/syslog-ng/lib"
