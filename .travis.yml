@@ -4,6 +4,11 @@ sudo: false
 git:
   submodules: false
 
+rust:
+  - stable
+  - beta
+  - nightly
+
 dist: trusty
 cache:
   - cargo
@@ -58,10 +63,6 @@ matrix:
 #        - PKG_CONFIG_PATH=$PKG_CONFIG_PATH:$HOME/install/syslog-ng/lib/pkgconfig
 #        - CMAKE_C_FLAGS=-std=gnu99
 #        - LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$HOME/install/syslog-ng/lib
-    - rust:
-        - stable
-        - beta
-        - nightly
       env:
         - PKG_CONFIG_PATH=$PKG_CONFIG_PATH:$HOME/install/syslog-ng/lib/pkgconfig
         - CMAKE_C_FLAGS=-std=gnu99
