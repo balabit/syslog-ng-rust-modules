@@ -26,16 +26,16 @@ addons:
 
 install:
 # copied from https://github.com/dgrunwald/rust-cpython/blob/master/.travis.yml (7c59d554ec6470963b4880345f39b5a543c00496)
-  - python -c "import sysconfig; print('\n'.join(map(repr,sorted(sysconfig.get_config_vars().items()))))"
-  - mkdir ~/rust-installer
-  - curl -sL https://static.rust-lang.org/rustup.sh -o ~/rust-installer/rustup.sh
-  - sh ~/rust-installer/rustup.sh --prefix=~/rust --spec=1.9.0 -y --disable-sudo
-  - export PATH="$HOME/rust/bin:$PATH"
-  - export PYTHON_LIB=$(python -c "import sysconfig; print(sysconfig.get_config_var('LIBDIR'))")
-  - find $PYTHON_LIB
-  - export LIBRARY_PATH="$LIBRARY_PATH:$PYTHON_LIB"
-  - export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$PYTHON_LIB:$HOME/rust/lib"
-  - rustc -V
+#  - python -c "import sysconfig; print('\n'.join(map(repr,sorted(sysconfig.get_config_vars().items()))))"
+#  - mkdir ~/rust-installer
+#  - curl -sL https://static.rust-lang.org/rustup.sh -o ~/rust-installer/rustup.sh
+#  - sh ~/rust-installer/rustup.sh --prefix=~/rust --spec=1.9.0 -y --disable-sudo
+#  - export PATH="$HOME/rust/bin:$PATH"
+#  - export PYTHON_LIB=$(python -c "import sysconfig; print(sysconfig.get_config_var('LIBDIR'))")
+#  - find $PYTHON_LIB
+#  - export LIBRARY_PATH="$LIBRARY_PATH:$PYTHON_LIB"
+#  - export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$PYTHON_LIB:$HOME/rust/lib"
+#  - rustc -V
 # install ivykis
   - curl -sL https://github.com/balabit/ivykis/archive/master.zip -o ivykis.zip
   - unzip ivykis.zip
@@ -58,7 +58,10 @@ matrix:
 #        - PKG_CONFIG_PATH=$PKG_CONFIG_PATH:$HOME/install/syslog-ng/lib/pkgconfig
 #        - CMAKE_C_FLAGS=-std=gnu99
 #        - LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$HOME/install/syslog-ng/lib
-    - python: "3.4"
+    - rust:
+        - stable
+        - beta
+        - nightly
       env:
         - PKG_CONFIG_PATH=$PKG_CONFIG_PATH:$HOME/install/syslog-ng/lib/pkgconfig
         - CMAKE_C_FLAGS=-std=gnu99
@@ -86,10 +89,10 @@ script:
   - cd build
   - >
     cmake -DCMAKE_INSTALL_PREFIX=$HOME/install/syslog-ng
-    -DENABLE_REGEX_PARSER=OFF
+    -DENABLE_REGEX_PARSER=ON
     -DENABLE_PYTHON_PARSER=ON
-    -DENABLE_ACTIONDB_PARSER=OFF
-    -DENABLE_CORRELATION_PARSER=OFF ..
+    -DENABLE_ACTIONDB_PARSER=ON
+    -DENABLE_CORRELATION_PARSER=ON ..
   - make install
   - cat CMakeCache.txt
   # find every crate (containing a Cargo.toml file) and run `cargo test` command in it
