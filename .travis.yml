@@ -5,6 +5,9 @@ git:
   submodules: false
 
 dist: trusty
+cache:
+  - cargo
+  - ccache
 
 addons:
   apt:
