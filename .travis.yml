@@ -18,6 +18,7 @@ addons:
     - pkg-config
     - cmake
     - autoconf
+    - libpython3-all-dev
 
 install:
 # copied from https://github.com/dgrunwald/rust-cpython/blob/master/.travis.yml (7c59d554ec6470963b4880345f39b5a543c00496)
