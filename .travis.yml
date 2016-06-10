@@ -18,6 +18,7 @@ addons:
     - pkg-config
     - cmake
     - autoconf
+    - libpython3.4
     - libpython3-all-dev
 
 install:
