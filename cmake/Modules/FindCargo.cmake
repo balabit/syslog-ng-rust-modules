@@ -10,6 +10,7 @@
 #   find_package(Cargo 0.10.0 REQUIRED)
 
 include(CheckMultirust)
+include(CheckRustup)
 
 if (MULTIRUST_FOUND)
   find_program(CARGO_EXECUTABLE cargo HINTS ${MULTIRUST_TOOLCHAIN_BIN_DIR} PATHS PATH_SUFFIXES bin)

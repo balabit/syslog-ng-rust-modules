@@ -15,3 +15,6 @@ env_logger = "0.3"
 
 [build-dependencies]
 syslog-ng-build = "0.2"
+
+[features]
+default = ["cpython/python-3-4"]
