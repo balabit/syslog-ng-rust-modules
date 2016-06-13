@@ -10,13 +10,8 @@
 # Example usage:
 #   find_package(Rust 0.12.0 REQUIRED)
 
-include(CheckMultirust)
 
-if (MULTIRUST_FOUND)
-  find_program(RUST_EXECUTABLE rustc HINTS ${MULTIRUST_TOOLCHAIN_BIN_DIR} PATHS PATH_SUFFIXES bin)
-else()
-  find_program(RUST_EXECUTABLE rustc PATHS PATH_SUFFIXES bin)
-endif()
+find_program(RUST_EXECUTABLE rustc HINTS ENV PATH PATHS PATH_SUFFIXES bin)
 
 if (RUST_EXECUTABLE)
     set(COMMAND ${RUST_EXECUTABLE} --version)

@@ -9,13 +9,7 @@
 # Example usage:
 #   find_package(Cargo 0.10.0 REQUIRED)
 
-include(CheckMultirust)
-
-if (MULTIRUST_FOUND)
-  find_program(CARGO_EXECUTABLE cargo HINTS ${MULTIRUST_TOOLCHAIN_BIN_DIR} PATHS PATH_SUFFIXES bin)
-else()
-  find_program(CARGO_EXECUTABLE cargo PATHS PATH_SUFFIXES bin)
-endif()
+find_program(CARGO_EXECUTABLE cargo HINTS ENV PATH PATHS PATH_SUFFIXES bin)
 
 if (CARGO_EXECUTABLE)
     set(COMMAND ${CARGO_EXECUTABLE} --version)
