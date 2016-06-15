@@ -74,6 +74,17 @@ impl<P, E, T, TF, TM> CorrelationParserBuilder<P, E, T, TF, TM> where P: Pipe, E
     }
 }
 
+impl<P, E, T, TF, TM> Clone for CorrelationParserBuilder<P, E, T, TF, TM> where P: Pipe, E: 'static + Event + Into<LogMessage> + Send, T: 'static + Template<Event=E>, TF: TemplateFactory<E, Template=T> + From<GlobalConfig>, TM: Timer<E, T> {
+    fn clone(&self) -> Self {
+        CorrelationParserBuilder {
+            contexts: self.contexts.clone(),
+            formatter: self.formatter.clone(),
+            template_factory: self.template_factory.clone(),
+            delta: self.delta.clone(),
+            _marker: PhantomData
+        }
+    }
+}
 impl<P, E, T, TF, TM> ParserBuilder<P> for CorrelationParserBuilder<P, E, T, TF, TM> where P: Pipe, E: 'static + Event + Into<LogMessage> + Send, T: 'static + Template<Event=E>, TF: TemplateFactory<E, Template=T> + From<GlobalConfig>, TM: Timer<E, T> {
     type Parser = CorrelationParser<E, T, TM>;
     fn new(cfg: GlobalConfig) -> Self {
