@@ -144,6 +144,17 @@ fn python_debug_callback(_: Python, debug_message: &str) -> PyResult<NoArgs> {
     Ok(NoArgs)
 }
 
+impl<P: Pipe> Clone for PythonParserBuilder<P> {
+    fn clone(&self) -> Self {
+        PythonParserBuilder {
+            module: self.module.clone(),
+            class: self.class.clone(),
+            options: self.options.clone(),
+            _marker: PhantomData
+        }
+    }
+}
+
 impl<P: Pipe> ParserBuilder<P> for PythonParserBuilder<P> {
     type Parser = PythonParser<P>;
     fn new(_: GlobalConfig) -> Self {
