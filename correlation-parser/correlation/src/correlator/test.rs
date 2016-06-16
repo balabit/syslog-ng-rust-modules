@@ -132,7 +132,7 @@ fn test_given_correlator_when_it_is_built_from_json_then_we_get_the_expected_cor
     }
     let context = contexts.remove(0);
     assert_eq!(Some(&expected_name), context.name.as_ref());
-    assert_eq!(&expected_uuid, &context.uuid.to_hyphenated_string());
+    assert_eq!(&expected_uuid, &context.uuid.hyphenated().to_string());
 }
 
 #[test]

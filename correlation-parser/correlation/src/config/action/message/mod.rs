@@ -55,7 +55,7 @@ impl<T> MessageAction<T> {
     }
 
     fn execute<E>(&self, state: &State<E>, context: &BaseContext<E, T>, responder: &mut VecDeque<Alert<E>>) where E: Event, T: Template<Event=E> {
-        let context_id = context.uuid.to_hyphenated_string();
+        let context_id = context.uuid.hyphenated().to_string();
         let mut message = Vec::new();
         self.message.format_with_context(state.messages(), &context_id, &mut message);
         let mut event = E::new(&self.uuid.as_bytes(), &message);

@@ -124,7 +124,6 @@ mod tests {
     use context::{Context, LinearContext};
     use uuid::Uuid;
     use std::time::Duration;
-    use Event;
     use Message;
     use test_utils::{MockTemplate, BaseContextBuilder};
 

@@ -1,5 +1,4 @@
 use Template;
-use Event;
 use TemplateFactory;
 use Message;
 use CompileError;

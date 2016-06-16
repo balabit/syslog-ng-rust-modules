@@ -61,27 +61,6 @@ impl Deserialize for Field {
 
 struct ContextVisitor<T> (PhantomData<T>);
 
-impl<T> ContextVisitor<T> {
-    fn parse_uuid<V>(uuid: Option<String>) -> Result<Uuid, V::Error>
-        where V: MapVisitor
-    {
-        match uuid {
-            Some(value) => {
-                match Uuid::parse_str(&value) {
-                    Ok(uuid) => Ok(uuid),
-                    Err(err) => {
-                        Err(Error::custom(format!("Failed to parse field 'uuid': uuid={} \
-                                                    error={}",
-                                                   value,
-                                                   err)))
-                    }
-                }
-            }
-            None => Err(Error::missing_field("uuid")),
-        }
-    }
-}
-
 impl<T> Visitor for ContextVisitor<T> where T: Deserialize {
     type Value = ContextConfig<T>;
 
@@ -89,7 +68,7 @@ impl<T> Visitor for ContextVisitor<T> where T: Deserialize {
         where V: MapVisitor
     {
         let mut name = None;
-        let mut uuid: Option<String> = None;
+        let mut uuid: Option<Uuid> = None;
         let mut conditions = None;
         let mut context_id: Option<Vec<String>> = None;
         let mut actions = None;
@@ -108,7 +87,12 @@ impl<T> Visitor for ContextVisitor<T> where T: Deserialize {
 
         try!(visitor.end());
 
-        let uuid = try!(ContextVisitor::<T>::parse_uuid::<V>(uuid));
+        let uuid = if let Some(uuid) = uuid {
+            uuid
+        } else {
+            return Err(V::Error::missing_field("uuid"));
+        };
+
         let actions = actions.unwrap_or_default();
         let conditions = try!(conditions.ok_or(V::Error::missing_field("conditions")));
 
@@ -264,6 +248,19 @@ mod test {
         let text = r#"
         {
             "uuid": "86ca9f93-84fb-4813-b037-6526f7a585a3"
+        }
+        "#;
+        let _ = from_str::<ContextConfig<String>>(text).err().unwrap();
+    }
+
+    #[test]
+    fn test_given_config_context_when_it_invalid_uuid_then_we_dont_panic() {
+        let text = r#"
+        {
+            "uuid": "231231212212423424324323477343246663",
+            "conditions": {
+                "timeout": 100
+            }
         }
         "#;
         let _ = from_str::<ContextConfig<String>>(text).err().unwrap();
