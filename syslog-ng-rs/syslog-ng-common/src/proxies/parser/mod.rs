@@ -57,6 +57,13 @@ pub mod _parser_plugin {
         let result = this.init();
         bool_to_int(result)
     }
+
+    #[no_mangle]
+    pub extern fn native_parser_proxy_deinit(this: &mut ParserProxy<$name>) -> c_int {
+        let result = this.deinit();
+        bool_to_int(result)
+    }
+
     #[no_mangle]
     pub extern fn native_parser_proxy_free(_: Box<ParserProxy<$name>>) {
     }
