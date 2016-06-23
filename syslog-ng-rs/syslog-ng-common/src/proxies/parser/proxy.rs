@@ -43,6 +43,15 @@ impl<B> ParserProxy<B> where B: ParserBuilder<LogParser>
         }
     }
 
+
+    pub fn deinit(&mut self) -> bool {
+        if let Some(ref mut parser) = self.parser {
+            parser.deinit()
+        } else {
+            false
+        }
+    }
+
     pub fn set_option(&mut self, name: String, value: String) {
         let builder = self.builder.as_mut().expect("Failed to get builder on a ParserProxy");
         builder.option(name, value);
