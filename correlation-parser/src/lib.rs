@@ -36,7 +36,7 @@ pub trait Timer<E, T> where E: Event + Send, T: Template<Event=E> {
 }
 
 pub struct CorrelationParserBuilder<P, E, T, TF, TM> where P: Pipe, E: 'static + Event + Send, T: 'static + Template<Event=E>, TF: TemplateFactory<E, Template=T>, TM: Timer<E, T> {
-    contexts: Option<Correlator<E, T>>,
+    correlator: Option<Correlator<E, T>>,
     formatter: MessageFormatter,
     template_factory: TF,
     delta: Option<Duration>,
@@ -47,7 +47,7 @@ impl<P, E, T, TF, TM> CorrelationParserBuilder<P, E, T, TF, TM> where P: Pipe, E
     pub fn set_file(&mut self, path: &str) {
         match CorrelatorFactory::from_path::<T, &str, E, TF>(path, &self.template_factory) {
             Ok(correlator) => {
-                self.contexts = Some(correlator);
+                self.correlator = Some(correlator);
             },
             Err(err) => {
                 error!("Failed to initialize correlation-parser from configuration file: {}", &err);
@@ -77,7 +77,7 @@ impl<P, E, T, TF, TM> CorrelationParserBuilder<P, E, T, TF, TM> where P: Pipe, E
 impl<P, E, T, TF, TM> Clone for CorrelationParserBuilder<P, E, T, TF, TM> where P: Pipe, E: 'static + Event + Into<LogMessage> + Send, T: 'static + Template<Event=E>, TF: TemplateFactory<E, Template=T> + From<GlobalConfig>, TM: Timer<E, T> {
     fn clone(&self) -> Self {
         CorrelationParserBuilder {
-            contexts: self.contexts.clone(),
+            correlator: self.correlator.clone(),
             formatter: self.formatter.clone(),
             template_factory: self.template_factory.clone(),
             delta: self.delta.clone(),
@@ -89,7 +89,7 @@ impl<P, E, T, TF, TM> ParserBuilder<P> for CorrelationParserBuilder<P, E, T, TF,
     type Parser = CorrelationParser<E, T, TM>;
     fn new(cfg: GlobalConfig) -> Self {
         CorrelationParserBuilder {
-            contexts: None,
+            correlator: None,
             formatter: MessageFormatter::new(),
             template_factory: TF::from(cfg),
             delta: Some(Duration::from_millis(1000)),
@@ -108,11 +108,11 @@ impl<P, E, T, TF, TM> ParserBuilder<P> for CorrelationParserBuilder<P, E, T, TF,
     }
     fn build(self) -> Result<Self::Parser, OptionError> {
         debug!("Building CorrelationParser");
-        let CorrelationParserBuilder {contexts, template_factory, formatter, delta, _marker } = self;
+        let CorrelationParserBuilder {correlator, template_factory, formatter, delta, _marker } = self;
         let _ = template_factory;
-        let contexts = try!(contexts.ok_or(OptionError::missing_required_option(options::CONTEXTS_FILE)));
+        let correlator = try!(correlator.ok_or(OptionError::missing_required_option(options::CONTEXTS_FILE)));
         let delta = try!(delta.ok_or(OptionError::missing_required_option(options::DELTA)));
-        let correlator = Arc::new(Mutex::new(contexts));
+        let correlator = Arc::new(Mutex::new(correlator));
         let timer = Arc::new(TM::new(delta, correlator.clone()));
         Ok(CorrelationParser::new(correlator, formatter, delta, timer))
     }
