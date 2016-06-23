@@ -29,12 +29,12 @@ impl<B> ParserProxy<B> where B: ParserBuilder<LogParser>
         }
     }
 
-    pub fn init(&mut self) -> bool {
-        let builder = self.builder.take().expect("Called init when builder was not set");
+    fn build_parser(&mut self, builder: B) -> bool {
         match builder.build() {
-            Ok(parser) => {
+            Ok(mut parser) => {
+                let init_result = parser.init();
                 self.parser = Some(parser);
-                true
+                init_result
             }
             Err(error) => {
                 error!("Error: {:?}", error);
@@ -43,6 +43,17 @@ impl<B> ParserProxy<B> where B: ParserBuilder<LogParser>
         }
     }
 
+    pub fn init(&mut self) -> bool {
+        if let Some(builder) = self.builder.take()  {
+            return self.build_parser(builder);
+        }
+
+        if let Some(ref mut parser) = self.parser {
+            parser.init()
+        } else {
+            false
+        }
+    }
 
     pub fn deinit(&mut self) -> bool {
         if let Some(ref mut parser) = self.parser {
