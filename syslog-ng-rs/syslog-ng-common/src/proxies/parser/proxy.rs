@@ -16,8 +16,8 @@ pub use proxies::parser::{OptionError, Parser, ParserBuilder};
 pub struct ParserProxy<B>
     where B: ParserBuilder<LogParser>
 {
-    pub parser: Option<B::Parser>,
-    pub builder: Option<B>,
+    parser: Option<B::Parser>,
+    builder: Option<B>,
 }
 
 impl<B> ParserProxy<B> where B: ParserBuilder<LogParser>
