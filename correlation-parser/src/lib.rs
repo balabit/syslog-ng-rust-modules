@@ -36,7 +36,7 @@ pub trait Timer<E, T> where E: Event + Send, T: Template<Event=E> {
 }
 
 pub struct CorrelationParserBuilder<P, E, T, TF, TM> where P: Pipe, E: 'static + Event + Send, T: 'static + Template<Event=E>, TF: TemplateFactory<E, Template=T>, TM: Timer<E, T> {
-    correlator: Option<Correlator<E, T>>,
+    correlator: Option<Arc<Mutex<Correlator<E, T>>>>,
     formatter: MessageFormatter,
     template_factory: Arc<TF>,
     delta: Option<Duration>,
@@ -47,6 +47,7 @@ impl<P, E, T, TF, TM> CorrelationParserBuilder<P, E, T, TF, TM> where P: Pipe, E
     pub fn set_file(&mut self, path: &str) {
         match CorrelatorFactory::from_path::<T, &str, E, TF>(path, &self.template_factory) {
             Ok(correlator) => {
+                let correlator = Arc::new(Mutex::new(correlator));
                 self.correlator = Some(correlator);
             },
             Err(err) => {
@@ -112,7 +113,6 @@ impl<P, E, T, TF, TM> ParserBuilder<P> for CorrelationParserBuilder<P, E, T, TF,
         let _ = template_factory;
         let correlator = try!(correlator.ok_or(OptionError::missing_required_option(options::CONTEXTS_FILE)));
         let delta = try!(delta.ok_or(OptionError::missing_required_option(options::DELTA)));
-        let correlator = Arc::new(Mutex::new(correlator));
         let timer = Arc::new(TM::new(delta, correlator.clone()));
         Ok(CorrelationParser::new(correlator, formatter, delta, timer))
     }
