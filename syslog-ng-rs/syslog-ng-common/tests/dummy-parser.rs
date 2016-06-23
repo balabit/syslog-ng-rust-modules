@@ -51,7 +51,7 @@ impl<P: Pipe> Clone for DummyParserBuilder<P> {
 // this verifies that the macro can be expanded
 parser_plugin!(DummyParserBuilder<LogParser>);
 
-use syslog_ng_common::{SYSLOG_NG_INITIALIZED, syslog_ng_global_init};
+use syslog_ng_common::{SYSLOG_NG_INITIALIZED, syslog_ng_global_init, ParserProxy, LogParser};
 
 struct DummyPipe;
 
@@ -76,3 +76,16 @@ fn test_given_parser_implementation_when_it_receives_a_message_then_it_adds_a_sp
     assert_eq!(msg.get(&b"input"[..]).unwrap(), input.as_bytes());
 }
 
+#[test]
+fn test_parser_proxy_can_be_deinitialized() {
+    SYSLOG_NG_INITIALIZED.call_once(|| {
+        unsafe { syslog_ng_global_init(); }
+    });
+    let cfg = GlobalConfig::new(0x0308);
+    let mut proxy = ParserProxy::<DummyParserBuilder<LogParser>>::new(cfg);
+    proxy.set_option("foo".to_owned(), "bar".to_owned());
+    proxy.init();
+    proxy.deinit();
+    proxy.init();
+    proxy.deinit();
+}
