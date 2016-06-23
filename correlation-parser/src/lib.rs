@@ -38,7 +38,7 @@ pub trait Timer<E, T> where E: Event + Send, T: Template<Event=E> {
 pub struct CorrelationParserBuilder<P, E, T, TF, TM> where P: Pipe, E: 'static + Event + Send, T: 'static + Template<Event=E>, TF: TemplateFactory<E, Template=T>, TM: Timer<E, T> {
     correlator: Option<Correlator<E, T>>,
     formatter: MessageFormatter,
-    template_factory: TF,
+    template_factory: Arc<TF>,
     delta: Option<Duration>,
     _marker: PhantomData<(P, E, T, TF, TM)>
 }
@@ -91,7 +91,7 @@ impl<P, E, T, TF, TM> ParserBuilder<P> for CorrelationParserBuilder<P, E, T, TF,
         CorrelationParserBuilder {
             correlator: None,
             formatter: MessageFormatter::new(),
-            template_factory: TF::from(cfg),
+            template_factory: Arc::new(TF::from(cfg)),
             delta: Some(Duration::from_millis(1000)),
             _marker: PhantomData
         }
