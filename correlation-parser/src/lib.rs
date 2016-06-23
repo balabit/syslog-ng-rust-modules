@@ -31,6 +31,8 @@ pub const CLASSIFIER_CLASS: &'static [u8] = b".classifier.class";
 
 pub trait Timer<E, T> where E: Event + Send, T: Template<Event=E> {
     fn new(delta: Duration, correlator: Arc<Mutex<Correlator<E, T>>>) -> Self;
+    fn start(&self) {}
+    fn stop(&self) {}
 }
 
 pub struct CorrelationParserBuilder<P, E, T, TF, TM> where P: Pipe, E: 'static + Event + Send, T: 'static + Template<Event=E>, TF: TemplateFactory<E, Template=T>, TM: Timer<E, T> {

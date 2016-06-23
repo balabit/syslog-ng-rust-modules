@@ -7,11 +7,14 @@ use correlation::correlator::Correlator;
 use correlation::{Event, Template};
 use std::thread::{self, JoinHandle};
 
-struct StopEvent;
+enum ControlEvent {
+    Stop,
+    Park
+}
 
 pub struct Watchdog {
-    sender: Sender<StopEvent>,
-    _join_handle: JoinHandle<()>
+    sender: Sender<ControlEvent>,
+    _join_handle: JoinHandle<()>,
 }
 
 impl<E, T> Timer<E, T> for Watchdog where E: Event + Send, T: Template<Event=E> {
@@ -19,30 +22,46 @@ impl<E, T> Timer<E, T> for Watchdog where E: Event + Send, T: Template<Event=E> 
         let (tx, rx) = channel();
 
         let join_handle = thread::spawn(move || {
+            let mut is_parking = true;
+
             loop {
-                thread::sleep(delta);
+                if is_parking {
+                    // we may wake up spuriously from park()
+                    ::std::thread::park();
+                } else {
+                    thread::sleep(delta);
 
-                match rx.try_recv() {
-                    Ok(StopEvent) | Err(TryRecvError::Disconnected) => break,
-                    Err(TryRecvError::Empty) => (),
-                }
+                    match rx.try_recv() {
+                        Ok(ControlEvent::Stop) | Err(TryRecvError::Disconnected) => break,
+                        Ok(ControlEvent::Park) => { is_parking = true; }
+                        Err(TryRecvError::Empty) => (),
+                    }
 
-                match correlator.lock() {
-                    Ok(mut guard) => guard.elapse_time(delta),
-                    Err(_) => break
+                    match correlator.lock() {
+                        Ok(mut guard) => guard.elapse_time(delta),
+                        Err(_) => break
+                    }
                 }
             }
         });
 
         Watchdog {
             sender: tx,
-            _join_handle: join_handle
+            _join_handle: join_handle,
         }
+    }
+
+    fn start(&self) {
+        self._join_handle.thread().unpark();
+    }
+
+    fn stop(&self) {
+        let _ = self.sender.send(ControlEvent::Park);
     }
 }
 
 impl Drop for Watchdog {
     fn drop(&mut self) {
-        let _ = self.sender.send(StopEvent);
+        let _ = self.sender.send(ControlEvent::Stop);
     }
 }
