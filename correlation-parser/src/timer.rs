@@ -9,7 +9,8 @@ use std::thread::{self, JoinHandle};
 
 enum ControlEvent {
     Stop,
-    Park
+    Park,
+    UnPark
 }
 
 pub struct Watchdog {
@@ -28,12 +29,19 @@ impl<E, T> Timer<E, T> for Watchdog where E: Event + Send, T: Template<Event=E> 
                 if is_parking {
                     // we may wake up spuriously from park()
                     ::std::thread::park();
+
+                    match rx.try_recv() {
+                        Ok(ControlEvent::UnPark) => { is_parking = false; }
+                        _ => ()
+                    }
+
                 } else {
                     thread::sleep(delta);
 
                     match rx.try_recv() {
                         Ok(ControlEvent::Stop) | Err(TryRecvError::Disconnected) => break,
                         Ok(ControlEvent::Park) => { is_parking = true; }
+                        Ok(ControlEvent::UnPark) => { is_parking = false; }
                         Err(TryRecvError::Empty) => (),
                     }
 
@@ -52,6 +60,7 @@ impl<E, T> Timer<E, T> for Watchdog where E: Event + Send, T: Template<Event=E> 
     }
 
     fn start(&self) {
+        let _ = self.sender.send(ControlEvent::UnPark);
         self._join_handle.thread().unpark();
     }
 
