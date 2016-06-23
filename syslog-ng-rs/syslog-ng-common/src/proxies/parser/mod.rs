@@ -24,6 +24,8 @@ pub trait ParserBuilder<P: Pipe>: Clone {
 }
 
 pub trait Parser<P: Pipe> {
+    fn init(&mut self) -> bool { true }
+    fn deinit(&mut self) -> bool { true }
     fn parse(&mut self, pipe: &mut P, msg: &mut LogMessage, input: &str) -> bool;
 }
 
