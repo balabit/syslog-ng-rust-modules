@@ -37,16 +37,15 @@ impl Watchdog {
                         Err(TryRecvError::Empty) => (),
                     }
                 } else {
-                    thread::sleep(delta);
-
                     match rx.try_recv() {
                         Ok(ControlEvent::Stop) | Err(TryRecvError::Disconnected) => break,
                         Ok(ControlEvent::Park) => { is_parking = true; }
                         Ok(ControlEvent::UnPark) => { is_parking = false; }
-                        Err(TryRecvError::Empty) => (),
+                        Err(TryRecvError::Empty) => {
+                            cb();
+                            thread::sleep(delta);
+                        }
                     }
-
-                    cb();
                 }
             }
         });
@@ -55,7 +54,6 @@ impl Watchdog {
             sender: tx,
             _join_handle: join_handle,
         }
-
     }
 }
 
