@@ -18,8 +18,8 @@ pub struct Watchdog {
     _join_handle: JoinHandle<()>,
 }
 
-impl<E, T> Timer<E, T> for Watchdog where E: Event + Send, T: Template<Event=E> {
-    fn new(delta: Duration, correlator: Arc<Mutex<Correlator<E, T>>>) -> Self {
+impl Watchdog {
+    pub fn schedule<F>(delta: Duration, mut cb: F) -> Self where F: 'static + FnMut() + Send {
         let (tx, rx) = channel();
 
         let join_handle = thread::spawn(move || {
@@ -31,10 +31,11 @@ impl<E, T> Timer<E, T> for Watchdog where E: Event + Send, T: Template<Event=E> 
                     ::std::thread::park();
 
                     match rx.try_recv() {
+                        Ok(ControlEvent::Stop) | Err(TryRecvError::Disconnected) => break,
+                        Ok(ControlEvent::Park) => { is_parking = true; }
                         Ok(ControlEvent::UnPark) => { is_parking = false; }
-                        _ => ()
+                        Err(TryRecvError::Empty) => (),
                     }
-
                 } else {
                     thread::sleep(delta);
 
@@ -45,10 +46,7 @@ impl<E, T> Timer<E, T> for Watchdog where E: Event + Send, T: Template<Event=E> 
                         Err(TryRecvError::Empty) => (),
                     }
 
-                    match correlator.lock() {
-                        Ok(mut guard) => guard.elapse_time(delta),
-                        Err(_) => break
-                    }
+                    cb();
                 }
             }
         });
@@ -57,6 +55,18 @@ impl<E, T> Timer<E, T> for Watchdog where E: Event + Send, T: Template<Event=E> 
             sender: tx,
             _join_handle: join_handle,
         }
+
+    }
+}
+
+impl<E, T> Timer<E, T> for Watchdog where E: Event + Send, T: Template<Event=E> {
+    fn new(delta: Duration, correlator: Arc<Mutex<Correlator<E, T>>>) -> Self {
+        Watchdog::schedule(delta, move || {
+            let _ = match correlator.lock() {
+                Ok(mut guard) => guard.elapse_time(delta),
+                Err(_) => ()
+            };
+        })
     }
 
     fn start(&self) {
