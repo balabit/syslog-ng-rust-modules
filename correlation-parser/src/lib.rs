@@ -125,17 +125,6 @@ pub struct CorrelationParser<E, T, TM> where E: 'static + Event + Send, T: 'stat
     pub timer: Arc<TM>
 }
 
-impl<E, T, TM> Clone for CorrelationParser<E, T, TM> where E: Event + Send, T: Template<Event=E>, TM: Timer<E, T> {
-    fn clone(&self) -> CorrelationParser<E, T, TM> {
-        CorrelationParser {
-            correlator: self.correlator.clone(),
-            formatter: self.formatter.clone(),
-            delta: self.delta.clone(),
-            timer: self.timer.clone()
-        }
-    }
-}
-
 impl<E, T, TM> CorrelationParser<E, T, TM> where E: Event + Send, T: Template<Event=E>, TM: Timer<E, T> {
     pub fn new(correlator: Arc<Mutex<Correlator<E, T>>>, formatter: MessageFormatter, delta: Duration, timer: Arc<TM>) -> CorrelationParser<E, T, TM> {
         CorrelationParser {
