@@ -114,23 +114,21 @@ impl<P, E, T, TF, TM> ParserBuilder<P> for CorrelationParserBuilder<P, E, T, TF,
         let correlator = try!(correlator.ok_or(OptionError::missing_required_option(options::CONTEXTS_FILE)));
         let delta = try!(delta.ok_or(OptionError::missing_required_option(options::DELTA)));
         let timer = Arc::new(TM::new(delta, correlator.clone()));
-        Ok(CorrelationParser::new(correlator, formatter, delta, timer))
+        Ok(CorrelationParser::new(correlator, formatter, timer))
     }
 }
 
 pub struct CorrelationParser<E, T, TM> where E: 'static + Event + Send, T: 'static + Template<Event=E>, TM: Timer<E, T> {
     correlator: Arc<Mutex<Correlator<E, T>>>,
-    delta: Duration,
     formatter: MessageFormatter,
     pub timer: Arc<TM>
 }
 
 impl<E, T, TM> CorrelationParser<E, T, TM> where E: Event + Send, T: Template<Event=E>, TM: Timer<E, T> {
-    pub fn new(correlator: Arc<Mutex<Correlator<E, T>>>, formatter: MessageFormatter, delta: Duration, timer: Arc<TM>) -> CorrelationParser<E, T, TM> {
+    pub fn new(correlator: Arc<Mutex<Correlator<E, T>>>, formatter: MessageFormatter, timer: Arc<TM>) -> CorrelationParser<E, T, TM> {
         CorrelationParser {
             correlator: correlator,
             formatter: formatter,
-            delta: delta,
             timer: timer
         }
     }
