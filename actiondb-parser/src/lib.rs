@@ -98,15 +98,6 @@ impl<M, P> Parser<P> for ActiondbParser<M> where P: Pipe, M: Matcher + Clone {
     }
 }
 
-impl<M> Clone for ActiondbParser<M> where M: Matcher + Clone {
-    fn clone(&self) -> ActiondbParser<M> {
-        ActiondbParser {
-            matcher: self.matcher.clone(),
-            formatter: self.formatter.clone(),
-        }
-    }
-}
-
 
 // You can change the matcher implementation by uncommening these lines
 // and commenting out the last lines.
