@@ -15,7 +15,6 @@ pub const REGEX_OPTION: &'static str = "regex";
 #[cfg(test)]
 mod tests;
 
-#[derive(Clone)]
 pub struct RegexParser {
     pub regex: Regex,
 }
@@ -23,6 +22,15 @@ pub struct RegexParser {
 pub struct RegexParserBuilder<P: Pipe> {
     regex: Option<Regex>,
     _marker: PhantomData<P>
+}
+
+impl<P> Clone for RegexParserBuilder<P> where P: Pipe {
+    fn clone(&self) -> Self {
+        RegexParserBuilder {
+            regex: self.regex.clone(),
+            _marker: PhantomData
+        }
+    }
 }
 
 impl<P: Pipe> ParserBuilder<P> for RegexParserBuilder<P> {
