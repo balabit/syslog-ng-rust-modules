@@ -79,6 +79,8 @@ impl<E, T> Timer<E, T> for Watchdog where E: Event + Send, T: Template<Event=E> 
 
 impl Drop for Watchdog {
     fn drop(&mut self) {
+        let _ = self.sender.send(ControlEvent::UnPark);
+        self._join_handle.thread().unpark();
         let _ = self.sender.send(ControlEvent::Stop);
     }
 }
