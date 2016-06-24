@@ -120,7 +120,7 @@ impl<P, E, T, TF, TM> ParserBuilder<P> for CorrelationParserBuilder<P, E, T, TF,
 
 pub struct CorrelationParser<E, T, TM> where E: 'static + Event + Send, T: 'static + Template<Event=E>, TM: Timer<E, T> {
     correlator: Arc<Mutex<Correlator<E, T>>>,
-    formatter: MessageFormatter,
+    _formatter: MessageFormatter,
     pub timer: Arc<TM>
 }
 
@@ -128,7 +128,7 @@ impl<E, T, TM> CorrelationParser<E, T, TM> where E: Event + Send, T: Template<Ev
     pub fn new(correlator: Arc<Mutex<Correlator<E, T>>>, formatter: MessageFormatter, timer: Arc<TM>) -> CorrelationParser<E, T, TM> {
         CorrelationParser {
             correlator: correlator,
-            formatter: formatter,
+            _formatter: formatter,
             timer: timer
         }
     }
