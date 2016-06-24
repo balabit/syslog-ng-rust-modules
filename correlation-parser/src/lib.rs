@@ -196,6 +196,16 @@ impl<P, E, T, TM> Parser<P> for CorrelationParser<E, T, TM> where P: Pipe, E: Ev
             }
         }
     }
+
+    fn init(&mut self) -> bool {
+        self.timer.start();
+        true
+    }
+
+    fn deinit(&mut self) -> bool {
+        self.timer.stop();
+        true
+    }
 }
 
 parser_plugin!(CorrelationParserBuilder<LogParser, LogEvent, LogTemplate, LogTemplateFactory, Watchdog>);
