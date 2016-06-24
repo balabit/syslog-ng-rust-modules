@@ -12,7 +12,7 @@ use std::borrow::Borrow;
 use std::marker::PhantomData;
 
 use syslog_ng_common::{LogMessage, Parser, ParserBuilder, OptionError, Pipe, GlobalConfig};
-use cpython::{Python, PyDict, NoArgs, PyClone, PyObject, PyResult, PyModule, PyErr, PyString, ToPyObject};
+use cpython::{Python, PyDict, NoArgs, PyObject, PyResult, PyModule, PyErr, PyString, ToPyObject};
 use cpython::ObjectProtocol; //for call method
 use cpython::exc::TypeError;
 
@@ -26,14 +26,6 @@ pub mod options {
 pub struct PythonParser<P: Pipe> {
     parser: PyObject,
     _marker: PhantomData<P>
-}
-
-impl<P: Pipe> Clone for PythonParser<P> {
-    fn clone(&self) -> Self {
-        let gil = Python::acquire_gil();
-        let py = gil.python(); // obtain `Python` token
-        PythonParser {parser: self.parser.clone_ref(py), _marker: PhantomData}
-    }
 }
 
 pub struct PythonParserBuilder<P: Pipe> {
