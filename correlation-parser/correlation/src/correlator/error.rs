@@ -18,7 +18,7 @@ pub enum Error {
     Io(io::Error),
     SerdeJson(serde_json::error::Error),
     SerdeYaml(serde_yaml::error::Error),
-    TemplateCompileError(CompileError),
+    TemplateCompile(CompileError),
     UnsupportedFileExtension(String),
     FileExtensionNotFound,
     NotUtf8FileName
@@ -44,7 +44,7 @@ impl From<serde_yaml::error::Error> for Error {
 
 impl From<CompileError> for Error {
     fn from(error: CompileError) -> Error {
-        Error::TemplateCompileError(error)
+        Error::TemplateCompile(error)
     }
 }
 
@@ -54,7 +54,7 @@ impl Display for Error {
             Error::Io(ref error) => error.fmt(formatter),
             Error::SerdeJson(ref error) => error.fmt(formatter),
             Error::SerdeYaml(ref error) => error.fmt(formatter),
-            Error::TemplateCompileError(ref error) => error.fmt(formatter),
+            Error::TemplateCompile(ref error) => error.fmt(formatter),
             Error::UnsupportedFileExtension(ref ext) => formatter.write_fmt(format_args!("File extension '{}' is not supported", ext)),
             Error::FileExtensionNotFound => formatter.write_str("The configuration file does not have an extension"),
             Error::NotUtf8FileName => formatter.write_str("File name is not a valid UTF-8 character sequence"),
@@ -68,7 +68,7 @@ impl ::std::error::Error for Error {
             Error::Io(ref error) => error.description(),
             Error::SerdeJson(ref error) => error.description(),
             Error::SerdeYaml(ref error) => error.description(),
-            Error::TemplateCompileError(ref error) => error.description(),
+            Error::TemplateCompile(ref error) => error.description(),
             Error::UnsupportedFileExtension(_) => "The correlation library does not support this file format",
             Error::FileExtensionNotFound => "The configuration file does not have file extension",
             Error::NotUtf8FileName => "File name is not a valid UTF-8 character sequence",
@@ -79,7 +79,7 @@ impl ::std::error::Error for Error {
             Error::Io(ref error) => error.cause(),
             Error::SerdeJson(ref error) => error.cause(),
             Error::SerdeYaml(ref error) => error.cause(),
-            Error::TemplateCompileError(ref error) => error.cause(),
+            Error::TemplateCompile(ref error) => error.cause(),
             Error::UnsupportedFileExtension(_) |
                 Error::FileExtensionNotFound |
                 Error::NotUtf8FileName => None,

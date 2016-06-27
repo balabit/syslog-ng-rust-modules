@@ -68,8 +68,8 @@ impl<E: Event> State<E> {
 
     pub fn update_timers(&mut self, event: &Duration) {
         let delta = *event;
-        self.elapsed_time = self.elapsed_time + delta;
-        self.elapsed_time_since_last_message = self.elapsed_time_since_last_message + delta;
+        self.elapsed_time +=  delta;
+        self.elapsed_time_since_last_message += delta;
     }
 
     fn reset(&mut self) {

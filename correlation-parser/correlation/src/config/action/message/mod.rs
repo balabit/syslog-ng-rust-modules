@@ -58,7 +58,7 @@ impl<T> MessageAction<T> {
         let context_id = context.uuid.hyphenated().to_string();
         let mut message = Vec::new();
         self.message.format_with_context(state.messages(), &context_id, &mut message);
-        let mut event = E::new(&self.uuid.as_bytes(), &message);
+        let mut event = E::new(self.uuid.as_bytes(), &message);
         event.set_name(self.name.as_ref().map(|name| name.as_bytes()));
         let mut value = Vec::new();
         for (k, v) in &self.values {

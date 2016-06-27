@@ -91,7 +91,7 @@ impl<E, T> BaseContext<E, T> where E: Event, T: Template<Event=E> {
                     state: &mut State<E>,
                     responder: &mut VecDeque<Alert<E>>) {
         if state.is_open() {
-            state.update_timers(&event);
+            state.update_timers(event);
         }
         if self.is_closing(state) {
             self.close(state, responder);
