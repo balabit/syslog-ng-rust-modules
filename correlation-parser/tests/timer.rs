@@ -6,15 +6,21 @@ use correlation_parser::mock::{MockEvent, MockLogTemplate};
 use std::time::Duration;
 use std::sync::{Arc, Mutex};
 
-fn assert_callback_called(cb_interval: Duration, iter_count: u32, acceptable_bias: u32) {
+fn create_counter_and_timer(cb_interval: Duration) -> (Arc<Mutex<u32>>, Watchdog) {
     let counter = Arc::new(Mutex::new(0));
-
     let cloned_counter = counter.clone();
+
     let timer = Watchdog::schedule(cb_interval, move || {
         if let Ok(mut guard) = cloned_counter.lock() {
             *guard += 1;
         }
     });
+
+    (counter, timer)
+}
+
+fn assert_callback_called(cb_interval: Duration, iter_count: u32, acceptable_bias: u32) {
+    let (counter, timer) = create_counter_and_timer(cb_interval);
 
     Timer::<MockEvent, MockLogTemplate>::start(&timer);
     ::std::thread::sleep(cb_interval * iter_count);
