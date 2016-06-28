@@ -2,7 +2,6 @@ use syslog_ng_common::LogMessage;
 
 use cpython::{Python, ToPyObject, NoArgs,PyObject, PyResult, PyString};
 use cpython::rustobject::{TypeBuilder, PyRustObject};
-use cpython::ObjectProtocol; //for call method
 
 fn getitem(py: Python, slf: &PyRustObject<LogMessage>, arg: &str) -> PyResult<PyString> {
     if let Some(value) = slf.get(py).get(arg) {
