@@ -6,7 +6,7 @@ extern crate env_logger;
 use std::env;
 use python_parser::{PythonParser, PyLogMessage};
 use python_parser::utils::*;
-use syslog_ng_common::{ParserBuilder, LogMessage, Parser};
+use syslog_ng_common::{LogMessage, Parser};
 use syslog_ng_common::mock::MockPipe;
 use syslog_ng_common::sys::logmsg::log_msg_registry_init;
 use cpython::{Python, PyResult, PyObject};
