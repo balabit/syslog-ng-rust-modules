@@ -249,7 +249,7 @@ impl Matcher for SuffixTable {
     fn parse<'a, 'b>(&'a self, value: &'b str) -> Option<MatchResult<'a, 'b>> {
         if let Some(child) = self.longest_common_prefix(value) {
             let common_prefix_len = child.literal().common_prefix_len(value);
-            if common_prefix_len == value.len() {
+            if common_prefix_len == value.len() && common_prefix_len == child.literal().len() {
                 child.pattern().and_then(|pattern| Some(MatchResult::new(pattern)))
             } else if common_prefix_len < value.len() {
                 let value = value.ltrunc(common_prefix_len);
