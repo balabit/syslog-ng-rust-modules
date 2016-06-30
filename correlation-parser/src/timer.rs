@@ -19,33 +19,29 @@ pub struct Watchdog {
 }
 
 impl Watchdog {
-    pub fn schedule<F>(delta: Duration, mut cb: F) -> Self where F: 'static + FnMut() + Send {
+    pub fn schedule<F>(delta: Duration, mut user_callback: F) -> Self where F: 'static + FnMut() + Send {
         let (tx, rx) = channel();
 
         let join_handle = thread::spawn(move || {
             let mut is_parking = true;
+
+            let mut dummy_callback = || ();
 
             loop {
                 if is_parking {
                     // we may wake up spuriously from park()
                     ::std::thread::park();
 
-                    match rx.try_recv() {
-                        Ok(ControlEvent::Stop) | Err(TryRecvError::Disconnected) => break,
-                        Ok(ControlEvent::Park) => { is_parking = true; }
-                        Ok(ControlEvent::UnPark) => { is_parking = false; }
-                        Err(TryRecvError::Empty) => (),
+                    match Watchdog::handle_control_event(rx.try_recv(), &mut dummy_callback) {
+                        Ok(should_park) => is_parking = should_park,
+                        Err(_) => break
                     }
                 } else {
-                    match rx.try_recv() {
-                        Ok(ControlEvent::Stop) | Err(TryRecvError::Disconnected) => break,
-                        Ok(ControlEvent::Park) => { is_parking = true; }
-                        Ok(ControlEvent::UnPark) => { is_parking = false; }
-                        Err(TryRecvError::Empty) => {
-                            cb();
-                            thread::sleep(delta);
-                        }
+                    match Watchdog::handle_control_event(rx.try_recv(), &mut user_callback) {
+                        Ok(should_park) => is_parking = should_park,
+                        Err(_) => break
                     }
+                    thread::sleep(delta);
                 }
             }
         });
@@ -53,6 +49,18 @@ impl Watchdog {
         Watchdog {
             sender: tx,
             _join_handle: join_handle,
+        }
+    }
+
+    fn handle_control_event<F>(event: Result<ControlEvent, TryRecvError>, cb: &mut F) -> Result<bool, ()> where F: 'static + FnMut() + Send {
+        match event {
+            Ok(ControlEvent::Stop) | Err(TryRecvError::Disconnected) => Err(()),
+            Ok(ControlEvent::Park) => Ok(true),
+            Ok(ControlEvent::UnPark) => Ok(false),
+            Err(TryRecvError::Empty) => {
+                cb();
+                Ok(false)
+            }
         }
     }
 }
