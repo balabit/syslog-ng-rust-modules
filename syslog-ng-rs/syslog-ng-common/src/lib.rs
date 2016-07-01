@@ -16,6 +16,7 @@ extern crate glib_sys;
 extern crate libc;
 
 use std::sync::{Once, ONCE_INIT};
+use libc::abort;
 
 #[macro_use]
 mod proxies;
@@ -52,4 +53,10 @@ pub unsafe fn syslog_ng_global_init() {
     sys::logmsg::log_msg_registry_init();
     sys::logmsg::log_tags_global_init();
     sys::logtemplate::log_template_global_init();
+}
+
+pub fn commit_suicide() -> ! {
+    unsafe {
+        abort();
+    };
 }
