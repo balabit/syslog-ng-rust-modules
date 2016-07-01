@@ -29,6 +29,13 @@ impl<B> ParserProxy<B> where B: ParserBuilder<LogParser>
         }
     }
 
+    pub fn with_parser_and_builder(builder: Option<B>, parser: Option<B::Parser>) -> ParserProxy<B> {
+        ParserProxy {
+            parser: parser,
+            builder: builder
+        }
+    }
+
     fn build_parser(&mut self, builder: B) -> bool {
         match builder.build() {
             Ok(mut parser) => {
