@@ -26,7 +26,7 @@ pub struct KVPair {
 
 pub type CsvRecord = (String, String, String);
 
-pub struct KvTaggerBuilder<P: Pipe> {
+pub struct KVTaggerBuilder<P: Pipe> {
     records: Option<Vec<CsvRecord>>,
     built_parser: Option<KVTagger>,
     lookup_key: Option<String>,
@@ -45,9 +45,9 @@ impl From<io::Error> for LoadError {
     }
 }
 
-impl<P: Pipe> KvTaggerBuilder<P> {
+impl<P: Pipe> KVTaggerBuilder<P> {
     pub fn set_csv_file<PATH: AsRef<Path>>(&mut self, path: PATH) {
-        match KvTaggerBuilder::<P>::load_csv_file::<PATH>(path) {
+        match KVTaggerBuilder::<P>::load_csv_file::<PATH>(path) {
             Ok(records) => {
                 self.records = Some(records);
             },
@@ -78,9 +78,9 @@ impl<P: Pipe> KvTaggerBuilder<P> {
     }
 }
 
-impl<P: Pipe> Clone for KvTaggerBuilder<P> {
+impl<P: Pipe> Clone for KVTaggerBuilder<P> {
     fn clone(&self) -> Self {
-        KvTaggerBuilder {
+        KVTaggerBuilder {
             records: self.records.clone(),
             built_parser: self.built_parser.clone(),
             lookup_key: self.lookup_key.clone(),
@@ -95,9 +95,9 @@ pub struct KVTagger {
     pub lookup_key: String
 }
 
-impl<P: Pipe> From<KVTagger> for KvTaggerBuilder<P> {
+impl<P: Pipe> From<KVTagger> for KVTaggerBuilder<P> {
     fn from(parser: KVTagger) -> Self {
-        KvTaggerBuilder {
+        KVTaggerBuilder {
             records: None,
             built_parser: Some(parser),
             lookup_key: None,
@@ -117,11 +117,11 @@ impl<P: Pipe> Parser<P> for KVTagger {
     }
 }
 
-impl<P: Pipe> ParserBuilder<P> for KvTaggerBuilder<P> {
+impl<P: Pipe> ParserBuilder<P> for KVTaggerBuilder<P> {
     type Parser = KVTagger;
 
     fn new(_: GlobalConfig) -> Self {
-        KvTaggerBuilder {
+        KVTaggerBuilder {
             records: None,
             built_parser: None,
             lookup_key: None,
@@ -171,4 +171,4 @@ impl<P: Pipe> ParserBuilder<P> for KvTaggerBuilder<P> {
     }
 }
 
-parser_plugin!(KvTaggerBuilder<LogParser>);
+parser_plugin!(KVTaggerBuilder<LogParser>);

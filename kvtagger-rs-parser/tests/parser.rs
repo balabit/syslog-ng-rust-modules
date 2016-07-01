@@ -1,7 +1,7 @@
 extern crate kvtagger_rs_parser;
 extern crate syslog_ng_common;
 
-use kvtagger_rs_parser::{KVTagger, LookupTable, KvTaggerBuilder};
+use kvtagger_rs_parser::{KVTagger, LookupTable, KVTaggerBuilder};
 use kvtagger_rs_parser::utils::{make_expected_value_for_test_file};
 
 use syslog_ng_common::{LogMessage, Parser, SYSLOG_NG_INITIALIZED, syslog_ng_global_init, ParserBuilder, GlobalConfig};
@@ -39,7 +39,7 @@ fn test_kv_tagger_can_be_constructed_from_options() {
 
     let cfg = GlobalConfig::new(0x0308);
 
-    let mut builder = KvTaggerBuilder::<MockPipe>::new(cfg);
+    let mut builder = KVTaggerBuilder::<MockPipe>::new(cfg);
     builder.option("csv-file".to_string(), "tests/test.csv".to_string());
     builder.option("lookup-key".to_string(), "key3".to_string());
 
@@ -64,7 +64,7 @@ fn test_parser_cannot_be_built_without_lookup_key() {
 
     let cfg = GlobalConfig::new(0x0308);
 
-    let mut builder = KvTaggerBuilder::<MockPipe>::new(cfg);
+    let mut builder = KVTaggerBuilder::<MockPipe>::new(cfg);
     builder.option("csv-file".to_string(), "tests/test.csv".to_string());
 
     let _ = builder.build().err().unwrap();
@@ -78,7 +78,7 @@ fn test_parser_cannot_be_built_without_csv_file() {
 
     let cfg = GlobalConfig::new(0x0308);
 
-    let mut builder = KvTaggerBuilder::<MockPipe>::new(cfg);
+    let mut builder = KVTaggerBuilder::<MockPipe>::new(cfg);
     builder.option("lookup-key".to_string(), "key3".to_string());
 
     let _ = builder.build().err().unwrap();
@@ -91,6 +91,6 @@ fn test_parser_cannot_be_built_without_configuration_options() {
     });
 
     let cfg = GlobalConfig::new(0x0308);
-    let builder = KvTaggerBuilder::<MockPipe>::new(cfg);
+    let builder = KVTaggerBuilder::<MockPipe>::new(cfg);
     let _ = builder.build().err().unwrap();
 }
