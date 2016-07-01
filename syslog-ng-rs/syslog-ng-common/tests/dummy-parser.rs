@@ -15,12 +15,6 @@ use std::marker::PhantomData;
 
 pub struct DummyParser<P: Pipe>(PhantomData<P>);
 
-impl<P: Pipe> Clone for DummyParser<P> {
-    fn clone(&self) -> DummyParser<P> {
-        DummyParser(self.0.clone())
-    }
-}
-
 pub struct DummyParserBuilder<P: Pipe>(PhantomData<P>);
 
 use syslog_ng_common::LogMessage;
@@ -43,15 +37,21 @@ impl<P: Pipe> ParserBuilder<P> for DummyParserBuilder<P> {
 impl<P: Pipe> Parser<P> for DummyParser<P> {
     fn parse(&mut self, _: &mut P, message: &mut LogMessage, input: &str) -> bool {
         debug!("Processing input in Rust Parser: {}", input);
-        message.insert("input", input);
+        message.insert(&b"input"[..], input.as_bytes());
         true
+    }
+}
+
+impl<P: Pipe> Clone for DummyParserBuilder<P> {
+    fn clone(&self) -> Self {
+        DummyParserBuilder(PhantomData)
     }
 }
 
 // this verifies that the macro can be expanded
 parser_plugin!(DummyParserBuilder<LogParser>);
 
-use syslog_ng_common::{SYSLOG_NG_INITIALIZED, syslog_ng_global_init};
+use syslog_ng_common::{SYSLOG_NG_INITIALIZED, syslog_ng_global_init, ParserProxy, LogParser};
 
 struct DummyPipe;
 
@@ -73,5 +73,19 @@ fn test_given_parser_implementation_when_it_receives_a_message_then_it_adds_a_sp
     let mut pipe = DummyPipe;
     let result = parser.parse(&mut pipe, &mut msg, input);
     assert!(result);
-    assert_eq!(msg.get("input").unwrap(), input);
+    assert_eq!(msg.get(&b"input"[..]).unwrap(), input.as_bytes());
+}
+
+#[test]
+fn test_parser_proxy_can_be_deinitialized() {
+    SYSLOG_NG_INITIALIZED.call_once(|| {
+        unsafe { syslog_ng_global_init(); }
+    });
+    let cfg = GlobalConfig::new(0x0308);
+    let mut proxy = ParserProxy::<DummyParserBuilder<LogParser>>::new(cfg);
+    proxy.set_option("foo".to_owned(), "bar".to_owned());
+    proxy.init();
+    proxy.deinit();
+    proxy.init();
+    proxy.deinit();
 }

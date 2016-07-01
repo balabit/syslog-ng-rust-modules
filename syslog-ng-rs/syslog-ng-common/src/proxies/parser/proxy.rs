@@ -16,8 +16,8 @@ pub use proxies::parser::{OptionError, Parser, ParserBuilder};
 pub struct ParserProxy<B>
     where B: ParserBuilder<LogParser>
 {
-    pub parser: Option<B::Parser>,
-    pub builder: Option<B>,
+    parser: Option<B::Parser>,
+    builder: Option<B>,
 }
 
 impl<B> ParserProxy<B> where B: ParserBuilder<LogParser>
@@ -29,17 +29,37 @@ impl<B> ParserProxy<B> where B: ParserBuilder<LogParser>
         }
     }
 
-    pub fn init(&mut self) -> bool {
-        let builder = self.builder.take().expect("Called init when builder was not set");
+    fn build_parser(&mut self, builder: B) -> bool {
         match builder.build() {
-            Ok(parser) => {
+            Ok(mut parser) => {
+                let init_result = parser.init();
                 self.parser = Some(parser);
-                true
+                init_result
             }
             Err(error) => {
                 error!("Error: {:?}", error);
                 false
             }
+        }
+    }
+
+    pub fn init(&mut self) -> bool {
+        if let Some(builder) = self.builder.take()  {
+            return self.build_parser(builder);
+        }
+
+        if let Some(ref mut parser) = self.parser {
+            parser.init()
+        } else {
+            false
+        }
+    }
+
+    pub fn deinit(&mut self) -> bool {
+        if let Some(ref mut parser) = self.parser {
+            parser.deinit()
+        } else {
+            false
         }
     }
 
@@ -58,7 +78,6 @@ impl<B> ParserProxy<B> where B: ParserBuilder<LogParser>
 
 impl<B> Clone for ParserProxy<B> where B: ParserBuilder<LogParser> {
     fn clone(&self) -> ParserProxy<B> {
-        // it makes no sense to clone() the builder
-        ParserProxy {parser: self.parser.clone(), builder: None}
+        ParserProxy {parser: None, builder: self.builder.clone()}
     }
 }
