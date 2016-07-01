@@ -13,6 +13,9 @@ extern crate log;
 extern crate libc;
 
 use std::marker::PhantomData;
+use std::ffi::CString;
+
+use libc::{SIGABRT, waitpid, fork, WIFSIGNALED, WTERMSIG, pid_t};
 
 use syslog_ng_common::{SYSLOG_NG_INITIALIZED, syslog_ng_global_init, ParserProxy, LogMessage, Parser, ParserBuilder, OptionError, Pipe, GlobalConfig};
 use syslog_ng_common::sys;
@@ -58,3 +61,42 @@ impl<P: Pipe> Clone for PanickingParserBuilder<P> {
 
 // this verifies that the macro can be expanded
 parser_plugin!(PanickingParserBuilder<LogParser>);
+
+fn set_up_test() {
+    SYSLOG_NG_INITIALIZED.call_once(|| {
+        unsafe { syslog_ng_global_init(); }
+    });
+}
+
+pub fn fork_with_callbacks<C, P>(child_callback: C, parent_callback: P) -> Result<(), ()>
+    where C: FnOnce(), P: FnOnce(pid_t) {
+    match unsafe { fork() } {
+        0 => {
+            child_callback();
+            Ok(())
+        },
+        x if x > 0 => {
+            parent_callback(x);
+            Ok(())
+        },
+        -1 | _ => {
+            Err(())
+        },
+    }
+}
+
+fn assert_child_commits_suicide<C>(child_callback: C)
+    where C: FnOnce() {
+    let parent_callback = |child_pid| {
+        let mut status = 0;
+        let options = 0;
+        unsafe {
+            let result = waitpid(child_pid, &mut status, options);
+            assert!(result != -1);
+            assert!(WIFSIGNALED(status));
+            assert_eq!(SIGABRT, WTERMSIG(status));
+        };
+    };
+
+    fork_with_callbacks(child_callback, parent_callback).unwrap();
+}
