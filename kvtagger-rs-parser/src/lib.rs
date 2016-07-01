@@ -18,12 +18,6 @@ pub mod utils;
 
 pub use lookup_table::LookupTable;
 
-#[derive(Clone, Eq, PartialEq, Debug, Ord, PartialOrd)]
-pub struct KVPair {
-    key: String,
-    value: String
-}
-
 pub type CsvRecord = (String, String, String);
 
 pub struct KVTaggerBuilder<P: Pipe> {
