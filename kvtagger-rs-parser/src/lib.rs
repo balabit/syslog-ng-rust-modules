@@ -9,7 +9,7 @@ use std::fs::File;
 use std::marker::PhantomData;
 use std::io::{self, Read};
 
-use syslog_ng_common::{Parser, Pipe, LogMessage, OptionError, ParserBuilder, GlobalConfig, LogTemplate, LogTimeZone};
+use syslog_ng_common::{Parser, Pipe, LogMessage, OptionError, ParserBuilder, GlobalConfig, LogTemplate, LogTimeZone, MessageFormatter};
 
 pub use syslog_ng_common::LogPipe;
 
@@ -23,6 +23,7 @@ pub type CsvRecord = (String, String, String);
 pub struct KVTaggerBuilder<P: Pipe> {
     records: Option<Vec<CsvRecord>>,
     selector_template: Option<LogTemplate>,
+    formatter: MessageFormatter,
     cfg: GlobalConfig,
     _marker: PhantomData<P>
 }
@@ -56,6 +57,10 @@ impl<P: Pipe> KVTaggerBuilder<P> {
         self.selector_template = Some(key);
     }
 
+    pub fn set_prefix(&mut self, prefix: String) {
+        self.formatter.set_prefix(prefix);
+    }
+
     pub fn load_csv_file<PATH: AsRef<Path>>(path: PATH) -> Result<Vec<CsvRecord>, LoadError> {
         let mut file = try!(File::open(path));
         let mut contents = String::new();
@@ -76,6 +81,7 @@ impl<P: Pipe> Clone for KVTaggerBuilder<P> {
     fn clone(&self) -> Self {
         KVTaggerBuilder {
             cfg: self.cfg.clone(),
+            formatter: self.formatter.clone(),
             records: self.records.clone(),
             selector_template: self.selector_template.clone(),
             _marker: PhantomData
@@ -85,6 +91,7 @@ impl<P: Pipe> Clone for KVTaggerBuilder<P> {
 
 pub struct KVTagger {
     pub map: LookupTable,
+    pub formatter: MessageFormatter,
     pub selector_template: LogTemplate
 }
 
@@ -95,7 +102,8 @@ impl<P: Pipe> Parser<P> for KVTagger {
         if let Ok(str_selector) = ::std::str::from_utf8(selector) {
             if let Some(kv_pairs) = self.map.get(str_selector) {
                 for kv in kv_pairs {
-                    msg.insert::<&str>(kv.0.as_ref(), kv.1.as_ref());
+                    let (key, value) = self.formatter.format(kv.0.as_ref(), kv.1.as_ref());
+                    msg.insert::<&str>(key, value.as_bytes());
                 }
             }
             true
@@ -114,6 +122,7 @@ impl<P: Pipe> ParserBuilder<P> for KVTaggerBuilder<P> {
             records: None,
             selector_template: None,
             cfg: cfg,
+            formatter: MessageFormatter::new(),
             _marker: PhantomData
         }
     }
@@ -133,6 +142,9 @@ impl<P: Pipe> ParserBuilder<P> for KVTaggerBuilder<P> {
                     }
                 }
             },
+            "prefix" => {
+                self.set_prefix(_value);
+            },
             _ => {
                 debug!("Unknown configuration option for kvtagger: {}", _name);
             }
@@ -143,6 +155,7 @@ impl<P: Pipe> ParserBuilder<P> for KVTaggerBuilder<P> {
             (Some(records), Some(selector_template)) => {
                 let parser = KVTagger {
                     map: LookupTable::new(records),
+                    formatter: self.formatter,
                     selector_template: selector_template
                 };
 
