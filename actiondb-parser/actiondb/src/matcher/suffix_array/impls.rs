@@ -203,6 +203,12 @@ impl ParserEntry for ParserE {
     }
 }
 
+pub enum MatchType {
+    Exact,
+    Partial(usize),
+    None
+}
+
 #[derive(Debug, Clone)]
 pub struct LiteralE {
     pattern: Option<Pattern>,
@@ -216,6 +222,18 @@ impl LiteralE {
             literal: literal,
             pattern: None,
             child: None
+        }
+    }
+
+    pub fn determine_match_type(&self, value: &str) -> MatchType {
+        let common_prefix_len = self.literal().common_prefix_len(value);
+
+        if common_prefix_len == value.len() && common_prefix_len == self.literal().len() {
+            MatchType::Exact
+        } else if common_prefix_len < value.len() {
+            MatchType::Partial(common_prefix_len)
+        } else {
+            MatchType::None
         }
     }
 }
@@ -248,14 +266,15 @@ impl LiteralEntry for LiteralE {
 impl Matcher for SuffixTable {
     fn parse<'a, 'b>(&'a self, value: &'b str) -> Option<MatchResult<'a, 'b>> {
         if let Some(child) = self.longest_common_prefix(value) {
-            let common_prefix_len = child.literal().common_prefix_len(value);
-            if common_prefix_len == value.len() {
-                child.pattern().and_then(|pattern| Some(MatchResult::new(pattern)))
-            } else if common_prefix_len < value.len() {
-                let value = value.ltrunc(common_prefix_len);
-                child.child().and_then(|child| child.parse(value))
-            } else {
-                None
+            match child.determine_match_type(value) {
+                MatchType::Exact => {
+                    child.pattern().and_then(|pattern| Some(MatchResult::new(pattern)))
+                },
+                MatchType::Partial(common_prefix_len) => {
+                    let value = value.ltrunc(common_prefix_len);
+                    child.child().and_then(|child| child.parse(value))
+                },
+                MatchType::None => None
             }
         } else {
             self.parse_with_parsers(value)

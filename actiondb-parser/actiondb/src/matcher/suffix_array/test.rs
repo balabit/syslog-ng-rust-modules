@@ -161,3 +161,17 @@ fn test_given_parser_when_it_receives_utf_8_strings_then_it_does_not_panic() {
 
     assert_eq!(true, root.parse("micek ¡micek").is_some());
 }
+
+#[test]
+fn test_given_parser_when_it_receives_empty_message_and_there_is_no_matching_pattern_then_we_do_not_return_a_match() {
+    let pattern = "aaa";
+    let compiled_pattern = ::grammar::parser::pattern(pattern).unwrap();
+
+    let mut pattern = Pattern::with_random_uuid();
+    pattern.set_pattern(compiled_pattern);
+
+    let mut root = SuffixTable::new();
+    root.insert(pattern);
+
+    assert_eq!(true, root.parse("").is_none());
+}
