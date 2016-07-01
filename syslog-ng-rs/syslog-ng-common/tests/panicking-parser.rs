@@ -63,6 +63,9 @@ impl<P: Pipe> Clone for PanickingParserBuilder<P> {
 // this verifies that the macro can be expanded
 parser_plugin!(PanickingParserBuilder<LogParser>);
 
+use _parser_plugin::native_parser_proxy_new;
+
+
 fn set_up_test() {
     SYSLOG_NG_INITIALIZED.call_once(|| {
         unsafe {
@@ -112,75 +115,5 @@ fn test_native_parser_proxy_new_wont_panic_even_if_the_proxy_panics() {
 
         let cfg = GlobalConfig::new(0x0308);
         let _ = native_parser_proxy_new(cfg.raw_ptr());
-    });
-}
-
-#[test]
-fn test_native_parser_proxy_free_wont_panic_even_if_the_proxy_panics() {
-    assert_child_commits_suicide(|| {
-        set_up_test();
-
-        let proxy = ParserProxy::with_builder_and_parser(None, Some(PanickingParser(PhantomData)));
-        let _ = native_parser_proxy_free(Box::new(proxy));
-    });
-}
-
-#[test]
-fn test_native_parser_proxy_set_option_wont_panic_even_if_the_proxy_panics() {
-    assert_child_commits_suicide(|| {
-        set_up_test();
-
-        let mut proxy =
-            ParserProxy::with_builder_and_parser(Some(PanickingParserBuilder(PhantomData)), None);
-        let key = CString::new("key").unwrap();
-        let value = CString::new("value").unwrap();
-        let _ = native_parser_proxy_set_option(&mut proxy, key.as_ptr(), value.as_ptr());
-    });
-}
-
-#[test]
-fn test_native_parser_proxy_init_wont_panic_even_if_the_proxy_panics() {
-    assert_child_commits_suicide(|| {
-        set_up_test();
-
-        let mut proxy =
-            ParserProxy::with_builder_and_parser(Some(PanickingParserBuilder(PhantomData)), None);
-        let _ = native_parser_proxy_init(&mut proxy);
-    });
-}
-
-#[test]
-fn test_native_parser_proxy_deinit_wont_panic_even_if_the_proxy_panics() {
-    assert_child_commits_suicide(|| {
-        set_up_test();
-
-        let mut proxy = ParserProxy::with_builder_and_parser(None,
-                                                             Some(PanickingParser(PhantomData)));
-        let _ = native_parser_proxy_deinit(&mut proxy);
-    });
-}
-
-#[test]
-fn test_native_parser_proxy_process_wont_panic_even_if_the_proxy_panics() {
-    assert_child_commits_suicide(|| {
-        set_up_test();
-
-        let mut proxy = ParserProxy::with_builder_and_parser(None,
-                                                             Some(PanickingParser(PhantomData)));
-        let parser: *mut sys::LogParser = ::std::ptr::null_mut();
-        let input = CString::new("input").unwrap();
-        let msg = LogMessage::new();
-        let _ = native_parser_proxy_process(&mut proxy, parser, msg.0, input.as_ptr());
-    });
-}
-
-#[test]
-fn test_native_parser_proxy_clone_wont_panic_even_if_the_proxy_panics() {
-    assert_child_commits_suicide(|| {
-        set_up_test();
-
-        let proxy = ParserProxy::with_builder_and_parser(Some(PanickingParserBuilder(PhantomData)),
-                                                         None);
-        let _ = native_parser_proxy_clone(&proxy);
     });
 }
