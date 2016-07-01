@@ -114,21 +114,34 @@ pub mod _parser_plugin {
 
     #[no_mangle]
     pub extern fn native_parser_proxy_process(this: &mut ParserProxy<$name>, parent: *mut $crate::sys::LogParser, msg: *mut $crate::sys::LogMessage, input: *const c_char) -> c_int {
-        let input = unsafe { CStr::from_ptr(input).to_str() };
-        let mut parent = LogParser::wrap_raw(parent);
-        let mut msg = LogMessage::wrap_raw(msg);
-        let result = match input {
-            Ok(input) => this.process(&mut parent, &mut msg, input),
-            Err(err) => {
-                error!("{}", err);
-                false
+        let mut wrapper_this = AssertUnwindSafe(this);
+        let wrapper_parent = AssertUnwindSafe(parent);
+        let wrapper_msg = AssertUnwindSafe(msg);
+        let wrapper_input = AssertUnwindSafe(input);
+
+        let result = catch_unwind(move || {
+            let input = unsafe { CStr::from_ptr(*wrapper_input).to_str() };
+            let mut parent = LogParser::wrap_raw(*wrapper_parent);
+            let mut msg = LogMessage::wrap_raw(*wrapper_msg);
+
+            match input {
+                Ok(input) => wrapper_this.process(&mut parent, &mut msg, input),
+                Err(err) => {
+                    error!("{}", err);
+                    commit_suicide();
+                }
+            }
+        });
+
+        let final_result = match result {
+            Ok(value) => value,
+            Err(error) => {
+                error!("native_parser_proxy_process() panicked, but the panic was cought: {:?}", error);
+                commit_suicide();
             }
         };
 
-        match result {
-            true => 1,
-            false => 0
-        }
+        bool_to_int(final_result)
     }
 
     #[no_mangle]
