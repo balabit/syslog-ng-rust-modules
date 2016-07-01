@@ -67,7 +67,16 @@ pub mod _parser_plugin {
     }
 
     #[no_mangle]
-    pub extern fn native_parser_proxy_free(_: Box<ParserProxy<$name>>) {
+    pub extern fn native_parser_proxy_free(proxy: Box<ParserProxy<$name>>) {
+        let wrapper = AssertUnwindSafe(proxy);
+
+        match catch_unwind(move || { let _ = wrapper; } ) {
+            Err(error) => {
+                error!("native_parser_proxy_free() panicked, but the panic was cought: {:?}", error);
+                commit_suicide();
+            },
+            Ok(()) => ()
+        }
     }
 
     #[no_mangle]
