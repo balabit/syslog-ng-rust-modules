@@ -67,6 +67,7 @@ use _parser_plugin::{
     native_parser_proxy_free,
     native_parser_proxy_set_option,
     native_parser_proxy_init,
+    native_parser_proxy_deinit,
 };
 
 
@@ -148,5 +149,15 @@ fn test_native_parser_proxy_init_wont_panic_even_if_the_proxy_panics() {
 
         let mut proxy = ParserProxy::with_parser_and_builder(Some(PanickingParserBuilder(PhantomData)), None);
         let _ = native_parser_proxy_init(&mut proxy);
+    });
+}
+
+#[test]
+fn test_native_parser_proxy_deinit_wont_panic_even_if_the_proxy_panics() {
+    assert_child_commits_suicide(|| {
+        set_up_test();
+
+        let mut proxy = ParserProxy::with_parser_and_builder(None, Some(PanickingParser(PhantomData)));
+        let _ = native_parser_proxy_deinit(&mut proxy);
     });
 }
