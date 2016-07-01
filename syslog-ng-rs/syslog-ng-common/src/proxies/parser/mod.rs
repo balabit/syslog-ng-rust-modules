@@ -73,8 +73,19 @@ pub mod _parser_plugin {
 
     #[no_mangle]
     pub extern fn native_parser_proxy_deinit(this: &mut ParserProxy<$name>) -> c_int {
-        let result = this.deinit();
-        bool_to_int(result)
+        let mut wrapper = AssertUnwindSafe(this);
+
+        let unwind_safe_call = move || {
+            bool_to_int(wrapper.deinit())
+        };
+
+        match catch_unwind(unwind_safe_call) {
+            Ok(deinit_result) => deinit_result,
+            Err(error) => {
+                error!("native_parser_proxy_deinit() panicked, but the panic was cought: {:?}", error);
+                commit_suicide();
+            }
+        }
     }
 
     #[no_mangle]
