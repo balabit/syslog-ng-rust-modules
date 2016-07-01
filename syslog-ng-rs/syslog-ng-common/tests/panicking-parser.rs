@@ -64,7 +64,7 @@ impl<P: Pipe> Clone for PanickingParserBuilder<P> {
 parser_plugin!(PanickingParserBuilder<LogParser>);
 
 use _parser_plugin::{native_parser_proxy_new, native_parser_proxy_free,
-                     native_parser_proxy_set_option};
+                     native_parser_proxy_set_option, native_parser_proxy_init};
 
 
 fn set_up_test() {
@@ -140,5 +140,16 @@ fn test_native_parser_proxy_set_option_wont_panic_even_if_the_proxy_panics() {
         let key = CString::new("key").unwrap();
         let value = CString::new("value").unwrap();
         let _ = native_parser_proxy_set_option(&mut proxy, key.as_ptr(), value.as_ptr());
+    });
+}
+
+#[test]
+fn test_native_parser_proxy_init_wont_panic_even_if_the_proxy_panics() {
+    assert_child_commits_suicide(|| {
+        set_up_test();
+
+        let mut proxy =
+            ParserProxy::with_parser_and_builder(Some(PanickingParserBuilder(PhantomData)), None);
+        let _ = native_parser_proxy_init(&mut proxy);
     });
 }
