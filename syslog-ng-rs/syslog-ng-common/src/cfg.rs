@@ -14,6 +14,16 @@ enum InternalState {
     Borrowed(*mut cfg::GlobalConfig),
 }
 
+impl Clone for InternalState {
+    fn clone(&self) -> InternalState {
+        match *self {
+            InternalState::Owned(ptr) => InternalState::Borrowed(ptr),
+            InternalState::Borrowed(ptr) => InternalState::Borrowed(ptr)
+        }
+    }
+}
+
+#[derive(Clone)]
 pub struct GlobalConfig(InternalState);
 
 impl GlobalConfig {
