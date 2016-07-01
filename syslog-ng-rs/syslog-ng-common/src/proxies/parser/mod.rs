@@ -184,8 +184,13 @@ pub mod _parser_plugin {
     pub extern fn native_parser_proxy_clone(this: &ParserProxy<$name>) -> *mut ParserProxy<$name> {
         let wrapper_this = AssertUnwindSafe(this);
 
-        match catch_unwind(move || (*wrapper_this).clone()) {
-            Ok(cloned) => Box::into_raw(Box::new(cloned)),
+        let unwind_safe_call = move || {
+            let cloned = (*wrapper_this).clone();
+            Box::into_raw(Box::new(cloned))
+        };
+
+        match catch_unwind(unwind_safe_call) {
+            Ok(cloned) => cloned,
             Err(error) => {
                 error!("native_parser_proxy_clone() panicked, but the panic was caught: {:?}", error);
                 commit_suicide();

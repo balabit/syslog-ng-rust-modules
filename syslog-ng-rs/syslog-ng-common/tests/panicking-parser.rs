@@ -65,7 +65,8 @@ parser_plugin!(PanickingParserBuilder<LogParser>);
 
 use _parser_plugin::{native_parser_proxy_new, native_parser_proxy_free,
                      native_parser_proxy_set_option, native_parser_proxy_init,
-                     native_parser_proxy_deinit, native_parser_proxy_process};
+                     native_parser_proxy_deinit, native_parser_proxy_process,
+                     native_parser_proxy_clone};
 
 
 fn set_up_test() {
@@ -177,5 +178,16 @@ fn test_native_parser_proxy_process_wont_panic_even_if_the_proxy_panics() {
         let input = CString::new("input").unwrap();
         let msg = LogMessage::new();
         let _ = native_parser_proxy_process(&mut proxy, parser, msg.0, input.as_ptr());
+    });
+}
+
+#[test]
+fn test_native_parser_proxy_clone_wont_panic_even_if_the_proxy_panics() {
+    assert_child_commits_suicide(|| {
+        set_up_test();
+
+        let proxy = ParserProxy::with_parser_and_builder(Some(PanickingParserBuilder(PhantomData)),
+                                                         None);
+        let _ = native_parser_proxy_clone(&proxy);
     });
 }
