@@ -1,0 +1,16 @@
+[package]
+name = "kvtagger-rs-parser"
+version = "0.1.0"
+authors = ["Tibor Benke <tibor.benke@balabit.com>"]
+build = "build.rs"
+
+[lib]
+crate-type = ["rlib", "dylib"]
+
+[dependencies]
+csv = "0.14.4"
+log = "0.3.6"
+syslog-ng-common = { path = "../syslog-ng-rs/syslog-ng-common" }
+
+[build-dependencies]
+syslog-ng-build = { path = "../syslog-ng-rs/syslog-ng-build" }
