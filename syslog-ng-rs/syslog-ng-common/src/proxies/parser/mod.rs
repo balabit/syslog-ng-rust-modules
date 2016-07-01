@@ -40,8 +40,10 @@ pub mod _parser_plugin {
     use $crate::init_logger;
     use $crate::ParserProxy;
     use $crate::GlobalConfig;
+    use $crate::commit_suicide;
 
     use std::ffi::CStr;
+    use std::panic::{AssertUnwindSafe, catch_unwind};
 
     use super::*;
 
@@ -96,10 +98,21 @@ pub mod _parser_plugin {
     }
 
     #[no_mangle]
-    pub extern fn native_parser_proxy_new(cfg: *mut $crate::sys::GlobalConfig) -> Box<ParserProxy<$name>> {
-        init_logger();
-        let cfg = GlobalConfig::borrow(cfg);
-        Box::new(ParserProxy::new(cfg))
+    pub extern fn native_parser_proxy_new(cfg: *mut $crate::sys::GlobalConfig) -> *mut ParserProxy<$name> {
+        let result = catch_unwind(move || {
+            init_logger();
+            let cfg = GlobalConfig::borrow(cfg);
+            let proxy = Box::new(ParserProxy::new(cfg));
+            Box::into_raw(proxy)
+        });
+
+        match result {
+            Ok(proxy) => proxy,
+            Err(error) => {
+                error!("native_parser_proxy_new() panicked, but the panic was cought: {:?}", error);
+                commit_suicide();
+            }
+        }
     }
 
     #[no_mangle]
