@@ -13,6 +13,7 @@ extern crate log;
 extern crate syslog_ng_sys;
 extern crate glib;
 extern crate glib_sys;
+extern crate libc;
 
 use std::sync::{Once, ONCE_INIT};
 
