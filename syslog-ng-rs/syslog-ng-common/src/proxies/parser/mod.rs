@@ -163,9 +163,16 @@ pub mod _parser_plugin {
     }
 
     #[no_mangle]
-    pub extern fn native_parser_proxy_clone(slf: &ParserProxy<$name>) -> Box<ParserProxy<$name>> {
-        let cloned = (*slf).clone();
-        Box::new(cloned)
+    pub extern fn native_parser_proxy_clone(this: &ParserProxy<$name>) -> *mut ParserProxy<$name> {
+        let wrapper_this = AssertUnwindSafe(this);
+
+        match catch_unwind(move || (*wrapper_this).clone()) {
+            Ok(cloned) => Box::into_raw(Box::new(cloned)),
+            Err(error) => {
+                error!("native_parser_proxy_process() panicked, but the panic was cought: {:?}", error);
+                commit_suicide();
+            }
+        }
     }
 }
     }
