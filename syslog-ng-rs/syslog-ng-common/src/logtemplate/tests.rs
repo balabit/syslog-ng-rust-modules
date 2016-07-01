@@ -11,7 +11,7 @@ fn test_template_can_be_created() {
         unsafe { syslog_ng_global_init(); }
     });
     let cfg = GlobalConfig::new(0x0308);
-    let _ = LogTemplate::new(&cfg);
+    let _ = LogTemplate::new(&cfg, "content".as_bytes());
 }
 
 #[test]

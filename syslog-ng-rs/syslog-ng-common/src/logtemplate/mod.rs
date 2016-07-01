@@ -14,7 +14,9 @@ mod tests;
 
 pub struct LogTemplate {
     pub wrapped: *mut sys::LogTemplate,
+    cfg: *const syslog_ng_sys::GlobalConfig,
     buffer: *mut glib_sys::GString,
+    template: Vec<u8>
 }
 
 pub struct LogTemplateOptions(pub *mut sys::LogTemplateOptions);
@@ -46,15 +48,17 @@ impl Error {
 }
 
 impl LogTemplate {
-    fn new(cfg: &GlobalConfig) -> LogTemplate {
+    fn new(cfg: &GlobalConfig, content: &[u8]) -> LogTemplate {
         let raw_cfg = cfg.raw_ptr();
         LogTemplate {
+            cfg: raw_cfg,
+            template: content.into(),
             wrapped: unsafe { sys::log_template_new(raw_cfg, ::std::ptr::null()) },
             buffer: unsafe { glib_sys::g_string_sized_new(128) },
         }
     }
     pub fn compile(cfg: &GlobalConfig, content: &[u8]) -> Result<LogTemplate, Error> {
-        let template = LogTemplate::new(cfg);
+        let template = LogTemplate::new(cfg, content);
         let content = try!(CString::new(content));
         let mut error = ::std::ptr::null_mut();
         let result = unsafe { sys::log_template_compile(template.wrapped, content.as_ptr(), &mut error) };
@@ -90,5 +94,16 @@ impl Drop for LogTemplate {
             sys::log_template_unref(self.wrapped);
             glib_sys::g_string_free(self.buffer, 1 as glib_sys::gboolean);
         };
+    }
+}
+
+impl Clone for LogTemplate {
+    fn clone(&self) -> LogTemplate {
+        LogTemplate {
+            template: self.template.clone(),
+            cfg: self.cfg,
+            wrapped: unsafe { sys::log_template_new(self.cfg, ::std::ptr::null()) },
+            buffer: unsafe { glib_sys::g_string_sized_new(128) },
+        }
     }
 }
