@@ -84,11 +84,25 @@ pub mod _parser_plugin {
     }
 
     #[no_mangle]
-    pub extern fn native_parser_proxy_set_option(slf: &mut ParserProxy<$name>, key: *const c_char, value: *const c_char) {
-        let k: String = unsafe { CStr::from_ptr(key).to_owned().to_string_lossy().into_owned() };
-        let v: String = unsafe { CStr::from_ptr(value).to_owned().to_string_lossy().into_owned() };
+    pub extern fn native_parser_proxy_set_option(this: &mut ParserProxy<$name>, key: *const c_char, value: *const c_char) {
+        let mut wrapper_this = AssertUnwindSafe(this);
+        let wrapper_key = AssertUnwindSafe(key);
+        let wrapper_value = AssertUnwindSafe(value);
 
-        slf.set_option(k, v);
+        let result = catch_unwind(move || {
+            let k: String = unsafe { CStr::from_ptr(*wrapper_key).to_owned().to_string_lossy().into_owned() };
+            let v: String = unsafe { CStr::from_ptr(*wrapper_value).to_owned().to_string_lossy().into_owned() };
+
+            wrapper_this.set_option(k, v);
+        });
+
+        match result {
+            Ok(()) => (),
+            Err(error) => {
+                error!("native_parser_proxy_set_option() panicked, but the panic was cought: {:?}", error);
+                commit_suicide();
+            }
+        }
     }
 
     #[no_mangle]
