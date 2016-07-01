@@ -1,64 +1,40 @@
-use {KVPair, CsvRecord};
+use CsvRecord;
 use std::collections::HashMap;
 
 #[derive(Clone)]
 pub struct LookupTable {
-    big_fuckin_vector: Vec<KVPair>,
-    map: HashMap<String, DbRecord>
+    map: HashMap<String, Vec<(String, String)>>
 }
-
-#[derive(Clone)]
-pub struct DbRecord {
-    offset: usize,
-    length: usize
-}
-
-pub type Iter<'a> = ::std::iter::Take<::std::iter::Skip<::std::slice::Iter<'a, KVPair>>>;
 
 impl LookupTable {
-    pub fn new(mut records: Vec<CsvRecord>) -> LookupTable {
-        records.sort();
-
+    pub fn new(records: Vec<CsvRecord>) -> LookupTable {
         let mut table = HashMap::new();
-        let mut big_fuckin_vector = Vec::new();
 
-        for record in records.into_iter().enumerate() {
-            let (index, (lookup_key, macro_name, macro_value)) = record;
+        for record in records {
+            let (lookup_key, macro_name, macro_value) = record;
 
-            let mut entry = table.entry(lookup_key).or_insert_with(|| DbRecord {offset: index, length: 0});
-            entry.length += 1;
-
-            let kvpair = KVPair { key: macro_name, value: macro_value };
-            big_fuckin_vector.push(kvpair);
+            let mut entry = table.entry(lookup_key).or_insert_with(Vec::new);
+            entry.push((macro_name, macro_value));
         }
 
         LookupTable {
-            big_fuckin_vector: big_fuckin_vector,
             map: table
         }
     }
 
-    pub fn get(&self, key: &str) -> Option<Iter> {
-        self.map.get(key).map(|db_record| {
-            self.big_fuckin_vector.iter().skip(db_record.offset).take(db_record.length)
-        })
+    pub fn get(&self, key: &str) -> Option<&Vec<(String, String)>> {
+        self.map.get(key)
     }
 }
 
 
 #[cfg(test)]
 mod tests {
-    use KVPair;
-    use super::Iter;
     use super::LookupTable;
     use utils::make_expected_value_for_test_file;
     use utils::kv;
 
-    fn iter_to_vec(iter: Iter) -> Vec<KVPair> {
-        iter.map(|v| v.clone()).collect()
-    }
-
-    fn assert_vec_eq(mut a: Vec<KVPair>, mut b: Vec<KVPair>) {
+    fn assert_vec_eq(mut a: Vec<(String, String)>, mut b: Vec<(String, String)>) {
         a.sort();
         b.sort();
 
@@ -99,10 +75,9 @@ mod tests {
         kv("name20","value20")
         ];
 
-        assert_vec_eq(iter_to_vec(table.get("key1").unwrap()), key_1_expected);
-        assert_vec_eq(iter_to_vec(table.get("key2").unwrap()), key_2_expected);
-        assert_vec_eq(iter_to_vec(table.get("key3").unwrap()), key_3_expected);
-
+        assert_vec_eq(table.get("key1").unwrap().clone(), key_1_expected);
+        assert_vec_eq(table.get("key2").unwrap().clone(), key_2_expected);
+        assert_vec_eq(table.get("key3").unwrap().clone(), key_3_expected);
     }
 
     #[test]

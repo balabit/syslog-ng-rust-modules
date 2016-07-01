@@ -110,7 +110,7 @@ impl<P: Pipe> Parser<P> for KVTagger {
     fn parse(&mut self, _: &mut P, msg: &mut LogMessage, _: &str) -> bool {
         if let Some(kv_pairs) = self.map.get(&self.lookup_key) {
             for kv in kv_pairs {
-                msg.insert::<&str>(kv.key.as_ref(), kv.value.as_ref());
+                msg.insert::<&str>(kv.0.as_ref(), kv.1.as_ref());
             }
         }
         true

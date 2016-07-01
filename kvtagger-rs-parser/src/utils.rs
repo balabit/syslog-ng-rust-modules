@@ -1,5 +1,3 @@
-use KVPair;
-
 pub fn make_expected_value_for_test_file() -> Vec<(String, String, String)> {
     [("key1","name1","value1"),
     ("key1","name11","value11"),
@@ -27,9 +25,6 @@ pub fn make_expected_value_for_test_file() -> Vec<(String, String, String)> {
     }).collect()
 }
 
-pub fn kv(key: &str, v: &str) -> KVPair {
-    KVPair {
-        key: key.to_string(),
-        value: v.to_string()
-    }
+pub fn kv(key: &str, v: &str) -> (String, String) {
+    (key.to_string(), v.to_string())
 }
