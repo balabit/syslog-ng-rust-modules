@@ -64,6 +64,7 @@ parser_plugin!(PanickingParserBuilder<LogParser>);
 
 use _parser_plugin::{
     native_parser_proxy_new,
+    native_parser_proxy_free,
 };
 
 
@@ -113,5 +114,15 @@ fn test_native_parser_proxy_new_wont_panic_even_if_the_proxy_panics() {
 
         let cfg = GlobalConfig::new(0x0308);
         let _ = native_parser_proxy_new(cfg.raw_ptr());
+    });
+}
+
+#[test]
+fn test_native_parser_proxy_free_wont_panic_even_if_the_proxy_panics() {
+    assert_child_commits_suicide(|| {
+        set_up_test();
+
+        let proxy = ParserProxy::with_parser_and_builder(None, Some(PanickingParser(PhantomData)));
+        let _ = native_parser_proxy_free(Box::new(proxy));
     });
 }
