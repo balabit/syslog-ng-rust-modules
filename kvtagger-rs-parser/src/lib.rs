@@ -28,7 +28,6 @@ pub type CsvRecord = (String, String, String);
 
 pub struct KVTaggerBuilder<P: Pipe> {
     records: Option<Vec<CsvRecord>>,
-    built_parser: Option<KVTagger>,
     lookup_key: Option<String>,
     _marker: PhantomData<P>
 }
@@ -82,28 +81,15 @@ impl<P: Pipe> Clone for KVTaggerBuilder<P> {
     fn clone(&self) -> Self {
         KVTaggerBuilder {
             records: self.records.clone(),
-            built_parser: self.built_parser.clone(),
             lookup_key: self.lookup_key.clone(),
             _marker: PhantomData
         }
     }
 }
 
-#[derive(Clone)]
 pub struct KVTagger {
     pub map: LookupTable,
     pub lookup_key: String
-}
-
-impl<P: Pipe> From<KVTagger> for KVTaggerBuilder<P> {
-    fn from(parser: KVTagger) -> Self {
-        KVTaggerBuilder {
-            records: None,
-            built_parser: Some(parser),
-            lookup_key: None,
-            _marker: PhantomData
-        }
-    }
 }
 
 impl<P: Pipe> Parser<P> for KVTagger {
@@ -123,7 +109,6 @@ impl<P: Pipe> ParserBuilder<P> for KVTaggerBuilder<P> {
     fn new(_: GlobalConfig) -> Self {
         KVTaggerBuilder {
             records: None,
-            built_parser: None,
             lookup_key: None,
             _marker: PhantomData
         }
@@ -142,10 +127,6 @@ impl<P: Pipe> ParserBuilder<P> for KVTaggerBuilder<P> {
         }
     }
     fn build(self) -> Result<Self::Parser, OptionError> {
-        if let Some(built_parser) = self.built_parser {
-            return Ok(built_parser);
-        }
-
         match (self.records, self.lookup_key) {
             (Some(records), Some(lookup_key)) => {
                 let parser = KVTagger {
