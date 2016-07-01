@@ -19,6 +19,7 @@ fn test_parser_enriches_the_message_with_key_value_pairs() {
 
     let mut parser = KVTagger {
         map: LookupTable::new(records),
+        default_selector: None,
         formatter: MessageFormatter::new(),
         selector_template: template
     };
@@ -111,6 +112,7 @@ fn test_parser_can_use_templates_as_selector() {
     let mut parser = KVTagger {
         map: LookupTable::new(records),
         formatter: MessageFormatter::new(),
+        default_selector: None,
         selector_template: template
     };
 
@@ -143,6 +145,7 @@ fn test_prefix_can_be_set_on_parser() {
     let mut parser = KVTagger {
         map: LookupTable::new(records),
         formatter: formatter,
+        default_selector: None,
         selector_template: template
     };
 
@@ -155,4 +158,34 @@ fn test_prefix_can_be_set_on_parser() {
     assert_eq!(logmsg.get("prefix.name18").unwrap(), b"value18");
     assert_eq!(logmsg.get("prefix.name19").unwrap(), b"value19");
     assert_eq!(logmsg.get("prefix.name20").unwrap(), b"value20");
+}
+
+#[test]
+fn test_parser_uses_default_selector() {
+    SYSLOG_NG_INITIALIZED.call_once(|| {
+        unsafe { syslog_ng_global_init() };
+    });
+
+    let records = make_expected_value_for_test_file();
+    let cfg = GlobalConfig::new(0x0308);
+    let template = LogTemplate::compile(&cfg, "XXXX".as_bytes()).unwrap();
+
+    let formatter = MessageFormatter::new();
+
+    let mut parser = KVTagger {
+        map: LookupTable::new(records),
+        formatter: formatter,
+        default_selector: Some("key3".to_string()),
+        selector_template: template
+    };
+
+    let mut logmsg = LogMessage::new();
+
+    let mut mock_pipe = MockPipe::new();
+
+    parser.parse(&mut mock_pipe, &mut logmsg, "message");
+
+    assert_eq!(logmsg.get("name18").unwrap(), b"value18");
+    assert_eq!(logmsg.get("name19").unwrap(), b"value19");
+    assert_eq!(logmsg.get("name20").unwrap(), b"value20");
 }

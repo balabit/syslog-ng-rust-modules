@@ -23,6 +23,7 @@ pub type CsvRecord = (String, String, String);
 pub struct KVTaggerBuilder<P: Pipe> {
     records: Option<Vec<CsvRecord>>,
     selector_template: Option<LogTemplate>,
+    default_selector: Option<String>,
     formatter: MessageFormatter,
     cfg: GlobalConfig,
     _marker: PhantomData<P>
@@ -61,6 +62,10 @@ impl<P: Pipe> KVTaggerBuilder<P> {
         self.formatter.set_prefix(prefix);
     }
 
+    pub fn set_default_selector(&mut self, default_selector: String) {
+        self.default_selector = Some(default_selector);
+    }
+
     pub fn load_csv_file<PATH: AsRef<Path>>(path: PATH) -> Result<Vec<CsvRecord>, LoadError> {
         let mut file = try!(File::open(path));
         let mut contents = String::new();
@@ -82,6 +87,7 @@ impl<P: Pipe> Clone for KVTaggerBuilder<P> {
         KVTaggerBuilder {
             cfg: self.cfg.clone(),
             formatter: self.formatter.clone(),
+            default_selector: self.default_selector.clone(),
             records: self.records.clone(),
             selector_template: self.selector_template.clone(),
             _marker: PhantomData
@@ -92,7 +98,17 @@ impl<P: Pipe> Clone for KVTaggerBuilder<P> {
 pub struct KVTagger {
     pub map: LookupTable,
     pub formatter: MessageFormatter,
+    pub default_selector: Option<String>,
     pub selector_template: LogTemplate
+}
+
+impl KVTagger {
+    fn tag_msg_with_looked_up_key_value_pairs(formatter: &mut MessageFormatter, msg: &mut LogMessage, kvpairs: &[(String, String)]) {
+        for kv in kvpairs {
+            let (key, value) = formatter.format(kv.0.as_ref(), kv.1.as_ref());
+            msg.insert::<&str>(key, value.as_bytes());
+        }
+    }
 }
 
 impl<P: Pipe> Parser<P> for KVTagger {
@@ -100,17 +116,26 @@ impl<P: Pipe> Parser<P> for KVTagger {
         let selector = self.selector_template.format(msg, None, LogTimeZone::Local, 0);
 
         if let Ok(str_selector) = ::std::str::from_utf8(selector) {
-            if let Some(kv_pairs) = self.map.get(str_selector) {
-                for kv in kv_pairs {
-                    let (key, value) = self.formatter.format(kv.0.as_ref(), kv.1.as_ref());
-                    msg.insert::<&str>(key, value.as_bytes());
-                }
+            let looked_up_kvpairs = self.map.get(str_selector);
+
+            match (looked_up_kvpairs, self.default_selector.as_ref()) {
+                (Some(kv_pairs), _) => {
+                    KVTagger::tag_msg_with_looked_up_key_value_pairs(&mut self.formatter, msg, kv_pairs);
+                    true
+                },
+                (None, Some(default_selector)) => {
+                    if let Some(kv_pairs) = self.map.get(default_selector) {
+                        KVTagger::tag_msg_with_looked_up_key_value_pairs(&mut self.formatter, msg, kv_pairs);
+                        true
+                    } else {
+                        true
+                    }
+                },
+                _ => true
             }
-            true
         } else {
             false
         }
-
     }
 }
 
@@ -121,6 +146,7 @@ impl<P: Pipe> ParserBuilder<P> for KVTaggerBuilder<P> {
         KVTaggerBuilder {
             records: None,
             selector_template: None,
+            default_selector: None,
             cfg: cfg,
             formatter: MessageFormatter::new(),
             _marker: PhantomData
@@ -151,26 +177,19 @@ impl<P: Pipe> ParserBuilder<P> for KVTaggerBuilder<P> {
         }
     }
     fn build(self) -> Result<Self::Parser, OptionError> {
-        match (self.records, self.selector_template) {
-            (Some(records), Some(selector_template)) => {
+        match (self.records, self.selector_template, self.default_selector) {
+            (Some(records), Some(selector_template), default_selector) => {
                 let parser = KVTagger {
                     map: LookupTable::new(records),
                     formatter: self.formatter,
+                    default_selector: default_selector,
                     selector_template: selector_template
                 };
 
                 return Ok(parser);
             },
-            (Some(_), None) => {
-                error!("Failed to intialize kvtagger-rs: csv-file() was not specified");
-                return Err(OptionError::missing_required_option("csv-file"));
-            },
-            (None, Some(_)) => {
-                error!("Failed to intialize kvtagger-rs: lookup-key() was not specified");
-                return Err(OptionError::missing_required_option("lookup-key"));
-            },
-            (None, None) => {
-                error!("Failed to intialize kvtagger-rs: neither lookup-key() or csv-file() was not specified");
+            _ => {
+                error!("Failed to intialize kvtagger-rs: neither lookup-key() or csv-file() or default-selector was not specified");
                 return Err(OptionError::missing_required_option("lookup-key & csv-file"));
             }
         }
