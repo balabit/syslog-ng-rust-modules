@@ -24,6 +24,7 @@ pub enum LogTimeZone {
     Send = 1,
 }
 
+#[derive(Debug)]
 pub enum Error {
     Glib(glib::Error),
     Nul(NulError)
