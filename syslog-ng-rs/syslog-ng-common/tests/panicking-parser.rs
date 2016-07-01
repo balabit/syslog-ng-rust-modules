@@ -63,6 +63,9 @@ impl<P: Pipe> Clone for PanickingParserBuilder<P> {
 // this verifies that the macro can be expanded
 parser_plugin!(PanickingParserBuilder<LogParser>);
 
+use _parser_plugin::native_parser_proxy_new;
+
+
 fn set_up_test() {
     SYSLOG_NG_INITIALIZED.call_once(|| {
         unsafe {
@@ -103,4 +106,14 @@ fn assert_child_commits_suicide<C>(child_callback: C)
     };
 
     fork_with_callbacks(child_callback, parent_callback).unwrap();
+}
+
+#[test]
+fn test_native_parser_proxy_new_wont_panic_even_if_the_proxy_panics() {
+    assert_child_commits_suicide(|| {
+        set_up_test();
+
+        let cfg = GlobalConfig::new(0x0308);
+        let _ = native_parser_proxy_new(cfg.raw_ptr());
+    });
 }
