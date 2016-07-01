@@ -21,3 +21,6 @@ harness = false
 
 [[test]]
 name = "dummy-parser"
+
+[[test]]
+name = "panicking-parser"
