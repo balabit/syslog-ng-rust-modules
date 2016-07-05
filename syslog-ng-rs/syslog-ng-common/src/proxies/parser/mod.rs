@@ -89,7 +89,7 @@ pub mod _parser_plugin {
                 error!("native_parser_proxy_free() panicked, but the panic was cought: {:?}", error);
                 commit_suicide();
             },
-            _ => (),
+            Ok(()) => ()
         }
     }
 
