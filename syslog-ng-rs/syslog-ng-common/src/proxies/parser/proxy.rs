@@ -29,7 +29,7 @@ impl<B> ParserProxy<B> where B: ParserBuilder<LogParser>
         }
     }
 
-    pub fn with_parser_and_builder(builder: Option<B>,
+    pub fn with_builder_and_parser(builder: Option<B>,
                                    parser: Option<B::Parser>)
                                    -> ParserProxy<B> {
         ParserProxy {
