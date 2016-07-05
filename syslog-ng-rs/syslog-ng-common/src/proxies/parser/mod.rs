@@ -65,7 +65,7 @@ pub mod _parser_plugin {
         match catch_unwind(unwind_safe_call) {
             Ok(init_result) => init_result,
             Err(error) => {
-                error!("native_parser_proxy_init() panicked, but the panic was cought: {:?}", error);
+                error!("native_parser_proxy_init() panicked, but the panic was caught: {:?}", error);
                 commit_suicide();
             }
         }
@@ -82,7 +82,7 @@ pub mod _parser_plugin {
         match catch_unwind(unwind_safe_call) {
             Ok(deinit_result) => deinit_result,
             Err(error) => {
-                error!("native_parser_proxy_deinit() panicked, but the panic was cought: {:?}", error);
+                error!("native_parser_proxy_deinit() panicked, but the panic was caught: {:?}", error);
                 commit_suicide();
             }
         }
@@ -99,7 +99,7 @@ pub mod _parser_plugin {
         match catch_unwind(unwind_safe_call) {
             Ok(()) => (),
             Err(error) => {
-                error!("native_parser_proxy_free() panicked, but the panic was cought: {:?}", error);
+                error!("native_parser_proxy_free() panicked, but the panic was caught: {:?}", error);
                 commit_suicide();
             },
         }
@@ -121,7 +121,7 @@ pub mod _parser_plugin {
         match result {
             Ok(()) => (),
             Err(error) => {
-                error!("native_parser_proxy_set_option() panicked, but the panic was cought: {:?}", error);
+                error!("native_parser_proxy_set_option() panicked, but the panic was caught: {:?}", error);
                 commit_suicide();
             }
         }
@@ -156,7 +156,7 @@ pub mod _parser_plugin {
         match result {
             Ok(process_result) => process_result,
             Err(error) => {
-                error!("native_parser_proxy_process() panicked, but the panic was cought: {:?}", error);
+                error!("native_parser_proxy_process() panicked, but the panic was caught: {:?}", error);
                 commit_suicide();
             }
         }
@@ -174,7 +174,7 @@ pub mod _parser_plugin {
         match result {
             Ok(proxy) => proxy,
             Err(error) => {
-                error!("native_parser_proxy_new() panicked, but the panic was cought: {:?}", error);
+                error!("native_parser_proxy_new() panicked, but the panic was caught: {:?}", error);
                 commit_suicide();
             }
         }
