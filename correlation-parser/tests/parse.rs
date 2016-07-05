@@ -45,3 +45,18 @@ fn test_alert_is_forwarded() {
     }
     assert_eq!(b"artificial test message", alert.get(&b"MESSAGE"[..]).unwrap());
 }
+
+#[test]
+fn test_syslog_ng_does_not_spin_with_invalid_yaml_configuration() {
+    let _ = env_logger::init();
+    SYSLOG_NG_INITIALIZED.call_once(|| {
+        unsafe { syslog_ng_global_init(); }
+    });
+
+    let config_file = "tests/spinning.json";
+
+    let cfg = GlobalConfig::new(0x0308);
+    let mut builder = CorrelationParserBuilder::<MockPipe, MockEvent, MockLogTemplate, MockLogTemplateFactory, MockTimer<MockEvent, MockLogTemplate>>::new(cfg);
+    builder.option(options::CONTEXTS_FILE.to_owned(), config_file.to_owned());
+    let _ = builder.build().err().unwrap();
+}
