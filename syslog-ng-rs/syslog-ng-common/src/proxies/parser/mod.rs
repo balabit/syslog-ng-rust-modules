@@ -131,20 +131,18 @@ pub mod _parser_plugin {
                 Ok(input) => wrapper_this.process(&mut parent, &mut msg, input),
                 Err(err) => {
                     error!("{}", err);
-                    commit_suicide();
+                    false
                 }
             }
         });
 
-        let final_result = match result {
-            Ok(value) => value,
+        match result {
+            Ok(value) => bool_to_int(value),
             Err(error) => {
                 error!("native_parser_proxy_process() panicked, but the panic was cought: {:?}", error);
                 commit_suicide();
             }
-        };
-
-        bool_to_int(final_result)
+        }
     }
 
     #[no_mangle]
