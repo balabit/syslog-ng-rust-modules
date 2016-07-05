@@ -72,7 +72,7 @@ fn test_given_yaml_context_file_when_it_is_read_by_the_correlator_factory_then_t
 }
 
 #[test]
-fn test_name() {
+fn test_yaml_parser_reports_error_when_the_yaml_file_is_not_valid_yaml() {
     let _ = env_logger::init();
     let contexts_file = "tests/correlator/invalid.yaml";
     let result = CorrelatorFactory::load_file(contexts_file);
