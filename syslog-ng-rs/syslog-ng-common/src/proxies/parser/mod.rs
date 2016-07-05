@@ -106,9 +106,12 @@ pub mod _parser_plugin {
             wrapper_this.set_option(k, v);
         });
 
-        if let Err(caught_error) = result {
-            error!("native_parser_proxy_set_option() panicked, but the panic was cought: {:?}", caught_error);
-            commit_suicide();
+        match result {
+            Ok(()) => (),
+            Err(error) => {
+                error!("native_parser_proxy_set_option() panicked, but the panic was cought: {:?}", error);
+                commit_suicide();
+            }
         }
     }
 
