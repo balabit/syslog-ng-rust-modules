@@ -192,12 +192,10 @@ impl ParserEntry for ParserE {
                     result.insert(kvpair);
                     Some(result)
                 })
+            } else if value.is_empty() {
+                self.create_match_result(kvpair)
             } else {
-                if value.is_empty() {
-                    self.create_match_result(kvpair)
-                } else {
-                    None
-                }
+                None
             }
         })
     }
