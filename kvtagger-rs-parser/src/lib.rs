@@ -24,6 +24,7 @@ pub mod options {
     pub const SELECTOR: &'static str = "selector";
     pub const DATABASE: &'static str = "database";
     pub const DEFAULT_SELECTOR: &'static str = "default-selector";
+    pub const PREFIX: &'static str = "prefix";
 }
 
 pub struct KVTaggerBuilder<P: Pipe> {
@@ -177,7 +178,7 @@ impl<P: Pipe> ParserBuilder<P> for KVTaggerBuilder<P> {
             options::DEFAULT_SELECTOR => {
                 self.set_default_selector(_value);
             }
-            "prefix" => {
+            options::PREFIX => {
                 self.set_prefix(_value);
             },
             _ => {
