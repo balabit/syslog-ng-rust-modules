@@ -54,7 +54,7 @@ impl<P: Pipe> KVTaggerBuilder<P> {
         }
     }
 
-    pub fn set_lookup_key(&mut self, key: LogTemplate) {
+    pub fn set_selector(&mut self, key: LogTemplate) {
         self.selector_template = Some(key);
     }
 
@@ -160,7 +160,7 @@ impl<P: Pipe> ParserBuilder<P> for KVTaggerBuilder<P> {
             "lookup-key" => {
                 match LogTemplate::compile(&self.cfg, _value.as_bytes()) {
                     Ok(template) => {
-                        self.set_lookup_key(template);
+                        self.set_selector(template);
                     },
                     Err(error) => {
                         error!("{:?}", error);
