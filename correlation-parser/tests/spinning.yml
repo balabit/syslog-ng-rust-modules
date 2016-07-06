@@ -1,0 +1,17 @@
+-
+  name: "GENERATED_LOGS"
+  uuid: "f7ee6a32-03a6-40d9-bd87-f48d1b4cd563"
+  patterns:
+    - "AAA"
+  conditions:
+    timeout: "0"
+  actions:
+    -
+      message:
+        uuid: "4bbd15c4-ec44-47a2-ada3-f7fe3ff81222"
+        inject_mode: "forward"
+        name: "GEN_LOGS"
+        message: "BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB"
+        values:
+           AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA: NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
+          stamp: $(grep ("${.loggen.seq}" == "0000000003") ${.loggen.stamp})
