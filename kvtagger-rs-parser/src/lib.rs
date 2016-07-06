@@ -23,6 +23,7 @@ pub type CsvRecord = (String, String, String);
 pub mod options {
     pub const SELECTOR: &'static str = "selector";
     pub const DATABASE: &'static str = "database";
+    pub const DEFAULT_SELECTOR: &'static str = "default-selector";
 }
 
 pub struct KVTaggerBuilder<P: Pipe> {
@@ -173,6 +174,9 @@ impl<P: Pipe> ParserBuilder<P> for KVTaggerBuilder<P> {
                     }
                 }
             },
+            options::DEFAULT_SELECTOR => {
+                self.set_default_selector(_value);
+            }
             "prefix" => {
                 self.set_prefix(_value);
             },
