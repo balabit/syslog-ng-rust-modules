@@ -20,6 +20,10 @@ pub use lookup_table::LookupTable;
 
 pub type CsvRecord = (String, String, String);
 
+pub mod options {
+    pub const SELECTOR: &'static str = "selector";
+}
+
 pub struct KVTaggerBuilder<P: Pipe> {
     records: Option<Vec<CsvRecord>>,
     selector_template: Option<LogTemplate>,
@@ -157,7 +161,7 @@ impl<P: Pipe> ParserBuilder<P> for KVTaggerBuilder<P> {
             "csv-file" => {
                 self.set_csv_file(_value);
             },
-            "lookup-key" => {
+            options::SELECTOR => {
                 match LogTemplate::compile(&self.cfg, _value.as_bytes()) {
                     Ok(template) => {
                         self.set_selector(template);
