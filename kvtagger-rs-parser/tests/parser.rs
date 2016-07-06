@@ -2,7 +2,7 @@ extern crate kvtagger_rs_parser;
 extern crate syslog_ng_common;
 
 use kvtagger_rs_parser::{KVTagger, LookupTable, KVTaggerBuilder, options};
-use kvtagger_rs_parser::utils::{make_expected_value_for_test_file};
+use kvtagger_rs_parser::utils::{make_expected_value_for_test_file, build_parser};
 
 use syslog_ng_common::{LogMessage, Parser, SYSLOG_NG_INITIALIZED, syslog_ng_global_init, ParserBuilder, GlobalConfig, LogTemplate, MessageFormatter};
 use syslog_ng_common::mock::MockPipe;
@@ -166,21 +166,16 @@ fn test_parser_uses_default_selector() {
         unsafe { syslog_ng_global_init() };
     });
 
-    let records = make_expected_value_for_test_file();
     let cfg = GlobalConfig::new(0x0308);
-    let template = LogTemplate::compile(&cfg, "XXXX".as_bytes()).unwrap();
 
-    let formatter = MessageFormatter::new();
-
-    let mut parser = KVTagger {
-        map: LookupTable::new(records),
-        formatter: formatter,
-        default_selector: Some("key3".to_string()),
-        selector_template: template
-    };
+    let options = [
+        (options::DATABASE, "tests/test.csv"),
+        (options::DEFAULT_SELECTOR, "key3"),
+        (options::SELECTOR, "XXXX"),
+    ];
+    let mut parser = build_parser::<MockPipe, KVTaggerBuilder<MockPipe>>(cfg, &options).unwrap();
 
     let mut logmsg = LogMessage::new();
-
     let mut mock_pipe = MockPipe::new();
 
     parser.parse(&mut mock_pipe, &mut logmsg, "message");
