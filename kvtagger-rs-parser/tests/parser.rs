@@ -44,7 +44,7 @@ fn test_kv_tagger_can_be_constructed_from_options() {
     let cfg = GlobalConfig::new(0x0308);
 
     let mut builder = KVTaggerBuilder::<MockPipe>::new(cfg);
-    builder.option("csv-file".to_string(), "tests/test.csv".to_string());
+    builder.option(options::DATABASE.to_string(), "tests/test.csv".to_string());
     builder.option(options::SELECTOR.to_string(), "key3".to_string());
 
     let mut parser = builder.build().unwrap();
@@ -69,7 +69,7 @@ fn test_parser_cannot_be_built_without_lookup_key() {
     let cfg = GlobalConfig::new(0x0308);
 
     let mut builder = KVTaggerBuilder::<MockPipe>::new(cfg);
-    builder.option("csv-file".to_string(), "tests/test.csv".to_string());
+    builder.option(options::DATABASE.to_string(), "tests/test.csv".to_string());
 
     let _ = builder.build().err().unwrap();
 }

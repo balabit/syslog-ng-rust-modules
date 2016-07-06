@@ -22,6 +22,7 @@ pub type CsvRecord = (String, String, String);
 
 pub mod options {
     pub const SELECTOR: &'static str = "selector";
+    pub const DATABASE: &'static str = "database";
 }
 
 pub struct KVTaggerBuilder<P: Pipe> {
@@ -158,7 +159,7 @@ impl<P: Pipe> ParserBuilder<P> for KVTaggerBuilder<P> {
     }
     fn option(&mut self, _name: String, _value: String) {
         match _name.as_ref() {
-            "csv-file" => {
+            options::DATABASE => {
                 self.set_csv_file(_value);
             },
             options::SELECTOR => {
@@ -193,8 +194,8 @@ impl<P: Pipe> ParserBuilder<P> for KVTaggerBuilder<P> {
                 return Ok(parser);
             },
             _ => {
-                error!("Failed to intialize kvtagger-rs: neither lookup-key() or csv-file() or default-selector was not specified");
-                return Err(OptionError::missing_required_option("lookup-key & csv-file"));
+                error!("Failed to intialize kvtagger-rs: neither {}() or {}() or default-selector was not specified", options::DATABASE, options::SELECTOR);
+                return Err(OptionError::missing_required_option(format!("{} & {}", options::DATABASE, options::SELECTOR)));
             }
         }
     }
