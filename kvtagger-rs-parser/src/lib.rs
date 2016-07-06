@@ -49,7 +49,7 @@ impl From<io::Error> for LoadError {
 }
 
 impl<P: Pipe> KVTaggerBuilder<P> {
-    pub fn set_csv_file<PATH: AsRef<Path>>(&mut self, path: PATH) {
+    pub fn set_database<PATH: AsRef<Path>>(&mut self, path: PATH) {
         match KVTaggerBuilder::<P>::load_csv_file::<PATH>(path) {
             Ok(records) => {
                 self.records = Some(records);
@@ -162,7 +162,7 @@ impl<P: Pipe> ParserBuilder<P> for KVTaggerBuilder<P> {
     fn option(&mut self, _name: String, _value: String) {
         match _name.as_ref() {
             options::DATABASE => {
-                self.set_csv_file(_value);
+                self.set_database(_value);
             },
             options::SELECTOR => {
                 match LogTemplate::compile(&self.cfg, _value.as_bytes()) {

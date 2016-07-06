@@ -41,7 +41,7 @@ fn test_csv_file_is_read_in_set_csv_file() {
     let mut builder = KVTaggerBuilder::<MockPipe>::new(cfg);
     let expected = make_expected_value_for_test_file();
 
-    builder.set_csv_file("tests/test.csv");
+    builder.set_database("tests/test.csv");
 
     assert_eq!(builder.records(), Some(&expected));
 }
@@ -54,7 +54,7 @@ fn test_non_exisint_csv_file_does_not_cause_panic() {
 
     let cfg = GlobalConfig::new(0x0308);
     let mut builder = KVTaggerBuilder::<MockPipe>::new(cfg);
-    builder.set_csv_file("tests/non_existing.csv");
+    builder.set_database("tests/non_existing.csv");
 
     assert_eq!(builder.records(), None);
 }
@@ -72,7 +72,7 @@ fn test_exotic_csv_file_can_be_loaded() {
 
     let cfg = GlobalConfig::new(0x0308);
     let mut builder = KVTaggerBuilder::<MockPipe>::new(cfg);
-    builder.set_csv_file("tests/exotic.csv");
+    builder.set_database("tests/exotic.csv");
 
     assert_eq!(builder.records(), Some(&expected));
 }
