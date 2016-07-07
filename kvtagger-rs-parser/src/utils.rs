@@ -1,4 +1,4 @@
-use syslog_ng_common::{Pipe, ParserBuilder, GlobalConfig, OptionError};
+use syslog_ng_common::{Pipe, ParserBuilder, GlobalConfig};
 
 pub fn make_expected_value_for_test_file() -> Vec<(String, String, String)> {
     [("key1","name1","value1"),
@@ -31,7 +31,7 @@ pub fn kv(key: &str, v: &str) -> (String, String) {
     (key.to_string(), v.to_string())
 }
 
-pub fn build_parser<P, PB>(cfg: GlobalConfig, options: &[(&str, &str)]) -> Result<PB::Parser, OptionError>
+pub fn build_parser<P, PB>(cfg: GlobalConfig, options: &[(&str, &str)]) -> PB
     where P: Pipe, PB: ParserBuilder<P> {
     let mut builder = PB::new(cfg);
 
@@ -39,5 +39,5 @@ pub fn build_parser<P, PB>(cfg: GlobalConfig, options: &[(&str, &str)]) -> Resul
         builder.option(option.0.to_string(), option.1.to_string());
     }
 
-    builder.build()
+    builder
 }
