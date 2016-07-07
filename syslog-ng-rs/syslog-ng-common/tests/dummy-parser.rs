@@ -12,6 +12,7 @@ extern crate syslog_ng_common;
 extern crate log;
 
 use std::marker::PhantomData;
+use std::ffi::CString;
 
 pub struct DummyParser<P: Pipe>(PhantomData<P>);
 
@@ -27,7 +28,10 @@ impl<P: Pipe> ParserBuilder<P> for DummyParserBuilder<P> {
     }
     fn option(&mut self, name: String, value: String) -> Result<(), Error> {
         debug!("Setting option: {}={}", name, value);
-        Ok(())
+        match name.as_ref() {
+            "Err" => Err(Error::verbatim_error("doesn't matter")),
+            "Ok" | _ => Ok(()),
+        }
     }
     fn build(self) -> Result<Self::Parser, Error> {
         debug!("Building Rust parser");
@@ -89,4 +93,25 @@ fn test_parser_proxy_can_be_deinitialized() {
     proxy.deinit();
     proxy.init();
     proxy.deinit();
+}
+
+use _parser_plugin::{native_parser_proxy_set_option};
+
+fn assert_option_setting_result_is_propagated(key: &str, expected: bool) {
+    let mut proxy =
+        ParserProxy::with_builder_and_parser(Some(DummyParserBuilder(PhantomData)), None);
+    let key = CString::new(key).unwrap();
+    let value = CString::new("value").unwrap();
+    let actual = native_parser_proxy_set_option(&mut proxy, key.as_ptr(), value.as_ptr());
+    assert_eq!(expected as i32, actual);
+}
+
+#[test]
+fn test_successful_option_setting_is_propagated_trough_native_parser_proxy_set_option() {
+    assert_option_setting_result_is_propagated("Ok", true);
+}
+
+#[test]
+fn test_failed_option_setting_is_propagated_trough_native_parser_proxy_set_option() {
+    assert_option_setting_result_is_propagated("Err", false);
 }
