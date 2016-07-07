@@ -47,6 +47,7 @@ extern "C" {
                                   func: NVTableForeachFunc,
                                   user_data: *mut c_void);
     pub fn log_msg_new_empty() -> *mut LogMessage;
+    pub fn log_msg_new_local() -> *mut LogMessage;
     pub fn log_msg_tags_foreach(msg: *const LogMessage,
                                 callback: LogMessageTagsForeachFunc,
                                 user_data: *mut c_void);
