@@ -43,7 +43,7 @@ pub mod _parser_plugin {
     use $crate::commit_suicide;
 
     use std::ffi::CStr;
-    use std::panic::{AssertUnwindSafe, catch_unwind};
+    use std::panic::{AssertUnwindSafe, catch_unwind, UnwindSafe};
 
     use super::*;
 
@@ -51,6 +51,17 @@ pub mod _parser_plugin {
         match result {
             true => 1,
             false => 0
+        }
+    }
+
+    fn abort_on_panic<F, R>(func_name_suffix: &str, unwind_safe_call: F) -> R
+        where F: UnwindSafe + FnOnce() -> R {
+        match catch_unwind(unwind_safe_call) {
+            Ok(result) => result,
+            Err(error) => {
+                error!("native_parser_proxy_{}() panicked, but the panic was caught: {:?}", func_name_suffix,  error);
+                commit_suicide();
+            }
         }
     }
 
@@ -62,13 +73,7 @@ pub mod _parser_plugin {
             bool_to_int(wrapper.init())
         };
 
-        match catch_unwind(unwind_safe_call) {
-            Ok(init_result) => init_result,
-            Err(error) => {
-                error!("native_parser_proxy_init() panicked, but the panic was caught: {:?}", error);
-                commit_suicide();
-            }
-        }
+        abort_on_panic("init", unwind_safe_call)
     }
 
     #[no_mangle]
@@ -79,13 +84,7 @@ pub mod _parser_plugin {
             bool_to_int(wrapper.deinit())
         };
 
-        match catch_unwind(unwind_safe_call) {
-            Ok(deinit_result) => deinit_result,
-            Err(error) => {
-                error!("native_parser_proxy_deinit() panicked, but the panic was caught: {:?}", error);
-                commit_suicide();
-            }
-        }
+        abort_on_panic("deinit", unwind_safe_call)
     }
 
     #[no_mangle]
@@ -96,13 +95,7 @@ pub mod _parser_plugin {
             let _ = unsafe { Box::from_raw(*wrapper) };
         };
 
-        match catch_unwind(unwind_safe_call) {
-            Ok(()) => (),
-            Err(error) => {
-                error!("native_parser_proxy_free() panicked, but the panic was caught: {:?}", error);
-                commit_suicide();
-            },
-        }
+        abort_on_panic("free", unwind_safe_call)
     }
 
     #[no_mangle]
@@ -111,20 +104,14 @@ pub mod _parser_plugin {
         let wrapper_key = AssertUnwindSafe(key);
         let wrapper_value = AssertUnwindSafe(value);
 
-        let result = catch_unwind(move || {
+        let unwind_safe_call = move || {
             let k: String = unsafe { CStr::from_ptr(*wrapper_key).to_owned().to_string_lossy().into_owned() };
             let v: String = unsafe { CStr::from_ptr(*wrapper_value).to_owned().to_string_lossy().into_owned() };
 
             wrapper_this.set_option(k, v);
-        });
+        };
 
-        match result {
-            Ok(()) => (),
-            Err(error) => {
-                error!("native_parser_proxy_set_option() panicked, but the panic was caught: {:?}", error);
-                commit_suicide();
-            }
-        }
+        abort_on_panic("set_option", unwind_safe_call)
     }
 
     #[no_mangle]
@@ -134,7 +121,7 @@ pub mod _parser_plugin {
         let wrapper_msg = AssertUnwindSafe(msg);
         let wrapper_input = AssertUnwindSafe(input);
 
-        let result = catch_unwind(move || {
+        let unwind_safe_call = move || {
             let input = unsafe { CStr::from_ptr(*wrapper_input).to_str() };
 
             let result: bool = match input {
@@ -151,33 +138,21 @@ pub mod _parser_plugin {
             };
 
             bool_to_int(result)
-        });
+        };
 
-        match result {
-            Ok(process_result) => process_result,
-            Err(error) => {
-                error!("native_parser_proxy_process() panicked, but the panic was caught: {:?}", error);
-                commit_suicide();
-            }
-        }
+        abort_on_panic("process", unwind_safe_call)
     }
 
     #[no_mangle]
     pub extern fn native_parser_proxy_new(cfg: *mut $crate::sys::GlobalConfig) -> *mut ParserProxy<$name> {
-        let result = catch_unwind(move || {
+        let unwind_safe_call = move || {
             init_logger();
             let cfg = GlobalConfig::borrow(cfg);
             let proxy = Box::new(ParserProxy::new(cfg));
             Box::into_raw(proxy)
-        });
+        };
 
-        match result {
-            Ok(proxy) => proxy,
-            Err(error) => {
-                error!("native_parser_proxy_new() panicked, but the panic was caught: {:?}", error);
-                commit_suicide();
-            }
-        }
+        abort_on_panic("new", unwind_safe_call)
     }
 
     #[no_mangle]
@@ -189,13 +164,7 @@ pub mod _parser_plugin {
             Box::into_raw(Box::new(cloned))
         };
 
-        match catch_unwind(unwind_safe_call) {
-            Ok(cloned) => cloned,
-            Err(error) => {
-                error!("native_parser_proxy_clone() panicked, but the panic was caught: {:?}", error);
-                commit_suicide();
-            }
-        }
+        abort_on_panic("clone", unwind_safe_call)
     }
 }
     }
