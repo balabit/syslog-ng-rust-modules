@@ -15,7 +15,7 @@ impl Template for LogTemplate {
     fn format_with_context(&self, messages: &[Self::Event], context_id: &str, buffer: &mut Write) {
         let messages: Vec<syslog_ng_common::LogMessage> = messages.iter().map(|event| event.0.clone()).collect();
         let mut template = self.0.borrow_mut();
-        let formatted_bytes = template.format_with_context(&messages, None, LogTimeZone::Send, 0, context_id);
+        let formatted_bytes = template.format_with_context(&messages, None, LogTimeZone::Local, 0, context_id);
         let _ = buffer.write(formatted_bytes);
     }
 }
