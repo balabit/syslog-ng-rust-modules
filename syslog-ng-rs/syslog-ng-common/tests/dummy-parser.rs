@@ -18,7 +18,7 @@ pub struct DummyParser<P: Pipe>(PhantomData<P>);
 pub struct DummyParserBuilder<P: Pipe>(PhantomData<P>);
 
 use syslog_ng_common::LogMessage;
-use syslog_ng_common::{Parser, ParserBuilder, OptionError, Pipe, GlobalConfig};
+use syslog_ng_common::{Parser, ParserBuilder, Error, Pipe, GlobalConfig};
 
 impl<P: Pipe> ParserBuilder<P> for DummyParserBuilder<P> {
     type Parser = DummyParser<P>;
@@ -28,7 +28,7 @@ impl<P: Pipe> ParserBuilder<P> for DummyParserBuilder<P> {
     fn option(&mut self, name: String, value: String) {
         debug!("Setting option: {}={}", name, value);
     }
-    fn build(self) -> Result<Self::Parser, OptionError> {
+    fn build(self) -> Result<Self::Parser, Error> {
         debug!("Building Rust parser");
         Ok(DummyParser(PhantomData))
     }

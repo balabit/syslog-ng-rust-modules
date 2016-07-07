@@ -14,7 +14,7 @@ use std::panic::{UnwindSafe, catch_unwind};
 mod option_error;
 mod proxy;
 
-pub use self::option_error::OptionError;
+pub use self::option_error::Error;
 pub use self::proxy::ParserProxy;
 use GlobalConfig;
 use commit_suicide;
@@ -24,7 +24,7 @@ pub trait ParserBuilder<P: Pipe>: Clone {
     type Parser: Parser<P>;
     fn new(GlobalConfig) -> Self;
     fn option(&mut self, _name: String, _value: String) {}
-    fn build(self) -> Result<Self::Parser, OptionError>;
+    fn build(self) -> Result<Self::Parser, Error>;
 }
 
 pub trait Parser<P: Pipe> {

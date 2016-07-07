@@ -10,7 +10,7 @@ use LogMessage;
 use LogParser;
 use GlobalConfig;
 
-pub use proxies::parser::{OptionError, Parser, ParserBuilder};
+pub use proxies::parser::{Error, Parser, ParserBuilder};
 
 #[repr(C)]
 pub struct ParserProxy<B>

@@ -18,7 +18,7 @@ use std::ffi::CString;
 use libc::{SIGABRT, waitpid, fork, WIFSIGNALED, WTERMSIG, pid_t};
 
 use syslog_ng_common::{SYSLOG_NG_INITIALIZED, syslog_ng_global_init, ParserProxy, LogMessage,
-                       Parser, ParserBuilder, OptionError, Pipe, GlobalConfig};
+                       Parser, ParserBuilder, Error, Pipe, GlobalConfig};
 use syslog_ng_common::sys;
 
 pub struct PanickingParser<P: Pipe>(PhantomData<P>);
@@ -39,7 +39,7 @@ impl<P: Pipe> ParserBuilder<P> for PanickingParserBuilder<P> {
     fn option(&mut self, _: String, _: String) {
         panic!("option() panicked");
     }
-    fn build(self) -> Result<Self::Parser, OptionError> {
+    fn build(self) -> Result<Self::Parser, Error> {
         panic!("build() panicked");
     }
 }
