@@ -3,7 +3,7 @@ use std::collections::HashMap;
 
 #[derive(Clone)]
 pub struct LookupTable {
-    map: HashMap<String, Vec<(String, String)>>
+    map: HashMap<String, Vec<(String, String)>>,
 }
 
 impl LookupTable {
@@ -17,9 +17,7 @@ impl LookupTable {
             entry.push((macro_name, macro_value));
         }
 
-        LookupTable {
-            map: table
-        }
+        LookupTable { map: table }
     }
 
     pub fn get(&self, key: &str) -> Option<&Vec<(String, String)>> {

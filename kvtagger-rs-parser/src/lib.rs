@@ -9,7 +9,8 @@ use std::fs::File;
 use std::marker::PhantomData;
 use std::io::{self, Read};
 
-use syslog_ng_common::{Parser, Pipe, LogMessage, OptionError, ParserBuilder, GlobalConfig, LogTemplate, LogTimeZone, MessageFormatter};
+use syslog_ng_common::{Parser, Pipe, LogMessage, OptionError, ParserBuilder, GlobalConfig,
+                       LogTemplate, LogTimeZone, MessageFormatter};
 
 pub use syslog_ng_common::LogPipe;
 
@@ -33,13 +34,13 @@ pub struct KVTaggerBuilder<P: Pipe> {
     default_selector: Option<String>,
     formatter: MessageFormatter,
     cfg: GlobalConfig,
-    _marker: PhantomData<P>
+    _marker: PhantomData<P>,
 }
 
 #[derive(Debug)]
 pub enum LoadError {
     Io(io::Error),
-    Csv(csv::Error)
+    Csv(csv::Error),
 }
 
 impl From<io::Error> for LoadError {
@@ -53,7 +54,7 @@ impl<P: Pipe> KVTaggerBuilder<P> {
         match KVTaggerBuilder::<P>::load_database::<PATH>(path) {
             Ok(records) => {
                 self.records = Some(records);
-            },
+            }
             Err(error) => {
                 error!("Error loading CSV file in kvtagger-rs: {:?}", error);
                 self.records = None;
@@ -97,7 +98,7 @@ impl<P: Pipe> Clone for KVTaggerBuilder<P> {
             default_selector: self.default_selector.clone(),
             records: self.records.clone(),
             selector_template: self.selector_template.clone(),
-            _marker: PhantomData
+            _marker: PhantomData,
         }
     }
 }
@@ -106,11 +107,13 @@ pub struct KVTagger {
     pub map: LookupTable,
     pub formatter: MessageFormatter,
     pub default_selector: Option<String>,
-    pub selector_template: LogTemplate
+    pub selector_template: LogTemplate,
 }
 
 impl KVTagger {
-    fn tag_msg_with_looked_up_key_value_pairs(formatter: &mut MessageFormatter, msg: &mut LogMessage, kvpairs: &[(String, String)]) {
+    fn tag_msg_with_looked_up_key_value_pairs(formatter: &mut MessageFormatter,
+                                              msg: &mut LogMessage,
+                                              kvpairs: &[(String, String)]) {
         for kv in kvpairs {
             let (key, value) = formatter.format(kv.0.as_ref(), kv.1.as_ref());
             msg.insert::<&str>(key, value.as_bytes());
@@ -127,18 +130,22 @@ impl<P: Pipe> Parser<P> for KVTagger {
 
             match (looked_up_kvpairs, self.default_selector.as_ref()) {
                 (Some(kv_pairs), _) => {
-                    KVTagger::tag_msg_with_looked_up_key_value_pairs(&mut self.formatter, msg, kv_pairs);
+                    KVTagger::tag_msg_with_looked_up_key_value_pairs(&mut self.formatter,
+                                                                     msg,
+                                                                     kv_pairs);
                     true
-                },
+                }
                 (None, Some(default_selector)) => {
                     if let Some(kv_pairs) = self.map.get(default_selector) {
-                        KVTagger::tag_msg_with_looked_up_key_value_pairs(&mut self.formatter, msg, kv_pairs);
+                        KVTagger::tag_msg_with_looked_up_key_value_pairs(&mut self.formatter,
+                                                                         msg,
+                                                                         kv_pairs);
                         true
                     } else {
                         true
                     }
-                },
-                _ => true
+                }
+                _ => true,
             }
         } else {
             false
@@ -156,35 +163,31 @@ impl<P: Pipe> ParserBuilder<P> for KVTaggerBuilder<P> {
             default_selector: None,
             cfg: cfg,
             formatter: MessageFormatter::new(),
-            _marker: PhantomData
+            _marker: PhantomData,
         }
     }
     fn option(&mut self, _name: String, _value: String) {
-        if _value.is_empty() {
-            return;
-        }
-
         match _name.as_ref() {
             options::DATABASE => {
                 self.set_database(_value);
-            },
+            }
             options::SELECTOR => {
                 match LogTemplate::compile(&self.cfg, _value.as_bytes()) {
                     Ok(template) => {
                         self.set_selector(template);
-                    },
+                    }
                     Err(error) => {
                         error!("{:?}", error);
                         self.selector_template = None;
                     }
                 }
-            },
+            }
             options::DEFAULT_SELECTOR => {
                 self.set_default_selector(_value);
             }
             options::PREFIX => {
                 self.set_prefix(_value);
-            },
+            }
             _ => {
                 debug!("Unknown configuration option for kvtagger: {}", _name);
             }
@@ -197,14 +200,19 @@ impl<P: Pipe> ParserBuilder<P> for KVTaggerBuilder<P> {
                     map: LookupTable::new(records),
                     formatter: self.formatter,
                     default_selector: default_selector,
-                    selector_template: selector_template
+                    selector_template: selector_template,
                 };
 
                 return Ok(parser);
-            },
+            }
             _ => {
-                error!("Failed to intialize kvtagger-rs: neither {}() or {}() or default-selector was not specified", options::DATABASE, options::SELECTOR);
-                return Err(OptionError::missing_required_option(format!("{} & {}", options::DATABASE, options::SELECTOR)));
+                error!("Failed to intialize kvtagger-rs: neither {}() or {}() or \
+                        default-selector was not specified",
+                       options::DATABASE,
+                       options::SELECTOR);
+                return Err(OptionError::missing_required_option(format!("{} & {}",
+                                                                        options::DATABASE,
+                                                                        options::SELECTOR)));
             }
         }
     }

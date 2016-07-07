@@ -2,7 +2,7 @@ extern crate kvtagger_rs_parser;
 extern crate syslog_ng_common;
 
 use kvtagger_rs_parser::{KVTaggerBuilder, LoadError};
-use kvtagger_rs_parser::utils::{make_expected_value_for_test_file};
+use kvtagger_rs_parser::utils::make_expected_value_for_test_file;
 
 use syslog_ng_common::{ParserBuilder, GlobalConfig, SYSLOG_NG_INITIALIZED, syslog_ng_global_init};
 use syslog_ng_common::mock::MockPipe;

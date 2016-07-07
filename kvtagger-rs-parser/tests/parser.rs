@@ -4,7 +4,8 @@ extern crate syslog_ng_common;
 use kvtagger_rs_parser::{KVTaggerBuilder, options};
 use kvtagger_rs_parser::utils::build_parser;
 
-use syslog_ng_common::{LogMessage, Parser, SYSLOG_NG_INITIALIZED, syslog_ng_global_init, ParserBuilder, GlobalConfig};
+use syslog_ng_common::{LogMessage, Parser, SYSLOG_NG_INITIALIZED, syslog_ng_global_init,
+                       ParserBuilder, GlobalConfig};
 use syslog_ng_common::mock::MockPipe;
 
 #[test]
@@ -14,10 +15,7 @@ fn test_parser_enriches_the_message_with_key_value_pairs() {
     });
 
     let cfg = GlobalConfig::new(0x0308);
-    let options = [
-        (options::SELECTOR, "key3"),
-        (options::DATABASE, "tests/test.csv"),
-    ];
+    let options = [(options::SELECTOR, "key3"), (options::DATABASE, "tests/test.csv")];
 
     let mut parser = build_parser::<MockPipe, KVTaggerBuilder<_>>(cfg, &options).build().unwrap();
 
@@ -39,10 +37,7 @@ fn test_kv_tagger_can_be_constructed_from_options() {
     });
 
     let cfg = GlobalConfig::new(0x0308);
-    let options = [
-        (options::SELECTOR, "key3"),
-        (options::DATABASE, "tests/test.csv"),
-    ];
+    let options = [(options::SELECTOR, "key3"), (options::DATABASE, "tests/test.csv")];
 
     let mut parser = build_parser::<MockPipe, KVTaggerBuilder<_>>(cfg, &options).build().unwrap();
 
@@ -65,9 +60,7 @@ fn test_parser_cannot_be_built_without_selector() {
 
     let cfg = GlobalConfig::new(0x0308);
 
-    let options = [
-        (options::DATABASE, "tests/test.csv"),
-    ];
+    let options = [(options::DATABASE, "tests/test.csv")];
 
     let _ = build_parser::<MockPipe, KVTaggerBuilder<_>>(cfg, &options).build().err().unwrap();
 }
@@ -79,9 +72,7 @@ fn test_parser_cannot_be_built_without_csv_file() {
     });
 
     let cfg = GlobalConfig::new(0x0308);
-    let options = [
-        (options::SELECTOR, "key3"),
-    ];
+    let options = [(options::SELECTOR, "key3")];
 
     let _ = build_parser::<MockPipe, KVTaggerBuilder<_>>(cfg, &options).build().err().unwrap();
 }
@@ -105,10 +96,8 @@ fn test_parser_can_use_templates_as_selector() {
 
     let cfg = GlobalConfig::new(0x0308);
 
-    let options = [
-        (options::SELECTOR, "${PART_1}${PART_2}"),
-        (options::DATABASE, "tests/test.csv"),
-    ];
+    let options = [(options::SELECTOR, "${PART_1}${PART_2}"),
+                   (options::DATABASE, "tests/test.csv")];
 
     let mut parser = build_parser::<MockPipe, KVTaggerBuilder<_>>(cfg, &options).build().unwrap();
 
@@ -132,11 +121,9 @@ fn test_prefix_can_be_set_on_parser() {
     });
 
     let cfg = GlobalConfig::new(0x0308);
-    let options = [
-        (options::SELECTOR, "key3"),
-        (options::PREFIX, "prefix."),
-        (options::DATABASE, "tests/test.csv"),
-    ];
+    let options = [(options::SELECTOR, "key3"),
+                   (options::PREFIX, "prefix."),
+                   (options::DATABASE, "tests/test.csv")];
     let mut parser = build_parser::<MockPipe, KVTaggerBuilder<_>>(cfg, &options).build().unwrap();
     let mut logmsg = LogMessage::new();
     let mut mock_pipe = MockPipe::new();
@@ -156,12 +143,11 @@ fn test_parser_uses_default_selector() {
 
     let cfg = GlobalConfig::new(0x0308);
 
-    let options = [
-        (options::DATABASE, "tests/test.csv"),
-        (options::DEFAULT_SELECTOR, "key3"),
-        (options::SELECTOR, "XXXX"),
-    ];
-    let mut parser = build_parser::<MockPipe, KVTaggerBuilder<MockPipe>>(cfg, &options).build().unwrap();
+    let options = [(options::DATABASE, "tests/test.csv"),
+                   (options::DEFAULT_SELECTOR, "key3"),
+                   (options::SELECTOR, "XXXX")];
+    let mut parser =
+        build_parser::<MockPipe, KVTaggerBuilder<MockPipe>>(cfg, &options).build().unwrap();
 
     let mut logmsg = LogMessage::new();
     let mut mock_pipe = MockPipe::new();
