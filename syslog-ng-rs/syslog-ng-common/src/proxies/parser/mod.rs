@@ -72,7 +72,7 @@ pub mod _parser_plugin {
         let mut wrapper = AssertUnwindSafe(this);
 
         match catch_unwind(move || wrapper.deinit()) {
-            Ok(value) => bool_to_int(value),
+            Ok(deinit_result) => bool_to_int(deinit_result),
             Err(error) => {
                 error!("native_parser_proxy_deinit() panicked, but the panic was caught: {:?}", error);
                 commit_suicide();
