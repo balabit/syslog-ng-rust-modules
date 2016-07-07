@@ -57,12 +57,7 @@ impl<P: Pipe> Clone for DummyParserBuilder<P> {
 parser_plugin!(DummyParserBuilder<LogParser>);
 
 use syslog_ng_common::{SYSLOG_NG_INITIALIZED, syslog_ng_global_init, ParserProxy, LogParser};
-
-struct DummyPipe;
-
-impl Pipe for DummyPipe {
-    fn forward(&mut self, _: LogMessage) {}
-}
+use syslog_ng_common::mock::MockPipe;
 
 #[test]
 fn test_given_parser_implementation_when_it_receives_a_message_then_it_adds_a_specific_key_value_pair_to_it
@@ -71,11 +66,11 @@ fn test_given_parser_implementation_when_it_receives_a_message_then_it_adds_a_sp
         unsafe { syslog_ng_global_init(); }
     });
     let cfg = GlobalConfig::new(0x0308);
-    let builder = DummyParserBuilder::<DummyPipe>::new(cfg);
+    let builder = DummyParserBuilder::<MockPipe>::new(cfg);
     let mut parser = builder.build().ok().expect("Failed to build DummyParser");
     let mut msg = LogMessage::new();
     let input = "The quick brown ...";
-    let mut pipe = DummyPipe;
+    let mut pipe = MockPipe::new();
     let result = parser.parse(&mut pipe, &mut msg, input);
     assert!(result);
     assert_eq!(msg.get(&b"input"[..]).unwrap(), input.as_bytes());
