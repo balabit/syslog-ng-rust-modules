@@ -10,6 +10,9 @@
 extern crate log;
 
 #[macro_use]
+extern crate error_chain;
+
+#[macro_use]
 extern crate syslog_ng_sys;
 extern crate glib;
 extern crate glib_sys;
