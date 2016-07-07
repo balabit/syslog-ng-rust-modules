@@ -57,3 +57,21 @@ fn test_context_id_can_be_used() {
     let actual = template.format_with_context(&messages, None, LogTimeZone::Local, 0, "context-id");
     assert_eq!(b"context-id", actual);
 }
+
+fn get_current_year() -> i32 {
+    ::time::now().tm_year + 1900
+}
+
+#[test]
+fn test_year_macro_returns_current_year_not_the_unix_epoch() {
+    SYSLOG_NG_INITIALIZED.call_once(|| {
+        unsafe { syslog_ng_global_init(); }
+    });
+
+    let cfg = GlobalConfig::new(0x0308);
+    let mut template = LogTemplate::compile(&cfg, b"${YEAR}").ok().unwrap();
+    let messages = [LogMessage::new()];
+    let actual = template.format_with_context(&messages, None, LogTimeZone::Local, 0, "context-id");
+    let current_year = get_current_year();
+    assert_eq!(actual, format!("{}", current_year).as_bytes());
+}
