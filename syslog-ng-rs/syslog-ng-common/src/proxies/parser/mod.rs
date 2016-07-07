@@ -140,7 +140,7 @@ pub mod _parser_plugin {
         });
 
         match result {
-            Ok(value) => bool_to_int(value),
+            Ok(process_result) => bool_to_int(process_result),
             Err(error) => {
                 error!("native_parser_proxy_process() panicked, but the panic was caught: {:?}", error);
                 commit_suicide();
