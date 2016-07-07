@@ -13,8 +13,10 @@ extern crate log;
 extern crate syslog_ng_sys;
 extern crate glib;
 extern crate glib_sys;
+extern crate libc;
 
 use std::sync::{Once, ONCE_INIT};
+use libc::abort;
 
 #[macro_use]
 mod proxies;
@@ -36,7 +38,7 @@ pub use logmsg::LogMessage;
 pub use formatter::MessageFormatter;
 pub use logger::init_logger;
 pub use cfg::GlobalConfig;
-pub use proxies::parser::{OptionError, Parser, ParserBuilder, ParserProxy};
+pub use proxies::parser::{OptionError, Parser, ParserBuilder, ParserProxy, abort_on_panic, bool_to_int};
 pub use logpipe::{LogPipe, Pipe};
 pub use logtemplate::{LogTemplate, LogTemplateOptions, LogTimeZone};
 pub use plugin::Plugin;
@@ -51,4 +53,10 @@ pub unsafe fn syslog_ng_global_init() {
     sys::logmsg::log_msg_registry_init();
     sys::logmsg::log_tags_global_init();
     sys::logtemplate::log_template_global_init();
+}
+
+pub fn commit_suicide() -> ! {
+    unsafe {
+        abort();
+    };
 }
