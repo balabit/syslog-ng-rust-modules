@@ -23,7 +23,7 @@ use c_int;
 pub trait ParserBuilder<P: Pipe>: Clone {
     type Parser: Parser<P>;
     fn new(GlobalConfig) -> Self;
-    fn option(&mut self, _name: String, _value: String) {}
+    fn option(&mut self, _name: String, _value: String) -> Result<(), Error> { Ok(()) }
     fn build(self) -> Result<Self::Parser, Error>;
 }
 

@@ -25,8 +25,9 @@ impl<P: Pipe> ParserBuilder<P> for DummyParserBuilder<P> {
     fn new(_: GlobalConfig) -> Self {
         DummyParserBuilder(PhantomData)
     }
-    fn option(&mut self, name: String, value: String) {
+    fn option(&mut self, name: String, value: String) -> Result<(), Error> {
         debug!("Setting option: {}={}", name, value);
+        Ok(())
     }
     fn build(self) -> Result<Self::Parser, Error> {
         debug!("Building Rust parser");

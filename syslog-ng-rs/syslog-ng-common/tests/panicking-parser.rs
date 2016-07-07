@@ -36,7 +36,7 @@ impl<P: Pipe> ParserBuilder<P> for PanickingParserBuilder<P> {
     fn new(_: GlobalConfig) -> Self {
         panic!("new() panicked");
     }
-    fn option(&mut self, _: String, _: String) {
+    fn option(&mut self, _: String, _: String) -> Result<(), Error> {
         panic!("option() panicked");
     }
     fn build(self) -> Result<Self::Parser, Error> {
