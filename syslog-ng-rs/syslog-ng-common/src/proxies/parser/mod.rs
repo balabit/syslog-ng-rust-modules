@@ -104,7 +104,7 @@ pub mod _parser_plugin {
     }
 
     #[no_mangle]
-    pub extern fn native_parser_proxy_set_option(this: &mut ParserProxy<$name>, key: *const c_char, value: *const c_char) {
+    pub extern fn native_parser_proxy_set_option(this: &mut ParserProxy<$name>, key: *const c_char, value: *const c_char) -> c_int {
         let mut wrapper_this = AssertUnwindSafe(this);
         let wrapper_key = AssertUnwindSafe(key);
         let wrapper_value = AssertUnwindSafe(value);
@@ -113,7 +113,7 @@ pub mod _parser_plugin {
             let k: String = unsafe { CStr::from_ptr(*wrapper_key).to_owned().to_string_lossy().into_owned() };
             let v: String = unsafe { CStr::from_ptr(*wrapper_value).to_owned().to_string_lossy().into_owned() };
 
-            wrapper_this.set_option(k, v);
+            bool_to_int(wrapper_this.set_option(k, v))
         };
 
         abort_on_panic("set_option", unwind_safe_call)
