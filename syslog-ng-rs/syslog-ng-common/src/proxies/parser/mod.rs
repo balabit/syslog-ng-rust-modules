@@ -124,11 +124,14 @@ pub mod _parser_plugin {
 
         let result = catch_unwind(move || {
             let input = unsafe { CStr::from_ptr(*wrapper_input).to_str() };
-            let mut parent = LogParser::wrap_raw(*wrapper_parent);
-            let mut msg = LogMessage::wrap_raw(*wrapper_msg);
 
             match input {
-                Ok(input) => wrapper_this.process(&mut parent, &mut msg, input),
+                Ok(input) => {
+                    let mut parent = LogParser::wrap_raw(*wrapper_parent);
+                    let mut msg = LogMessage::wrap_raw(*wrapper_msg);
+
+                    wrapper_this.process(&mut parent, &mut msg, input)
+                },
                 Err(err) => {
                     error!("{}", err);
                     false
