@@ -50,7 +50,7 @@ impl From<io::Error> for LoadError {
 
 impl<P: Pipe> KVTaggerBuilder<P> {
     pub fn set_database<PATH: AsRef<Path>>(&mut self, path: PATH) {
-        match KVTaggerBuilder::<P>::load_csv_file::<PATH>(path) {
+        match KVTaggerBuilder::<P>::load_database::<PATH>(path) {
             Ok(records) => {
                 self.records = Some(records);
             },
@@ -73,7 +73,7 @@ impl<P: Pipe> KVTaggerBuilder<P> {
         self.default_selector = Some(default_selector);
     }
 
-    pub fn load_csv_file<PATH: AsRef<Path>>(path: PATH) -> Result<Vec<CsvRecord>, LoadError> {
+    pub fn load_database<PATH: AsRef<Path>>(path: PATH) -> Result<Vec<CsvRecord>, LoadError> {
         let mut file = try!(File::open(path));
         let mut contents = String::new();
 

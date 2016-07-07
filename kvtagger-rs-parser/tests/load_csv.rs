@@ -10,7 +10,7 @@ use syslog_ng_common::mock::MockPipe;
 #[test]
 fn test_csv_records_can_be_read_from_file() {
     let expected = make_expected_value_for_test_file();
-    let records = KVTaggerBuilder::<MockPipe>::load_csv_file("tests/test.csv").ok().unwrap();
+    let records = KVTaggerBuilder::<MockPipe>::load_database("tests/test.csv").ok().unwrap();
     assert_eq!(&records, &expected);
 }
 
@@ -27,7 +27,7 @@ macro_rules! assert_err {
 
 #[test]
 fn test_unparseable_csv_file_is_reported_as_an_error() {
-    let records = KVTaggerBuilder::<MockPipe>::load_csv_file("tests/unparseable.csv");
+    let records = KVTaggerBuilder::<MockPipe>::load_database("tests/unparseable.csv");
     assert_err!(LoadError::Csv, records);
 }
 
