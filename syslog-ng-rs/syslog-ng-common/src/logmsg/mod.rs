@@ -37,7 +37,7 @@ impl Clone for LogMessage {
 impl LogMessage {
     pub fn new() -> LogMessage {
         unsafe {
-            let msg = logmsg::log_msg_new_empty();
+            let msg = logmsg::log_msg_new_local();
             assert!(msg != ::std::ptr::null_mut());
             LogMessage(msg)
         }
