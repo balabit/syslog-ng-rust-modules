@@ -9,12 +9,16 @@
 use LogMessage;
 use Pipe;
 
+use std::panic::{UnwindSafe, catch_unwind};
+
 mod option_error;
 mod proxy;
 
 pub use self::option_error::OptionError;
 pub use self::proxy::ParserProxy;
 use GlobalConfig;
+use commit_suicide;
+use c_int;
 
 pub trait ParserBuilder<P: Pipe>: Clone {
     type Parser: Parser<P>;
@@ -29,6 +33,24 @@ pub trait Parser<P: Pipe> {
     fn parse(&mut self, pipe: &mut P, msg: &mut LogMessage, input: &str) -> bool;
 }
 
+pub fn bool_to_int(result: bool) -> c_int {
+    match result {
+        true => 1,
+        false => 0
+    }
+}
+
+pub fn abort_on_panic<F, R>(func_name_suffix: &str, unwind_safe_call: F) -> R
+where F: UnwindSafe + FnOnce() -> R {
+    match catch_unwind(unwind_safe_call) {
+        Ok(result) => result,
+        Err(error) => {
+            error!("native_parser_proxy_{}() panicked, but the panic was caught: {:?}", func_name_suffix,  error);
+            commit_suicide();
+        }
+    }
+}
+
 #[macro_export]
 macro_rules! parser_plugin {
     ($name:ty) => {
@@ -40,30 +62,13 @@ pub mod _parser_plugin {
     use $crate::init_logger;
     use $crate::ParserProxy;
     use $crate::GlobalConfig;
-    use $crate::commit_suicide;
+    use $crate::abort_on_panic;
+    use $crate::bool_to_int;
 
     use std::ffi::CStr;
-    use std::panic::{AssertUnwindSafe, catch_unwind, UnwindSafe};
+    use std::panic::AssertUnwindSafe;
 
     use super::*;
-
-    fn bool_to_int(result: bool) -> c_int {
-        match result {
-            true => 1,
-            false => 0
-        }
-    }
-
-    fn abort_on_panic<F, R>(func_name_suffix: &str, unwind_safe_call: F) -> R
-        where F: UnwindSafe + FnOnce() -> R {
-        match catch_unwind(unwind_safe_call) {
-            Ok(result) => result,
-            Err(error) => {
-                error!("native_parser_proxy_{}() panicked, but the panic was caught: {:?}", func_name_suffix,  error);
-                commit_suicide();
-            }
-        }
-    }
 
     #[no_mangle]
     pub extern fn native_parser_proxy_init(this: &mut ParserProxy<$name>) -> c_int {
