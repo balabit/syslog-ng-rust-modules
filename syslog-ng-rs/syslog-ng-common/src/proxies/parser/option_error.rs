@@ -32,8 +32,8 @@ impl Error {
             expected_value: expected_value.into(),
         }
     }
-    pub fn verbatim_error(error_msg: String) -> Error {
-        Error::VerbatimError(error_msg)
+    pub fn verbatim_error<S: Into<String>>(error_msg: S) -> Error {
+        Error::VerbatimError(error_msg.into())
     }
 }
 
