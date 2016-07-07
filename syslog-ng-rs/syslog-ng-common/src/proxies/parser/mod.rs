@@ -169,7 +169,7 @@ pub mod _parser_plugin {
         match catch_unwind(move || (*wrapper_this).clone()) {
             Ok(cloned) => Box::into_raw(Box::new(cloned)),
             Err(error) => {
-                error!("native_parser_proxy_process() panicked, but the panic was caught: {:?}", error);
+                error!("native_parser_proxy_clone() panicked, but the panic was caught: {:?}", error);
                 commit_suicide();
             }
         }
