@@ -160,6 +160,10 @@ impl<P: Pipe> ParserBuilder<P> for KVTaggerBuilder<P> {
         }
     }
     fn option(&mut self, _name: String, _value: String) {
+        if _value.is_empty() {
+            return;
+        }
+
         match _name.as_ref() {
             options::DATABASE => {
                 self.set_database(_value);
