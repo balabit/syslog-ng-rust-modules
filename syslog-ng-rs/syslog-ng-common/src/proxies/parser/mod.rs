@@ -11,10 +11,10 @@ use Pipe;
 
 use std::panic::{UnwindSafe, catch_unwind};
 
-mod option_error;
+mod error;
 mod proxy;
 
-pub use self::option_error::Error;
+pub use self::error::Error;
 pub use self::proxy::ParserProxy;
 use GlobalConfig;
 use commit_suicide;
