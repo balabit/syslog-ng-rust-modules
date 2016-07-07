@@ -85,11 +85,11 @@ pub mod _parser_plugin {
         let wrapper = AssertUnwindSafe(proxy);
 
         match catch_unwind(move || { let _ = wrapper; } ) {
+            Ok(()) => (),
             Err(error) => {
                 error!("native_parser_proxy_free() panicked, but the panic was caught: {:?}", error);
                 commit_suicide();
             },
-            Ok(()) => ()
         }
     }
 
