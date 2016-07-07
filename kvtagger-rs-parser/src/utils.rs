@@ -22,8 +22,8 @@ pub fn make_expected_value_for_test_file() -> Vec<(String, String, String)> {
     ("key1","name8","value8"),
     ("key1","name12","value12")]
     .iter()
-    .map(|&(lookup_key, macro_name, macro_value)| {
-        (lookup_key.to_string(), macro_name.to_string(), macro_value.to_string())
+    .map(|&(selector, macro_name, macro_value)| {
+        (selector.to_string(), macro_name.to_string(), macro_value.to_string())
     }).collect()
 }
 

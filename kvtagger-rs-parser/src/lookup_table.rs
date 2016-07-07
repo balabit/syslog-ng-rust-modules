@@ -11,9 +11,9 @@ impl LookupTable {
         let mut table = HashMap::new();
 
         for record in records {
-            let (lookup_key, macro_name, macro_value) = record;
+            let (selector, macro_name, macro_value) = record;
 
-            let mut entry = table.entry(lookup_key).or_insert_with(Vec::new);
+            let mut entry = table.entry(selector).or_insert_with(Vec::new);
             entry.push((macro_name, macro_value));
         }
 

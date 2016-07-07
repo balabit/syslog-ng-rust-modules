@@ -58,7 +58,7 @@ fn test_kv_tagger_can_be_constructed_from_options() {
 }
 
 #[test]
-fn test_parser_cannot_be_built_without_lookup_key() {
+fn test_parser_cannot_be_built_without_selector() {
     SYSLOG_NG_INITIALIZED.call_once(|| {
         unsafe { syslog_ng_global_init() };
     });
