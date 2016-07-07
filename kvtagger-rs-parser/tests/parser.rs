@@ -1,10 +1,10 @@
 extern crate kvtagger_rs_parser;
 extern crate syslog_ng_common;
 
-use kvtagger_rs_parser::{KVTagger, LookupTable, KVTaggerBuilder, options};
-use kvtagger_rs_parser::utils::{make_expected_value_for_test_file, build_parser};
+use kvtagger_rs_parser::{KVTaggerBuilder, options};
+use kvtagger_rs_parser::utils::build_parser;
 
-use syslog_ng_common::{LogMessage, Parser, SYSLOG_NG_INITIALIZED, syslog_ng_global_init, ParserBuilder, GlobalConfig, LogTemplate, MessageFormatter};
+use syslog_ng_common::{LogMessage, Parser, SYSLOG_NG_INITIALIZED, syslog_ng_global_init, ParserBuilder, GlobalConfig};
 use syslog_ng_common::mock::MockPipe;
 
 #[test]
@@ -13,16 +13,13 @@ fn test_parser_enriches_the_message_with_key_value_pairs() {
         unsafe { syslog_ng_global_init() };
     });
 
-    let records = make_expected_value_for_test_file();
     let cfg = GlobalConfig::new(0x0308);
-    let template = LogTemplate::compile(&cfg, "key3".as_bytes()).unwrap();
+    let options = [
+        (options::SELECTOR, "key3"),
+        (options::DATABASE, "tests/test.csv"),
+    ];
 
-    let mut parser = KVTagger {
-        map: LookupTable::new(records),
-        default_selector: None,
-        formatter: MessageFormatter::new(),
-        selector_template: template
-    };
+    let mut parser = build_parser::<MockPipe, KVTaggerBuilder<_>>(cfg, &options).build().unwrap();
 
     let mut logmsg = LogMessage::new();
     let mut mock_pipe = MockPipe::new();
@@ -42,12 +39,12 @@ fn test_kv_tagger_can_be_constructed_from_options() {
     });
 
     let cfg = GlobalConfig::new(0x0308);
+    let options = [
+        (options::SELECTOR, "key3"),
+        (options::DATABASE, "tests/test.csv"),
+    ];
 
-    let mut builder = KVTaggerBuilder::<MockPipe>::new(cfg);
-    builder.option(options::DATABASE.to_string(), "tests/test.csv".to_string());
-    builder.option(options::SELECTOR.to_string(), "key3".to_string());
-
-    let mut parser = builder.build().unwrap();
+    let mut parser = build_parser::<MockPipe, KVTaggerBuilder<_>>(cfg, &options).build().unwrap();
 
     let mut logmsg = LogMessage::new();
     let mut mock_pipe = MockPipe::new();
@@ -68,10 +65,11 @@ fn test_parser_cannot_be_built_without_lookup_key() {
 
     let cfg = GlobalConfig::new(0x0308);
 
-    let mut builder = KVTaggerBuilder::<MockPipe>::new(cfg);
-    builder.option(options::DATABASE.to_string(), "tests/test.csv".to_string());
+    let options = [
+        (options::DATABASE, "tests/test.csv"),
+    ];
 
-    let _ = builder.build().err().unwrap();
+    let _ = build_parser::<MockPipe, KVTaggerBuilder<_>>(cfg, &options).build().err().unwrap();
 }
 
 #[test]
@@ -81,11 +79,11 @@ fn test_parser_cannot_be_built_without_csv_file() {
     });
 
     let cfg = GlobalConfig::new(0x0308);
+    let options = [
+        (options::SELECTOR, "key3"),
+    ];
 
-    let mut builder = KVTaggerBuilder::<MockPipe>::new(cfg);
-    builder.option(options::SELECTOR.to_string(), "key3".to_string());
-
-    let _ = builder.build().err().unwrap();
+    let _ = build_parser::<MockPipe, KVTaggerBuilder<_>>(cfg, &options).build().err().unwrap();
 }
 
 #[test]
@@ -105,16 +103,14 @@ fn test_parser_can_use_templates_as_selector() {
         unsafe { syslog_ng_global_init() };
     });
 
-    let records = make_expected_value_for_test_file();
     let cfg = GlobalConfig::new(0x0308);
-    let template = LogTemplate::compile(&cfg, "${PART_1}${PART_2}".as_bytes()).unwrap();
 
-    let mut parser = KVTagger {
-        map: LookupTable::new(records),
-        formatter: MessageFormatter::new(),
-        default_selector: None,
-        selector_template: template
-    };
+    let options = [
+        (options::SELECTOR, "${PART_1}${PART_2}"),
+        (options::DATABASE, "tests/test.csv"),
+    ];
+
+    let mut parser = build_parser::<MockPipe, KVTaggerBuilder<_>>(cfg, &options).build().unwrap();
 
     let mut logmsg = LogMessage::new();
     logmsg.insert("PART_1", "key".as_bytes());
@@ -135,22 +131,14 @@ fn test_prefix_can_be_set_on_parser() {
         unsafe { syslog_ng_global_init() };
     });
 
-    let records = make_expected_value_for_test_file();
     let cfg = GlobalConfig::new(0x0308);
-    let template = LogTemplate::compile(&cfg, "key3".as_bytes()).unwrap();
-
-    let mut formatter = MessageFormatter::new();
-    formatter.set_prefix("prefix.".to_string());
-
-    let mut parser = KVTagger {
-        map: LookupTable::new(records),
-        formatter: formatter,
-        default_selector: None,
-        selector_template: template
-    };
-
+    let options = [
+        (options::SELECTOR, "key3"),
+        (options::PREFIX, "prefix."),
+        (options::DATABASE, "tests/test.csv"),
+    ];
+    let mut parser = build_parser::<MockPipe, KVTaggerBuilder<_>>(cfg, &options).build().unwrap();
     let mut logmsg = LogMessage::new();
-
     let mut mock_pipe = MockPipe::new();
 
     parser.parse(&mut mock_pipe, &mut logmsg, "message");
@@ -173,7 +161,7 @@ fn test_parser_uses_default_selector() {
         (options::DEFAULT_SELECTOR, "key3"),
         (options::SELECTOR, "XXXX"),
     ];
-    let mut parser = build_parser::<MockPipe, KVTaggerBuilder<MockPipe>>(cfg, &options).unwrap();
+    let mut parser = build_parser::<MockPipe, KVTaggerBuilder<MockPipe>>(cfg, &options).build().unwrap();
 
     let mut logmsg = LogMessage::new();
     let mut mock_pipe = MockPipe::new();
