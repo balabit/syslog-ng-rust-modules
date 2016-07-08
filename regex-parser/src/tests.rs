@@ -1,7 +1,7 @@
 use regex::Regex;
 use super::*;
 
-use syslog_ng_common::{LogMessage, Parser, ParserBuilder, OptionError, mock, GlobalConfig, SYSLOG_NG_INITIALIZED, syslog_ng_global_init};
+use syslog_ng_common::{LogMessage, Parser, ParserBuilder, mock, GlobalConfig, SYSLOG_NG_INITIALIZED, syslog_ng_global_init, Error};
 
 #[test]
 fn test_loggen_regex_can_be_compiled() {
@@ -60,7 +60,7 @@ fn test_parser_can_be_built_with_valid_regex() {
     });
     let cfg = GlobalConfig::new(0x0308);
     let mut builder = RegexParserBuilder::<mock::MockPipe>::new(cfg);
-    builder.option(REGEX_OPTION.to_string(), "[abc]d".to_string());
+    builder.option(REGEX_OPTION.to_string(), "[abc]d".to_string()).ok().unwrap();
     let _ = builder.build().unwrap();
 }
 
@@ -73,6 +73,10 @@ fn test_parser_cannot_be_built_with_invalid_regex() {
     });
     let cfg = GlobalConfig::new(0x0308);
     let mut builder = RegexParserBuilder::<mock::MockPipe>::new(cfg);
-    builder.option(REGEX_OPTION.to_string(), "[abcd".to_string());
-    assert_eq!(Some(OptionError::missing_required_option(REGEX_OPTION)), builder.build().err());
+    builder.option(REGEX_OPTION.to_string(), "[abcd".to_string()).err().unwrap();
+    if let Error::MissingRequiredOption(value) = builder.build().err().unwrap() {
+        assert_eq!(REGEX_OPTION, value);
+    } else {
+        unreachable!();
+    }
 }
