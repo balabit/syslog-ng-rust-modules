@@ -158,3 +158,27 @@ fn test_parser_uses_default_selector() {
     assert_eq!(logmsg.get("name19").unwrap(), b"value19");
     assert_eq!(logmsg.get("name20").unwrap(), b"value20");
 }
+
+fn assert_empty_optional_option_is_not_set(option: &str) -> KVTaggerBuilder<MockPipe> {
+    SYSLOG_NG_INITIALIZED.call_once(|| {
+        unsafe { syslog_ng_global_init() };
+    });
+
+    let cfg = GlobalConfig::new(0x0308);
+
+    let mut builder = KVTaggerBuilder::<MockPipe>::new(cfg);
+    builder.option(option.to_string(), String::new()).ok().unwrap();
+    builder
+}
+
+#[test]
+fn test_empty_prefix_is_not_set_on_builder() {
+    let builder = assert_empty_optional_option_is_not_set(options::PREFIX);
+    assert!(builder.formatter.prefix().is_none());
+}
+
+#[test]
+fn test_empty_default_selector_is_not_set_on_builder() {
+    let builder = assert_empty_optional_option_is_not_set(options::DEFAULT_SELECTOR);
+    assert!(builder.default_selector.is_none());
+}
