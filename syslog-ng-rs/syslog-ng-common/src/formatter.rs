@@ -26,6 +26,10 @@ impl MessageFormatter {
         self.prefix = Some(prefix)
     }
 
+    pub fn prefix(&self) -> Option<&String> {
+        self.prefix.as_ref()
+    }
+
     pub fn format<'a, 'b, 'c>(&'a mut self, key: &'b str, value: &'c str) -> (&'a str, &'c str) {
         self.buffer.clear();
         self.apply_prefix(key);
