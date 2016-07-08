@@ -1,7 +1,7 @@
 extern crate kvtagger_rs_parser;
 extern crate syslog_ng_common;
 
-use kvtagger_rs_parser::{KVTaggerBuilder, LoadError};
+use kvtagger_rs_parser::KVTaggerBuilder;
 use kvtagger_rs_parser::utils::make_expected_value_for_test_file;
 
 use syslog_ng_common::{ParserBuilder, GlobalConfig, SYSLOG_NG_INITIALIZED, syslog_ng_global_init};
@@ -14,21 +14,9 @@ fn test_csv_records_can_be_read_from_file() {
     assert_eq!(&records, &expected);
 }
 
-macro_rules! assert_err {
-    ($err_type:path, $value:expr) => {
-        {
-            if let Err($err_type(_)) = $value {
-            } else {
-                panic!("Expected error didn't occur");
-            }
-        }
-    }
-}
-
 #[test]
 fn test_unparseable_csv_file_is_reported_as_an_error() {
-    let records = KVTaggerBuilder::<MockPipe>::load_database("tests/unparseable.csv");
-    assert_err!(LoadError::Csv, records);
+    let _ = KVTaggerBuilder::<MockPipe>::load_database("tests/unparseable.csv").err().unwrap();
 }
 
 #[test]

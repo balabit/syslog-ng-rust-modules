@@ -3,6 +3,9 @@ extern crate csv;
 extern crate log;
 #[macro_use]
 extern crate syslog_ng_common;
+#[macro_use]
+extern crate error_chain;
+
 
 use std::path::Path;
 use std::fs::File;
@@ -37,16 +40,19 @@ pub struct KVTaggerBuilder<P: Pipe> {
     _marker: PhantomData<P>,
 }
 
-#[derive(Debug)]
-pub enum LoadError {
-    Io(io::Error),
-    Csv(csv::Error),
-}
-
-impl From<io::Error> for LoadError {
-    fn from(error: io::Error) -> LoadError {
-        LoadError::Io(error)
+error_chain! {
+    types {
+        LoadError, LoadErrorKind, ChainErr, LoadResult;
     }
+
+    links {}
+
+    foreign_links {
+        io::Error, Io, "IO error";
+        csv::Error, Csv, "CSV error";
+    }
+
+    errors {}
 }
 
 impl<P: Pipe> KVTaggerBuilder<P> {
@@ -83,7 +89,10 @@ impl<P: Pipe> KVTaggerBuilder<P> {
 
         let mut csv_reader = csv::Reader::from_string(contents).has_headers(false);
 
-        csv_reader.decode().collect::<csv::Result<Vec<CsvRecord>>>().map_err(LoadError::Csv)
+        match csv_reader.decode().collect::<csv::Result<Vec<CsvRecord>>>() {
+            Ok(records) => Ok(records),
+            Err(error) => Err(LoadError::from(error))
+        }
     }
 
     pub fn records(&self) -> Option<&Vec<CsvRecord>> {
