@@ -193,11 +193,11 @@ impl<P: Pipe> ParserBuilder<P> for KVTaggerBuilder<P> {
                     }
                 }
             }
-            options::DEFAULT_SELECTOR => {
+            options::DEFAULT_SELECTOR if ! _value.is_empty() => {
                 self.set_default_selector(_value);
                 Ok(())
             }
-            options::PREFIX => {
+            options::PREFIX if !_value.is_empty() => {
                 self.set_prefix(_value);
                 Ok(())
             }
