@@ -10,6 +10,9 @@
 extern crate log;
 
 #[macro_use]
+extern crate error_chain;
+
+#[macro_use]
 extern crate syslog_ng_sys;
 extern crate glib;
 extern crate glib_sys;
@@ -38,7 +41,7 @@ pub use logmsg::LogMessage;
 pub use formatter::MessageFormatter;
 pub use logger::init_logger;
 pub use cfg::GlobalConfig;
-pub use proxies::parser::{OptionError, Parser, ParserBuilder, ParserProxy, abort_on_panic, bool_to_int};
+pub use proxies::parser::{Error, ErrorKind, Parser, ParserBuilder, ParserProxy, abort_on_panic, bool_to_int};
 pub use logpipe::{LogPipe, Pipe};
 pub use logtemplate::{LogTemplate, LogTemplateOptions, LogTimeZone};
 pub use plugin::Plugin;

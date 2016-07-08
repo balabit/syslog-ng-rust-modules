@@ -15,7 +15,7 @@ extern crate actiondb;
 use std::borrow::Borrow;
 
 use actiondb::matcher::{Matcher, PatternLoader, MatcherSuite};
-use syslog_ng_common::{Parser, ParserBuilder, OptionError, LogMessage, MessageFormatter, Pipe, GlobalConfig};
+use syslog_ng_common::{Parser, ParserBuilder, Error, LogMessage, MessageFormatter, Pipe, GlobalConfig};
 
 mod msgfilller;
 mod keys;
@@ -52,7 +52,7 @@ impl<MS, P> ParserBuilder<P> for ActiondbParserBuilder<MS> where P: Pipe, MS: Ma
             formatter: MessageFormatter::new(),
         }
     }
-    fn option(&mut self, name: String, value: String) {
+    fn option(&mut self, name: String, value: String) -> Result<(), Error> {
         trace!("ActiondbParserBuilder: set_option(name={}, value={})",
                &name,
                &value);
@@ -60,21 +60,22 @@ impl<MS, P> ParserBuilder<P> for ActiondbParserBuilder<MS> where P: Pipe, MS: Ma
         match name.borrow() {
             options::PATTERN_FILE => {
                 self.set_pattern_file(&value);
+                Ok(())
             }
             options::PREFIX => {
                 self.set_prefix(value);
+                Ok(())
             }
             _ => {
-                debug!("ActiondbParserBuilder: unsupported option: {:?}", &name) ;
+                Err(Error::unknown_option(name))
             }
-        };
-
+        }
     }
-    fn build(self) -> Result<Self::Parser, OptionError> {
+    fn build(self) -> Result<Self::Parser, Error> {
         let ActiondbParserBuilder {matcher, formatter} = self;
         debug!("ActiondbParser: building");
         let matcher =
-            try!(matcher.ok_or(OptionError::missing_required_option(options::PATTERN_FILE)));
+            try!(matcher.ok_or(Error::missing_required_option(options::PATTERN_FILE)));
         Ok(ActiondbParser {
             matcher: matcher,
             formatter: formatter,
