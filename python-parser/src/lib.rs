@@ -11,7 +11,7 @@ pub mod utils;
 use std::borrow::Borrow;
 use std::marker::PhantomData;
 
-use syslog_ng_common::{LogMessage, Parser, ParserBuilder, OptionError, Pipe, GlobalConfig};
+use syslog_ng_common::{LogMessage, Parser, ParserBuilder, Error, Pipe, GlobalConfig};
 use cpython::{Python, PyDict, NoArgs, PyObject, PyResult, PyModule, PyErr, PyString, ToPyObject};
 use cpython::ObjectProtocol; //for call method
 use cpython::exc::TypeError;
@@ -157,33 +157,35 @@ impl<P: Pipe> ParserBuilder<P> for PythonParserBuilder<P> {
             _marker: PhantomData
         }
     }
-    fn option(&mut self, name: String, value: String) {
+    fn option(&mut self, name: String, value: String) -> Result<(), Error> {
         match name.borrow() {
-            options::MODULE => { self.module = Some(value); },
-            options::CLASS => { self.class = Some(value); },
-            _ => { self.options.push((name, value)); }
+            options::MODULE => {
+                self.module = Some(value);
+            },
+            options::CLASS => {
+                self.class = Some(value);
+            },
+            _ => {
+                self.options.push((name, value));
+            }
         }
+        Ok(())
     }
-    fn build(self) -> Result<Self::Parser, OptionError> {
+    fn build(self) -> Result<Self::Parser, Error> {
         let gil = Python::acquire_gil();
         let py = gil.python(); // obtain `Python` token
 
-        match (self.module, self.class) {
-            (Some(ref module_name), Some(ref class_name)) => {
-                match PythonParserBuilder::<P>::load_and_init_class(py, module_name, class_name, &self.options) {
-                    Ok(parser_instance) => {
-                        debug!("Python parser successfully initialized, class='{}'", &class_name);
-                        Ok(PythonParser {parser: parser_instance, _marker: PhantomData})
-                    },
-                    Err(error) => {
-                        error!("Failed to create Python parser, class='{}', error='{:?}'", class_name, error);
-                        Err(OptionError::verbatim_error(format!("{:?}", error)))
-                    }
-                }
+        let module_name = try!(self.module.ok_or(Error::missing_required_option(options::MODULE)));
+        let class_name = try!(self.class.ok_or(Error::missing_required_option(options::CLASS)));
+
+        match PythonParserBuilder::<P>::load_and_init_class(py, &module_name, &class_name, &self.options) {
+            Ok(parser_instance) => {
+                debug!("Python parser successfully initialized, class='{}'", &class_name);
+                Ok(PythonParser {parser: parser_instance, _marker: PhantomData})
             },
-            (ref module, ref class) => {
-                error!("Missing parameters in Python parser: module={:?}, class={:?}", module, class);
-                Err(OptionError::missing_required_option("module"))
+            Err(error) => {
+                let err_msg = format!("Failed to create Python parser, class='{}', error='{:?}'", class_name, error);
+                Err(Error::verbatim_error(err_msg))
             }
         }
     }
