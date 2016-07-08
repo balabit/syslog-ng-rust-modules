@@ -39,7 +39,7 @@ pub fn build_parser<P, PB>(cfg: GlobalConfig, options: &[(&str, &str)]) -> PB
     let mut builder = PB::new(cfg);
 
     for option in options {
-        builder.option(option.0.to_string(), option.1.to_string());
+        let _ = builder.option(option.0.to_string(), option.1.to_string());
     }
 
     builder

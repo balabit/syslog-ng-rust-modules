@@ -9,7 +9,7 @@ use std::fs::File;
 use std::marker::PhantomData;
 use std::io::{self, Read};
 
-use syslog_ng_common::{Parser, Pipe, LogMessage, OptionError, ParserBuilder, GlobalConfig,
+use syslog_ng_common::{Parser, Pipe, LogMessage, Error, ParserBuilder, GlobalConfig,
                        LogTemplate, LogTimeZone, MessageFormatter};
 
 pub use syslog_ng_common::LogPipe;
@@ -50,14 +50,15 @@ impl From<io::Error> for LoadError {
 }
 
 impl<P: Pipe> KVTaggerBuilder<P> {
-    pub fn set_database<PATH: AsRef<Path>>(&mut self, path: PATH) {
+    pub fn set_database<PATH: AsRef<Path>>(&mut self, path: PATH) -> Result<(), Error> {
         match KVTaggerBuilder::<P>::load_database::<PATH>(path) {
             Ok(records) => {
                 self.records = Some(records);
+                Ok(())
             }
             Err(error) => {
-                error!("Error loading CSV file in kvtagger-rs: {:?}", error);
-                self.records = None;
+                let errmsg = format!("Error loading CSV file in kvtagger-rs: {:?}", error);
+                Err(Error::verbatim_error(errmsg))
             }
         }
     }
@@ -166,34 +167,38 @@ impl<P: Pipe> ParserBuilder<P> for KVTaggerBuilder<P> {
             _marker: PhantomData,
         }
     }
-    fn option(&mut self, _name: String, _value: String) {
+    fn option(&mut self, _name: String, _value: String) -> Result<(), Error> {
         match _name.as_ref() {
             options::DATABASE => {
-                self.set_database(_value);
+                self.set_database(_value)
             }
             options::SELECTOR => {
                 match LogTemplate::compile(&self.cfg, _value.as_bytes()) {
                     Ok(template) => {
                         self.set_selector(template);
+                        Ok(())
                     }
                     Err(error) => {
-                        error!("{:?}", error);
-                        self.selector_template = None;
+                        let errmsg = format!("{:?}", error);
+                        Err(Error::verbatim_error(errmsg))
                     }
                 }
             }
             options::DEFAULT_SELECTOR => {
                 self.set_default_selector(_value);
+                Ok(())
             }
             options::PREFIX => {
                 self.set_prefix(_value);
+                Ok(())
             }
             _ => {
-                debug!("Unknown configuration option for kvtagger: {}", _name);
+                let errmsg = format!("Unknown configuration option for kvtagger: {}", _name);
+                Err(Error::unknown_option(errmsg))
             }
         }
     }
-    fn build(self) -> Result<Self::Parser, OptionError> {
+    fn build(self) -> Result<Self::Parser, Error> {
         match (self.records, self.selector_template, self.default_selector) {
             (Some(records), Some(selector_template), default_selector) => {
                 let parser = KVTagger {
@@ -210,7 +215,7 @@ impl<P: Pipe> ParserBuilder<P> for KVTaggerBuilder<P> {
                         default-selector was not specified",
                        options::DATABASE,
                        options::SELECTOR);
-                return Err(OptionError::missing_required_option(format!("{} & {}",
+                return Err(Error::missing_required_option(format!("{} & {}",
                                                                         options::DATABASE,
                                                                         options::SELECTOR)));
             }
