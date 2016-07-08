@@ -199,27 +199,15 @@ impl<P: Pipe> ParserBuilder<P> for KVTaggerBuilder<P> {
         }
     }
     fn build(self) -> Result<Self::Parser, Error> {
-        match (self.records, self.selector_template, self.default_selector) {
-            (Some(records), Some(selector_template), default_selector) => {
-                let parser = KVTagger {
-                    map: LookupTable::new(records),
-                    formatter: self.formatter,
-                    default_selector: default_selector,
-                    selector_template: selector_template,
-                };
+        let records = try!(self.records.ok_or(Error::missing_required_option(options::DATABASE)));
+        let selector_template = try!(self.selector_template.ok_or(Error::missing_required_option(options::SELECTOR)));
 
-                return Ok(parser);
-            }
-            _ => {
-                error!("Failed to intialize kvtagger-rs: neither {}() or {}() or \
-                        default-selector was not specified",
-                       options::DATABASE,
-                       options::SELECTOR);
-                return Err(Error::missing_required_option(format!("{} & {}",
-                                                                        options::DATABASE,
-                                                                        options::SELECTOR)));
-            }
-        }
+        Ok(KVTagger {
+            map: LookupTable::new(records),
+            formatter: self.formatter,
+            default_selector: self.default_selector,
+            selector_template: selector_template,
+        })
     }
 }
 
