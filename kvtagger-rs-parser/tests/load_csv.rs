@@ -20,6 +20,11 @@ fn test_unparseable_csv_file_is_reported_as_an_error() {
 }
 
 #[test]
+fn test_csv_file_with_more_than_three_columns_is_reported_as_an_error() {
+    let _ = KVTaggerBuilder::<MockPipe>::load_database("tests/more_columns.csv").err().unwrap();
+}
+
+#[test]
 fn test_csv_file_is_read_in_set_csv_file() {
     SYSLOG_NG_INITIALIZED.call_once(|| {
         unsafe { syslog_ng_global_init() };
