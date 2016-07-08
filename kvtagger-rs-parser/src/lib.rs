@@ -63,7 +63,7 @@ impl<P: Pipe> KVTaggerBuilder<P> {
                 Ok(())
             }
             Err(error) => {
-                let errmsg = format!("Error loading CSV file in kvtagger-rs: {:?}", error);
+                let errmsg = format!("Error loading CSV file in kvtagger-rs: {}", error);
                 Err(Error::verbatim_error(errmsg))
             }
         }
