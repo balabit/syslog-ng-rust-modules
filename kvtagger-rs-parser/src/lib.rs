@@ -32,12 +32,12 @@ pub mod options {
 }
 
 pub struct KVTaggerBuilder<P: Pipe> {
-    records: Option<Vec<CsvRecord>>,
-    selector_template: Option<LogTemplate>,
-    default_selector: Option<String>,
-    formatter: MessageFormatter,
-    cfg: GlobalConfig,
-    _marker: PhantomData<P>,
+    pub records: Option<Vec<CsvRecord>>,
+    pub selector_template: Option<LogTemplate>,
+    pub default_selector: Option<String>,
+    pub formatter: MessageFormatter,
+    pub cfg: GlobalConfig,
+    pub _marker: PhantomData<P>,
 }
 
 error_chain! {
