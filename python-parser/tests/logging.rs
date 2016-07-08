@@ -70,8 +70,8 @@ fn logging_callbacks_can_be_used_from_init_method(messages: Arc<Mutex<Vec<Simpli
     ];
     let cfg = GlobalConfig::new(0x0308);
     let mut builder = PythonParserBuilder::<MockPipe>::new(cfg);
-    builder.option(options::MODULE.to_owned(), "_test_module".to_owned());
-    builder.option(options::CLASS.to_owned(), "LoggingIsUsedInInitMethod".to_owned());
+    builder.option(options::MODULE.to_owned(), "_test_module".to_owned()).ok().unwrap();
+    builder.option(options::CLASS.to_owned(), "LoggingIsUsedInInitMethod".to_owned()).ok().unwrap();
     let _ = builder.build();
     let lock = messages.lock().unwrap();
     for i in &expected {
@@ -89,8 +89,8 @@ fn logging_callbacks_are_not_overriden_if_they_are_already_defined(messages: Arc
     ];
     let cfg = GlobalConfig::new(0x0308);
     let mut builder = PythonParserBuilder::<MockPipe>::new(cfg);
-    builder.option(options::MODULE.to_owned(), "_test_module.test_logging".to_owned());
-    builder.option(options::CLASS.to_owned(), "LoggingCallbacksAreNotOverriden".to_owned());
+    builder.option(options::MODULE.to_owned(), "_test_module.test_logging".to_owned()).ok().unwrap();
+    builder.option(options::CLASS.to_owned(), "LoggingCallbacksAreNotOverriden".to_owned()).ok().unwrap();
     let _ = builder.build();
     let lock = messages.lock().unwrap();
     for i in &expected {
