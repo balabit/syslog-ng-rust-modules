@@ -25,6 +25,10 @@ error_chain! {
         description("Invalid value in option")
         display("Invalid value in option. option_name={} value={} expected_value={}", option_name, value, expected_value)
     }
+    UnknownOption(option_name: String) {
+        description("Unknown configuration option")
+        display("Unknown configuration option: option_name={}", option_name)
+    }
    }
 }
 
@@ -37,5 +41,8 @@ impl Error {
     }
     pub fn verbatim_error<S: Into<String>>(error_msg: S) -> Error {
         ErrorKind::Msg(error_msg.into()).into()
+    }
+    pub fn unknown_option<S: Into<String>>(option_name: S) -> Error {
+        ErrorKind::UnknownOption(option_name.into()).into()
     }
 }
