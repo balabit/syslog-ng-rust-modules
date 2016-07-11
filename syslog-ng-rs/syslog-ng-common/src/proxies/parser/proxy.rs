@@ -46,7 +46,7 @@ impl<B> ParserProxy<B> where B: ParserBuilder<LogParser>
                 init_result
             }
             Err(error) => {
-                error!("Error: {:?}", error);
+                error!("Error: {}", error);
                 false
             }
         }
