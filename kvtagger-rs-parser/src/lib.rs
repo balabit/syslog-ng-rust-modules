@@ -12,8 +12,8 @@ use std::fs::File;
 use std::marker::PhantomData;
 use std::io::{self, Read};
 
-use syslog_ng_common::{Parser, Pipe, LogMessage, Error, ParserBuilder, GlobalConfig,
-                       LogTemplate, LogTimeZone, MessageFormatter};
+use syslog_ng_common::{Parser, Pipe, LogMessage, Error, ParserBuilder, GlobalConfig, LogTemplate,
+                       LogTimeZone, MessageFormatter};
 
 pub use syslog_ng_common::LogPipe;
 
@@ -133,15 +133,13 @@ impl<P: Pipe> Parser<P> for KVTagger {
 
         if let Ok(str_selector) = ::std::str::from_utf8(selector) {
             if let Some(kvpairs) = self.map.get(str_selector) {
-                KVTagger::tag_msg_with_looked_up_key_value_pairs(&mut self.formatter,
-                                                                 msg,
-                                                                 kvpairs);
+                KVTagger::tag_msg_with_looked_up_key_value_pairs(&mut self.formatter, msg, kvpairs);
             } else if let Some(ref default_selector) = self.default_selector {
                 if let Some(kv_pairs) = self.map.get(default_selector) {
                     KVTagger::tag_msg_with_looked_up_key_value_pairs(&mut self.formatter,
                                                                      msg,
                                                                      kv_pairs);
-                 }
+                }
             }
             true
         } else {
@@ -165,9 +163,7 @@ impl<P: Pipe> ParserBuilder<P> for KVTaggerBuilder<P> {
     }
     fn option(&mut self, _name: String, _value: String) -> Result<(), Error> {
         match _name.as_ref() {
-            options::DATABASE => {
-                self.set_database(_value)
-            }
+            options::DATABASE => self.set_database(_value),
             options::SELECTOR => {
                 match LogTemplate::compile(&self.cfg, _value.as_bytes()) {
                     Ok(template) => {
@@ -186,7 +182,7 @@ impl<P: Pipe> ParserBuilder<P> for KVTaggerBuilder<P> {
                 }
                 Ok(())
             }
-            options::PREFIX  => {
+            options::PREFIX => {
                 if !_value.is_empty() {
                     self.set_prefix(_value);
                 }
@@ -200,7 +196,8 @@ impl<P: Pipe> ParserBuilder<P> for KVTaggerBuilder<P> {
     }
     fn build(self) -> Result<Self::Parser, Error> {
         let records = try!(self.records.ok_or(Error::missing_required_option(options::DATABASE)));
-        let selector_template = try!(self.selector_template.ok_or(Error::missing_required_option(options::SELECTOR)));
+        let selector_template = try!(self.selector_template
+            .ok_or(Error::missing_required_option(options::SELECTOR)));
 
         Ok(KVTagger {
             map: LookupTable::new(records),

@@ -59,19 +59,14 @@ mod tests {
         kv("name12","value12"),
         ];
 
-        let key_2_expected = vec![
-        kv("name13","value13"),
-        kv("name14","value14"),
-        kv("name15","value15"),
-        kv("name16","value16"),
-        kv("name17","value17")
-        ];
+        let key_2_expected = vec![kv("name13", "value13"),
+                                  kv("name14", "value14"),
+                                  kv("name15", "value15"),
+                                  kv("name16", "value16"),
+                                  kv("name17", "value17")];
 
-        let key_3_expected = vec![
-        kv("name18","value18"),
-        kv("name19","value19"),
-        kv("name20","value20")
-        ];
+        let key_3_expected =
+            vec![kv("name18", "value18"), kv("name19", "value19"), kv("name20", "value20")];
 
         assert_vec_eq(table.get("key1").unwrap().clone(), key_1_expected);
         assert_vec_eq(table.get("key2").unwrap().clone(), key_2_expected);
