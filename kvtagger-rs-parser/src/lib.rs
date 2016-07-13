@@ -4,7 +4,7 @@ extern crate log;
 #[macro_use]
 extern crate syslog_ng_common;
 #[macro_use]
-extern crate error_chain;
+extern crate quick_error;
 
 
 use std::path::Path;
@@ -40,19 +40,18 @@ pub struct KVTaggerBuilder<P: Pipe> {
     pub _marker: PhantomData<P>,
 }
 
-error_chain! {
-    types {
-        LoadError, LoadErrorKind, ChainErr, LoadResult;
+quick_error! {
+    #[derive(Debug)]
+    pub enum LoadError {
+        Io(err: io::Error) {
+            from()
+            cause(err)
+        }
+        Csv(err: csv::Error) {
+            from()
+            cause(err)
+        }
     }
-
-    links {}
-
-    foreign_links {
-        io::Error, Io, "IO error";
-        csv::Error, Csv, "CSV error";
-    }
-
-    errors {}
 }
 
 impl<P: Pipe> KVTaggerBuilder<P> {
