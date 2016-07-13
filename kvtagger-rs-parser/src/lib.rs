@@ -132,27 +132,18 @@ impl<P: Pipe> Parser<P> for KVTagger {
         let selector = self.selector_template.format(msg, None, LogTimeZone::Local, 0);
 
         if let Ok(str_selector) = ::std::str::from_utf8(selector) {
-            let looked_up_kvpairs = self.map.get(str_selector);
-
-            match (looked_up_kvpairs, self.default_selector.as_ref()) {
-                (Some(kv_pairs), _) => {
+            if let Some(kvpairs) = self.map.get(str_selector) {
+                KVTagger::tag_msg_with_looked_up_key_value_pairs(&mut self.formatter,
+                                                                 msg,
+                                                                 kvpairs);
+            } else if let Some(ref default_selector) = self.default_selector {
+                if let Some(kv_pairs) = self.map.get(default_selector) {
                     KVTagger::tag_msg_with_looked_up_key_value_pairs(&mut self.formatter,
                                                                      msg,
                                                                      kv_pairs);
-                    true
-                }
-                (None, Some(default_selector)) => {
-                    if let Some(kv_pairs) = self.map.get(default_selector) {
-                        KVTagger::tag_msg_with_looked_up_key_value_pairs(&mut self.formatter,
-                                                                         msg,
-                                                                         kv_pairs);
-                        true
-                    } else {
-                        true
-                    }
-                }
-                _ => true,
+                 }
             }
+            true
         } else {
             false
         }
