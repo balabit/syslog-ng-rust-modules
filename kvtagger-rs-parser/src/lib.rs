@@ -125,6 +125,19 @@ impl KVTagger {
             msg.insert::<&str>(key, value.as_bytes());
         }
     }
+    fn tag_msg(selector: &str,
+               default_selector: Option<&String>,
+               formatter: &mut MessageFormatter,
+               msg: &mut LogMessage,
+               map: &mut LookupTable) {
+        if let Some(kvpairs) = map.get(selector) {
+            KVTagger::tag_msg_with_looked_up_key_value_pairs(formatter, msg, kvpairs);
+        } else if let Some(default_selector) = default_selector {
+            if let Some(kv_pairs) = map.get(default_selector) {
+                KVTagger::tag_msg_with_looked_up_key_value_pairs(formatter, msg, kv_pairs);
+            }
+        }
+    }
 }
 
 impl<P: Pipe> Parser<P> for KVTagger {
@@ -132,15 +145,11 @@ impl<P: Pipe> Parser<P> for KVTagger {
         let selector = self.selector_template.format(msg, None, LogTimeZone::Local, 0);
 
         if let Ok(str_selector) = ::std::str::from_utf8(selector) {
-            if let Some(kvpairs) = self.map.get(str_selector) {
-                KVTagger::tag_msg_with_looked_up_key_value_pairs(&mut self.formatter, msg, kvpairs);
-            } else if let Some(ref default_selector) = self.default_selector {
-                if let Some(kv_pairs) = self.map.get(default_selector) {
-                    KVTagger::tag_msg_with_looked_up_key_value_pairs(&mut self.formatter,
-                                                                     msg,
-                                                                     kv_pairs);
-                }
-            }
+            KVTagger::tag_msg(str_selector,
+                              self.default_selector.as_ref(),
+                              &mut self.formatter,
+                              msg,
+                              &mut self.map);
             true
         } else {
             false
