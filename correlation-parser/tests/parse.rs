@@ -5,7 +5,6 @@ extern crate env_logger;
 
 use correlation_parser::{CorrelationParserBuilder, options, CLASSIFIER_UUID, CLASSIFIER_CLASS};
 use correlation_parser::mock::{MockEvent, MockLogTemplate, MockLogTemplateFactory, MockTimer};
-use correlation::Event;
 use syslog_ng_common::{ParserBuilder, LogMessage, Parser, SYSLOG_NG_INITIALIZED, syslog_ng_global_init, GlobalConfig};
 use syslog_ng_common::mock::MockPipe;
 
@@ -27,7 +26,7 @@ fn test_alert_is_forwarded() {
     let mut pipe = MockPipe::new();
     let cfg = GlobalConfig::new(0x0308);
     let mut builder = CorrelationParserBuilder::<MockPipe, MockEvent, MockLogTemplate, MockLogTemplateFactory, MockTimer<MockEvent, MockLogTemplate>>::new(cfg);
-    builder.option(options::CONTEXTS_FILE.to_owned(), config_file.to_owned());
+    builder.option(options::CONTEXTS_FILE.to_owned(), config_file.to_owned()).ok().unwrap();
     let mut parser = builder.build().unwrap();
     let timer = parser.timer.clone();
     assert_eq!(true, parser.parse(&mut pipe, &mut logmsg, message));
@@ -57,6 +56,6 @@ fn test_syslog_ng_does_not_spin_with_invalid_yaml_configuration() {
 
     let cfg = GlobalConfig::new(0x0308);
     let mut builder = CorrelationParserBuilder::<MockPipe, MockEvent, MockLogTemplate, MockLogTemplateFactory, MockTimer<MockEvent, MockLogTemplate>>::new(cfg);
-    builder.option(options::CONTEXTS_FILE.to_owned(), config_file.to_owned());
+    builder.option(options::CONTEXTS_FILE.to_owned(), config_file.to_owned()).err().unwrap();
     let _ = builder.build().err().unwrap();
 }

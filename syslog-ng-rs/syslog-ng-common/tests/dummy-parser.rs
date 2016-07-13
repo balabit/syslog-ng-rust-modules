@@ -12,23 +12,28 @@ extern crate syslog_ng_common;
 extern crate log;
 
 use std::marker::PhantomData;
+use std::ffi::CString;
 
 pub struct DummyParser<P: Pipe>(PhantomData<P>);
 
 pub struct DummyParserBuilder<P: Pipe>(PhantomData<P>);
 
 use syslog_ng_common::LogMessage;
-use syslog_ng_common::{Parser, ParserBuilder, OptionError, Pipe, GlobalConfig};
+use syslog_ng_common::{Parser, ParserBuilder, Error, Pipe, GlobalConfig};
 
 impl<P: Pipe> ParserBuilder<P> for DummyParserBuilder<P> {
     type Parser = DummyParser<P>;
     fn new(_: GlobalConfig) -> Self {
         DummyParserBuilder(PhantomData)
     }
-    fn option(&mut self, name: String, value: String) {
+    fn option(&mut self, name: String, value: String) -> Result<(), Error> {
         debug!("Setting option: {}={}", name, value);
+        match name.as_ref() {
+            "Err" => Err(Error::verbatim_error("doesn't matter")),
+            "Ok" | _ => Ok(()),
+        }
     }
-    fn build(self) -> Result<Self::Parser, OptionError> {
+    fn build(self) -> Result<Self::Parser, Error> {
         debug!("Building Rust parser");
         Ok(DummyParser(PhantomData))
     }
@@ -52,12 +57,7 @@ impl<P: Pipe> Clone for DummyParserBuilder<P> {
 parser_plugin!(DummyParserBuilder<LogParser>);
 
 use syslog_ng_common::{SYSLOG_NG_INITIALIZED, syslog_ng_global_init, ParserProxy, LogParser};
-
-struct DummyPipe;
-
-impl Pipe for DummyPipe {
-    fn forward(&mut self, _: LogMessage) {}
-}
+use syslog_ng_common::mock::MockPipe;
 
 #[test]
 fn test_given_parser_implementation_when_it_receives_a_message_then_it_adds_a_specific_key_value_pair_to_it
@@ -66,11 +66,11 @@ fn test_given_parser_implementation_when_it_receives_a_message_then_it_adds_a_sp
         unsafe { syslog_ng_global_init(); }
     });
     let cfg = GlobalConfig::new(0x0308);
-    let builder = DummyParserBuilder::<DummyPipe>::new(cfg);
+    let builder = DummyParserBuilder::<MockPipe>::new(cfg);
     let mut parser = builder.build().ok().expect("Failed to build DummyParser");
     let mut msg = LogMessage::new();
     let input = "The quick brown ...";
-    let mut pipe = DummyPipe;
+    let mut pipe = MockPipe::new();
     let result = parser.parse(&mut pipe, &mut msg, input);
     assert!(result);
     assert_eq!(msg.get(&b"input"[..]).unwrap(), input.as_bytes());
@@ -88,4 +88,25 @@ fn test_parser_proxy_can_be_deinitialized() {
     proxy.deinit();
     proxy.init();
     proxy.deinit();
+}
+
+use _parser_plugin::{native_parser_proxy_set_option};
+
+fn assert_option_setting_result_is_propagated(key: &str, expected: bool) {
+    let mut proxy =
+        ParserProxy::with_builder_and_parser(Some(DummyParserBuilder(PhantomData)), None);
+    let key = CString::new(key).unwrap();
+    let value = CString::new("value").unwrap();
+    let actual = native_parser_proxy_set_option(&mut proxy, key.as_ptr(), value.as_ptr());
+    assert_eq!(expected as i32, actual);
+}
+
+#[test]
+fn test_successful_option_setting_is_propagated_trough_native_parser_proxy_set_option() {
+    assert_option_setting_result_is_propagated("Ok", true);
+}
+
+#[test]
+fn test_failed_option_setting_is_propagated_trough_native_parser_proxy_set_option() {
+    assert_option_setting_result_is_propagated("Err", false);
 }

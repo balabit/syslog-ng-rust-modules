@@ -14,7 +14,8 @@ use std::error::Error;
 use std::time::Duration;
 use std::str::FromStr;
 use syslog_ng_common::{MessageFormatter, LogMessage};
-use syslog_ng_common::{Parser, ParserBuilder, OptionError, Pipe, GlobalConfig};
+use syslog_ng_common::{Parser, ParserBuilder, Pipe, GlobalConfig};
+use syslog_ng_common::Error as OptionError;
 
 pub use logevent::LogEvent;
 pub use logtemplate::{LogTemplate, LogTemplateFactory};
@@ -44,18 +45,20 @@ pub struct CorrelationParserBuilder<P, E, T, TF, TM> where P: Pipe, E: 'static +
 }
 
 impl<P, E, T, TF, TM> CorrelationParserBuilder<P, E, T, TF, TM> where P: Pipe, E: Event + Send, T: Template<Event=E>, TF: TemplateFactory<E, Template=T>, TM: Timer<E, T> {
-    pub fn set_file(&mut self, path: &str) {
+    pub fn set_file(&mut self, path: &str) -> Result<(), OptionError> {
         match CorrelatorFactory::from_path::<T, &str, E, TF>(path, &self.template_factory) {
             Ok(correlator) => {
                 let correlator = Arc::new(Mutex::new(correlator));
                 self.correlator = Some(correlator);
+                Ok(())
             },
             Err(err) => {
-                error!("Failed to initialize correlation-parser from configuration file: {}", &err);
+                let errmsg = format!("Failed to initialize correlation-parser from configuration file: {}", &err);
                 while let Some(err) = err.cause() {
                     info!("Error: {}", err.description());
                     info!("Cause: {}", &err);
                 }
+                Err(OptionError::verbatim_error(errmsg))
             }
         }
     }
@@ -64,13 +67,17 @@ impl<P, E, T, TF, TM> CorrelationParserBuilder<P, E, T, TF, TM> where P: Pipe, E
         self.formatter.set_prefix(prefix);
     }
 
-    pub fn set_delta(&mut self, delta: String) {
+    pub fn set_delta(&mut self, delta: String) -> Result<(), OptionError> {
         match u64::from_str(&delta) {
             Ok(delta) => {
                 info!("correlation-parser: using {} ms as delta time between timer events", &delta);
                 self.delta = Some(Duration::from_millis(delta));
+                Ok(())
             },
-            Err(err) => error!("{}", err)
+            Err(err) => {
+                let errmsg = format!("{}", err);
+                Err(OptionError::verbatim_error(errmsg))
+            }
         }
     }
 }
@@ -97,15 +104,18 @@ impl<P, E, T, TF, TM> ParserBuilder<P> for CorrelationParserBuilder<P, E, T, TF,
             _marker: PhantomData
         }
     }
-    fn option(&mut self, name: String, value: String) {
+    fn option(&mut self, name: String, value: String) -> Result<(), OptionError> {
         debug!("CorrelationParser: set_option(key={}, value={})", &name, &value);
 
         match name.borrow() {
             options::CONTEXTS_FILE => self.set_file(&value),
-            options::PREFIX => self.set_prefix(value),
+            options::PREFIX => {
+                self.set_prefix(value);
+                Ok(())
+            },
             options::DELTA => self.set_delta(value),
-            _ => debug!("CorrelationParser: not supported key: {:?}", name)
-        };
+            _ => Err(OptionError::unknown_option(name))
+        }
     }
     fn build(self) -> Result<Self::Parser, OptionError> {
         debug!("Building CorrelationParser");

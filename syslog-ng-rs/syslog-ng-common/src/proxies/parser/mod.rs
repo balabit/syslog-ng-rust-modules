@@ -11,10 +11,10 @@ use Pipe;
 
 use std::panic::{UnwindSafe, catch_unwind};
 
-mod option_error;
+mod error;
 mod proxy;
 
-pub use self::option_error::OptionError;
+pub use self::error::Error;
 pub use self::proxy::ParserProxy;
 use GlobalConfig;
 use commit_suicide;
@@ -23,8 +23,8 @@ use c_int;
 pub trait ParserBuilder<P: Pipe>: Clone {
     type Parser: Parser<P>;
     fn new(GlobalConfig) -> Self;
-    fn option(&mut self, _name: String, _value: String) {}
-    fn build(self) -> Result<Self::Parser, OptionError>;
+    fn option(&mut self, _name: String, _value: String) -> Result<(), Error> { Ok(()) }
+    fn build(self) -> Result<Self::Parser, Error>;
 }
 
 pub trait Parser<P: Pipe> {
@@ -104,7 +104,7 @@ pub mod _parser_plugin {
     }
 
     #[no_mangle]
-    pub extern fn native_parser_proxy_set_option(this: &mut ParserProxy<$name>, key: *const c_char, value: *const c_char) {
+    pub extern fn native_parser_proxy_set_option(this: &mut ParserProxy<$name>, key: *const c_char, value: *const c_char) -> c_int {
         let mut wrapper_this = AssertUnwindSafe(this);
         let wrapper_key = AssertUnwindSafe(key);
         let wrapper_value = AssertUnwindSafe(value);
@@ -113,7 +113,7 @@ pub mod _parser_plugin {
             let k: String = unsafe { CStr::from_ptr(*wrapper_key).to_owned().to_string_lossy().into_owned() };
             let v: String = unsafe { CStr::from_ptr(*wrapper_value).to_owned().to_string_lossy().into_owned() };
 
-            wrapper_this.set_option(k, v);
+            bool_to_int(wrapper_this.set_option(k, v))
         };
 
         abort_on_panic("set_option", unwind_safe_call)

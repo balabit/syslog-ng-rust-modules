@@ -10,7 +10,7 @@ use LogMessage;
 use LogParser;
 use GlobalConfig;
 
-pub use proxies::parser::{OptionError, Parser, ParserBuilder};
+pub use proxies::parser::{Error, Parser, ParserBuilder};
 
 #[repr(C)]
 pub struct ParserProxy<B>
@@ -46,7 +46,7 @@ impl<B> ParserProxy<B> where B: ParserBuilder<LogParser>
                 init_result
             }
             Err(error) => {
-                error!("Error: {:?}", error);
+                error!("Error: {}", error);
                 false
             }
         }
@@ -72,9 +72,16 @@ impl<B> ParserProxy<B> where B: ParserBuilder<LogParser>
         }
     }
 
-    pub fn set_option(&mut self, name: String, value: String) {
+    pub fn set_option(&mut self, name: String, value: String) -> bool {
         let builder = self.builder.as_mut().expect("Failed to get builder on a ParserProxy");
-        builder.option(name, value);
+
+        match builder.option(name, value) {
+            Ok(()) => true,
+            Err(error) => {
+                error!("{}", error);
+                false
+            }
+        }
     }
 
     pub fn process(&mut self, parent: &mut LogParser, msg: &mut LogMessage, input: &str) -> bool {

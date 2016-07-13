@@ -129,8 +129,8 @@ fn test_parser_can_be_built_if_there_is_no_error() {
     });
     let cfg = GlobalConfig::new(0x0308);
     let mut builder = PythonParserBuilder::<MockPipe>::new(cfg);
-    builder.option(options::MODULE.to_owned(), "_test_module".to_owned());
-    builder.option(options::CLASS.to_owned(), "ExistingParser".to_owned());
+    builder.option(options::MODULE.to_owned(), "_test_module".to_owned()).ok().unwrap();
+    builder.option(options::CLASS.to_owned(), "ExistingParser".to_owned()).ok().unwrap();
     let _ = builder.build().unwrap();
 }
 
@@ -142,8 +142,8 @@ fn test_parser_cannot_be_built_if_there_is_an_error() {
     });
     let cfg = GlobalConfig::new(0x0308);
     let mut builder = PythonParserBuilder::<MockPipe>::new(cfg);
-    builder.option(options::MODULE.to_owned(), "_test_module".to_owned());
-    builder.option(options::CLASS.to_owned(), "NonExistingParser".to_owned());
+    builder.option(options::MODULE.to_owned(), "_test_module".to_owned()).ok().unwrap();
+    builder.option(options::CLASS.to_owned(), "NonExistingParser".to_owned()).ok().unwrap();
     let _ = builder.build().err().unwrap();
 }
 
@@ -155,7 +155,7 @@ fn test_exception_is_raised_in_init_method() {
     });
     let cfg = GlobalConfig::new(0x0308);
     let mut builder = PythonParserBuilder::<MockPipe>::new(cfg);
-    builder.option(options::MODULE.to_owned(), "_test_module".to_owned());
-    builder.option(options::CLASS.to_owned(), "ExceptionIsRaisedInInitMethod".to_owned());
+    builder.option(options::MODULE.to_owned(), "_test_module".to_owned()).ok().unwrap();
+    builder.option(options::CLASS.to_owned(), "ExceptionIsRaisedInInitMethod".to_owned()).ok().unwrap();
     let _ = builder.build().err().unwrap();
 }
