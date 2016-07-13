@@ -88,10 +88,7 @@ impl<P: Pipe> KVTaggerBuilder<P> {
 
         let mut csv_reader = csv::Reader::from_string(contents).has_headers(false);
 
-        match csv_reader.decode().collect::<csv::Result<Vec<CsvRecord>>>() {
-            Ok(records) => Ok(records),
-            Err(error) => Err(LoadError::from(error))
-        }
+        csv_reader.decode().collect::<csv::Result<Vec<CsvRecord>>>().map_err(LoadError::Csv)
     }
 
     pub fn records(&self) -> Option<&Vec<CsvRecord>> {
