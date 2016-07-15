@@ -13,4 +13,4 @@ fi
 travis-cargo build &&
   travis-cargo test &&
   travis-cargo bench &&
-  travis-cargo --only stable doc
+  travis-cargo coveralls --no-sudo
