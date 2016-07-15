@@ -10,9 +10,9 @@ env:
     - LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$HOME/install/syslog-ng/lib"
     - PATH="$HOME/.local/bin:$PATH"
   matrix:
-    - RUST_CHANNEL=nightly TEST_MODE=everything TRAVIS_CARGO_NIGHTLY_FEATURE=nightly
+#    - RUST_CHANNEL=nightly TEST_MODE=everything TRAVIS_CARGO_NIGHTLY_FEATURE=nightly
     - RUST_CHANNEL=stable TEST_MODE=everything
-    - RUST_CHANNEL=beta TEST_MODE=everything
+#    - RUST_CHANNEL=beta TEST_MODE=everything
 
 matrix:
   include:
