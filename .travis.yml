@@ -42,6 +42,7 @@ addons:
     - libcurl4-openssl-dev
     - libelf-dev
     - libdw-dev
+    - binutils-dev
 
 install:
   - pip install 'travis-cargo<0.2'
