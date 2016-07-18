@@ -37,15 +37,6 @@ If an exception is thrown during `init()` is is considered an initialization err
 ```
 @version: 3.8
 
-block parser regex(
-    regex("")
-)
-{
-    regex-rs(
-        option("regex", `regex`)
-    );
-};
-
 source s_localhost {
     network(
         ip(127.0.0.1),
