@@ -54,10 +54,6 @@ impl<P, E, T, TF, TM> CorrelationParserBuilder<P, E, T, TF, TM> where P: Pipe, E
             },
             Err(err) => {
                 let errmsg = format!("Failed to initialize correlation-parser from configuration file: {}", &err);
-                while let Some(err) = err.cause() {
-                    info!("Error: {}", err.description());
-                    info!("Cause: {}", &err);
-                }
                 Err(OptionError::verbatim_error(errmsg))
             }
         }
