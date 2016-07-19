@@ -14,7 +14,7 @@ use std::time::Duration;
 use std::str::FromStr;
 use syslog_ng_common::{MessageFormatter, LogMessage};
 use syslog_ng_common::{Parser, ParserBuilder, Pipe, GlobalConfig};
-use syslog_ng_common::Error as OptionError;
+use syslog_ng_common::Error;
 
 pub use logevent::LogEvent;
 pub use logtemplate::{LogTemplate, LogTemplateFactory};
@@ -44,7 +44,7 @@ pub struct CorrelationParserBuilder<P, E, T, TF, TM> where P: Pipe, E: 'static +
 }
 
 impl<P, E, T, TF, TM> CorrelationParserBuilder<P, E, T, TF, TM> where P: Pipe, E: Event + Send, T: Template<Event=E>, TF: TemplateFactory<E, Template=T>, TM: Timer<E, T> {
-    pub fn set_file(&mut self, path: &str) -> Result<(), OptionError> {
+    pub fn set_file(&mut self, path: &str) -> Result<(), Error> {
         match CorrelatorFactory::from_path::<T, &str, E, TF>(path, &self.template_factory) {
             Ok(correlator) => {
                 let correlator = Arc::new(Mutex::new(correlator));
@@ -53,7 +53,7 @@ impl<P, E, T, TF, TM> CorrelationParserBuilder<P, E, T, TF, TM> where P: Pipe, E
             },
             Err(err) => {
                 let errmsg = format!("Failed to initialize correlation-parser from configuration file: {}", &err);
-                Err(OptionError::verbatim_error(errmsg))
+                Err(Error::verbatim_error(errmsg))
             }
         }
     }
@@ -62,7 +62,7 @@ impl<P, E, T, TF, TM> CorrelationParserBuilder<P, E, T, TF, TM> where P: Pipe, E
         self.formatter.set_prefix(prefix);
     }
 
-    pub fn set_delta(&mut self, delta: String) -> Result<(), OptionError> {
+    pub fn set_delta(&mut self, delta: String) -> Result<(), Error> {
         match u64::from_str(&delta) {
             Ok(delta) => {
                 info!("correlation-parser: using {} ms as delta time between timer events", &delta);
@@ -71,7 +71,7 @@ impl<P, E, T, TF, TM> CorrelationParserBuilder<P, E, T, TF, TM> where P: Pipe, E
             },
             Err(err) => {
                 let errmsg = format!("{}", err);
-                Err(OptionError::verbatim_error(errmsg))
+                Err(Error::verbatim_error(errmsg))
             }
         }
     }
@@ -99,7 +99,7 @@ impl<P, E, T, TF, TM> ParserBuilder<P> for CorrelationParserBuilder<P, E, T, TF,
             _marker: PhantomData
         }
     }
-    fn option(&mut self, name: String, value: String) -> Result<(), OptionError> {
+    fn option(&mut self, name: String, value: String) -> Result<(), Error> {
         debug!("CorrelationParser: set_option(key={}, value={})", &name, &value);
 
         match name.borrow() {
@@ -109,15 +109,15 @@ impl<P, E, T, TF, TM> ParserBuilder<P> for CorrelationParserBuilder<P, E, T, TF,
                 Ok(())
             },
             options::DELTA => self.set_delta(value),
-            _ => Err(OptionError::unknown_option(name))
+            _ => Err(Error::unknown_option(name))
         }
     }
-    fn build(self) -> Result<Self::Parser, OptionError> {
+    fn build(self) -> Result<Self::Parser, Error> {
         debug!("Building CorrelationParser");
         let CorrelationParserBuilder {correlator, template_factory, formatter, delta, _marker } = self;
         let _ = template_factory;
-        let correlator = try!(correlator.ok_or(OptionError::missing_required_option(options::CONTEXTS_FILE)));
-        let delta = try!(delta.ok_or(OptionError::missing_required_option(options::DELTA)));
+        let correlator = try!(correlator.ok_or(Error::missing_required_option(options::CONTEXTS_FILE)));
+        let delta = try!(delta.ok_or(Error::missing_required_option(options::DELTA)));
         let timer = Arc::new(TM::new(delta, correlator.clone()));
         Ok(CorrelationParser::new(correlator, formatter, timer))
     }
