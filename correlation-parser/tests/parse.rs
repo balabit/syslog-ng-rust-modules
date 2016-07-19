@@ -52,7 +52,7 @@ fn test_syslog_ng_does_not_spin_with_invalid_yaml_configuration() {
         unsafe { syslog_ng_global_init(); }
     });
 
-    let config_file = "tests/spinning.json";
+    let config_file = "tests/spinning.yml";
 
     let cfg = GlobalConfig::new(0x0308);
     let mut builder = CorrelationParserBuilder::<MockPipe, MockEvent, MockLogTemplate, MockLogTemplateFactory, MockTimer<MockEvent, MockLogTemplate>>::new(cfg);
