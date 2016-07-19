@@ -10,7 +10,6 @@ use correlation::correlator::{Correlator, CorrelatorFactory};
 use std::borrow::Borrow;
 use std::marker::PhantomData;
 use std::sync::{Arc, Mutex, MutexGuard};
-use std::error::Error;
 use std::time::Duration;
 use std::str::FromStr;
 use syslog_ng_common::{MessageFormatter, LogMessage};
