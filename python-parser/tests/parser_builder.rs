@@ -114,18 +114,34 @@ fn test_module_loading_and_class_initialization() {
     let gil = Python::acquire_gil();
     let py = gil.python();
     let options = [];
-    let _ = PythonParserBuilder::<MockPipe>::load_and_init_class(py, "__non_existing_python_module_name", "ExistingParser", &options).err().unwrap();
-    let _ = PythonParserBuilder::<MockPipe>::load_and_init_class(py, TEST_MODULE_NAME, "NonExistingParser", &options).err().unwrap();
-    let _ = PythonParserBuilder::<MockPipe>::load_and_init_class(py, TEST_MODULE_NAME, "ExistingParser", &options).unwrap();
-    let _ = PythonParserBuilder::<MockPipe>::load_and_init_class(py, TEST_MODULE_NAME, "ClassWithInitMethod", &options).unwrap();
-    let _ = PythonParserBuilder::<MockPipe>::load_and_init_class(py, TEST_MODULE_NAME, "InitMethodReturnsNotNone", &options).err().unwrap();
+    let _ = PythonParserBuilder::<MockPipe>::load_and_init_class(py,
+                                                                 "__non_existing_python_module_name",
+                                                                 "ExistingParser",
+                                                                 &options)
+        .err()
+        .unwrap();
+    let _ = PythonParserBuilder::<MockPipe>::load_and_init_class(py, TEST_MODULE_NAME, "NonExistingParser", &options)
+        .err()
+        .unwrap();
+    let _ = PythonParserBuilder::<MockPipe>::load_and_init_class(py, TEST_MODULE_NAME, "ExistingParser", &options)
+        .unwrap();
+    let _ = PythonParserBuilder::<MockPipe>::load_and_init_class(py, TEST_MODULE_NAME, "ClassWithInitMethod", &options)
+        .unwrap();
+    let _ = PythonParserBuilder::<MockPipe>::load_and_init_class(py,
+                                                                 TEST_MODULE_NAME,
+                                                                 "InitMethodReturnsNotNone",
+                                                                 &options)
+        .err()
+        .unwrap();
 }
 
 #[test]
 fn test_parser_can_be_built_if_there_is_no_error() {
     env::set_var("PYTHONPATH", env::current_dir().unwrap());
     SYSLOG_NG_INITIALIZED.call_once(|| {
-        unsafe { syslog_ng_global_init(); }
+        unsafe {
+            syslog_ng_global_init();
+        }
     });
     let cfg = GlobalConfig::new(0x0308);
     let mut builder = PythonParserBuilder::<MockPipe>::new(cfg);
@@ -138,7 +154,9 @@ fn test_parser_can_be_built_if_there_is_no_error() {
 fn test_parser_cannot_be_built_if_there_is_an_error() {
     env::set_var("PYTHONPATH", env::current_dir().unwrap());
     SYSLOG_NG_INITIALIZED.call_once(|| {
-        unsafe { syslog_ng_global_init(); }
+        unsafe {
+            syslog_ng_global_init();
+        }
     });
     let cfg = GlobalConfig::new(0x0308);
     let mut builder = PythonParserBuilder::<MockPipe>::new(cfg);
@@ -151,11 +169,16 @@ fn test_parser_cannot_be_built_if_there_is_an_error() {
 fn test_exception_is_raised_in_init_method() {
     env::set_var("PYTHONPATH", env::current_dir().unwrap());
     SYSLOG_NG_INITIALIZED.call_once(|| {
-        unsafe { syslog_ng_global_init(); }
+        unsafe {
+            syslog_ng_global_init();
+        }
     });
     let cfg = GlobalConfig::new(0x0308);
     let mut builder = PythonParserBuilder::<MockPipe>::new(cfg);
     builder.option(options::MODULE.to_owned(), "_test_module".to_owned()).ok().unwrap();
-    builder.option(options::CLASS.to_owned(), "ExceptionIsRaisedInInitMethod".to_owned()).ok().unwrap();
+    builder.option(options::CLASS.to_owned(),
+                "ExceptionIsRaisedInInitMethod".to_owned())
+        .ok()
+        .unwrap();
     let _ = builder.build().err().unwrap();
 }

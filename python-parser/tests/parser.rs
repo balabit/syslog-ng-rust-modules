@@ -57,7 +57,8 @@ fn test_successful_parse() {
     let mut parser = build_parser(TEST_MODULE_NAME, "ParseReturnsTrue");
     let mut logmsg = LogMessage::new();
     let mut pipe = MockPipe::new();
-    assert_eq!(true, parser.parse(&mut pipe, &mut logmsg, "input message to be parsed"));
+    assert_eq!(true,
+               parser.parse(&mut pipe, &mut logmsg, "input message to be parsed"));
 }
 
 #[test]
@@ -67,7 +68,8 @@ fn test_unsucessful_parse() {
     let mut parser = build_parser(TEST_MODULE_NAME, "ParseReturnsFalse");
     let mut logmsg = LogMessage::new();
     let mut pipe = MockPipe::new();
-    assert_eq!(false, parser.parse(&mut pipe, &mut logmsg, "input message to be parsed"));
+    assert_eq!(false,
+               parser.parse(&mut pipe, &mut logmsg, "input message to be parsed"));
 }
 
 #[test]
@@ -77,7 +79,8 @@ fn test_parse_method_raises_an_exception() {
     let mut parser = build_parser(TEST_MODULE_NAME, "ExceptionIsRaisedInParseMethod");
     let mut logmsg = LogMessage::new();
     let mut pipe = MockPipe::new();
-    assert_eq!(false, parser.parse(&mut pipe, &mut logmsg, "input message to be parsed"));
+    assert_eq!(false,
+               parser.parse(&mut pipe, &mut logmsg, "input message to be parsed"));
 }
 
 #[test]
