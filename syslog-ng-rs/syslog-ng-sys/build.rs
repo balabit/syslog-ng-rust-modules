@@ -8,6 +8,8 @@
 
 extern crate pkg_config;
 
+use std::process::exit;
+
 fn main() {
     let res = pkg_config::find_library("syslog-ng");
     match res {
@@ -19,6 +21,7 @@ fn main() {
         },
         Err(err) => {
             println!("libsyslog-ng.so is not found by pkg-config: {}", err);
+            exit(1);
         }
     }
 }
