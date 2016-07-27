@@ -57,6 +57,7 @@ pub unsafe fn syslog_ng_global_init() {
     sys::logmsg::log_msg_registry_init();
     sys::logmsg::log_tags_global_init();
     sys::logtemplate::log_template_global_init();
+    syslog_ng_sys::messages::msg_init(1 as c_int);
 }
 
 pub fn commit_suicide() -> ! {
