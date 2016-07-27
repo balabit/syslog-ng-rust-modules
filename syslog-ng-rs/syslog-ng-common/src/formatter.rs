@@ -22,8 +22,8 @@ impl MessageFormatter {
         }
     }
 
-    pub fn set_prefix(&mut self, prefix: String) {
-        self.prefix = Some(prefix)
+    pub fn set_prefix<S: Into<String>>(&mut self, prefix: S) {
+        self.prefix = Some(prefix.into());
     }
 
     pub fn format<'a, 'b, 'c>(&'a mut self, key: &'b str, value: &'c str) -> (&'a str, &'c str) {
