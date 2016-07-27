@@ -25,14 +25,14 @@ pub mod options {
 
 pub struct PythonParser<P: Pipe> {
     parser: PyObject,
-    _marker: PhantomData<P>
+    _marker: PhantomData<P>,
 }
 
 pub struct PythonParserBuilder<P: Pipe> {
     module: Option<String>,
     class: Option<String>,
     options: Vec<(String, String)>,
-    _marker: PhantomData<P>
+    _marker: PhantomData<P>,
 }
 
 impl<P: Pipe> PythonParserBuilder<P> {
@@ -41,7 +41,7 @@ impl<P: Pipe> PythonParserBuilder<P> {
         debug!("Trying to load Python module, module='{}'", module_name);
         py.import(module_name)
     }
-    pub fn load_class<'p>(py: Python<'p>, module: &PyModule,  class_name: &str) -> PyResult<PyObject> {
+    pub fn load_class<'p>(py: Python<'p>, module: &PyModule, class_name: &str) -> PyResult<PyObject> {
         debug!("Trying to load Python class, class='{}'", class_name);
         module.get(py, class_name)
     }
@@ -53,13 +53,15 @@ impl<P: Pipe> PythonParserBuilder<P> {
         debug!("Instantiating the options dict");
         let options = PyDict::new(py);
         for &(ref k, ref v) in init_options {
-            debug!("Adding values to the options dict, key='{}', value='{}'", k, v);
+            debug!("Adding values to the options dict, key='{}', value='{}'",
+                   k,
+                   v);
             try!(options.set_item(py, k, v));
         }
         Ok(options)
     }
     fn call_init<'p>(py: Python<'p>, instance: &PyObject, options: PyDict) -> PyResult<()> {
-        let init_result = try!(instance.call_method(py, "init", (&options, ), None));
+        let init_result = try!(instance.call_method(py, "init", (&options,), None));
         if init_result == Python::None(py) {
             Ok(())
         } else {
@@ -82,7 +84,11 @@ impl<P: Pipe> PythonParserBuilder<P> {
         Ok(parser_instance)
     }
 
-    pub fn load_and_init_class<'p>(py: Python<'p>, module_name: &str, class_name: &str, options: &[(String, String)]) -> PyResult<PyObject> {
+    pub fn load_and_init_class<'p>(py: Python<'p>,
+                                   module_name: &str,
+                                   class_name: &str,
+                                   options: &[(String, String)])
+                                   -> PyResult<PyObject> {
         let module = try!(Self::load_module(py, module_name));
         let mut dict = module.dict(py);
 
@@ -94,17 +100,33 @@ impl<P: Pipe> PythonParserBuilder<P> {
 }
 
 fn python_register_callbacks(py: Python, dict: &mut PyDict) -> PyResult<()> {
-    try!(python_register_callback(py, dict, "error", py_fn!(python_error_callback(error_message: &str))));
-    try!(python_register_callback(py, dict, "info", py_fn!(python_info_callback(info_message: &str))));
-    try!(python_register_callback(py, dict, "trace", py_fn!(python_trace_callback(trace_message: &str))));
-    try!(python_register_callback(py, dict, "warning", py_fn!(python_warning_callback(warning_message: &str))));
-    try!(python_register_callback(py, dict, "debug", py_fn!(python_debug_callback(debug_message: &str))));
+    try!(python_register_callback(py,
+                                  dict,
+                                  "error",
+                                  py_fn!(py, python_error_callback(error_message: &str))));
+    try!(python_register_callback(py,
+                                  dict,
+                                  "info",
+                                  py_fn!(py, python_info_callback(info_message: &str))));
+    try!(python_register_callback(py,
+                                  dict,
+                                  "trace",
+                                  py_fn!(py, python_trace_callback(trace_message: &str))));
+    try!(python_register_callback(py,
+                                  dict,
+                                  "warning",
+                                  py_fn!(py, python_warning_callback(warning_message: &str))));
+    try!(python_register_callback(py,
+                                  dict,
+                                  "debug",
+                                  py_fn!(py, python_debug_callback(debug_message: &str))));
     Ok(())
 }
 
 fn python_register_callback<F: ToPyObject>(py: Python, dict: &mut PyDict, name: &str, function: F) -> PyResult<()> {
     if try!(dict.contains(py, name)) {
-        warn!("Already implemented {}() function, omitting callback definition.", name);
+        warn!("Already implemented {}() function, omitting callback definition.",
+              name);
     } else {
         try!(dict.set_item(py, name, function));
     }
@@ -142,7 +164,7 @@ impl<P: Pipe> Clone for PythonParserBuilder<P> {
             module: self.module.clone(),
             class: self.class.clone(),
             options: self.options.clone(),
-            _marker: PhantomData
+            _marker: PhantomData,
         }
     }
 }
@@ -154,17 +176,17 @@ impl<P: Pipe> ParserBuilder<P> for PythonParserBuilder<P> {
             module: None,
             class: None,
             options: Vec::new(),
-            _marker: PhantomData
+            _marker: PhantomData,
         }
     }
     fn option(&mut self, name: String, value: String) -> Result<(), Error> {
         match name.borrow() {
             options::MODULE => {
                 self.module = Some(value);
-            },
+            }
             options::CLASS => {
                 self.class = Some(value);
-            },
+            }
             _ => {
                 self.options.push((name, value));
             }
@@ -180,11 +202,17 @@ impl<P: Pipe> ParserBuilder<P> for PythonParserBuilder<P> {
 
         match PythonParserBuilder::<P>::load_and_init_class(py, &module_name, &class_name, &self.options) {
             Ok(parser_instance) => {
-                debug!("Python parser successfully initialized, class='{}'", &class_name);
-                Ok(PythonParser {parser: parser_instance, _marker: PhantomData})
-            },
+                debug!("Python parser successfully initialized, class='{}'",
+                       &class_name);
+                Ok(PythonParser {
+                    parser: parser_instance,
+                    _marker: PhantomData,
+                })
+            }
             Err(error) => {
-                let err_msg = format!("Failed to create Python parser, class='{}', error='{:?}'", class_name, error);
+                let err_msg = format!("Failed to create Python parser, class='{}', error='{:?}'",
+                                      class_name,
+                                      error);
                 Err(Error::verbatim_error(err_msg))
             }
         }
@@ -215,11 +243,12 @@ impl<P: Pipe> Parser<P> for PythonParser<P> {
                 match self.call_parse(py, pylogmsg, input) {
                     Ok(result) => result,
                     Err(error) => {
-                        error!("Failed to extract return value of parse() method: {:?}", error);
+                        error!("Failed to extract return value of parse() method: {:?}",
+                               error);
                         false
                     }
                 }
-            },
+            }
             // I didn't find a way to test this case :-(
             Err(error) => {
                 error!("Failed to create PyLogMessage: {:?}", error);

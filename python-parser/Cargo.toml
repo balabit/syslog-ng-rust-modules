@@ -1,6 +1,6 @@
 [package]
 name = "python-parser"
-version = "0.2.1"
+version = "0.2.2"
 authors = ["Tibor Benke <ihrwein@gmail.com>"]
 build = "build.rs"
 
@@ -9,7 +9,7 @@ crate-type = ["rlib", "dylib"]
 
 [dependencies]
 syslog-ng-common = { path = "../syslog-ng-rs/syslog-ng-common" }
-cpython = { git = "https://github.com/ihrwein/rust-cpython.git" }
+cpython = { git = "https://github.com/ihrwein/rust-cpython.git", branch = "make-generated-type-public" }
 log = "0.3"
 env_logger = "0.3"
 

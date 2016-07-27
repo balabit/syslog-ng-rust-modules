@@ -15,27 +15,25 @@ use std::sync::Mutex;
 #[derive(Eq, PartialEq, Debug)]
 struct SimplifiedLogRecord {
     level: LogLevel,
-    formatted_message: String
+    formatted_message: String,
 }
 
 impl SimplifiedLogRecord {
     pub fn new<S: Into<String>>(level: LogLevel, msg: S) -> SimplifiedLogRecord {
         SimplifiedLogRecord {
             level: level,
-            formatted_message: msg.into()
+            formatted_message: msg.into(),
         }
     }
 }
 
 struct MockLogger {
-    pub messages: Arc<Mutex<Vec<SimplifiedLogRecord>>>
+    pub messages: Arc<Mutex<Vec<SimplifiedLogRecord>>>,
 }
 
 impl MockLogger {
     pub fn new() -> MockLogger {
-        MockLogger {
-            messages: Arc::new(Mutex::new(Vec::new()))
-        }
+        MockLogger { messages: Arc::new(Mutex::new(Vec::new())) }
     }
 }
 
@@ -61,40 +59,54 @@ fn init_logging(logger: MockLogger) -> Result<(), log::SetLoggerError> {
 }
 
 fn logging_callbacks_can_be_used_from_init_method(messages: Arc<Mutex<Vec<SimplifiedLogRecord>>>) {
-    let expected = [
-        SimplifiedLogRecord::new(LogLevel::Info, "INFO"),
-        SimplifiedLogRecord::new(LogLevel::Warn, "WARNING"),
-        SimplifiedLogRecord::new(LogLevel::Trace, "TRACE"),
-        SimplifiedLogRecord::new(LogLevel::Error, "ERROR"),
-        SimplifiedLogRecord::new(LogLevel::Debug, "DEBUG"),
-    ];
+    let expected = [SimplifiedLogRecord::new(LogLevel::Info, "INFO"),
+                    SimplifiedLogRecord::new(LogLevel::Warn, "WARNING"),
+                    SimplifiedLogRecord::new(LogLevel::Trace, "TRACE"),
+                    SimplifiedLogRecord::new(LogLevel::Error, "ERROR"),
+                    SimplifiedLogRecord::new(LogLevel::Debug, "DEBUG")];
     let cfg = GlobalConfig::new(0x0308);
     let mut builder = PythonParserBuilder::<MockPipe>::new(cfg);
     builder.option(options::MODULE.to_owned(), "_test_module".to_owned()).ok().unwrap();
-    builder.option(options::CLASS.to_owned(), "LoggingIsUsedInInitMethod".to_owned()).ok().unwrap();
+    builder.option(options::CLASS.to_owned(),
+                "LoggingIsUsedInInitMethod".to_owned())
+        .ok()
+        .unwrap();
     let _ = builder.build();
     let lock = messages.lock().unwrap();
     for i in &expected {
-        assert!((*lock).contains(i), "This item wasn't found in the expected messages: {:?}", i);
+        assert!((*lock).contains(i),
+                "This item wasn't found in the expected messages: {:?}",
+                i);
     }
 }
 
 fn logging_callbacks_are_not_overriden_if_they_are_already_defined(messages: Arc<Mutex<Vec<SimplifiedLogRecord>>>) {
-    let expected = [
-        SimplifiedLogRecord::new(LogLevel::Warn, "Already implemented info() function, omitting callback definition."),
-        SimplifiedLogRecord::new(LogLevel::Warn, "Already implemented warning() function, omitting callback definition."),
-        SimplifiedLogRecord::new(LogLevel::Warn, "Already implemented trace() function, omitting callback definition."),
-        SimplifiedLogRecord::new(LogLevel::Warn, "Already implemented error() function, omitting callback definition."),
-        SimplifiedLogRecord::new(LogLevel::Warn, "Already implemented debug() function, omitting callback definition."),
-    ];
+    let expected = [SimplifiedLogRecord::new(LogLevel::Warn,
+                                             "Already implemented info() function, omitting callback definition."),
+                    SimplifiedLogRecord::new(LogLevel::Warn,
+                                             "Already implemented warning() function, omitting callback definition."),
+                    SimplifiedLogRecord::new(LogLevel::Warn,
+                                             "Already implemented trace() function, omitting callback definition."),
+                    SimplifiedLogRecord::new(LogLevel::Warn,
+                                             "Already implemented error() function, omitting callback definition."),
+                    SimplifiedLogRecord::new(LogLevel::Warn,
+                                             "Already implemented debug() function, omitting callback definition.")];
     let cfg = GlobalConfig::new(0x0308);
     let mut builder = PythonParserBuilder::<MockPipe>::new(cfg);
-    builder.option(options::MODULE.to_owned(), "_test_module.test_logging".to_owned()).ok().unwrap();
-    builder.option(options::CLASS.to_owned(), "LoggingCallbacksAreNotOverriden".to_owned()).ok().unwrap();
+    builder.option(options::MODULE.to_owned(),
+                "_test_module.test_logging".to_owned())
+        .ok()
+        .unwrap();
+    builder.option(options::CLASS.to_owned(),
+                "LoggingCallbacksAreNotOverriden".to_owned())
+        .ok()
+        .unwrap();
     let _ = builder.build();
     let lock = messages.lock().unwrap();
     for i in &expected {
-        assert!((*lock).contains(i), "This item wasn't found in the expected messages: {:?}", i);
+        assert!((*lock).contains(i),
+                "This item wasn't found in the expected messages: {:?}",
+                i);
     }
 }
 
@@ -103,7 +115,9 @@ fn set_up() -> Arc<Mutex<Vec<SimplifiedLogRecord>>> {
     let messages = logger.messages.clone();
     let _ = init_logging(logger);
     SYSLOG_NG_INITIALIZED.call_once(|| {
-        unsafe { syslog_ng_global_init(); }
+        unsafe {
+            syslog_ng_global_init();
+        }
     });
     env::set_var("PYTHONPATH", env::current_dir().unwrap());
     messages
