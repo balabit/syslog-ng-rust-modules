@@ -37,12 +37,10 @@ pub struct InternalMessageSender;
 impl InternalMessageSender {
     pub fn create_and_send(severity: Msg, message: String) {
         unsafe {
-            if messages::debug_flag != 0 {
-                let msg = CString::new(message).unwrap();
-                let prio = severity as i32;
-                let msg_event = messages::msg_event_create_from_desc(prio, msg.as_ptr());
-                messages::msg_event_suppress_recursions_and_send(msg_event);
-            }
+            let msg = CString::new(message).unwrap();
+            let prio = severity as i32;
+            let msg_event = messages::msg_event_create_from_desc(prio, msg.as_ptr());
+            messages::msg_event_suppress_recursions_and_send(msg_event);
         };
     }
 
