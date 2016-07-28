@@ -14,7 +14,7 @@ extern crate log;
 use std::marker::PhantomData;
 use std::ffi::CString;
 
-pub struct DummyParser<P: Pipe>(PhantomData<P>);
+pub struct DummyParser;
 
 pub struct DummyParserBuilder<P: Pipe>(PhantomData<P>);
 
@@ -22,7 +22,7 @@ use syslog_ng_common::LogMessage;
 use syslog_ng_common::{Parser, ParserBuilder, Error, Pipe, GlobalConfig};
 
 impl<P: Pipe> ParserBuilder<P> for DummyParserBuilder<P> {
-    type Parser = DummyParser<P>;
+    type Parser = DummyParser;
     fn new(_: GlobalConfig) -> Self {
         DummyParserBuilder(PhantomData)
     }
@@ -35,11 +35,11 @@ impl<P: Pipe> ParserBuilder<P> for DummyParserBuilder<P> {
     }
     fn build(self) -> Result<Self::Parser, Error> {
         debug!("Building Rust parser");
-        Ok(DummyParser(PhantomData))
+        Ok(DummyParser)
     }
 }
 
-impl<P: Pipe> Parser<P> for DummyParser<P> {
+impl<P: Pipe> Parser<P> for DummyParser {
     fn parse(&mut self, _: &mut P, message: &mut LogMessage, input: &str) -> bool {
         debug!("Processing input in Rust Parser: {}", input);
         message.insert(&b"input"[..], input.as_bytes());
