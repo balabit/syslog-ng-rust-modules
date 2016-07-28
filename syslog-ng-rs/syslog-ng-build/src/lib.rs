@@ -135,6 +135,14 @@ fn link_against_module(content: &str) {
     compile_and_link_module(&dest_path);
 }
 
+/// Generates a module for syslog-ng.
+///
+/// This method generates code which describes a syslog-ng module. A module has a `canonical_name`
+/// (like `"foo"`), a `description` (like "This module contains plugins to ....") and an optional
+/// parser plugin. `parser_name` represents the name of the parser, if it's `None` the module
+/// doesn't contain any plugin.
+///
+/// This method must be called in a build script (`build.rs`).
 pub fn create_module(canonical_name: &str, description: &str, parser_name: Option<&str>) {
     link_against_rust_deps();
     let module_content = create_module_content(canonical_name, description, parser_name);
