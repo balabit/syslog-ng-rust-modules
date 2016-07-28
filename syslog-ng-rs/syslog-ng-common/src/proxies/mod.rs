@@ -6,5 +6,6 @@
 // option. All files in the project carrying such notice may not be copied,
 // modified, or distributed except according to those terms.
 
+/// Types for implementing a parser (in syslog-ng's terminology).
 #[macro_use]
 pub mod parser;

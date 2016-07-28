@@ -6,6 +6,12 @@
 // option. All files in the project carrying such notice may not be copied,
 // modified, or distributed except according to those terms.
 
+//! This module reexports some types from the `syslog_ng_sys` crate.
+//!
+//! The users of `syslog-ng-common` shouldn't use `syslog-ng-sys` directly, instead use the high
+//! level wrappers provided by `syslog-ng-common` (they don't have to define `syslog-ng-sys` as a
+//! dependency, since it's pulled in by syslog-ng-common). However, some functions are useful
+//! for the users of this crate, so they are reexported under this module.
 pub use syslog_ng_sys::LogMessage;
 pub use syslog_ng_sys::LogParser;
 pub use syslog_ng_sys::GlobalConfig;

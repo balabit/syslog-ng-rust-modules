@@ -47,9 +47,24 @@ pub use logpipe::{LogPipe, Pipe};
 pub use logtemplate::{LogTemplate, LogTemplateOptions, LogTimeZone};
 pub use plugin::Plugin;
 
+/// This variable helps to initialize syslog-ng in tests.
+///
+/// # Examples
+///
+/// ```
+/// # use syslog_ng_common::SYSLOG_NG_INITIALIZED;
+/// # use syslog_ng_common::syslog_ng_global_init;
+/// SYSLOG_NG_INITIALIZED.call_once(|| {
+///     unsafe { syslog_ng_global_init() };
+/// })
+/// ```
 #[allow(dead_code)]
 pub static SYSLOG_NG_INITIALIZED: Once = ONCE_INIT;
 
+/// Initiales global variables in syslog-ng.
+///
+/// This function is uses only in tests. It mayn't contain everything what you need. If you add bindings
+/// for new types and you receive segmentation faults in tests, look for uninitialized globals.
 pub unsafe fn syslog_ng_global_init() {
     use syslog_ng_sys::resolved_configurable_paths as c_paths;
 
@@ -60,6 +75,7 @@ pub unsafe fn syslog_ng_global_init() {
     syslog_ng_sys::messages::msg_init(1 as c_int);
 }
 
+/// Aborts the process.
 pub fn commit_suicide() -> ! {
     unsafe {
         abort();

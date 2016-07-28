@@ -8,24 +8,35 @@
 
 use std::fmt::Write;
 
+/// Applies transformations to key-value pairs.
+///
+/// # Examples
+/// ```
+/// # use syslog_ng_common::MessageFormatter;
+///
+/// let mut formatter = MessageFormatter::new();
+/// formatter.set_prefix("foo.");
+/// assert_eq!(formatter.format("key", "value"), ("foo.key", "value"));
+/// ```
 #[derive(Clone)]
 pub struct MessageFormatter {
     buffer: String,
     prefix: Option<String>,
 }
-
 impl MessageFormatter {
+    /// Creates a new MessageFormatter without any transformations.
     pub fn new() -> MessageFormatter {
         MessageFormatter {
             buffer: String::new(),
             prefix: None,
         }
     }
-
+    /// Sets a `prefix` is applied to every `key` during a `format()` call.
     pub fn set_prefix<S: Into<String>>(&mut self, prefix: S) {
         self.prefix = Some(prefix.into());
     }
 
+    /// Formats the given `key` and/or `value` parameters and returns the formatted pair as a tuple.
     pub fn format<'a, 'b, 'c>(&'a mut self, key: &'b str, value: &'c str) -> (&'a str, &'c str) {
         self.buffer.clear();
         self.apply_prefix(key);

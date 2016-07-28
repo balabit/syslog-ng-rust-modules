@@ -1,3 +1,5 @@
+//! Contains templating related types.
+
 use syslog_ng_sys;
 use syslog_ng_sys::logtemplate as sys;
 use glib_sys;
@@ -12,18 +14,23 @@ use std::ffi::{CString, NulError};
 #[cfg(test)]
 mod tests;
 
+/// High level wrapper around syslog-ng's LogTemplate structure.
 pub struct LogTemplate {
+    /// The wrapped raw LogTemplate pointer.
     pub wrapped: *mut sys::LogTemplate,
     buffer: *mut glib_sys::GString,
 }
 
+/// High level wrapper around syslog-ng's LogTemplateOptions.
 pub struct LogTemplateOptions(pub *mut sys::LogTemplateOptions);
 
+/// Typesafe representation of syslog-ng's LogTimeZone constants.s
 pub enum LogTimeZone {
     Local = 0,
     Send = 1,
 }
 
+/// Error cases of `LogTemplate::compile` method.
 pub enum Error {
     Glib(glib::Error),
     Nul(NulError)
@@ -52,6 +59,17 @@ impl LogTemplate {
             buffer: unsafe { glib_sys::g_string_sized_new(128) },
         }
     }
+
+    /// Creates a new instance.
+    ///
+    /// `content` is the literal string that should be compiled into a template.
+    ///
+    /// # Safety
+    ///
+    /// The created instance must not outlive the `cfg` parameter. Note, that this invariant
+    /// can be expressed in Rust with `PhantomData`, but we still don't have any guarantee that
+    /// the `*GlobalConfig` pointer is handled according to this rule. So let's hope that `cfg`
+    /// outlives every `LogTemplate` instance.
     pub fn compile(cfg: &GlobalConfig, content: &[u8]) -> Result<LogTemplate, Error> {
         let template = LogTemplate::new(cfg);
         let content = try!(CString::new(content));
@@ -64,6 +82,12 @@ impl LogTemplate {
         }
     }
 
+    /// Formats a log message into a string representation.
+    ///
+    /// # Safety
+    ///
+    /// This method takes `&mut self`, because it lends a mutable buffer to the wrapped `LogTemplate`.
+    /// The returned byte slice points to this internal buffer.
     pub fn format(&mut self, msg: &LogMessage, options: Option<&LogTemplateOptions>, tz: LogTimeZone, seq_num: i32) -> &[u8] {
         let options: *const sys::LogTemplateOptions = options.map_or(::std::ptr::null(), |options| options.0);
         unsafe {
@@ -72,6 +96,12 @@ impl LogTemplate {
         }
     }
 
+    /// Format a slice of log messages into a string representation.
+    ///
+    /// # Safety
+    ///
+    /// This method takes `&mut self`, because it lends a mutable buffer to the wrapped `LogTemplate`.
+    /// The returned byte slice points to this internal buffer.
     pub fn format_with_context(&mut self, messages: &[LogMessage], options: Option<&LogTemplateOptions>, tz: LogTimeZone, seq_num: i32, context_id: &str) -> &[u8] {
         let options: *const sys::LogTemplateOptions = options.map_or(::std::ptr::null(), |options| options.0);
         let messages = messages.iter().map(|msg| msg.0 as *const syslog_ng_sys::LogMessage).collect::<Vec<*const syslog_ng_sys::LogMessage>>();

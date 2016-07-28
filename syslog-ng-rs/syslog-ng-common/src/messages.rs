@@ -10,7 +10,7 @@ use std::ffi::CString;
 use log::{LogLevel, LogLevelFilter};
 use syslog_ng_sys::messages;
 
-
+/// `Msg` represents the log levels and their numeric values.
 pub enum Msg {
     _Fatal = 2,
     Error = 3,
@@ -32,9 +32,11 @@ impl From<LogLevel> for Msg {
     }
 }
 
+/// `InternalMessageSender` is able to place log messages into syslog-ng's internal log stream.
 pub struct InternalMessageSender;
 
 impl InternalMessageSender {
+    /// Logs `message` with the given `severity` into syslog-ng's internal logs.
     pub fn create_and_send(severity: Msg, message: String) {
         unsafe {
             let msg = CString::new(message).unwrap();
@@ -44,6 +46,7 @@ impl InternalMessageSender {
         };
     }
 
+    /// Returns a `LogLevelFilter` based on syslog-ng's current log level.
     pub fn level() -> LogLevelFilter {
         if messages::trace_flag != 0 {
             LogLevelFilter::Trace

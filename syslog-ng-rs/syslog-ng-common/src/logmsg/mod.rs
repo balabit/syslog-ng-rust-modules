@@ -17,7 +17,10 @@ use std::ffi::{CStr, CString};
 #[cfg(test)]
 mod test;
 
+/// Wrapper around syslog-ng's NVHandle
 pub struct NVHandle(logmsg::NVHandle);
+
+/// High level wrapper around syslog-ng's LogMessage structure.
 pub struct LogMessage(pub *mut logmsg::LogMessage);
 
 impl Drop for LogMessage {
@@ -35,6 +38,7 @@ impl Clone for LogMessage {
 }
 
 impl LogMessage {
+    /// Creates a new instance.
     pub fn new() -> LogMessage {
         unsafe {
             let msg = logmsg::log_msg_new_local();
@@ -43,17 +47,30 @@ impl LogMessage {
         }
     }
 
+    /// Wraps syslog-ng's raw LogMessage into this type.
+    ///
+    /// # Safety
+    ///
+    /// `raw` must be a non-null LogMessage pointer.
     pub fn wrap_raw(raw: *mut ::sys::LogMessage) -> LogMessage {
         let referenced = unsafe {logmsg::log_msg_ref(raw)};
         LogMessage(referenced)
     }
 
+    /// Extracts the raw LogMessage pointer from this instance.
+    ///
+    /// It also increments it's reference count.
     pub fn into_raw(self) -> *mut ::sys::LogMessage {
         // self will be destroyed by the end of this functions so we need to
         // increment the refcount
         unsafe {logmsg::log_msg_ref(self.0)}
     }
 
+    /// Returns the `value_name`'s corresponding `NVHandle`.
+    ///
+    /// # Panics
+    ///
+    /// This function panics if `value_name` contains a `\0` byte.
     pub fn get_value_handle(value_name: &str) -> NVHandle {
         unsafe {
             let name = CString::new(value_name).unwrap();
@@ -61,6 +78,7 @@ impl LogMessage {
         }
     }
 
+    /// Looks up the corresponding byte slice of `key` in the log message.
     pub fn get<K: Into<NVHandle>>(&self, key: K) -> Option<&[u8]> {
         let handle = key.into();
         let mut size: ssize_t = 0;
@@ -73,6 +91,7 @@ impl LogMessage {
         }
     }
 
+    /// Inserts a net (key, value) pair into the log message.
     pub fn insert<K: Into<NVHandle>>(&mut self, key: K, value: &[u8]) {
         let handle = key.into();
         unsafe {
@@ -80,6 +99,11 @@ impl LogMessage {
         }
     }
 
+    /// Sets `tag` in the log message.
+    ///
+    /// # Panics
+    ///
+    /// This function panics if `tag` contains a `\0` byte.
     pub fn set_tag(&mut self, tag: &[u8]) {
         let c_tag = CString::new(tag).unwrap();
         unsafe {
@@ -87,6 +111,9 @@ impl LogMessage {
         }
     }
 
+    /// Returns the (key, value) pairs stored.
+    ///
+    /// Keys and values are represented as vectors of bytes.
     pub fn values(&self) -> BTreeMap<Vec<u8>, Vec<u8>> {
         let mut values = BTreeMap::new();
         unsafe {
@@ -97,6 +124,9 @@ impl LogMessage {
         values
     }
 
+    /// Returns the tags stored.
+    ///
+    /// A tag is represented as a vector of bytes.
     pub fn tags(&self) -> Vec<Vec<u8>> {
         let mut tags = Vec::new();
         unsafe {

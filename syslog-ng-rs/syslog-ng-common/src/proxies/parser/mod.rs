@@ -20,19 +20,41 @@ use GlobalConfig;
 use commit_suicide;
 use c_int;
 
+/// Trait that can build a particular `Parser` instance.
+///
+/// The initialization of a parser plugin is split into two halves. First, a `ParserBuilder` instance
+/// is created with it's `new()` method, then several configuration options can be set with
+/// the `option()` method.
+///
+/// The parser instance is created when `build()` is called. It returns either a parser instance,
+/// or an error indicating why the building wasn't successful.
 pub trait ParserBuilder<P: Pipe>: Clone {
+    /// Parser is the type that this builder implementation is able to build.
     type Parser: Parser<P>;
+    /// Creates a new `ParserBuilder` instance.
     fn new(GlobalConfig) -> Self;
+    /// Sets a configuration option.
     fn option(&mut self, _name: String, _value: String) -> Result<(), Error> { Ok(()) }
+    /// Tries to build a parser instance.
     fn build(self) -> Result<Self::Parser, Error>;
 }
 
+/// The `Parser` trait is used to represent a `parser` according to syslog-ng's terminology.
 pub trait Parser<P: Pipe> {
+    /// `init()` is called to indicate that the parser should be ready for log message processing.
+    ///
+    /// It is mainly used in conjunction with `deinit()`: the two methods shold be symmetrical. This
+    /// means, that if `init()` starts a timer thread, `deinit()` should stop it.
     fn init(&mut self) -> bool { true }
+    /// `deinit()` is called to indicate that the parser is temporarily suspended (or before dropping
+    /// it permanently).
     fn deinit(&mut self) -> bool { true }
+    /// Parses `input` and inserts the new key-value pairs into `msg`. `pipe` represents the parent
+    /// `LogPipe`. It can be mocked out to simplify the testing without syslog-ng.
     fn parse(&mut self, pipe: &mut P, msg: &mut LogMessage, input: &str) -> bool;
 }
 
+/// Converts a `bool` to a `c_int`
 pub fn bool_to_int(result: bool) -> c_int {
     match result {
         true => 1,
@@ -40,6 +62,8 @@ pub fn bool_to_int(result: bool) -> c_int {
     }
 }
 
+/// Calls `unwind_safe_call` and returns the result if it was successul. If a panic occured,
+/// an error message is logged and the current process is aborted.
 pub fn abort_on_panic<F, R>(func_name_suffix: &str, unwind_safe_call: F) -> R
 where F: UnwindSafe + FnOnce() -> R {
     match catch_unwind(unwind_safe_call) {
@@ -51,6 +75,28 @@ where F: UnwindSafe + FnOnce() -> R {
     }
 }
 
+/// This macro generates FFI bindings for a parser.
+///
+/// It takes a `ParserBuilder` as its parameter and generates several functions. Only one `parser_plugin!`
+/// can be used in a compilation unit.
+///
+/// # Examples
+///
+/// ```
+/// # macro_rules! parser_plugin{
+/// #    ($name:ty) => {}
+/// # }
+/// #
+/// # use syslog_ng_common::ParserBuilder;
+/// #
+/// pub struct DummyParserBuilder;
+///
+/// //impl ParserBuilder for DummyParserBuilder {
+/// //    ...
+/// //}
+///
+/// parser_plugin!(DummyParserBuilder);
+/// ```
 #[macro_export]
 macro_rules! parser_plugin {
     ($name:ty) => {

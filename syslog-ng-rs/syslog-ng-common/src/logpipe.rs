@@ -4,10 +4,12 @@ use LogMessage;
 use syslog_ng_sys::logpipe::__log_pipe_forward_msg;
 use syslog_ng_sys::LogPathOptions;
 
+/// `Pipe` is used to represent a log pipe which is able to forward log messages to other pipes.
 pub trait Pipe {
     fn forward(&mut self, msg: LogMessage);
 }
 
+/// High level wrapper around syslog-ng's raw LogPipe pointer.
 pub struct LogPipe(pub *mut syslog_ng_sys::LogPipe);
 
 impl Pipe for LogPipe {
