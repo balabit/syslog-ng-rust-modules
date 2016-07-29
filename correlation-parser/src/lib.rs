@@ -35,17 +35,33 @@ pub trait Timer<E, T> where E: Event + Send, T: Template<Event=E> {
     fn stop(&self) {}
 }
 
-pub struct CorrelationParserBuilder<E, T, TF, TM> where E: 'static + Event + Send, T: 'static + Template<Event=E>, TF: TemplateFactory<E, Template=T>, TM: Timer<E, T> {
-    correlator: Option<Arc<Mutex<Correlator<E, T>>>>,
-    formatter: MessageFormatter,
-    template_factory: Arc<TF>,
-    delta: Option<Duration>,
-    _marker: PhantomData<(E, T, TF, TM)>
+pub trait TypeFamily {
+    type Event: 'static + Event + Send;
+    type Template: 'static + Template<Event=Self::Event>;
+    type TemplateFactory: TemplateFactory<Self::Event, Template=Self::Template>;
+    type Timer: Timer<Self::Event, Self::Template>;
 }
 
-impl<E, T, TF, TM> CorrelationParserBuilder<E, T, TF, TM> where E: Event + Send, T: Template<Event=E>, TF: TemplateFactory<E, Template=T>, TM: Timer<E, T> {
+pub struct SyslogNgTypeFamily {}
+
+impl TypeFamily for SyslogNgTypeFamily {
+    type Event = LogEvent;
+    type Template = LogTemplate;
+    type TemplateFactory = LogTemplateFactory;
+    type Timer = Watchdog;
+}
+
+pub struct CorrelationParserBuilder<X: TypeFamily>  {
+    correlator: Option<Arc<Mutex<Correlator<X::Event, X::Template>>>>,
+    formatter: MessageFormatter,
+    template_factory: Arc<X::TemplateFactory>,
+    delta: Option<Duration>,
+    _marker: PhantomData<X>
+}
+
+impl<X: TypeFamily> CorrelationParserBuilder<X> {
     pub fn set_file(&mut self, path: &str) -> Result<(), Error> {
-        match CorrelatorFactory::from_path::<T, &str, E, TF>(path, &self.template_factory) {
+        match CorrelatorFactory::from_path::<X::Template, &str, X::Event, X::TemplateFactory>(path, &self.template_factory) {
             Ok(correlator) => {
                 let correlator = Arc::new(Mutex::new(correlator));
                 self.correlator = Some(correlator);
@@ -77,7 +93,7 @@ impl<E, T, TF, TM> CorrelationParserBuilder<E, T, TF, TM> where E: Event + Send,
     }
 }
 
-impl<E, T, TF, TM> Clone for CorrelationParserBuilder<E, T, TF, TM> where E: 'static + Event + Into<LogMessage> + Send, T: 'static + Template<Event=E>, TF: TemplateFactory<E, Template=T> + From<GlobalConfig>, TM: Timer<E, T> {
+impl<X: TypeFamily> Clone for CorrelationParserBuilder<X> {
     fn clone(&self) -> Self {
         CorrelationParserBuilder {
             correlator: self.correlator.clone(),
@@ -88,13 +104,15 @@ impl<E, T, TF, TM> Clone for CorrelationParserBuilder<E, T, TF, TM> where E: 'st
         }
     }
 }
-impl<E, T, TF, TM> ParserBuilder for CorrelationParserBuilder<E, T, TF, TM> where E: 'static + Event + Into<LogMessage> + Send, T: 'static + Template<Event=E>, TF: TemplateFactory<E, Template=T> + From<GlobalConfig>, TM: Timer<E, T> {
-    type Parser = CorrelationParser<E, T, TM>;
+
+// TODO
+impl<X: TypeFamily> ParserBuilder for CorrelationParserBuilder<X> where X::Event: Into<LogMessage>, X::TemplateFactory: From<GlobalConfig> {
+    type Parser = CorrelationParser<X>;
     fn new(cfg: GlobalConfig) -> Self {
         CorrelationParserBuilder {
             correlator: None,
             formatter: MessageFormatter::new(),
-            template_factory: Arc::new(TF::from(cfg)),
+            template_factory: Arc::new(X::TemplateFactory::from(cfg)),
             delta: Some(Duration::from_millis(1000)),
             _marker: PhantomData
         }
@@ -118,27 +136,27 @@ impl<E, T, TF, TM> ParserBuilder for CorrelationParserBuilder<E, T, TF, TM> wher
         let _ = template_factory;
         let correlator = try!(correlator.ok_or(Error::missing_required_option(options::CONTEXTS_FILE)));
         let delta = try!(delta.ok_or(Error::missing_required_option(options::DELTA)));
-        let timer = Arc::new(TM::new(delta, correlator.clone()));
+        let timer = Arc::new(X::Timer::new(delta, correlator.clone()));
         Ok(CorrelationParser::new(correlator, formatter, timer))
     }
 }
 
-pub struct CorrelationParser<E, T, TM> where E: 'static + Event + Send, T: 'static + Template<Event=E>, TM: Timer<E, T> {
-    correlator: Arc<Mutex<Correlator<E, T>>>,
+pub struct CorrelationParser<X: TypeFamily> {
+    correlator: Arc<Mutex<Correlator<X::Event, X::Template>>>,
     _formatter: MessageFormatter,
-    pub timer: Arc<TM>
+    pub timer: Arc<X::Timer>
 }
 
-impl<E, T, TM> CorrelationParser<E, T, TM> where E: Event + Send, T: Template<Event=E>, TM: Timer<E, T> {
-    pub fn new(correlator: Arc<Mutex<Correlator<E, T>>>, formatter: MessageFormatter, timer: Arc<TM>) -> CorrelationParser<E, T, TM> {
+impl<X: TypeFamily> CorrelationParser<X> {
+    pub fn new(correlator: Arc<Mutex<Correlator<X::Event, X::Template>>>, formatter: MessageFormatter, timer: Arc<X::Timer>) -> CorrelationParser<X> {
         CorrelationParser {
             correlator: correlator,
             _formatter: formatter,
             timer: timer
         }
     }
-    fn on_alert(guard: &mut MutexGuard<Correlator<E, T>>, alert: Alert<E>, parent: &mut Pipe)
-        where E: Into<LogMessage> {
+    fn on_alert(guard: &mut MutexGuard<Correlator<X::Event, X::Template>>, alert: Alert<X::Event>, parent: &mut Pipe)
+        where X::Event: Into<LogMessage> {
         match alert.inject_mode {
             InjectMode::Log => {
                 debug!("LOG: {}", String::from_utf8_lossy(alert.message.message()));
@@ -156,14 +174,14 @@ impl<E, T, TM> CorrelationParser<E, T, TM> where E: Event + Send, T: Template<Ev
     }
 }
 
-impl<E, T, TM> Parser for CorrelationParser<E, T, TM> where E: Event + Into<LogMessage> + Send, T: Template<Event=E>, TM: Timer<E, T> {
+impl<X: TypeFamily> Parser for CorrelationParser<X>  where X::Event: Into<LogMessage> {
     fn parse(&mut self, parent: &mut Pipe, msg: &mut LogMessage, message: &str) -> bool {
         debug!("CorrelationParser: process()");
         let message = {
             if let Some(uuid) = msg.get(CLASSIFIER_UUID) {
                 let name = msg.get(CLASSIFIER_CLASS);
 
-                let mut event = E::new(uuid, message.as_bytes());
+                let mut event = X::Event::new(uuid, message.as_bytes());
                 for (k, v) in msg.values() {
                     event.set(&k, &v);
                 }
@@ -178,7 +196,7 @@ impl<E, T, TM> Parser for CorrelationParser<E, T, TM> where E: Event + Into<LogM
             Ok(mut guard) => {
                 guard.push_message(message);
                 while let Some(alert) = guard.responses.pop_front() {
-                    CorrelationParser::<E, T, TM>::on_alert(&mut guard, alert, parent);
+                    CorrelationParser::<X>::on_alert(&mut guard, alert, parent);
                 }
                 true
             },
@@ -200,4 +218,4 @@ impl<E, T, TM> Parser for CorrelationParser<E, T, TM> where E: Event + Into<LogM
     }
 }
 
-parser_plugin!(CorrelationParserBuilder<LogEvent, LogTemplate, LogTemplateFactory, Watchdog>);
+parser_plugin!(CorrelationParserBuilder<SyslogNgTypeFamily>);
