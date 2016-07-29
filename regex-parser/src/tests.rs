@@ -59,7 +59,7 @@ fn test_parser_can_be_built_with_valid_regex() {
         }
     });
     let cfg = GlobalConfig::new(0x0308);
-    let mut builder = RegexParserBuilder::<mock::MockPipe>::new(cfg);
+    let mut builder = RegexParserBuilder::new(cfg);
     builder.option(REGEX_OPTION.to_string(), "[abc]d".to_string()).ok().unwrap();
     let _ = builder.build().unwrap();
 }
@@ -72,7 +72,7 @@ fn test_parser_cannot_be_built_with_invalid_regex() {
         }
     });
     let cfg = GlobalConfig::new(0x0308);
-    let mut builder = RegexParserBuilder::<mock::MockPipe>::new(cfg);
+    let mut builder = RegexParserBuilder::new(cfg);
     builder.option(REGEX_OPTION.to_string(), "[abcd".to_string()).err().unwrap();
     if let Error::MissingRequiredOption(value) = builder.build().err().unwrap() {
         assert_eq!(REGEX_OPTION, value);
