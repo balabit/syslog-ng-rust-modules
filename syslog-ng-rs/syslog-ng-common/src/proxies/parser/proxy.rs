@@ -18,13 +18,13 @@ pub use proxies::parser::{Error, Parser, ParserBuilder};
 /// side as a `*mut ParserProxy` pointer.
 #[repr(C)]
 pub struct ParserProxy<B>
-    where B: ParserBuilder<LogParser>
+    where B: ParserBuilder
 {
     parser: Option<B::Parser>,
     builder: Option<B>,
 }
 
-impl<B> ParserProxy<B> where B: ParserBuilder<LogParser>
+impl<B> ParserProxy<B> where B: ParserBuilder
 {
     /// Creates a new `ParserProxy` instance and initializes a `ParserBuilder` internally.
     pub fn new(cfg: GlobalConfig) -> ParserProxy<B> {
@@ -115,7 +115,7 @@ impl<B> ParserProxy<B> where B: ParserBuilder<LogParser>
     }
 }
 
-impl<B> Clone for ParserProxy<B> where B: ParserBuilder<LogParser> {
+impl<B> Clone for ParserProxy<B> where B: ParserBuilder {
     fn clone(&self) -> ParserProxy<B> {
         ParserProxy {parser: None, builder: self.builder.clone()}
     }
