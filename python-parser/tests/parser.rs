@@ -37,7 +37,7 @@ fn test_error_is_returned_if_there_is_no_parse_method() {
     let gil = Python::acquire_gil();
     let py = gil.python();
     let result = call_parse(py, TEST_MODULE_NAME, "ParseMethodReturnsNotBoolean").unwrap();
-    let _ = PythonParser::<MockPipe>::process_parse_result(py, result).err().unwrap();
+    let _ = PythonParser::process_parse_result(py, result).err().unwrap();
 }
 
 #[test]
@@ -47,7 +47,7 @@ fn test_parse_method_which_returns_boolean_does_not_raise_errors() {
     let gil = Python::acquire_gil();
     let py = gil.python();
     let result = call_parse(py, TEST_MODULE_NAME, "ParserClassWithGoodParseMethod").unwrap();
-    let _ = PythonParser::<MockPipe>::process_parse_result(py, result).unwrap();
+    let _ = PythonParser::process_parse_result(py, result).unwrap();
 }
 
 #[test]
