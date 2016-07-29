@@ -44,7 +44,7 @@ impl<MS> ActiondbParserBuilder<MS> where MS: MatcherSuite, MS::Matcher: Clone {
     }
 }
 
-impl<MS, P> ParserBuilder<P> for ActiondbParserBuilder<MS> where P: Pipe, MS: MatcherSuite + Clone, MS::Matcher: Clone {
+impl<MS> ParserBuilder for ActiondbParserBuilder<MS> where MS: MatcherSuite + Clone, MS::Matcher: Clone {
     type Parser = ActiondbParser<MS::Matcher>;
     fn new(_: GlobalConfig) -> Self {
         ActiondbParserBuilder {
@@ -88,8 +88,8 @@ pub struct ActiondbParser<M> where M: Matcher + Clone {
     pub formatter: MessageFormatter,
 }
 
-impl<M, P> Parser<P> for ActiondbParser<M> where P: Pipe, M: Matcher + Clone {
-    fn parse(&mut self, _: &mut P, msg: &mut LogMessage, input: &str) -> bool {
+impl<M> Parser for ActiondbParser<M> where M: Matcher + Clone {
+    fn parse(&mut self, _: &mut Pipe, msg: &mut LogMessage, input: &str) -> bool {
         if let Some(result) = self.matcher.parse(input) {
             MessageFiller::fill_logmsg(&mut self.formatter, msg, &result);
             true
