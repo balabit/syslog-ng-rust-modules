@@ -25,7 +25,7 @@ fn test_alert_is_forwarded() {
 
     let mut pipe = MockPipe::new();
     let cfg = GlobalConfig::new(0x0308);
-    let mut builder = CorrelationParserBuilder::<MockPipe, MockEvent, MockLogTemplate, MockLogTemplateFactory, MockTimer<MockEvent, MockLogTemplate>>::new(cfg);
+    let mut builder = CorrelationParserBuilder::<MockEvent, MockLogTemplate, MockLogTemplateFactory, MockTimer<MockEvent, MockLogTemplate>>::new(cfg);
     builder.option(options::CONTEXTS_FILE.to_owned(), config_file.to_owned()).ok().unwrap();
     let mut parser = builder.build().unwrap();
     let timer = parser.timer.clone();
@@ -55,7 +55,7 @@ fn test_syslog_ng_does_not_spin_with_invalid_yaml_configuration() {
     let config_file = "tests/spinning.yml";
 
     let cfg = GlobalConfig::new(0x0308);
-    let mut builder = CorrelationParserBuilder::<MockPipe, MockEvent, MockLogTemplate, MockLogTemplateFactory, MockTimer<MockEvent, MockLogTemplate>>::new(cfg);
+    let mut builder = CorrelationParserBuilder::<MockEvent, MockLogTemplate, MockLogTemplateFactory, MockTimer<MockEvent, MockLogTemplate>>::new(cfg);
     builder.option(options::CONTEXTS_FILE.to_owned(), config_file.to_owned()).err().unwrap();
     let _ = builder.build().err().unwrap();
 }

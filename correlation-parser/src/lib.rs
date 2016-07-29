@@ -35,15 +35,15 @@ pub trait Timer<E, T> where E: Event + Send, T: Template<Event=E> {
     fn stop(&self) {}
 }
 
-pub struct CorrelationParserBuilder<P, E, T, TF, TM> where P: Pipe, E: 'static + Event + Send, T: 'static + Template<Event=E>, TF: TemplateFactory<E, Template=T>, TM: Timer<E, T> {
+pub struct CorrelationParserBuilder<E, T, TF, TM> where E: 'static + Event + Send, T: 'static + Template<Event=E>, TF: TemplateFactory<E, Template=T>, TM: Timer<E, T> {
     correlator: Option<Arc<Mutex<Correlator<E, T>>>>,
     formatter: MessageFormatter,
     template_factory: Arc<TF>,
     delta: Option<Duration>,
-    _marker: PhantomData<(P, E, T, TF, TM)>
+    _marker: PhantomData<(E, T, TF, TM)>
 }
 
-impl<P, E, T, TF, TM> CorrelationParserBuilder<P, E, T, TF, TM> where P: Pipe, E: Event + Send, T: Template<Event=E>, TF: TemplateFactory<E, Template=T>, TM: Timer<E, T> {
+impl<E, T, TF, TM> CorrelationParserBuilder<E, T, TF, TM> where E: Event + Send, T: Template<Event=E>, TF: TemplateFactory<E, Template=T>, TM: Timer<E, T> {
     pub fn set_file(&mut self, path: &str) -> Result<(), Error> {
         match CorrelatorFactory::from_path::<T, &str, E, TF>(path, &self.template_factory) {
             Ok(correlator) => {
@@ -77,7 +77,7 @@ impl<P, E, T, TF, TM> CorrelationParserBuilder<P, E, T, TF, TM> where P: Pipe, E
     }
 }
 
-impl<P, E, T, TF, TM> Clone for CorrelationParserBuilder<P, E, T, TF, TM> where P: Pipe, E: 'static + Event + Into<LogMessage> + Send, T: 'static + Template<Event=E>, TF: TemplateFactory<E, Template=T> + From<GlobalConfig>, TM: Timer<E, T> {
+impl<E, T, TF, TM> Clone for CorrelationParserBuilder<E, T, TF, TM> where E: 'static + Event + Into<LogMessage> + Send, T: 'static + Template<Event=E>, TF: TemplateFactory<E, Template=T> + From<GlobalConfig>, TM: Timer<E, T> {
     fn clone(&self) -> Self {
         CorrelationParserBuilder {
             correlator: self.correlator.clone(),
@@ -88,7 +88,7 @@ impl<P, E, T, TF, TM> Clone for CorrelationParserBuilder<P, E, T, TF, TM> where 
         }
     }
 }
-impl<P, E, T, TF, TM> ParserBuilder<P> for CorrelationParserBuilder<P, E, T, TF, TM> where P: Pipe, E: 'static + Event + Into<LogMessage> + Send, T: 'static + Template<Event=E>, TF: TemplateFactory<E, Template=T> + From<GlobalConfig>, TM: Timer<E, T> {
+impl<E, T, TF, TM> ParserBuilder for CorrelationParserBuilder<E, T, TF, TM> where E: 'static + Event + Into<LogMessage> + Send, T: 'static + Template<Event=E>, TF: TemplateFactory<E, Template=T> + From<GlobalConfig>, TM: Timer<E, T> {
     type Parser = CorrelationParser<E, T, TM>;
     fn new(cfg: GlobalConfig) -> Self {
         CorrelationParserBuilder {
@@ -137,8 +137,8 @@ impl<E, T, TM> CorrelationParser<E, T, TM> where E: Event + Send, T: Template<Ev
             timer: timer
         }
     }
-    fn on_alert<P>(guard: &mut MutexGuard<Correlator<E, T>>, alert: Alert<E>, parent: &mut P)
-        where P: Pipe, E: Into<LogMessage> {
+    fn on_alert(guard: &mut MutexGuard<Correlator<E, T>>, alert: Alert<E>, parent: &mut Pipe)
+        where E: Into<LogMessage> {
         match alert.inject_mode {
             InjectMode::Log => {
                 debug!("LOG: {}", String::from_utf8_lossy(alert.message.message()));
@@ -156,8 +156,8 @@ impl<E, T, TM> CorrelationParser<E, T, TM> where E: Event + Send, T: Template<Ev
     }
 }
 
-impl<P, E, T, TM> Parser<P> for CorrelationParser<E, T, TM> where P: Pipe, E: Event + Into<LogMessage> + Send, T: Template<Event=E>, TM: Timer<E, T> {
-    fn parse(&mut self, parent: &mut P, msg: &mut LogMessage, message: &str) -> bool {
+impl<E, T, TM> Parser for CorrelationParser<E, T, TM> where E: Event + Into<LogMessage> + Send, T: Template<Event=E>, TM: Timer<E, T> {
+    fn parse(&mut self, parent: &mut Pipe, msg: &mut LogMessage, message: &str) -> bool {
         debug!("CorrelationParser: process()");
         let message = {
             if let Some(uuid) = msg.get(CLASSIFIER_UUID) {
@@ -200,4 +200,4 @@ impl<P, E, T, TM> Parser<P> for CorrelationParser<E, T, TM> where P: Pipe, E: Ev
     }
 }
 
-parser_plugin!(CorrelationParserBuilder<LogParser, LogEvent, LogTemplate, LogTemplateFactory, Watchdog>);
+parser_plugin!(CorrelationParserBuilder<LogEvent, LogTemplate, LogTemplateFactory, Watchdog>);
