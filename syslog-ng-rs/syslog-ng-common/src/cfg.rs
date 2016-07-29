@@ -32,19 +32,6 @@ impl GlobalConfig {
     }
 
     /// Returns the configuration's user version.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// # use syslog_ng_common::{SYSLOG_NG_INITIALIZED, syslog_ng_global_init};
-    /// # use syslog_ng_common::GlobalConfig;
-
-    /// # SYSLOG_NG_INITIALIZED.call_once(|| {
-    /// #     unsafe { syslog_ng_global_init() };
-    /// # });
-    ///   let cfg = GlobalConfig::new(0x0308);
-    ///   assert_eq!(cfg.get_user_version(), (3, 8));
-    /// ```
     pub fn get_user_version(&self) -> (u8, u8) {
         let ptr = self.raw_ptr();
         let mut version = unsafe { cfg::cfg_get_user_version(ptr) };
@@ -58,19 +45,6 @@ impl GlobalConfig {
     }
 
     /// Returns the configuration's parsed version.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// # use syslog_ng_common::{SYSLOG_NG_INITIALIZED, syslog_ng_global_init};
-    /// # use syslog_ng_common::GlobalConfig;
-
-    /// # SYSLOG_NG_INITIALIZED.call_once(|| {
-    /// #     unsafe { syslog_ng_global_init() };
-    /// # });
-    ///   let cfg = GlobalConfig::new(0x0308);
-    ///   assert_eq!(cfg.get_parsed_version(), (0, 0));
-    /// ```
     pub fn get_parsed_version(&self) -> (u8, u8) {
         let ptr = self.raw_ptr();
         let mut version = unsafe { cfg::cfg_get_parsed_version(ptr) };

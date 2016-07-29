@@ -9,15 +9,6 @@
 use std::fmt::Write;
 
 /// Applies transformations to key-value pairs.
-///
-/// # Examples
-/// ```
-/// # use syslog_ng_common::MessageFormatter;
-///
-/// let mut formatter = MessageFormatter::new();
-/// formatter.set_prefix("foo.");
-/// assert_eq!(formatter.format("key", "value"), ("foo.key", "value"));
-/// ```
 #[derive(Clone)]
 pub struct MessageFormatter {
     buffer: String,

@@ -79,24 +79,6 @@ where F: UnwindSafe + FnOnce() -> R {
 ///
 /// It takes a `ParserBuilder` as its parameter and generates several functions. Only one `parser_plugin!`
 /// can be used in a compilation unit.
-///
-/// # Examples
-///
-/// ```
-/// # macro_rules! parser_plugin{
-/// #    ($name:ty) => {}
-/// # }
-/// #
-/// # use syslog_ng_common::ParserBuilder;
-/// #
-/// pub struct DummyParserBuilder;
-///
-/// //impl ParserBuilder for DummyParserBuilder {
-/// //    ...
-/// //}
-///
-/// parser_plugin!(DummyParserBuilder);
-/// ```
 #[macro_export]
 macro_rules! parser_plugin {
     ($name:ty) => {

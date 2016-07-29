@@ -48,16 +48,6 @@ pub use logtemplate::{LogTemplate, LogTemplateOptions, LogTimeZone};
 pub use plugin::Plugin;
 
 /// This variable helps to initialize syslog-ng in tests.
-///
-/// # Examples
-///
-/// ```
-/// # use syslog_ng_common::SYSLOG_NG_INITIALIZED;
-/// # use syslog_ng_common::syslog_ng_global_init;
-/// SYSLOG_NG_INITIALIZED.call_once(|| {
-///     unsafe { syslog_ng_global_init() };
-/// })
-/// ```
 #[allow(dead_code)]
 pub static SYSLOG_NG_INITIALIZED: Once = ONCE_INIT;
 
