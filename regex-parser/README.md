@@ -90,8 +90,7 @@ log {
     source(s_localhost);
     parser {
         regex-rs(
-            # Note the additional escaping before the backslashes!!!
-            option("regex", "seq: (?P<seq>\\d+), thread: (?P<thread>\\d+), runid: (?P<runid>\\d+), stamp: (?P<stamp>[^ ]+) (?P<padding>.*$)")
+            option("regex", 'seq: (?P<seq>\d+), thread: (?P<thread>\d+), runid: (?P<runid>\d+), stamp: (?P<stamp>[^ ]+) (?P<padding>.*$)')
         );
     };
     destination {
