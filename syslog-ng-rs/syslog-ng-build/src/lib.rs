@@ -118,6 +118,7 @@ fn compile_and_link_module<P: AsRef<Path>>(dest_path: P) {
         }
         Err(err) => {
             println!("{}", err);
+            ::std::process::exit(1);
         }
     }
 }
