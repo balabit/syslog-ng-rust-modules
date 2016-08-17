@@ -14,4 +14,4 @@ log = "0.3"
 env_logger = "0.3"
 
 [build-dependencies]
-syslog-ng-build = "0.2"
+syslog-ng-build = { path = "../syslog-ng-rs/syslog-ng-build" }
