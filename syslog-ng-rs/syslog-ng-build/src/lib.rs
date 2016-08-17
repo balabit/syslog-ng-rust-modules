@@ -112,6 +112,7 @@ fn compile_and_link_module<P: AsRef<Path>>(dest_path: P) {
             }
 
             compiler.flag("-c")
+                    .flag("-std=gnu99")
                     .file(dest_path)
                     .compile("librust-module.a");
         }
