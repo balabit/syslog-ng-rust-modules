@@ -16,4 +16,4 @@ syslog-ng-common = { path = "../syslog-ng-rs/syslog-ng-common" }
 path = "correlation"
 
 [build-dependencies]
-syslog-ng-build = "0.2.0"
+syslog-ng-build = { path = "../syslog-ng-rs/syslog-ng-build" }
