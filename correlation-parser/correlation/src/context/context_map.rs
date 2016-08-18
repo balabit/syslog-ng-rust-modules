@@ -15,6 +15,7 @@ use Template;
 
 pub struct ContextMap<E, T> where E: Event, T: Template<Event=E> {
     map: HashMap<Vec<u8>, Vec<usize>>,
+    empty_pattern_indices: Vec<usize>,
     contexts: Vec<Context<E, T>>,
 }
 
@@ -22,6 +23,7 @@ impl<E, T> Default for ContextMap<E, T> where E: Event, T: Template<Event=E> {
     fn default() -> ContextMap<E, T> {
         ContextMap {
             map: HashMap::default(),
+            empty_pattern_indices: Vec::default(),
             contexts: Vec::default()
         }
     }
@@ -48,22 +50,17 @@ impl<E, T> ContextMap<E, T> where E: Event, T: Template<Event=E> {
                                .expect("Failed to remove the last Context from a non empty vector");
         let index_of_last_context = self.contexts.len() - 1;
         let patterns = last_context.patterns();
-        ContextMap::<E, T>::update_indices(&mut self.map, index_of_last_context, patterns);
+        ContextMap::<E, T>::update_indices(&mut self.map, &mut self.empty_pattern_indices, index_of_last_context, patterns);
     }
 
     fn update_indices(map: &mut HashMap<Vec<u8>, Vec<usize>>,
+                      empty_pattern_indices: &mut Vec<usize>,
                       new_index: usize,
                       patterns: &[String]) {
         if patterns.is_empty() {
-            ContextMap::<E, T>::add_index_to_every_index_vectors(map, new_index);
+            empty_pattern_indices.push(new_index);
         } else {
             ContextMap::<E, T>::add_index_to_looked_up_index_vectors(map, new_index, patterns);
-        }
-    }
-
-    fn add_index_to_every_index_vectors(map: &mut HashMap<Vec<u8>, Vec<usize>>, new_index: usize) {
-        for (_, v) in map.iter_mut() {
-            v.push(new_index);
         }
     }
 
@@ -85,6 +82,7 @@ impl<E, T> ContextMap<E, T> where E: Event, T: Template<Event=E> {
             index_vector.extend_from_slice(index_list);
         }
 
+        index_vector.extend_from_slice(&self.empty_pattern_indices);
         index_vector.sort();
         index_vector.dedup();
 
