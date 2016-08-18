@@ -130,6 +130,14 @@ mod tests {
     use std::time::Duration;
     use Message;
     use test_utils::{MockTemplate, BaseContextBuilder};
+    use Event;
+    use Template;
+
+    impl<'a, E, T> Iterator<'a, E, T> where E: 'a + Event, T: 'a + Template<Event=E> {
+        fn count(&self) -> usize {
+            self.indices.len()
+        }
+    }
 
     fn assert_context_map_contains_uuid<'a, I>(context_map: &mut ContextMap<Message, MockTemplate>, uuid: &Uuid, keys: I)
         where I: ::std::iter::Iterator<Item=&'a [u8]>
@@ -159,5 +167,25 @@ mod tests {
         context_map.insert(Context::Linear(context1));
         assert_eq!(context_map.contexts_mut().len(), 1);
         assert_context_map_contains_uuid(&mut context_map, &uuid, vec!["A".as_bytes(), "B".as_bytes()].into_iter());
+    }
+
+    #[test]
+    fn test_given_context_map_when_a_context_is_inserted_without_patterns_then_its_contexts_are_available_for_all_key
+        () {
+        let mut context_map = ContextMap::<Message, MockTemplate>::new();
+        let uuid = Uuid::new_v4();
+        let context1 = {
+            let conditions = {
+                ConditionsBuilder::new(Duration::from_millis(100)).build()
+            };
+            let patterns = Vec::new();
+            let base = BaseContextBuilder::new(uuid.to_owned(), conditions).patterns(patterns).build();
+            LinearContext::new(base)
+        };
+        context_map.insert(Context::Linear(context1));
+
+        let iter = context_map.contexts_iter_mut(vec!["WHATEVER".as_bytes()].into_iter());
+
+        assert_eq!(iter.count(), 1);
     }
 }
