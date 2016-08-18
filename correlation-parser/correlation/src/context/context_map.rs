@@ -45,30 +45,26 @@ impl<E, T> ContextMap<E, T> where E: Event, T: Template<Event=E> {
 
     pub fn insert(&mut self, context: Context<E, T>) {
         self.contexts.push(context);
-        let last_context = self.contexts
-                               .last()
-                               .expect("Failed to remove the last Context from a non empty vector");
-        let index_of_last_context = self.contexts.len() - 1;
-        let patterns = last_context.patterns();
-        ContextMap::<E, T>::update_indices(&mut self.map, &mut self.empty_pattern_indices, index_of_last_context, patterns);
+        self.update_indices();
     }
 
-    fn update_indices(map: &mut HashMap<Vec<u8>, Vec<usize>>,
-                      empty_pattern_indices: &mut Vec<usize>,
-                      new_index: usize,
-                      patterns: &[String]) {
+    fn update_indices(&mut self) {
+        let index_of_last_context = self.contexts.len() - 1;
+        let patterns : Vec<String> = self.contexts.last().expect("Failed to remove the last Context from a non empty vector")
+                                         .patterns().iter().cloned().collect();
+
         if patterns.is_empty() {
-            empty_pattern_indices.push(new_index);
+            self.empty_pattern_indices.push(index_of_last_context);
         } else {
-            ContextMap::<E, T>::add_index_to_looked_up_index_vectors(map, new_index, patterns);
+            self.add_index_to_looked_up_index_vectors(index_of_last_context, &patterns);
         }
     }
 
-    fn add_index_to_looked_up_index_vectors(map: &mut HashMap<Vec<u8>, Vec<usize>>,
+    fn add_index_to_looked_up_index_vectors(&mut self,
                                             new_index: usize,
                                             patterns: &[String]) {
         for i in patterns {
-            map.entry(i.as_bytes().to_vec()).or_insert_with(Vec::new).push(new_index);
+            self.map.entry(i.as_bytes().to_vec()).or_insert_with(Vec::new).push(new_index);
         }
     }
 
