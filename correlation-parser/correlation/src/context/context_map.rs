@@ -79,12 +79,19 @@ impl<E, T> ContextMap<E, T> where E: Event, T: Template<Event=E> {
         &mut self.contexts
     }
 
-    pub fn contexts_iter_mut(&mut self, key: &[u8]) -> Iterator<E, T> {
-        let ids = self.map.get(key);
+    pub fn contexts_iter_mut<'a, I: ::std::iter::Iterator<Item=&'a [u8]>>(&mut self, keys: I) -> Iterator<E, T> {
+        let mut index_vector = Vec::new();
+        for index_list in keys.filter_map(|key| self.map.get(key)) {
+            index_vector.extend_from_slice(index_list);
+        }
+
+        index_vector.sort();
+        index_vector.dedup();
+
         Iterator {
-            ids: ids,
+            indices: index_vector,
             pos: 0,
-            contexts: &mut self.contexts,
+            contexts: &mut self.contexts
         }
     }
 }
@@ -95,22 +102,19 @@ pub trait StreamingIterator {
 }
 
 pub struct Iterator<'a, E, T> where E: 'a + Event, T: 'a + Template<Event=E> {
-    ids: Option<&'a Vec<usize>>,
+    indices: Vec<usize>,
     pos: usize,
-    contexts: &'a mut Vec<Context<E, T>>,
+    contexts: &'a mut Vec<Context<E, T>>
 }
 
 impl<'a, E, T> StreamingIterator for Iterator<'a, E, T> where E: Event, T: Template<Event=E> {
     type Item = Context<E, T>;
     fn next(&mut self) -> Option<&mut Context<E, T>> {
-        if let Some(ids) = self.ids {
-            if let Some(id) = ids.get(self.pos) {
-                self.pos += 1;
-                self.contexts.get_mut(*id)
-            } else {
-                None
-            }
-        } else {
+        if let Some(index) = self.indices.get(self.pos) {
+            self.pos += 1;
+            self.contexts.get_mut(*index)
+        }
+        else {
             None
         }
     }
@@ -127,8 +131,10 @@ mod tests {
     use Message;
     use test_utils::{MockTemplate, BaseContextBuilder};
 
-    fn assert_context_map_contains_uuid(context_map: &mut ContextMap<Message, MockTemplate>, uuid: &Uuid, key: &str) {
-        let mut iter = context_map.contexts_iter_mut(key.as_bytes());
+    fn assert_context_map_contains_uuid<'a, I>(context_map: &mut ContextMap<Message, MockTemplate>, uuid: &Uuid, keys: I)
+        where I: ::std::iter::Iterator<Item=&'a [u8]>
+    {
+        let mut iter = context_map.contexts_iter_mut(keys);
         let context = iter.next().expect("Failed to get back an inserted context");
         if let Context::Linear(ref context) = *context {
             assert_eq!(uuid, context.uuid());
@@ -152,7 +158,6 @@ mod tests {
         };
         context_map.insert(Context::Linear(context1));
         assert_eq!(context_map.contexts_mut().len(), 1);
-        assert_context_map_contains_uuid(&mut context_map, &uuid, "A");
-        assert_context_map_contains_uuid(&mut context_map, &uuid, "B");
+        assert_context_map_contains_uuid(&mut context_map, &uuid, vec!["A".as_bytes(), "B".as_bytes()].into_iter());
     }
 }

@@ -17,11 +17,9 @@ pub struct MessageEventHandler;
 impl<'a, E, T> EventHandler<E, SharedData<'a, E, T>> for MessageEventHandler where E: 'a + Event, T: Template<Event=E> {
     fn handle_event(&mut self, event: E, data: &mut SharedData<E, T>) {
         trace!("MessageEventHandler: handle_event()");
-        for i in event.ids() {
-            let mut iter = data.map.contexts_iter_mut(i);
-            while let Some(context) = iter.next() {
-                context.on_message(event.clone(), data.responder);
-            }
+        let mut iter = data.map.contexts_iter_mut(event.ids().into_iter());
+        while let Some(context) = iter.next() {
+            context.on_message(event.clone(), data.responder);
         }
     }
 }
