@@ -21,9 +21,9 @@ fn bench_parse(b: &mut Bencher) {
     let cfg = GlobalConfig::new(0x0308);
     let pattern_file_path = "benches/loggen.json";
     let mut pipe = MockPipe::new();
-    let mut builder: ActiondbParserBuilder<SuffixArrayMatcherSuite> = ParserBuilder::<MockPipe>::new(cfg);
+    let mut builder: ActiondbParserBuilder<SuffixArrayMatcherSuite> = ParserBuilder::new(cfg);
     builder.set_pattern_file(pattern_file_path);
-    let mut parser = ParserBuilder::<MockPipe>::build(builder).unwrap();
+    let mut parser = ParserBuilder::build(builder).unwrap();
     let mut logmsg = LogMessage::new();
     let input = "seq: 0000000000, thread: 0000, runid: 1456947132, stamp: 2016-03-02T20:32:12 PAD";
     b.iter(|| parser.parse(&mut pipe, &mut logmsg, input));

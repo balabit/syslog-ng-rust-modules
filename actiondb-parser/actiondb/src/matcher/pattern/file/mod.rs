@@ -1,5 +1,14 @@
-pub use self::file::PatternFile;
-
 mod deser;
-mod file;
 mod iter;
+
+use matcher::pattern::Pattern;
+
+pub struct PatternFile {
+    pub patterns: Vec<Pattern>,
+}
+
+impl PatternFile {
+    pub fn patterns(&self) -> &Vec<Pattern> {
+        &self.patterns
+    }
+}

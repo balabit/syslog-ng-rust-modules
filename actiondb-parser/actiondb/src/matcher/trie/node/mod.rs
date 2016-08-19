@@ -212,7 +212,7 @@ impl SuffixTree {
     }
 
     fn lookup_parser(&mut self, parser: &Parser) -> Option<usize> {
-        self.parser_children.iter().position(|ref x| x.parser().hash_os() == parser.hash_os())
+        self.parser_children.iter().position(|x| x.parser().hash_os() == parser.hash_os())
     }
 
     fn insert_literal_tail(&mut self, tail: &str) -> &mut LiteralNode {
