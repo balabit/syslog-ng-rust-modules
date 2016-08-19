@@ -46,6 +46,38 @@ fn test_alert_is_forwarded() {
 }
 
 #[test]
+fn test_empty_pattern_array() {
+    let _ = env_logger::init();
+    SYSLOG_NG_INITIALIZED.call_once(|| {
+        unsafe { syslog_ng_global_init(); }
+    });
+    let mut logmsg = LogMessage::new();
+    logmsg.insert(CLASSIFIER_UUID, b"9cd7a5d6-d439-484d-95ac-7bf3bd055082");
+    logmsg.insert(CLASSIFIER_CLASS, b"LOGGEN");
+
+    let config_file = "tests/empty_pattern.json";
+    let message = "seq: 0000000000, thread: 0000, runid: 1456947132, stamp: 2016-03-02T20:32:12 PAD";
+
+    let mut pipe = MockPipe::new();
+    let cfg = GlobalConfig::new(0x0308);
+    let mut builder = CorrelationParserBuilder::<MockTypeFamily>::new(cfg);
+    builder.option(options::CONTEXTS_FILE.to_owned(), config_file.to_owned()).ok().unwrap();
+    let mut parser = builder.build().unwrap();
+    let timer = parser.timer.clone();
+    assert_eq!(true, parser.parse(&mut pipe, &mut logmsg, message));
+    assert_eq!(0, pipe.forwarded_messages.len());
+    timer.elapse_time(Duration::from_secs(5));
+
+    assert_eq!(true, parser.parse(&mut pipe, &mut logmsg, message));
+    assert_eq!(1, pipe.forwarded_messages.len());
+    let alert = pipe.forwarded_messages.get(0).unwrap();
+    for i in alert.values() {
+        println!("{:?}", i);
+    }
+    assert_eq!(b"artificial test message", alert.get(&b"MESSAGE"[..]).unwrap());
+}
+
+#[test]
 fn test_syslog_ng_does_not_spin_with_invalid_yaml_configuration() {
     let _ = env_logger::init();
     SYSLOG_NG_INITIALIZED.call_once(|| {

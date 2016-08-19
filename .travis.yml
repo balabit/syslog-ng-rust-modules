@@ -19,6 +19,7 @@ matrix:
     - env: RUST_CHANNEL=stable TEST_MODE=cmake
   allow_failures:
     - env: RUST_CHANNEL=nightly TEST_MODE=everything TRAVIS_CARGO_NIGHTLY_FEATURE=nightly
+    - env: RUST_CHANNEL=beta TEST_MODE=everything
 
 git:
   submodules: false

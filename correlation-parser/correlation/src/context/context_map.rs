@@ -15,6 +15,7 @@ use Template;
 
 pub struct ContextMap<E, T> where E: Event, T: Template<Event=E> {
     map: HashMap<Vec<u8>, Vec<usize>>,
+    empty_pattern_indices: Vec<usize>,
     contexts: Vec<Context<E, T>>,
 }
 
@@ -22,6 +23,7 @@ impl<E, T> Default for ContextMap<E, T> where E: Event, T: Template<Event=E> {
     fn default() -> ContextMap<E, T> {
         ContextMap {
             map: HashMap::default(),
+            empty_pattern_indices: Vec::default(),
             contexts: Vec::default()
         }
     }
@@ -43,35 +45,26 @@ impl<E, T> ContextMap<E, T> where E: Event, T: Template<Event=E> {
 
     pub fn insert(&mut self, context: Context<E, T>) {
         self.contexts.push(context);
-        let last_context = self.contexts
-                               .last()
-                               .expect("Failed to remove the last Context from a non empty vector");
+        self.update_indices();
+    }
+
+    fn update_indices(&mut self) {
         let index_of_last_context = self.contexts.len() - 1;
-        let patterns = last_context.patterns();
-        ContextMap::<E, T>::update_indices(&mut self.map, index_of_last_context, patterns);
-    }
+        let patterns : Vec<String> = self.contexts.last().expect("Failed to remove the last Context from a non empty vector")
+                                         .patterns().iter().cloned().collect();
 
-    fn update_indices(map: &mut HashMap<Vec<u8>, Vec<usize>>,
-                      new_index: usize,
-                      patterns: &[String]) {
         if patterns.is_empty() {
-            ContextMap::<E, T>::add_index_to_every_index_vectors(map, new_index);
+            self.empty_pattern_indices.push(index_of_last_context);
         } else {
-            ContextMap::<E, T>::add_index_to_looked_up_index_vectors(map, new_index, patterns);
+            self.add_index_to_looked_up_index_vectors(index_of_last_context, &patterns);
         }
     }
 
-    fn add_index_to_every_index_vectors(map: &mut HashMap<Vec<u8>, Vec<usize>>, new_index: usize) {
-        for (_, v) in map.iter_mut() {
-            v.push(new_index);
-        }
-    }
-
-    fn add_index_to_looked_up_index_vectors(map: &mut HashMap<Vec<u8>, Vec<usize>>,
+    fn add_index_to_looked_up_index_vectors(&mut self,
                                             new_index: usize,
                                             patterns: &[String]) {
         for i in patterns {
-            map.entry(i.as_bytes().to_vec()).or_insert_with(Vec::new).push(new_index);
+            self.map.entry(i.as_bytes().to_vec()).or_insert_with(Vec::new).push(new_index);
         }
     }
 
@@ -79,12 +72,20 @@ impl<E, T> ContextMap<E, T> where E: Event, T: Template<Event=E> {
         &mut self.contexts
     }
 
-    pub fn contexts_iter_mut(&mut self, key: &[u8]) -> Iterator<E, T> {
-        let ids = self.map.get(key);
+    pub fn contexts_iter_mut<'a, I: ::std::iter::Iterator<Item=&'a [u8]>>(&mut self, keys: I) -> Iterator<E, T> {
+        let mut index_vector = Vec::new();
+        for index_list in keys.filter_map(|key| self.map.get(key)) {
+            index_vector.extend_from_slice(index_list);
+        }
+
+        index_vector.extend_from_slice(&self.empty_pattern_indices);
+        index_vector.sort();
+        index_vector.dedup();
+
         Iterator {
-            ids: ids,
+            indices: index_vector,
             pos: 0,
-            contexts: &mut self.contexts,
+            contexts: &mut self.contexts
         }
     }
 }
@@ -95,22 +96,19 @@ pub trait StreamingIterator {
 }
 
 pub struct Iterator<'a, E, T> where E: 'a + Event, T: 'a + Template<Event=E> {
-    ids: Option<&'a Vec<usize>>,
+    indices: Vec<usize>,
     pos: usize,
-    contexts: &'a mut Vec<Context<E, T>>,
+    contexts: &'a mut Vec<Context<E, T>>
 }
 
 impl<'a, E, T> StreamingIterator for Iterator<'a, E, T> where E: Event, T: Template<Event=E> {
     type Item = Context<E, T>;
     fn next(&mut self) -> Option<&mut Context<E, T>> {
-        if let Some(ids) = self.ids {
-            if let Some(id) = ids.get(self.pos) {
-                self.pos += 1;
-                self.contexts.get_mut(*id)
-            } else {
-                None
-            }
-        } else {
+        if let Some(index) = self.indices.get(self.pos) {
+            self.pos += 1;
+            self.contexts.get_mut(*index)
+        }
+        else {
             None
         }
     }
@@ -126,9 +124,19 @@ mod tests {
     use std::time::Duration;
     use Message;
     use test_utils::{MockTemplate, BaseContextBuilder};
+    use Event;
+    use Template;
 
-    fn assert_context_map_contains_uuid(context_map: &mut ContextMap<Message, MockTemplate>, uuid: &Uuid, key: &str) {
-        let mut iter = context_map.contexts_iter_mut(key.as_bytes());
+    impl<'a, E, T> Iterator<'a, E, T> where E: 'a + Event, T: 'a + Template<Event=E> {
+        fn count(&self) -> usize {
+            self.indices.len()
+        }
+    }
+
+    fn assert_context_map_contains_uuid<'a, I>(context_map: &mut ContextMap<Message, MockTemplate>, uuid: &Uuid, keys: I)
+        where I: ::std::iter::Iterator<Item=&'a [u8]>
+    {
+        let mut iter = context_map.contexts_iter_mut(keys);
         let context = iter.next().expect("Failed to get back an inserted context");
         if let Context::Linear(ref context) = *context {
             assert_eq!(uuid, context.uuid());
@@ -152,7 +160,26 @@ mod tests {
         };
         context_map.insert(Context::Linear(context1));
         assert_eq!(context_map.contexts_mut().len(), 1);
-        assert_context_map_contains_uuid(&mut context_map, &uuid, "A");
-        assert_context_map_contains_uuid(&mut context_map, &uuid, "B");
+        assert_context_map_contains_uuid(&mut context_map, &uuid, vec!["A".as_bytes(), "B".as_bytes()].into_iter());
+    }
+
+    #[test]
+    fn test_given_context_map_when_a_context_is_inserted_without_patterns_then_its_contexts_are_available_for_all_key
+        () {
+        let mut context_map = ContextMap::<Message, MockTemplate>::new();
+        let uuid = Uuid::new_v4();
+        let context1 = {
+            let conditions = {
+                ConditionsBuilder::new(Duration::from_millis(100)).build()
+            };
+            let patterns = Vec::new();
+            let base = BaseContextBuilder::new(uuid.to_owned(), conditions).patterns(patterns).build();
+            LinearContext::new(base)
+        };
+        context_map.insert(Context::Linear(context1));
+
+        let iter = context_map.contexts_iter_mut(vec!["WHATEVER".as_bytes()].into_iter());
+
+        assert_eq!(iter.count(), 1);
     }
 }
