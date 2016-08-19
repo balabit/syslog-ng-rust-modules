@@ -6,7 +6,6 @@ extern crate log;
 use std::env;
 use python_parser::{options, PythonParserBuilder};
 use syslog_ng_common::{ParserBuilder, SYSLOG_NG_INITIALIZED, syslog_ng_global_init, GlobalConfig};
-use syslog_ng_common::mock::MockPipe;
 use log::{LogRecord, LogLevel, LogMetadata};
 
 use std::sync::Arc;
@@ -65,7 +64,7 @@ fn logging_callbacks_can_be_used_from_init_method(messages: Arc<Mutex<Vec<Simpli
                     SimplifiedLogRecord::new(LogLevel::Error, "ERROR"),
                     SimplifiedLogRecord::new(LogLevel::Debug, "DEBUG")];
     let cfg = GlobalConfig::new(0x0308);
-    let mut builder = PythonParserBuilder::<MockPipe>::new(cfg);
+    let mut builder = PythonParserBuilder::new(cfg);
     builder.option(options::MODULE.to_owned(), "_test_module".to_owned()).ok().unwrap();
     builder.option(options::CLASS.to_owned(),
                 "LoggingIsUsedInInitMethod".to_owned())
@@ -92,7 +91,7 @@ fn logging_callbacks_are_not_overriden_if_they_are_already_defined(messages: Arc
                     SimplifiedLogRecord::new(LogLevel::Warn,
                                              "Already implemented debug() function, omitting callback definition.")];
     let cfg = GlobalConfig::new(0x0308);
-    let mut builder = PythonParserBuilder::<MockPipe>::new(cfg);
+    let mut builder = PythonParserBuilder::new(cfg);
     builder.option(options::MODULE.to_owned(),
                 "_test_module.test_logging".to_owned())
         .ok()

@@ -7,8 +7,6 @@
 // modified, or distributed except according to those terms.
 
 extern crate libc;
-#[macro_use]
-extern crate log;
 extern crate glib_sys;
 
 pub mod types;

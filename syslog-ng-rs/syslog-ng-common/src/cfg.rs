@@ -14,18 +14,24 @@ enum InternalState {
     Borrowed(*mut cfg::GlobalConfig),
 }
 
+/// High level wrapper around syslog-ng's GlobalConfig.
 pub struct GlobalConfig(InternalState);
 
 impl GlobalConfig {
+    /// Creates a new *owned* GlobalConfig instance (it will be freed when this instance is dropped).
+    /// `version` is the hexadecimal configuration version (e.g. `0x0308` corresponds to syslog-ng 3.8).
     pub fn new(version: i32) -> GlobalConfig {
         let cfg = unsafe { cfg::cfg_new(version) };
         GlobalConfig(InternalState::Owned(cfg))
     }
 
+    /// Creates a new `borrowed` GlobalConfig instance.
+    /// The wrapped `cfg` pointer won't be deallocated when this instance is dropped.
     pub fn borrow(cfg: *mut cfg::GlobalConfig) -> GlobalConfig {
         GlobalConfig(InternalState::Borrowed(cfg))
     }
 
+    /// Returns the configuration's user version.
     pub fn get_user_version(&self) -> (u8, u8) {
         let ptr = self.raw_ptr();
         let mut version = unsafe { cfg::cfg_get_user_version(ptr) };
@@ -38,6 +44,7 @@ impl GlobalConfig {
         convert_version(version as u16)
     }
 
+    /// Returns the configuration's parsed version.
     pub fn get_parsed_version(&self) -> (u8, u8) {
         let ptr = self.raw_ptr();
         let mut version = unsafe { cfg::cfg_get_parsed_version(ptr) };
@@ -50,11 +57,18 @@ impl GlobalConfig {
         convert_version(version as u16)
     }
 
+    /// Returns the filename of the configuration file.
     pub fn get_filename(&self) -> &CStr {
         let ptr = self.raw_ptr();
         unsafe { CStr::from_ptr(cfg::cfg_get_filename(ptr)) }
     }
 
+    /// Extracts the wrapped raw pointer from this instance.
+    ///
+    /// # Safety
+    ///
+    /// The returned pointer will be deallocated if its owned by this `GlobalConfig` instance
+    /// and this instance is dropped.
     pub fn raw_ptr(&self) -> *mut cfg::GlobalConfig {
         match self.0 {
             InternalState::Owned(ptr) => ptr,

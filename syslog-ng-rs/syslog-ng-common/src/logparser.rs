@@ -11,9 +11,11 @@ use Pipe;
 use LogPipe;
 use LogMessage;
 
+/// High level wrapper around syslog-ng's LogParser structure.
 pub struct LogParser(*mut syslog_ng_sys::LogParser);
 
 impl LogParser {
+    /// Wraps syslog-ng's raw LogParser pointer into this high level wrapper.
     pub fn wrap_raw(raw: *mut syslog_ng_sys::LogParser) -> LogParser {
         LogParser(raw)
     }

@@ -15,15 +15,19 @@ pub enum LogTemplateOptions {}
 
 #[link(name = "syslog-ng")]
 extern "C" {
-   pub fn log_template_compile(slf: *mut LogTemplate, template: *const c_char, error: *mut *mut GError) -> c_int;
-   pub fn log_template_new(cfg: *const GlobalConfig, name: *const c_char) -> *mut LogTemplate;
-   pub fn log_template_format(slf: *const LogTemplate,
-                              lm: *const LogMessage,
-                              opts: *const LogTemplateOptions,
-                              tz: c_int,
-                              seq_num: i32,
-                              context_id: *const c_char,
-                              result: *mut GString) -> c_void;
+    pub fn log_template_compile(slf: *mut LogTemplate,
+                                template: *const c_char,
+                                error: *mut *mut GError)
+                                -> c_int;
+    pub fn log_template_new(cfg: *const GlobalConfig, name: *const c_char) -> *mut LogTemplate;
+    pub fn log_template_format(slf: *const LogTemplate,
+                               lm: *const LogMessage,
+                               opts: *const LogTemplateOptions,
+                               tz: c_int,
+                               seq_num: i32,
+                               context_id: *const c_char,
+                               result: *mut GString)
+                               -> c_void;
     pub fn log_template_unref(s: *mut LogTemplate);
     pub fn log_template_global_init();
     pub fn log_template_global_deinit();
@@ -34,5 +38,6 @@ extern "C" {
                                             tz: c_int,
                                             seq_num: i32,
                                             context_id: *const c_char,
-                                            result: *mut GString) -> c_void;
+                                            result: *mut GString)
+                                            -> c_void;
 }

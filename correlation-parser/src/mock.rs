@@ -1,5 +1,15 @@
 use syslog_ng_common::{LogMessage, GlobalConfig};
 use correlation::{Message, Event, EventIds, Template, TemplateFactory, CompileError};
+use TypeFamily;
+
+pub struct MockTypeFamily {}
+
+impl TypeFamily for MockTypeFamily {
+    type Event = MockEvent;
+    type Template = MockLogTemplate;
+    type TemplateFactory = MockLogTemplateFactory;
+    type Timer = MockTimer<MockEvent, MockLogTemplate>;
+}
 
 use std::io::Write;
 

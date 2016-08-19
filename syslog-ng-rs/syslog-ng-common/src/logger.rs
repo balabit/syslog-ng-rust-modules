@@ -11,6 +11,7 @@ use messages::{InternalMessageSender, Msg};
 
 use log;
 
+/// Initializes the logging subsystem to use syslog-ng's internal logs as backend.
 pub fn init_logger() {
     let _ = log::set_logger(|max_log_level| {
         max_log_level.set(InternalLogger::level());
@@ -18,10 +19,11 @@ pub fn init_logger() {
     });
 }
 
-
+/// Sends logs into syslog-ng's internal log stream.
 pub struct InternalLogger;
 
 impl InternalLogger {
+    /// Creates a log filter based on the current log level of syslog-ng.
     pub fn level() -> LogLevelFilter {
         InternalMessageSender::level()
     }

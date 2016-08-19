@@ -12,16 +12,21 @@ use GlobalConfig;
 
 pub use proxies::parser::{Error, Parser, ParserBuilder};
 
+/// Handles the state of a parser.
+///
+/// `ParserProxy` hides the fact, that parsers are stateful objects. It is also passed to the C
+/// side as a `*mut ParserProxy` pointer.
 #[repr(C)]
 pub struct ParserProxy<B>
-    where B: ParserBuilder<LogParser>
+    where B: ParserBuilder
 {
     parser: Option<B::Parser>,
     builder: Option<B>,
 }
 
-impl<B> ParserProxy<B> where B: ParserBuilder<LogParser>
+impl<B> ParserProxy<B> where B: ParserBuilder
 {
+    /// Creates a new `ParserProxy` instance and initializes a `ParserBuilder` internally.
     pub fn new(cfg: GlobalConfig) -> ParserProxy<B> {
         ParserProxy {
             parser: None,
@@ -29,6 +34,7 @@ impl<B> ParserProxy<B> where B: ParserBuilder<LogParser>
         }
     }
 
+    /// Creates a new `ParserProxy` instance with the specific `builder` and `parser` values.
     pub fn with_builder_and_parser(builder: Option<B>,
                                    parser: Option<B::Parser>)
                                    -> ParserProxy<B> {
@@ -52,6 +58,11 @@ impl<B> ParserProxy<B> where B: ParserBuilder<LogParser>
         }
     }
 
+    /// Forwards the method call to either a `ParserBuilder` (as `build()`) or to a `Parser`
+    /// (as `init()`).
+    ///
+    /// Returns the result of either `build()` or `init()`. In case of an error, it's logged and
+    /// `false` is returned.
     pub fn init(&mut self) -> bool {
         if let Some(builder) = self.builder.take()  {
             return self.build_parser(builder);
@@ -64,6 +75,9 @@ impl<B> ParserProxy<B> where B: ParserBuilder<LogParser>
         }
     }
 
+    /// Forwards the method call to the wrapped `Parser`.
+    ///
+    /// Returns the forwarded result.
     pub fn deinit(&mut self) -> bool {
         if let Some(ref mut parser) = self.parser {
             parser.deinit()
@@ -72,6 +86,10 @@ impl<B> ParserProxy<B> where B: ParserBuilder<LogParser>
         }
     }
 
+    /// Calls `ParserBuilder`'s `option()` method.
+    ///
+    /// If `option()` returns an `Err`, an error is logged and `false` is returned, otherwise
+    /// `true`.
     pub fn set_option(&mut self, name: String, value: String) -> bool {
         let builder = self.builder.as_mut().expect("Failed to get builder on a ParserProxy");
 
@@ -84,6 +102,11 @@ impl<B> ParserProxy<B> where B: ParserBuilder<LogParser>
         }
     }
 
+    /// Calls the parser's `parse()` method.
+    ///
+    /// # Panics
+    ///
+    /// Panics if `process()` is called without a built parser.
     pub fn process(&mut self, parent: &mut LogParser, msg: &mut LogMessage, input: &str) -> bool {
         self.parser
             .as_mut()
@@ -92,7 +115,7 @@ impl<B> ParserProxy<B> where B: ParserBuilder<LogParser>
     }
 }
 
-impl<B> Clone for ParserProxy<B> where B: ParserBuilder<LogParser> {
+impl<B> Clone for ParserProxy<B> where B: ParserBuilder {
     fn clone(&self) -> ParserProxy<B> {
         ParserProxy {parser: None, builder: self.builder.clone()}
     }

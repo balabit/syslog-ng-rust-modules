@@ -4,7 +4,6 @@ extern crate syslog_ng_common;
 extern crate log;
 extern crate regex;
 
-use std::marker::PhantomData;
 use syslog_ng_common::{LogMessage, Parser, ParserBuilder, Error, Pipe, GlobalConfig};
 use regex::Regex;
 
@@ -19,24 +18,22 @@ pub struct RegexParser {
     pub regex: Regex,
 }
 
-pub struct RegexParserBuilder<P: Pipe> {
+pub struct RegexParserBuilder {
     regex: Option<Regex>,
-    _marker: PhantomData<P>
 }
 
-impl<P> Clone for RegexParserBuilder<P> where P: Pipe {
+impl Clone for RegexParserBuilder {
     fn clone(&self) -> Self {
         RegexParserBuilder {
             regex: self.regex.clone(),
-            _marker: PhantomData
         }
     }
 }
 
-impl<P: Pipe> ParserBuilder<P> for RegexParserBuilder<P> {
+impl ParserBuilder for RegexParserBuilder {
     type Parser = RegexParser;
     fn new(_: GlobalConfig) -> Self {
-        RegexParserBuilder { regex: None, _marker: PhantomData }
+        RegexParserBuilder { regex: None }
     }
     fn option(&mut self, name: String, value: String) -> Result<(), Error> {
         if name == REGEX_OPTION {
@@ -59,8 +56,8 @@ impl<P: Pipe> ParserBuilder<P> for RegexParserBuilder<P> {
     }
 }
 
-impl<P: Pipe> Parser<P> for RegexParser {
-    fn parse(&mut self, _: &mut P, logmsg: &mut LogMessage, input: &str) -> bool {
+impl Parser for RegexParser {
+    fn parse(&mut self, _: &mut Pipe, logmsg: &mut LogMessage, input: &str) -> bool {
         if let Some(captures) = self.regex.captures(input) {
             for (name, value) in captures.iter_named() {
                 if let Some(value) = value {
@@ -74,4 +71,4 @@ impl<P: Pipe> Parser<P> for RegexParser {
     }
 }
 
-parser_plugin!(RegexParserBuilder<LogParser>);
+parser_plugin!(RegexParserBuilder);

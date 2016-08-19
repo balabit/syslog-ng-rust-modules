@@ -9,7 +9,6 @@ pub mod py_logmsg;
 pub mod utils;
 
 use std::borrow::Borrow;
-use std::marker::PhantomData;
 
 use syslog_ng_common::{LogMessage, Parser, ParserBuilder, Error, Pipe, GlobalConfig};
 use cpython::{Python, PyDict, NoArgs, PyObject, PyResult, PyModule, PyErr, PyString, ToPyObject};
@@ -23,19 +22,17 @@ pub mod options {
     pub const CLASS: &'static str = "class";
 }
 
-pub struct PythonParser<P: Pipe> {
+pub struct PythonParser {
     parser: PyObject,
-    _marker: PhantomData<P>,
 }
 
-pub struct PythonParserBuilder<P: Pipe> {
+pub struct PythonParserBuilder {
     module: Option<String>,
     class: Option<String>,
     options: Vec<(String, String)>,
-    _marker: PhantomData<P>,
 }
 
-impl<P: Pipe> PythonParserBuilder<P> {
+impl PythonParserBuilder {
     // Although these functions are very small ones, they are very useful for testing
     pub fn load_module<'p>(py: Python<'p>, module_name: &str) -> PyResult<PyModule> {
         debug!("Trying to load Python module, module='{}'", module_name);
@@ -158,25 +155,23 @@ fn python_debug_callback(_: Python, debug_message: &str) -> PyResult<NoArgs> {
     Ok(NoArgs)
 }
 
-impl<P: Pipe> Clone for PythonParserBuilder<P> {
+impl Clone for PythonParserBuilder {
     fn clone(&self) -> Self {
         PythonParserBuilder {
             module: self.module.clone(),
             class: self.class.clone(),
             options: self.options.clone(),
-            _marker: PhantomData,
         }
     }
 }
 
-impl<P: Pipe> ParserBuilder<P> for PythonParserBuilder<P> {
-    type Parser = PythonParser<P>;
+impl ParserBuilder for PythonParserBuilder {
+    type Parser = PythonParser;
     fn new(_: GlobalConfig) -> Self {
         PythonParserBuilder {
             module: None,
             class: None,
             options: Vec::new(),
-            _marker: PhantomData,
         }
     }
     fn option(&mut self, name: String, value: String) -> Result<(), Error> {
@@ -200,13 +195,12 @@ impl<P: Pipe> ParserBuilder<P> for PythonParserBuilder<P> {
         let module_name = try!(self.module.ok_or(Error::missing_required_option(options::MODULE)));
         let class_name = try!(self.class.ok_or(Error::missing_required_option(options::CLASS)));
 
-        match PythonParserBuilder::<P>::load_and_init_class(py, &module_name, &class_name, &self.options) {
+        match PythonParserBuilder::load_and_init_class(py, &module_name, &class_name, &self.options) {
             Ok(parser_instance) => {
                 debug!("Python parser successfully initialized, class='{}'",
                        &class_name);
                 Ok(PythonParser {
                     parser: parser_instance,
-                    _marker: PhantomData,
                 })
             }
             Err(error) => {
@@ -219,7 +213,7 @@ impl<P: Pipe> ParserBuilder<P> for PythonParserBuilder<P> {
     }
 }
 
-impl<P: Pipe> PythonParser<P> {
+impl PythonParser {
     pub fn process_parsing<'p>(&mut self, py: Python<'p>, logmsg: PyLogMessage, message: &str) -> PyResult<PyObject> {
         debug!("Trying to call parse() method on Python parser");
         self.parser.call_method(py, "parse", (logmsg, message), None)
@@ -230,12 +224,12 @@ impl<P: Pipe> PythonParser<P> {
     }
     pub fn call_parse<'p>(&mut self, py: Python<'p>, logmsg: PyLogMessage, input: &str) -> PyResult<bool> {
         let result = try!(self.process_parsing(py, logmsg, input));
-        PythonParser::<P>::process_parse_result(py, result)
+        PythonParser::process_parse_result(py, result)
     }
 }
 
-impl<P: Pipe> Parser<P> for PythonParser<P> {
-    fn parse(&mut self, _: &mut P, logmsg: &mut LogMessage, input: &str) -> bool {
+impl Parser for PythonParser {
+    fn parse(&mut self, _: &mut Pipe, logmsg: &mut LogMessage, input: &str) -> bool {
         let gil = Python::acquire_gil();
         let py = gil.python();
         match PyLogMessage::new(py, logmsg.clone()) {
@@ -258,4 +252,4 @@ impl<P: Pipe> Parser<P> for PythonParser<P> {
     }
 }
 
-parser_plugin!(PythonParserBuilder<LogParser>);
+parser_plugin!(PythonParserBuilder);
