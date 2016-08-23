@@ -8,7 +8,6 @@ use correlation::{Alert, Event, Template, TemplateFactory};
 use correlation::config::action::message::InjectMode;
 use correlation::correlator::{Correlator, CorrelatorFactory};
 use std::borrow::Borrow;
-use std::marker::PhantomData;
 use std::sync::{Arc, Mutex, MutexGuard};
 use std::time::Duration;
 use std::str::FromStr;
@@ -56,7 +55,6 @@ pub struct CorrelationParserBuilder<X: TypeFamily>  {
     formatter: MessageFormatter,
     template_factory: Arc<X::TemplateFactory>,
     delta: Option<Duration>,
-    _marker: PhantomData<X>
 }
 
 impl<X: TypeFamily> CorrelationParserBuilder<X> {
@@ -100,7 +98,6 @@ impl<X: TypeFamily> Clone for CorrelationParserBuilder<X> {
             formatter: self.formatter.clone(),
             template_factory: self.template_factory.clone(),
             delta: self.delta.clone(),
-            _marker: PhantomData
         }
     }
 }
@@ -114,7 +111,6 @@ impl<X: TypeFamily> ParserBuilder for CorrelationParserBuilder<X> where X::Event
             formatter: MessageFormatter::new(),
             template_factory: Arc::new(X::TemplateFactory::from(cfg)),
             delta: Some(Duration::from_millis(1000)),
-            _marker: PhantomData
         }
     }
     fn option(&mut self, name: String, value: String) -> Result<(), Error> {
@@ -132,7 +128,7 @@ impl<X: TypeFamily> ParserBuilder for CorrelationParserBuilder<X> where X::Event
     }
     fn build(self) -> Result<Self::Parser, Error> {
         debug!("Building CorrelationParser");
-        let CorrelationParserBuilder {correlator, template_factory, formatter, delta, _marker } = self;
+        let CorrelationParserBuilder {correlator, template_factory, formatter, delta } = self;
         let _ = template_factory;
         let correlator = try!(correlator.ok_or(Error::missing_required_option(options::CONTEXTS_FILE)));
         let delta = try!(delta.ok_or(Error::missing_required_option(options::DELTA)));
