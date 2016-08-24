@@ -44,27 +44,22 @@ impl<E, T> ContextMap<E, T> where E: Event, T: Template<Event=E> {
     }
 
     pub fn insert(&mut self, context: Context<E, T>) {
+        let patterns = context.patterns().iter().cloned().collect::<Vec<String>>();
         self.contexts.push(context);
-        self.update_indices();
+        self.update_indices(patterns);
     }
 
-    fn update_indices(&mut self) {
-        let index_of_last_context = self.contexts.len() - 1;
-        let patterns : Vec<String> = self.contexts.last().expect("Failed to remove the last Context from a non empty vector")
-                                         .patterns().iter().cloned().collect();
-
+    fn update_indices(&mut self, patterns: Vec<String>) {
         if patterns.is_empty() {
-            self.empty_pattern_indices.push(index_of_last_context);
+            self.empty_pattern_indices.push(self.contexts.len() - 1);
         } else {
-            self.add_index_to_looked_up_index_vectors(index_of_last_context, &patterns);
+            self.add_index_to_looked_up_index_vectors(patterns);
         }
     }
 
-    fn add_index_to_looked_up_index_vectors(&mut self,
-                                            new_index: usize,
-                                            patterns: &[String]) {
+    fn add_index_to_looked_up_index_vectors(&mut self, patterns: Vec<String>) {
         for i in patterns {
-            self.map.entry(i.as_bytes().to_vec()).or_insert_with(Vec::new).push(new_index);
+            self.map.entry(i.as_bytes().to_vec()).or_insert_with(Vec::new).push(self.contexts.len() - 1);
         }
     }
 
