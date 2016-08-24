@@ -53,11 +53,11 @@ impl<E, T> ContextMap<E, T> where E: Event, T: Template<Event=E> {
         if patterns.is_empty() {
             self.empty_pattern_indices.push(self.contexts.len() - 1);
         } else {
-            self.add_index_to_looked_up_index_vectors(patterns);
+            self.update_indices_of_subscribed_contexts(patterns);
         }
     }
 
-    fn add_index_to_looked_up_index_vectors(&mut self, patterns: Vec<String>) {
+    fn update_indices_of_subscribed_contexts(&mut self, patterns: Vec<String>) {
         for i in patterns {
             self.map.entry(i.as_bytes().to_vec()).or_insert_with(Vec::new).push(self.contexts.len() - 1);
         }
