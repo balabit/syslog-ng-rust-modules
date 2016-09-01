@@ -187,13 +187,13 @@ impl ParserEntry for ParserE {
         self.parser.parse(value).and_then(|kvpair| {
             let value = value.ltrunc(kvpair.value().len());
 
-            if let Some(child) = self.child() {
+            if value.is_empty() {
+                self.create_match_result(kvpair)
+            } else if let Some(child) = self.child() {
                 child.parse(value).and_then(|mut result| {
                     result.insert(kvpair);
                     Some(result)
                 })
-            } else if value.is_empty() {
-                self.create_match_result(kvpair)
             } else {
                 None
             }
