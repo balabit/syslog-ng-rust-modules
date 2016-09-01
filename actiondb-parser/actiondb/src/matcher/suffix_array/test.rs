@@ -47,6 +47,21 @@ fn create_populated_suffix_table() -> SuffixTable {
     root
 }
 
+fn assert_suffix_table_parse<'a, 'b>(patterns: &[&'a str], values: &[&'b str]) {
+    let mut root = SuffixTable::new();
+
+    for pattern in patterns {
+        let compiled_pattern = ::grammar::parser::pattern(pattern).expect("Failed to compile pattern");
+        let mut pattern = Pattern::with_random_uuid();
+        pattern.set_pattern(compiled_pattern);
+        root.insert(pattern);
+    }
+
+    for value in values {
+        assert_eq!(true, root.parse(value).is_some());
+    }
+}
+
 #[test]
 fn test_given_parser_trie_when_a_parser_is_not_matched_then_the_parser_stack_is_unwind_so_an_untried_parser_is_tried() {
     let root = create_populated_suffix_table();
@@ -149,17 +164,12 @@ fn test_given_suffix_array_when_literals_are_inserted_then_it_can_find_the_strin
 
 #[test]
 fn test_given_parser_when_it_receives_utf_8_strings_then_it_does_not_panic() {
-    let pattern = "%{GREEDY}¡%{GREEDY}";
-    let compiled_pattern = ::grammar::parser::pattern(pattern)
-                  .expect("Failed to compile pattern when it includes UTF-8 multibyte characters");
 
-    let mut pattern = Pattern::with_random_uuid();
-    pattern.set_pattern(compiled_pattern);
 
-    let mut root = SuffixTable::new();
-    root.insert(pattern);
+    let patterns = ["%{GREEDY}¡%{GREEDY}"];
+    let values = ["micek ¡micek"];
 
-    assert_eq!(true, root.parse("micek ¡micek").is_some());
+    assert_suffix_table_parse(&patterns, &values);
 }
 
 #[test]
