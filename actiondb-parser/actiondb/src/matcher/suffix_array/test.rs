@@ -163,9 +163,23 @@ fn test_given_suffix_array_when_literals_are_inserted_then_it_can_find_the_strin
 }
 
 #[test]
+fn test_given_suffix_array_when_multiple_patterns_are_inserted_with_the_same_prefix_then_it_can_match_all_of_them() {
+    let patterns = [
+        "test: %{INT:a}",
+        "test: %{INT:a} test"
+    ];
+
+    let values = [
+        "test: 1 test",
+        "test: 1",
+        "test: 23"
+    ];
+
+    assert_suffix_table_parse(&patterns, &values);
+}
+
+#[test]
 fn test_given_parser_when_it_receives_utf_8_strings_then_it_does_not_panic() {
-
-
     let patterns = ["%{GREEDY}¡%{GREEDY}"];
     let values = ["micek ¡micek"];
 
