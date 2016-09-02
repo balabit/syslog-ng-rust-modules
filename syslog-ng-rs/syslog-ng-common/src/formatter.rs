@@ -11,14 +11,12 @@ use std::fmt::Write;
 /// Applies transformations to key-value pairs.
 #[derive(Clone)]
 pub struct MessageFormatter {
-    buffer: String,
     prefix: Option<String>,
 }
 impl MessageFormatter {
     /// Creates a new MessageFormatter without any transformations.
     pub fn new() -> MessageFormatter {
         MessageFormatter {
-            buffer: String::new(),
             prefix: None,
         }
     }
@@ -28,20 +26,20 @@ impl MessageFormatter {
     }
 
     /// Formats the given `key` and/or `value` parameters and returns the formatted pair as a tuple.
-    pub fn format<'a, 'b, 'c>(&'a mut self, key: &'b str, value: &'c str) -> (&'a str, &'c str) {
-        self.buffer.clear();
-        self.apply_prefix(key);
-        (&self.buffer, value)
+    pub fn format<'a, 'b, 'c>(&'a mut self, key: &'b str, value: &'c str) -> (String, &'c str) {
+        let mut buffer = String::new();
+        self.apply_prefix(key, &mut buffer);
+        (buffer, value)
     }
 
-    fn apply_prefix(&mut self, key: &str) {
+    fn apply_prefix(&mut self, key: &str, buffer: &mut String) {
         match self.prefix.as_ref() {
             Some(prefix) => {
-                let _ = self.buffer.write_str(prefix);
-                let _ = self.buffer.write_str(key);
+                let _ = buffer.write_str(prefix);
+                let _ = buffer.write_str(key);
             }
             None => {
-                let _ = self.buffer.write_str(key);
+                let _ = buffer.write_str(key);
             }
         };
     }
