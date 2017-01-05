@@ -11,8 +11,8 @@ license = "MIT/Apache-2.0"
 [dependencies]
 log = "0.3"
 syslog-ng-sys = { path = "../syslog-ng-sys" }
-glib = "0.0.8"
-glib-sys = "0.3.0"
+glib = "0.1.1"
+glib-sys = "0.3.2"
 libc = "0.2.13"
 quick-error = "1.1.0"
 time = "0.1.35"
