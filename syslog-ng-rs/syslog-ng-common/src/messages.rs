@@ -48,9 +48,11 @@ impl InternalMessageSender {
 
     /// Returns a `LogLevelFilter` based on syslog-ng's current log level.
     pub fn level() -> LogLevelFilter {
-        if messages::trace_flag != 0 {
+        let trace_flag = unsafe { messages::trace_flag };
+        let debug_flag = unsafe { messages::debug_flag };
+        if trace_flag != 0 {
             LogLevelFilter::Trace
-        } else if messages::debug_flag != 0 {
+        } else if debug_flag != 0 {
             LogLevelFilter::Debug
         } else {
             LogLevelFilter::Info
