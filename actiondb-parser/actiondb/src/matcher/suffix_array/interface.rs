@@ -17,9 +17,13 @@ pub trait Entry {
     fn insert(&mut self, pattern: Pattern) {
         if pattern.pattern().is_empty() {
             self.set_pattern(Some(pattern));
-        } else {
-            let sa = Self::SA::new();
-            self.set_child(Some(sa));
+        }
+        else {
+            if self.child().is_none() {
+                let sa = Self::SA::new();
+                self.set_child(Some(sa));
+            }
+
             self.child_mut().expect("Failed to get a child").insert(pattern);
         }
     }
