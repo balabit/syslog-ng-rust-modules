@@ -9,7 +9,7 @@ crate-type = ["rlib", "dylib"]
 
 [dependencies]
 syslog-ng-common = { path = "../syslog-ng-rs/syslog-ng-common" }
-regex = "0.1"
+regex = "1.5.5"
 log = "0.3"
 
 [build-dependencies]

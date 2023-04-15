@@ -15,7 +15,7 @@ glib = "0.1.1"
 glib-sys = "0.3.2"
 libc = "0.2.13"
 quick-error = "1.1.0"
-time = "0.1.35"
+time = "0.2.23"
 
 [[test]]
 name = "template_functions"
